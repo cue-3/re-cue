@@ -5,7 +5,7 @@
 If you discover a security vulnerability in this project, please follow these steps:
 
 1. **Do not open a public issue.**
-2. Email the maintainer at [your-email@example.com] with details of the vulnerability.
+2. Email the maintainer at security@cue3.com with details of the vulnerability.
 3. Include:
    - A clear description of the issue
    - Steps to reproduce (if applicable)
