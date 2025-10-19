@@ -4,7 +4,7 @@ The `reverse-engineer.sh` script analyzes existing codebases to automatically ge
 
 ## Disclaimer
 
-**This script is provided "as is" without warranty of any kind, either expressed or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. No warranties are made or to be inferred regarding the accuracy, completeness, reliability, or suitability of this software for any purpose. Use at your own risk.**
+>**This script is provided "as is" without warranty of any kind, either expressed or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. No warranties are made or to be inferred regarding the accuracy, completeness, reliability, or suitability of this software for any purpose. Use at your own risk.**
 
 ## Overview
 
