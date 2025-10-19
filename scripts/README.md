@@ -2,6 +2,10 @@
 
 The `reverse-engineer.sh` script analyzes existing codebases to automatically generate comprehensive documentation and API contracts. This script can be used independently or through GitHub Copilot integration for any project that needs reverse engineering capabilities.
 
+## Disclaimer
+
+**This script is provided "as is" without warranty of any kind, either expressed or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. No warranties are made or to be inferred regarding the accuracy, completeness, reliability, or suitability of this software for any purpose. Use at your own risk.**
+
 ## Overview
 
 The script discovers and analyzes:
@@ -15,7 +19,7 @@ The script discovers and analyzes:
 This script is designed to work seamlessly with the GitHub Copilot prompt located at `../prompts/speckit.reverse.prompt.md`. When installed in a Specify project (via `../install.sh`), users can trigger automated reverse engineering by typing:
 
 ```
-/speckit.reverse [feature description]
+/speckit.reverse
 ```
 
 The prompt automatically executes this script with all flags (`--spec --plan --data-model --api-contract`) and provides status updates.
@@ -31,7 +35,7 @@ Generate all documentation types:
 
 **Through GitHub Copilot (when installed):**
 ```
-/speckit.reverse user authentication system
+/speckit.reverse
 ```
 
 Generate just an API contract:
