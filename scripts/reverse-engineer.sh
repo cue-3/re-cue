@@ -731,6 +731,99 @@ detect_project_type() {
     fi
 }
 
+detect_project_name() {
+    log_info "Detecting project name..."
+    
+    local project_name=""
+    
+    # Try to get name from root pom.xml
+    if [ -f "$REPO_ROOT/pom.xml" ]; then
+        # Get the project's artifactId (skip parent's artifactId)
+        # This gets artifactIds and filters out those inside <parent> tags
+        local artifact_id=$(awk '/<parent>/,/<\/parent>/{next} /<artifactId>/{print; exit}' "$REPO_ROOT/pom.xml" | grep -o '<artifactId>[^<]*</artifactId>' | sed 's/<[^>]*>//g')
+        
+        # Then check if name tag has a useful value (not a variable reference)
+        local name_tag=$(awk '/<parent>/,/<\/parent>/{next} /<name>/{print; exit}' "$REPO_ROOT/pom.xml" | grep -o '<name>[^<]*</name>' | sed 's/<[^>]*>//g')
+        
+        # Use name_tag only if it doesn't contain variables and isn't a framework reference
+        if [ -n "$name_tag" ] && ! [[ "$name_tag" =~ \$ ]] && ! [[ "$name_tag" =~ -parentpom ]] && ! [[ "$name_tag" =~ framework ]]; then
+            project_name="$name_tag"
+        else
+            # Use artifactId as fallback
+            project_name="$artifact_id"
+        fi
+    fi
+    
+    # Try package.json if no pom.xml or empty name
+    if [ -z "$project_name" ] && [ -f "$REPO_ROOT/package.json" ]; then
+        project_name=$(grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' "$REPO_ROOT/package.json" | head -1 | cut -d'"' -f4)
+    fi
+    
+    # Fallback to directory name
+    if [ -z "$project_name" ]; then
+        project_name=$(basename "$REPO_ROOT")
+    fi
+    
+    # Clean up and format the name
+    # Remove common prefixes/suffixes
+    project_name=$(echo "$project_name" | sed 's/^bip-//' | sed 's/-api$//' | sed 's/-reactor$//' | sed 's/-service$//')
+    
+    echo "$project_name"
+}
+
+detect_project_description() {
+    log_info "Detecting project description..."
+    
+    local description=""
+    
+    # Try to get description from root pom.xml
+    if [ -f "$REPO_ROOT/pom.xml" ]; then
+        description=$(grep -o '<description>[^<]*</description>' "$REPO_ROOT/pom.xml" | head -1 | sed 's/<[^>]*>//g')
+    fi
+    
+    # Try package.json if no pom.xml or empty description
+    if [ -z "$description" ] && [ -f "$REPO_ROOT/package.json" ]; then
+        description=$(grep -o '"description"[[:space:]]*:[[:space:]]*"[^"]*"' "$REPO_ROOT/package.json" | head -1 | cut -d'"' -f4)
+    fi
+    
+    # Try README.md
+    if [ -z "$description" ] && [ -f "$REPO_ROOT/README.md" ]; then
+        # Get the first substantial paragraph after headings
+        description=$(sed -n '/^##/,/^$/p' "$REPO_ROOT/README.md" | grep -v '^#' | grep -v '^$' | head -1 | sed 's/^[[:space:]]*//')
+    fi
+    
+    # Fallback
+    if [ -z "$description" ]; then
+        description="Application for managing and processing data"
+    fi
+    
+    echo "$description"
+}
+
+detect_project_modules() {
+    log_info "Detecting project modules..."
+    
+    local modules=()
+    
+    # Check for Maven multi-module project
+    if [ -f "$REPO_ROOT/pom.xml" ]; then
+        while IFS= read -r module_line; do
+            local module_name=$(echo "$module_line" | sed 's/<[^>]*>//g' | tr -d '[:space:]')
+            if [ -n "$module_name" ] && [ -d "$REPO_ROOT/$module_name" ]; then
+                modules+=("$module_name")
+            fi
+        done < <(sed -n '/<modules>/,/<\/modules>/p' "$REPO_ROOT/pom.xml" | grep '<module>' | grep -v '<!--')
+    fi
+    
+    # Return comma-separated list
+    if [ ${#modules[@]} -gt 0 ]; then
+        local IFS=', '
+        echo "${modules[*]}"
+    else
+        echo ""
+    fi
+}
+
 # Main analysis
 echo "" >&2
 echo "🔍 Analyzing project..." >&2
@@ -749,10 +842,25 @@ generate_api_contract() {
     # Ensure contracts directory exists
     mkdir -p "$(dirname "$contract_file")"
     
-    # Extract base URL and service info from project
-    local api_title="Agile Forecaster API"
-    local api_description="REST API for agile project forecasting with Monte Carlo simulation"
+    # Detect project information dynamically
+    local project_name=$(detect_project_name)
+    local project_desc=$(detect_project_description)
+    
+    # Format for API title (capitalize words)
+    local api_title=$(echo "$project_name" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
+    api_title="${api_title} API"
+    
+    # Use project description or create default
+    local api_description="$project_desc"
     local api_version="1.0.0"
+    
+    # Try to extract version from pom.xml
+    if [ -f "$REPO_ROOT/pom.xml" ]; then
+        local pom_version=$(grep -o '<version>[^<]*</version>' "$REPO_ROOT/pom.xml" | head -1 | sed 's/<[^>]*>//g')
+        if [ -n "$pom_version" ]; then
+            api_version="$pom_version"
+        fi
+    fi
     
     # Try to determine base server URL
     local server_url="http://localhost:8080"
@@ -1251,13 +1359,21 @@ generate_plan_md() {
     local datetime=$(date +"%Y-%m-%d %H:%M:%S")
     local project_type=$(detect_project_type)
     
+    # Detect project information
+    local project_name=$(detect_project_name)
+    local project_desc=$(detect_project_description)
+    local project_modules=$(detect_project_modules)
+    
+    # Format project name for display
+    local display_name=$(echo "$project_name" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
+    
     cat > "$plan_file" << EOF
-# Implementation Plan: Agile Forecaster Application
+# Implementation Plan: ${display_name}
 
 **Branch**: \`001-reverse\` | **Date**: $date | **Spec**: [spec.md](./spec.md)
 **Input**: Reverse-engineered specification from existing codebase
 
-**Note**: This plan documents the current implementation state of the Agile Forecaster
+**Note**: This plan documents the current implementation state of the ${display_name}
 application, generated through reverse-engineering analysis. Unlike typical plans that
 guide future development, this serves as architectural documentation of what exists.
 
@@ -1265,26 +1381,66 @@ guide future development, this serves as architectural documentation of what exi
 
 ## Summary
 
-The Agile Forecaster is a full-stack web application that provides Monte Carlo-based
-sprint forecasting for agile teams. The system analyzes historical sprint data to
-predict project completion timelines using statistical methods.
+${project_desc}
 
 **Primary Capabilities**:
-- Project and sprint management
-- Story point estimation and tracking
-- Monte Carlo forecasting engine
-- Historical data analysis
-- User authentication and authorization
 - RESTful API with $ENDPOINT_COUNT endpoints
-- Responsive Vue.js frontend with $VIEW_COUNT views
+- Data management with $MODEL_COUNT models
+EOF
+
+    # Add modules if detected
+    if [ -n "$project_modules" ]; then
+        echo "- Multi-module architecture: $project_modules" >> "$plan_file"
+    fi
+    
+    if [ $VIEW_COUNT -gt 0 ]; then
+        echo "- User interface with $VIEW_COUNT views" >> "$plan_file"
+    fi
+    
+    if [ $SERVICE_COUNT -gt 0 ]; then
+        echo "- Business logic layer with $SERVICE_COUNT services" >> "$plan_file"
+    fi
+    
+    cat >> "$plan_file" << EOF
 
 **Technical Approach**:
-- Spring Boot 3.x backend with Java 17+
-- MongoDB for data persistence
-- Vue.js 3 with Pinia state management
-- JWT-based authentication
-- Docker containerization
-- Maven build system
+EOF
+    
+    # Dynamically build technical approach based on detected tech
+    local lang_ver=$(detect_language_version)
+    local deps=$(detect_dependencies)
+    local storage=$(detect_storage)
+    
+    if [ -n "$lang_ver" ] && [ "$lang_ver" != "NEEDS CLARIFICATION" ]; then
+        echo "- $lang_ver runtime" >> "$plan_file"
+    fi
+    
+    if [ -n "$deps" ] && [ "$deps" != "NEEDS CLARIFICATION" ]; then
+        # Split dependencies and add each as a bullet
+        echo "$deps" | tr ',' '\n' | while read -r dep; do
+            dep=$(echo "$dep" | sed 's/^[[:space:]]*//')
+            if [ -n "$dep" ]; then
+                echo "- $dep framework" >> "$plan_file"
+            fi
+        done
+    fi
+    
+    if [ -n "$storage" ] && [ "$storage" != "N/A" ]; then
+        echo "- $storage for data persistence" >> "$plan_file"
+    fi
+    
+    # Check for common patterns
+    if find "$REPO_ROOT" -name "Dockerfile" -print -quit | grep -q . 2>/dev/null; then
+        echo "- Docker containerization" >> "$plan_file"
+    fi
+    
+    if find "$REPO_ROOT" -name "pom.xml" -print -quit | grep -q . 2>/dev/null; then
+        echo "- Maven build system" >> "$plan_file"
+    elif find "$REPO_ROOT" -name "build.gradle" -print -quit | grep -q . 2>/dev/null; then
+        echo "- Gradle build system" >> "$plan_file"
+    fi
+    
+    cat >> "$plan_file" << 'EOF'
 
 ---
 
@@ -1410,9 +1566,14 @@ EOF
         has_violations=true
     fi
     
-    # Check for multi-project structure
-    if [ -d "$REPO_ROOT/agileforecaster-api" ] && [ -d "$REPO_ROOT/agileforecaster-ui" ] && [ -d "$REPO_ROOT/agileforecaster-db" ]; then
-        echo "| 3+ projects | Backend API, frontend UI, and database models require separate deployments | Monorepo without separation would complicate independent scaling and deployment |" >> "$plan_file"
+    # Check for multi-project structure (dynamic detection)
+    local module_count=0
+    if [ -n "$project_modules" ]; then
+        module_count=$(echo "$project_modules" | tr ',' '\n' | wc -l | tr -d ' ')
+    fi
+    
+    if [ $module_count -ge 3 ]; then
+        echo "| $module_count+ modules | Multi-module architecture requires separate build configurations | Monorepo without separation would complicate independent builds and deployments |" >> "$plan_file"
         has_violations=true
     fi
     
@@ -1671,20 +1832,31 @@ generate_data_model_md() {
     local data_model_file="$1"
     local date=$(date +%Y-%m-%d)
     
+    # Detect project information
+    local project_name=$(detect_project_name)
+    local display_name=$(echo "$project_name" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
+    
+    # Find the actual model directory for source path
+    local model_source_path="N/A"
+    local first_model_dir=$(find "$REPO_ROOT" -type d \( -name "model" -o -name "models" -o -name "entity" -o -name "entities" -o -name "domain" \) -path "*/src/*" -print -quit 2>/dev/null)
+    if [ -n "$first_model_dir" ]; then
+        model_source_path=${first_model_dir#$REPO_ROOT/}
+    fi
+    
     cat > "$data_model_file" << EOF
-# Data Models: Agile Forecaster Application
+# Data Models: ${display_name}
 
 **Generated**: $date  
-**Source**: Reverse-engineered from \`agileforecaster-api/src/main/java/com/agileforecaster/model/\`  
+**Source**: Reverse-engineered from \`${model_source_path}\`  
 **Total Models**: $MODEL_COUNT
 
-This document provides comprehensive documentation for all data models in the Agile Forecaster application.
+This document provides comprehensive documentation for all data models in the ${display_name} application.
 
 ---
 
 ## Overview
 
-The Agile Forecaster uses $MODEL_COUNT data models to represent the domain:
+The ${display_name} uses $MODEL_COUNT data models to represent the domain:
 
 EOF
 
@@ -1791,7 +1963,7 @@ EOF
 
 ### $name
 
-**Location**: \`agileforecaster-api/src/main/java/com/agileforecaster/model/${name}.java\`  
+**Location**: \`${model_source_path}/${name}.java\`  
 **Fields**: $fields
 
 *Model file not found or not accessible for detailed analysis*
@@ -1806,54 +1978,19 @@ EOF
 
 ## Model Relationships
 
-The following diagram shows the high-level relationships between models:
-
-```
-User
- └── Projects (1:many)
-      ├── Sprints (1:many)
-      │    └── Stories (1:many)
-      └── SavedForecasts (1:many)
-
-ForecastRequest
- └── CompletedSprints (contains array)
-      └── generates → ProjectForecast
-           └── ForecastedSprints (contains array)
-
-Story
- ├── StoryStatus (enum)
- └── StoryPointEstimate (related)
-
-Project
- └── ProjectPointEstimate (related)
-
-Sprint
- └── SprintPointAccuracy (related)
-```
+The model relationships are determined by examining `@DBRef`, `@OneToMany`, `@ManyToOne`, 
+and other relationship annotations in the source code. Refer to the individual model 
+documentation above for specific relationship details.
 
 ## Usage Patterns
 
-### Creating a Forecast
+The usage patterns for these models are determined by the service layer and controller 
+implementations. Common patterns include:
 
-1. User provides historical **CompletedSprint** data
-2. System creates **ForecastRequest** with parameters
-3. Monte Carlo simulation generates **ProjectForecast**
-4. Forecast contains array of **ForecastedSprint** predictions
-5. User can save as **SavedForecast** for later retrieval
-
-### Managing Projects
-
-1. User creates **Project** with metadata
-2. User adds **Sprint** records to project
-3. User adds **Story** records to sprints
-4. System calculates **ProjectPointEstimate** from stories
-5. System tracks **SprintPointAccuracy** over time
-
-### Bulk Data Operations
-
-1. Use **StoryUploadRequest** to upload multiple stories
-2. System validates and processes stories
-3. Returns **StoryUploadResponse** with results
+1. **CRUD Operations**: Create, Read, Update, Delete operations for entity management
+2. **Data Validation**: JSR-303 validation annotations ensure data integrity
+3. **Persistence**: JPA/MongoDB annotations handle database mapping
+4. **Business Logic**: Service classes orchestrate model interactions
 
 ---
 
@@ -1866,34 +2003,51 @@ EOF
 generate_markdown_spec() {
     local date=$(date +%Y-%m-%d)
     
+    # Detect project information
+    local project_name=$(detect_project_name)
+    local project_desc=$(detect_project_description)
+    local display_name=$(echo "$project_name" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
+    
     cat << EOF
-# Feature Specification: Agile Forecaster Application
+# Feature Specification: ${display_name}
 
 **Feature Branch**: \`main\`
 **Created**: $date
 **Status**: Active Development
 **Input**: Reverse-engineered from existing codebase
 
+## Project Overview
+
+${project_desc}
+
+This specification was automatically generated by reverse-engineering the existing codebase. 
+It documents the current implementation's capabilities, requirements, and architecture.
+
+**Note**: This is a living document generated from code analysis. User stories and requirements 
+below represent the implemented functionality as detected from controllers, models, and services.
+
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - User Authentication and Authorization (Priority: P1)
+### User Story 1 - API Operations (Priority: P1)
 
-As a **team member or product owner**, I want to **securely register, log in, and access the agile forecasting system** so that **my project data and forecasts are protected and only accessible to authorized users**.
+As a **system integrator or client application**, I want to **interact with the REST API endpoints** 
+so that **I can perform CRUD operations and access system functionality programmatically**.
 
-**Why this priority**: Authentication is foundational to all other features - without it, no user-specific data can be safely stored or accessed.
+**Why this priority**: API accessibility is foundational to all system interactions.
 
-**Independent Test**: Can be fully tested by registering a new user account, logging in with credentials, and verifying that protected endpoints require authentication tokens.
+**Independent Test**: Can be fully tested by making HTTP requests to available endpoints and 
+verifying responses match OpenAPI specification.
 
 **Acceptance Scenarios**:
 
-1. **Given** I am a new user, **When** I provide valid registration details (username, email, password), **Then** my account is created and I receive a confirmation
-2. **Given** I have a registered account, **When** I submit correct login credentials, **Then** I receive an authentication token and can access protected resources
-3. **Given** I am not authenticated, **When** I attempt to access protected endpoints, **Then** I receive a 401 Unauthorized response
-4. **Given** I have a valid authentication token, **When** I make requests to authorized endpoints, **Then** my requests are processed successfully
+1. **Given** I have valid credentials, **When** I call authenticated endpoints, **Then** I receive authorized responses
+2. **Given** I provide valid request data, **When** I make API calls, **Then** operations complete successfully
+3. **Given** I provide invalid data, **When** I make API calls, **Then** I receive appropriate error messages
+4. **Given** endpoints are available, **When** I access the API, **Then** responses follow consistent structure
 
 ---
 
-### User Story 2 - Project Management (Priority: P2)
+### User Story 2 - Data Management (Priority: P2)
 
 As a **product owner or project manager**, I want to **create, view, update, and organize projects** so that **I can track multiple agile initiatives and their forecasts separately**.
 
@@ -1972,14 +2126,14 @@ EOF
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can successfully register, log in, and access protected resources within 30 seconds
-- **SC-002**: Users can create a project and add sprint/story data within 2 minutes
-- **SC-003**: Monte Carlo forecast generation completes within 500ms for typical inputs
-- **SC-004**: System accurately calculates takt time and cycle time metrics within 2 decimal places
-- **SC-005**: Forecast probability distribution sums to 100% (within 0.1% rounding tolerance)
-- **SC-006**: 95% of API requests return within 1 second under normal load
-- **SC-007**: System successfully handles concurrent requests from 100+ users without data corruption
-- **SC-008**: Users can save and retrieve forecasts with 100% data fidelity
+- **SC-001**: API endpoints respond within acceptable time limits (< 2 seconds for 95% of requests)
+- **SC-002**: System successfully handles concurrent requests without data corruption
+- **SC-003**: All CRUD operations complete successfully with proper validation
+- **SC-004**: Error responses include meaningful messages and appropriate HTTP status codes
+- **SC-005**: Data persistence maintains integrity across all operations
+- **SC-006**: Authentication and authorization function correctly for protected resources
+- **SC-007**: System scales to handle expected user load ($ENDPOINT_COUNT endpoints, $MODEL_COUNT models)
+- **SC-008**: All functional requirements are testable and verified
 
 ## Technical Implementation Details
 
