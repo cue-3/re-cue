@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Specify Reverse Engineering - Transform existing codebases into structured specifications and API contracts. An essential add-on for GitHub's Spec Kit.">
+    <meta name="keywords" content="reverse engineering, specification-driven development, API contracts, GitHub Copilot, OpenAPI, documentation">
+    <title>Specify Reverse Engineering - Bridge Legacy Code to Modern Specs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .section h3 {
+            color: #555;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            border-radius: 4px;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+
+        .feature-card p {
+            margin-top: 0.5rem;
+            color: #666;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .code-block code {
+            white-space: pre;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box strong {
+            color: #856404;
+        }
+
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 2rem;
+            padding-left: 3rem;
+            position: relative;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🔄 Specify Reverse Engineering</h1>
+        <p>Transform existing codebases into structured specifications and API contracts. An essential add-on for GitHub's Spec Kit.</p>
+        <div style="margin-top: 2rem;">
+            <a href="https://github.com/quickcue3/specify-reverse" class="btn">View on GitHub</a>
+            <a href="#quick-start" class="btn btn-secondary">Get Started</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="section">
+            <div class="warning-box">
+                <strong>Disclaimer:</strong> This project is provided "as is" without warranty of any kind, either expressed or implied. Use at your own risk.
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Why Use Specify Reverse?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>🔄 Bridge Legacy to Spec-First</h3>
+                    <p>Transform existing code into Specify-compatible documentation seamlessly.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📋 Consistent Workflows</h3>
+                    <p>Generated specs follow Specify's established patterns and standards.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🚀 Accelerate Adoption</h3>
+                    <p>Quickly onboard existing projects to specification-driven development.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔗 Seamless Integration</h3>
+                    <p>Installs directly into Specify's directory structure with ease.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📝 Ready-to-Use Templates</h3>
+                    <p>Output formats align with Specify's documentation standards.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🤖 AI-Powered Analysis</h3>
+                    <p>GitHub Copilot integration for intelligent reverse engineering.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="quick-start">
+            <h2>Quick Start</h2>
+            <ol class="steps">
+                <li>
+                    <h3>Clone the Repository</h3>
+                    <div class="code-block"><code>git clone https://github.com/quickcue3/specify-reverse.git
+cd specify-reverse</code></div>
+                </li>
+                <li>
+                    <h3>Install into Your Specify Project</h3>
+                    <div class="code-block"><code>./install.sh /path/to/your/specify/project</code></div>
+                    <p>This integrates the toolkit into your existing Specify structure.</p>
+                </li>
+                <li>
+                    <h3>Reverse Engineer Your Codebase</h3>
+                    <div class="code-block"><code># Generate complete documentation
+./.specify/scripts/bash/reverse-engineer.sh --spec --plan --data-model --api-contract
+
+# Or use GitHub Copilot
+/speckit.reverse</code></div>
+                </li>
+            </ol>
+        </section>
+
+        <section class="section">
+            <h2>What You Get</h2>
+            <p>Specify Reverse generates comprehensive documentation that integrates seamlessly with your Specify workflow:</p>
+            <div style="margin-top: 1.5rem;">
+                <h3>📄 Feature Specifications (spec.md)</h3>
+                <p>Compatible with Specify's specification format, focusing on user stories and acceptance criteria.</p>
+
+                <h3>📋 Implementation Plans (plan.md)</h3>
+                <p>Ready for Specify's planning workflow with technical details and architecture decisions.</p>
+
+                <h3>🗄️ Data Model Documentation (data-model.md)</h3>
+                <p>Integrated with Specify's model templates, documenting entities, relationships, and constraints.</p>
+
+                <h3>🔌 API Contracts (api-spec.json)</h3>
+                <p>OpenAPI 3.0 specifications for contract-first development and API documentation.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>GitHub Copilot Integration</h2>
+            <p>The included prompt enables advanced AI-assisted reverse engineering workflows. Simply type:</p>
+            <div class="code-block"><code>/speckit.reverse</code></div>
+            <p style="margin-top: 1rem;">GitHub Copilot will automatically:</p>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>Generate a descriptive branch name</li>
+                <li>Run specification generation</li>
+                <li>Create implementation plans</li>
+                <li>Analyze data models</li>
+                <li>Generate API contracts</li>
+                <li>Provide status updates for each step</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Usage Patterns</h2>
+            
+            <h3>🔄 Brownfield Project Onboarding</h3>
+            <p>Transform existing projects to use Specify's specification-driven approach:</p>
+            <div class="code-block"><code># Reverse engineer existing codebase
+./.specify/scripts/bash/reverse-engineer.sh --spec --plan --data-model --api-contract
+
+# Review and refine generated specifications
+code specs/001-reverse/
+
+# Use as foundation for future development
+./.specify/scripts/bash/create-new-feature.sh "new feature"</code></div>
+
+            <h3>📚 Documentation Modernization</h3>
+            <p>Bring outdated documentation up to Specify standards and maintain it alongside your code.</p>
+
+            <h3>🔧 API Contract Management</h3>
+            <p>Maintain OpenAPI specifications alongside Specify workflows for contract-first development.</p>
+        </section>
+
+        <section class="section">
+            <h2>Requirements</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h3>For Installation</h3>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Existing Specify project</li>
+                        <li>Bash shell environment</li>
+                        <li>Basic project structure</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>For Optimal Results</h3>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Well-structured codebase</li>
+                        <li>Standard frameworks</li>
+                        <li>Proper naming conventions</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Resources</h2>
+            <div style="margin-top: 1rem;">
+                <a href="https://github.com/quickcue3/specify-reverse" class="btn">GitHub Repository</a>
+                <a href="https://github.com/quickcue3/specify-reverse/blob/main/scripts/README.md" class="btn btn-secondary">Script Documentation</a>
+                <a href="https://github.com/quickcue3/specify-reverse/issues" class="btn">Report Issues</a>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Contributing</h2>
+            <p>Help improve the integration between reverse engineering and Specify:</p>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li><strong>Template Enhancement</strong> - Improve generated spec templates</li>
+                <li><strong>Workflow Optimization</strong> - Streamline integration patterns</li>
+                <li><strong>Prompt Engineering</strong> - Enhance GitHub Copilot prompts</li>
+                <li><strong>Documentation</strong> - Expand integration examples</li>
+            </ul>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p><a href="https://github.com/quickcue3/specify-reverse">GitHub</a> | <a href="https://github.com/quickcue3/specify-reverse/blob/main/LICENSE">License</a></p>
+        <p style="margin-top: 0.5rem; opacity: 0.8;">🚀 Accelerate your transition to specification-driven development</p>
+    </footer>
+</body>
+</html>
