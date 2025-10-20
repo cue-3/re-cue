@@ -506,6 +506,11 @@ detect_dependencies() {
         if grep -q "spring-boot-starter-data-jpa" "$pom_file" 2>/dev/null; then
             deps+=("Spring Data JPA")
         fi
+        if grep -q "<groupId>org.springframework</groupId>" "$pom_file" 2>/dev/null && ! grep -q "spring-boot" "$pom_file" 2>/dev/null; then
+            if [[ ! " ${deps[@]} " =~ "Spring Framework" ]]; then
+                deps+=("Spring Framework")
+            fi
+        fi
     done < <(find "$REPO_ROOT" -name "pom.xml" -print0 2>/dev/null)
     
     # Frontend dependencies from any package.json
@@ -635,17 +640,24 @@ detect_testing() {
     
     # Check all pom.xml files for Java testing
     while IFS= read -r -d '' pom_file; do
-        if grep -q "junit-jupiter\|junit-5" "$pom_file" 2>/dev/null; then
-            testing_frameworks+=("JUnit 5")
-        fi
-        if grep -q "junit" "$pom_file" 2>/dev/null && ! grep -q "junit-jupiter" "$pom_file" 2>/dev/null; then
-            testing_frameworks+=("JUnit 4")
+        if grep -q "junit-jupiter" "$pom_file" 2>/dev/null; then
+            if [[ ! " ${testing_frameworks[@]} " =~ "JUnit 5" ]]; then
+                testing_frameworks+=("JUnit 5")
+            fi
+        elif grep -q "<artifactId>junit</artifactId>" "$pom_file" 2>/dev/null; then
+            if [[ ! " ${testing_frameworks[@]} " =~ "JUnit 4" ]]; then
+                testing_frameworks+=("JUnit 4")
+            fi
         fi
         if grep -q "mockito" "$pom_file" 2>/dev/null; then
-            testing_frameworks+=("Mockito")
+            if [[ ! " ${testing_frameworks[@]} " =~ "Mockito" ]]; then
+                testing_frameworks+=("Mockito")
+            fi
         fi
         if grep -q "testng" "$pom_file" 2>/dev/null; then
-            testing_frameworks+=("TestNG")
+            if [[ ! " ${testing_frameworks[@]} " =~ "TestNG" ]]; then
+                testing_frameworks+=("TestNG")
+            fi
         fi
     done < <(find "$REPO_ROOT" -name "pom.xml" -print0 2>/dev/null)
     
@@ -1452,8 +1464,8 @@ EOF
 **Testing**: $(detect_testing)  
 **Target Platform**: Docker containers (Linux), Web browsers (ES2015+)  
 **Project Type**: $project_type  
-**Performance Goals**: <500ms API response time, <2s forecast generation, 60fps UI  
-**Constraints**: Supports 100+ projects per user, 1000+ stories per sprint  
+**Performance Goals**: <500ms API response time, efficient data processing, optimal resource utilization  
+**Constraints**: Scalable architecture, maintainable codebase, robust error handling  
 **Scale/Scope**: $ENDPOINT_COUNT API endpoints, $MODEL_COUNT data models, $VIEW_COUNT UI views
 
 ---
@@ -1552,17 +1564,17 @@ EOF
     
     # Check for common complexity indicators
     if [ $MODEL_COUNT -gt 10 ]; then
-        echo "| $MODEL_COUNT data models | Complex domain with forecasting, sprints, projects, users, and analytics | Fewer models would lose domain clarity and violate business requirements |" >> "$plan_file"
+        echo "| $MODEL_COUNT data models | Domain complexity requires comprehensive data modeling | Fewer models would lose domain clarity and violate business requirements |" >> "$plan_file"
         has_violations=true
     fi
     
     if [ $ENDPOINT_COUNT -gt 30 ]; then
-        echo "| $ENDPOINT_COUNT API endpoints | Full-featured application with CRUD operations, authentication, forecasting, and analytics | Consolidating endpoints would break REST principles and reduce API clarity |" >> "$plan_file"
+        echo "| $ENDPOINT_COUNT API endpoints | Full-featured application with comprehensive operations and functionality | Consolidating endpoints would break REST principles and reduce API clarity |" >> "$plan_file"
         has_violations=true
     fi
     
     if [ $SERVICE_COUNT -gt 5 ]; then
-        echo "| $SERVICE_COUNT services | Separation of concerns for forecasting, projects, sprints, users, and utilities | Fewer services would create god objects and reduce testability |" >> "$plan_file"
+        echo "| $SERVICE_COUNT services | Separation of concerns following single responsibility principle | Fewer services would create god objects and reduce testability |" >> "$plan_file"
         has_violations=true
     fi
     
@@ -1714,7 +1726,7 @@ Then follow the standard workflow for task breakdown.
 - Alternatives considered: React (more complex state management), Angular (heavier)
 
 **Database: MongoDB**
-- Rationale: Flexible schema for evolving sprint data, excellent JSON integration
+- Rationale: Flexible schema for evolving data requirements, excellent JSON integration
 - Alternatives considered: PostgreSQL (less flexible schema), MySQL (dated)
 
 **State Management: Pinia**
@@ -2028,85 +2040,133 @@ below represent the implemented functionality as detected from controllers, mode
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - API Operations (Priority: P1)
+EOF
 
-As a **system integrator or client application**, I want to **interact with the REST API endpoints** 
-so that **I can perform CRUD operations and access system functionality programmatically**.
+    # Generate dynamic user stories based on discovered capabilities
+    # Story 1: Primary data operations
+    cat >> /dev/stdout << 'EOFSTORY1'
 
-**Why this priority**: API accessibility is foundational to all system interactions.
+### User Story 1 - Data Operations (Priority: P1)
 
-**Independent Test**: Can be fully tested by making HTTP requests to available endpoints and 
-verifying responses match OpenAPI specification.
+As a **system user**, I want to **create, retrieve, update, and delete data entities** 
+so that **I can manage information within the system effectively**.
+
+**Why this priority**: Data operations are foundational to system functionality.
+
+**Independent Test**: Can be fully tested by performing CRUD operations on available entities and verifying data persistence.
+
+**Acceptance Scenarios**:
+
+1. **Given** I have proper authorization, **When** I create new entities, **Then** they are persisted correctly
+2. **Given** entities exist in the system, **When** I query for them, **Then** I receive accurate data
+3. **Given** I update existing entities, **When** changes are saved, **Then** modifications are reflected in subsequent retrievals
+4. **Given** I have permission to delete entities, **When** I remove an entity, **Then** it is no longer accessible
+
+---
+
+EOFSTORY1
+    
+    # Story 2: API Integration
+    cat >> /dev/stdout << 'EOFSTORY2'
+
+### User Story 2 - REST API Integration (Priority: P2)
+
+As a **client application or service**, I want to **interact with the REST API endpoints** 
+so that **I can integrate with the system programmatically and automate workflows**.
+
+**Why this priority**: API accessibility enables system integration and automation capabilities.
+
+**Independent Test**: Can be fully tested by making HTTP requests to available endpoints and verifying responses match OpenAPI specification.
 
 **Acceptance Scenarios**:
 
 1. **Given** I have valid credentials, **When** I call authenticated endpoints, **Then** I receive authorized responses
 2. **Given** I provide valid request data, **When** I make API calls, **Then** operations complete successfully
-3. **Given** I provide invalid data, **When** I make API calls, **Then** I receive appropriate error messages
-4. **Given** endpoints are available, **When** I access the API, **Then** responses follow consistent structure
+3. **Given** I provide invalid data, **When** I make API calls, **Then** I receive appropriate error messages with details
+4. **Given** endpoints are available, **When** I access the API, **Then** responses follow consistent RESTful structure
 
 ---
 
-### User Story 2 - Data Management (Priority: P2)
+EOFSTORY2
 
-As a **product owner or project manager**, I want to **create, view, update, and organize projects** so that **I can track multiple agile initiatives and their forecasts separately**.
-
-**Why this priority**: Projects serve as the organizational container for all sprints, stories, and forecasts - essential for multi-project teams.
-
-**Independent Test**: Can be fully tested by creating a new project with required details, listing all projects, updating project information, and viewing project details.
-
-**Acceptance Scenarios**:
-
-1. **Given** I am authenticated, **When** I create a new project with name and date range, **Then** the project is saved with a unique ID and appears in my project list
-2. **Given** I have existing projects, **When** I request my project list, **Then** I see all projects I have created or have access to
-3. **Given** I select a specific project, **When** I view its details, **Then** I see comprehensive project information including associated sprints and stories
-
----
-
-### User Story 3 - Sprint Forecasting with Monte Carlo Simulation (Priority: P3)
-
-As a **product owner or project manager**, I want to **generate probabilistic forecasts for project completion** so that **I can make data-driven decisions about scope, timeline, and resource allocation**.
-
-**Why this priority**: This is the core value proposition of the application - generating accurate, probability-based forecasts from historical data.
-
-**Independent Test**: Can be fully tested by providing historical sprint data, program focus, and work items, then verifying a forecast distribution is returned with probabilities.
-
-**Acceptance Scenarios**:
-
-1. **Given** I have historical sprint data, **When** I provide sprint work days, program focus, work items count, and completed sprints, **Then** a Monte Carlo simulation generates a probability distribution
-2. **Given** forecast results are displayed, **When** I view the forecast, **Then** I see individual sprint counts with their occurrence probability and cumulative percentage
-3. **Given** I have a useful forecast, **When** I choose to save it, **Then** the forecast is stored with all input parameters and results
-
----
+    cat >> /dev/stdout << 'EOF'
 
 ### Edge Cases
 
-- What happens when **a user provides invalid historical data** (e.g., zero work days, negative story counts)?
-- How does the system handle **empty or insufficient historical sprint data** for forecasting?
-- What occurs when **a user attempts to access another user's private forecasts or projects**?
-- How does the system respond to **malformed JSON in bulk upload requests**?
-- What happens when **authentication tokens expire** during active user sessions?
+- What happens when **invalid data is submitted** to API endpoints?
+- How does the system handle **concurrent modifications** to the same entity?
+- What occurs when **required authentication** is missing or expired?
+- How does the system respond to **malformed JSON** in requests?
+- What happens when **database connections fail** during operations?
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide user registration with unique username and email validation
-- **FR-002**: System MUST authenticate users via username/password and issue JWT tokens
-- **FR-003**: System MUST enforce role-based access control (RBAC) with USER and ADMIN roles
-- **FR-004**: System MUST protect sensitive endpoints requiring authentication via OAuth 2.0
-- **FR-005**: Users MUST be able to create projects with name, start date, and end date
-- **FR-006**: System MUST auto-create a default project for new users without projects
-- **FR-007**: Users MUST be able to list, view, update, and delete their own projects
-- **FR-008**: Users MUST be able to create sprints with work days, start/end dates, and project association
-- **FR-009**: Users MUST be able to create stories with point estimates, status, and sprint/project association
-- **FR-010**: System MUST support bulk upload of sprints and stories via JSON payload
-- **FR-011**: System MUST generate Monte Carlo forecasts using 1000 simulation iterations
-- **FR-012**: System MUST calculate takt time from historical sprint data and program focus
-- **FR-013**: System MUST return forecast distribution with sprint counts, probabilities, and cumulative percentages
-- **FR-014**: Users MUST be able to save, load, list, and delete their forecasts
-- **FR-015**: System MUST validate all input data (non-negative values, required fields, date ranges)
-- **FR-016**: System MUST enforce user data isolation (users cannot access other users' data)
+EOF
+
+    # Generate functional requirements based on discovered endpoints and models
+    local req_counter=1
+    
+    # Add authentication requirement if security detected
+    for endpoint_info in "${ENDPOINTS[@]}"; do
+        IFS='|' read -r method path controller auth <<< "$endpoint_info"
+        if [ "$auth" = "🔒" ]; then
+            echo "- **FR-$(printf "%03d" $req_counter)**: System MUST provide authentication and authorization for protected endpoints" >> /dev/stdout
+            req_counter=$((req_counter + 1))
+            break
+        fi
+    done
+    
+    # Add CRUD requirements based on HTTP methods found
+    local has_get=false has_post=false has_put=false has_delete=false
+    for endpoint_info in "${ENDPOINTS[@]}"; do
+        IFS='|' read -r method path controller auth <<< "$endpoint_info"
+        case "$method" in
+            "GET") has_get=true ;;
+            "POST") has_post=true ;;
+            "PUT") has_put=true ;;
+            "DELETE") has_delete=true ;;
+            "PATCH") has_put=true ;;
+        esac
+    done
+    
+    if [ "$has_get" = true ]; then
+        echo "- **FR-$(printf "%03d" $req_counter)**: System MUST support retrieval of data via GET endpoints" >> /dev/stdout
+        req_counter=$((req_counter + 1))
+    fi
+    
+    if [ "$has_post" = true ]; then
+        echo "- **FR-$(printf "%03d" $req_counter)**: System MUST support creation of new entities via POST endpoints" >> /dev/stdout
+        req_counter=$((req_counter + 1))
+    fi
+    
+    if [ "$has_put" = true ]; then
+        echo "- **FR-$(printf "%03d" $req_counter)**: System MUST support updates to existing entities via PUT/PATCH endpoints" >> /dev/stdout
+        req_counter=$((req_counter + 1))
+    fi
+    
+    if [ "$has_delete" = true ]; then
+        echo "- **FR-$(printf "%03d" $req_counter)**: System MUST support deletion of entities via DELETE endpoints" >> /dev/stdout
+        req_counter=$((req_counter + 1))
+    fi
+    
+    echo "- **FR-$(printf "%03d" $req_counter)**: System MUST validate all input data for correctness and completeness" >> /dev/stdout
+    req_counter=$((req_counter + 1))
+    
+    echo "- **FR-$(printf "%03d" $req_counter)**: System MUST return appropriate HTTP status codes for all operations" >> /dev/stdout
+    req_counter=$((req_counter + 1))
+    
+    echo "- **FR-$(printf "%03d" $req_counter)**: System MUST handle errors gracefully with meaningful error messages" >> /dev/stdout
+    req_counter=$((req_counter + 1))
+    
+    # Add data model requirements if models discovered
+    if [ $MODEL_COUNT -gt 0 ]; then
+        echo "- **FR-$(printf "%03d" $req_counter)**: System MUST persist data using $MODEL_COUNT defined data models" >> /dev/stdout
+        req_counter=$((req_counter + 1))
+    fi
+    
+    cat << 'EOF'
 
 ### Key Entities
 
@@ -2189,22 +2249,50 @@ EOF
 
 ### Technology Stack
 
-- **Backend**: Java 17+, Spring Boot 3.x, Spring Security, MongoDB
-- **Frontend**: Vue.js 3, Vite, Pinia, Tailwind CSS, Chart.js
-- **Authentication**: OAuth 2.0, JWT, optional mTLS
-- **Testing**: JUnit 5, Vue Test Utils
-- **Build**: Maven, npm/vite
+EOF
 
-### Key Algorithms
-
-- **Monte Carlo Simulation**: 1000 iterations of random takt time sampling
-- **Takt Time Calculation**: \`workDays / (storiesCompleted × programFocus × 100)\`
-- **Cycle Time Calculation**: \`sprintWorkDays / storiesCompleted\`
-- **Forecast Distribution**: Grouping, counting, and cumulative probability calculation
+    # Dynamically build technology stack
+    local lang_ver=$(detect_language_version)
+    local deps=$(detect_dependencies)
+    local storage=$(detect_storage)
+    local testing=$(detect_testing)
+    
+    if [ -n "$lang_ver" ] && [ "$lang_ver" != "NEEDS CLARIFICATION" ]; then
+        echo "- **Language/Runtime**: $lang_ver" >> /dev/stdout
+    fi
+    
+    if [ -n "$deps" ] && [ "$deps" != "NEEDS CLARIFICATION" ]; then
+        # Clean up the dependencies list - replace commas with proper formatting
+        local formatted_deps=$(echo "$deps" | sed 's/, / + /g' | sed 's/,/ + /g')
+        echo "- **Frameworks**: $formatted_deps" >> /dev/stdout
+    fi
+    
+    if [ -n "$storage" ] && [ "$storage" != "N/A" ]; then
+        # Clean up the storage list
+        local formatted_storage=$(echo "$storage" | sed 's/, / + /g' | sed 's/,/ + /g')
+        echo "- **Data Storage**: $formatted_storage" >> /dev/stdout
+    fi
+    
+    if [ -n "$testing" ] && [ "$testing" != "NEEDS CLARIFICATION" ]; then
+        # Clean up the testing list
+        local formatted_testing=$(echo "$testing" | sed 's/, / + /g' | sed 's/,/ + /g')
+        echo "- **Testing**: $formatted_testing" >> /dev/stdout
+    fi
+    
+    # Check for build tools
+    if find "$REPO_ROOT" -name "pom.xml" -print -quit | grep -q . 2>/dev/null; then
+        echo "- **Build Tool**: Maven" >> /dev/stdout
+    elif find "$REPO_ROOT" -name "build.gradle" -print -quit | grep -q . 2>/dev/null; then
+        echo "- **Build Tool**: Gradle" >> /dev/stdout
+    elif find "$REPO_ROOT" -name "package.json" -print -quit | grep -q . 2>/dev/null; then
+        echo "- **Build Tool**: npm/yarn/pnpm" >> /dev/stdout
+    fi
+    
+    cat << EOF
 
 ---
 
-**Generated**: $date by reverse-engineer-spec.sh
+**Generated**: $date by reverse-engineer.sh
 **Analysis**: $ENDPOINT_COUNT endpoints, $MODEL_COUNT models, $VIEW_COUNT views, $SERVICE_COUNT services
 EOF
 }
