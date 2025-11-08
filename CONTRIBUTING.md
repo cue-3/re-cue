@@ -68,7 +68,7 @@ cd specify-reverse
 git checkout -b feature/my-new-feature
 
 # Make the scripts executable
-chmod +x scripts/*.sh
+chmod +x reverse-engineer-bash/*.sh
 chmod +x install.sh
 ```
 
@@ -79,7 +79,7 @@ Before submitting a pull request, test your changes:
 ```bash
 # Test the reverse engineering script
 cd /path/to/test/project
-/path/to/specify-reverse/scripts/reverse-engineer.sh --spec --verbose
+/path/to/specify-reverse/reverse-engineer-bash/reverse-engineer.sh --spec --verbose
 
 # Test the installation script
 /path/to/specify-reverse/install.sh /path/to/test/specify/project

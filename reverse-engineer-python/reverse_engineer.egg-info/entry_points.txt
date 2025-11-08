@@ -1,0 +1,2 @@
+[console_scripts]
+reverse-engineer = reverse_engineer.cli:main

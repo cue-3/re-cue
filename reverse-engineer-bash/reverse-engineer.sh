@@ -5,6 +5,134 @@ set -e
 # Script to reverse-engineer documentation from an existing project
 # Usage: ./reverse-engineer.sh [--spec] [--plan] [--data-model] [OPTIONS]
 
+# Function for interactive mode
+interactive_mode() {
+    cat << 'EOF'
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                   Specify - Reverse Engineering                            ║
+║                         Interactive Mode                                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+EOF
+    
+    echo "Let's configure your reverse engineering session."
+    echo ""
+    
+    # Ask for project path
+    echo "📁 Project Path"
+    echo "   Enter the path to the project you want to analyze."
+    echo "   Press Enter to use the current directory."
+    read -p "   Path: " PROJECT_PATH
+    PROJECT_PATH=$(echo "$PROJECT_PATH" | xargs)  # trim whitespace
+    
+    # Validate path if provided
+    if [ -n "$PROJECT_PATH" ] && [ ! -d "$PROJECT_PATH" ]; then
+        echo ""
+        echo "❌ Error: Path does not exist or is not a directory: $PROJECT_PATH" >&2
+        exit 1
+    fi
+    
+    echo ""
+    
+    # Ask what to generate
+    echo "📝 What would you like to generate?"
+    echo "   You can select multiple options (y/n for each)"
+    echo ""
+    
+    read -p "   Generate specification (spec.md)? [Y/n]: " gen_spec
+    gen_spec=$(echo "$gen_spec" | tr '[:upper:]' '[:lower:]' | xargs)
+    [ "$gen_spec" != "n" ] && GENERATE_SPEC=true
+    
+    read -p "   Generate implementation plan (plan.md)? [Y/n]: " gen_plan
+    gen_plan=$(echo "$gen_plan" | tr '[:upper:]' '[:lower:]' | xargs)
+    [ "$gen_plan" != "n" ] && GENERATE_PLAN=true
+    
+    read -p "   Generate data model documentation (data-model.md)? [Y/n]: " gen_data
+    gen_data=$(echo "$gen_data" | tr '[:upper:]' '[:lower:]' | xargs)
+    [ "$gen_data" != "n" ] && GENERATE_DATA_MODEL=true
+    
+    read -p "   Generate API contract (api-spec.json)? [Y/n]: " gen_api
+    gen_api=$(echo "$gen_api" | tr '[:upper:]' '[:lower:]' | xargs)
+    [ "$gen_api" != "n" ] && GENERATE_API_CONTRACT=true
+    
+    echo ""
+    
+    # Check if at least one option selected
+    if [ "$GENERATE_SPEC" = false ] && [ "$GENERATE_PLAN" = false ] && \
+       [ "$GENERATE_DATA_MODEL" = false ] && [ "$GENERATE_API_CONTRACT" = false ]; then
+        echo "❌ Error: At least one generation option must be selected." >&2
+        exit 1
+    fi
+    
+    # Ask for description if spec is selected
+    PROJECT_DESCRIPTION=""
+    if [ "$GENERATE_SPEC" = true ]; then
+        echo "📄 Project Description"
+        echo "   Describe the project intent (e.g., 'forecast sprint delivery')"
+        read -p "   Description: " PROJECT_DESCRIPTION
+        PROJECT_DESCRIPTION=$(echo "$PROJECT_DESCRIPTION" | xargs)
+        if [ -z "$PROJECT_DESCRIPTION" ]; then
+            echo ""
+            echo "❌ Error: Description is required for spec generation." >&2
+            exit 1
+        fi
+        echo ""
+    fi
+    
+    # Ask for output format
+    echo "📋 Output Format"
+    read -p "   Choose format (markdown/json) [markdown]: " FORMAT
+    FORMAT=$(echo "$FORMAT" | tr '[:upper:]' '[:lower:]' | xargs)
+    [ -z "$FORMAT" ] && FORMAT="markdown"
+    if [[ ! "$FORMAT" =~ ^(markdown|json)$ ]]; then
+        FORMAT="markdown"
+    fi
+    echo ""
+    
+    # Ask for verbose mode
+    read -p "🔍 Enable verbose mode for detailed progress? [y/N]: " verbose_input
+    verbose_input=$(echo "$verbose_input" | tr '[:upper:]' '[:lower:]' | xargs)
+    [ "$verbose_input" = "y" ] && VERBOSE=true
+    echo ""
+    
+    # Display summary and confirm
+    echo "═══════════════════════════════════════════════════════════════════"
+    echo "  Configuration Summary"
+    echo "═══════════════════════════════════════════════════════════════════"
+    echo ""
+    if [ -n "$PROJECT_PATH" ]; then
+        echo "📁 Project Path: $PROJECT_PATH"
+    else
+        echo "📁 Project Path: Current directory (auto-detect)"
+    fi
+    echo "📝 Generating:"
+    [ "$GENERATE_SPEC" = true ] && echo "   ✓ Specification (spec.md)"
+    [ "$GENERATE_PLAN" = true ] && echo "   ✓ Implementation Plan (plan.md)"
+    [ "$GENERATE_DATA_MODEL" = true ] && echo "   ✓ Data Model (data-model.md)"
+    [ "$GENERATE_API_CONTRACT" = true ] && echo "   ✓ API Contract (api-spec.json)"
+    [ -n "$PROJECT_DESCRIPTION" ] && echo "📄 Description: $PROJECT_DESCRIPTION"
+    echo "📋 Format: $FORMAT"
+    if [ "$VERBOSE" = true ]; then
+        echo "🔍 Verbose: Yes"
+    else
+        echo "🔍 Verbose: No"
+    fi
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════════"
+    echo ""
+    
+    read -p "Ready to proceed? [Y/n]: " confirm
+    confirm=$(echo "$confirm" | tr '[:upper:]' '[:lower:]' | xargs)
+    if [ "$confirm" = "n" ]; then
+        echo ""
+        echo "❌ Operation cancelled by user."
+        exit 0
+    fi
+    
+    echo ""
+}
+
 OUTPUT_FILE=""
 FORMAT="markdown"
 VERBOSE=false
@@ -12,7 +140,15 @@ GENERATE_SPEC=false
 GENERATE_PLAN=false
 GENERATE_DATA_MODEL=false
 GENERATE_API_CONTRACT=false
+PROJECT_PATH=""
+PROJECT_DESCRIPTION=""
 ARGS=()
+
+# Check if no arguments provided - enter interactive mode
+if [ $# -eq 0 ]; then
+    interactive_mode
+fi
+
 i=1
 
 while [ $i -le $# ]; do
@@ -26,6 +162,14 @@ while [ $i -le $# ]; do
             i=$((i + 1))
             OUTPUT_FILE="${!i}"
             ;;
+        --path|-p)
+            if [ $((i + 1)) -ge $# ]; then
+                echo 'Error: --path requires a value' >&2
+                exit 1
+            fi
+            i=$((i + 1))
+            PROJECT_PATH="${!i}"
+            ;;
         --format|-f)
             if [ $((i + 1)) -ge $# ]; then
                 echo 'Error: --format requires a value' >&2
@@ -37,6 +181,14 @@ while [ $i -le $# ]; do
                 echo "Error: --format must be 'json' or 'markdown'" >&2
                 exit 1
             fi
+            ;;
+        --description|-d)
+            if [ $((i + 1)) -gt $# ]; then
+                echo 'Error: --description requires a value' >&2
+                exit 1
+            fi
+            i=$((i + 1))
+            PROJECT_DESCRIPTION="${!i}"
             ;;
         --verbose|-v)
             VERBOSE=true
@@ -65,13 +217,16 @@ Options:
   --plan                 Generate implementation plan (plan.md)
   --data-model           Generate data model documentation (data-model.md)
   --api-contract         Generate API contract (api-spec.json)
-  --output, -o <file>    Output file path (default: specs/001-reverse/spec.md)
+  --description, -d <text> Describe project intent (e.g., "forecast sprint delivery")
+  --path, -p <path>      Path to project directory to analyze (default: current directory)
+  --output, -o <file>    Output file path (default: specs/<project-name>/spec.md)
   --format, -f <format>  Output format: markdown or json (default: markdown)
   --verbose, -v          Show detailed analysis progress
   --help, -h             Show this help message
 
 Examples:
   ./reverse-engineer.sh --spec
+  ./reverse-engineer.sh --spec --description "forecast sprint delivery and predict completion"
   ./reverse-engineer.sh --plan
   ./reverse-engineer.sh --data-model
   ./reverse-engineer.sh --api-contract
@@ -79,6 +234,7 @@ Examples:
   ./reverse-engineer.sh --spec --output my-spec.md
   ./reverse-engineer.sh --spec --format json --output spec.json
   ./reverse-engineer.sh --spec --plan --verbose
+  ./reverse-engineer.sh --spec --path /path/to/project --description "external project"
 
 The script will:
   1. Discover API endpoints from Spring Boot controllers
@@ -158,23 +314,40 @@ find_repo_root() {
 }
 
 # Determine repository root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-if git rev-parse --show-toplevel >/dev/null 2>&1; then
-    REPO_ROOT=$(git rev-parse --show-toplevel)
-else
-    REPO_ROOT="$(find_repo_root "$SCRIPT_DIR")"
-    if [ -z "$REPO_ROOT" ]; then
-        echo "Error: Could not determine repository root." >&2
+if [ -n "$PROJECT_PATH" ]; then
+    # Use the specified path
+    if [ ! -d "$PROJECT_PATH" ]; then
+        echo "Error: Specified path does not exist: $PROJECT_PATH" >&2
         exit 1
+    fi
+    REPO_ROOT="$(cd "$PROJECT_PATH" && pwd)"
+else
+    # Auto-detect from current location
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
+    if git rev-parse --show-toplevel >/dev/null 2>&1; then
+        REPO_ROOT=$(git rev-parse --show-toplevel)
+    else
+        REPO_ROOT="$(find_repo_root "$SCRIPT_DIR")"
+        if [ -z "$REPO_ROOT" ]; then
+            echo "Error: Could not determine repository root." >&2
+            echo "Hint: Use --path to specify the project directory." >&2
+            exit 1
+        fi
     fi
 fi
 
 cd "$REPO_ROOT"
 
+# Get project directory name for output path
+PROJECT_NAME=$(basename "$REPO_ROOT")
+
+# Add identifier to project name to show it's reverse-engineered
+PROJECT_NAME="$PROJECT_NAME-re"
+
 # Set default output file if not specified
 if [ -z "$OUTPUT_FILE" ]; then
-    OUTPUT_FILE="$REPO_ROOT/specs/001-reverse/spec.md"
+    OUTPUT_FILE="$REPO_ROOT/specs/$PROJECT_NAME/spec.md"
 fi
 
 # Ensure output directory exists
@@ -209,17 +382,14 @@ SERVICE_COUNT=0
 FEATURE_COUNT=0
 
 log_section "Specify - Reverse Engineering"
-echo "Analyzing project structure..." >&2
 
 # Function to discover API endpoints from Java controllers
 discover_endpoints() {
-    log_info "Discovering API endpoints..."
-    
-    # Find all controller directories in the project
+    # Find all controller directories in the project (including 'api' directories)
     local controller_dirs=()
     while IFS= read -r -d '' controller_dir; do
         controller_dirs+=("$controller_dir")
-    done < <(find "$REPO_ROOT" -type d \( -name "controller" -o -name "controllers" \) -print0 2>/dev/null)
+    done < <(find "$REPO_ROOT" -type d \( -name "controller" -o -name "controllers" -o -name "api" \) -path "*/src/*" -print0 2>/dev/null)
     
     # Also search for files ending in Controller.java anywhere in src
     if [ ${#controller_dirs[@]} -eq 0 ]; then
@@ -290,14 +460,10 @@ discover_endpoints() {
             
         done < <(find "$controller_dir" -name "*Controller.java" -print0)
     done
-    
-    log_info "Found $ENDPOINT_COUNT endpoints"
 }
 
 # Function to discover data models
 discover_models() {
-    log_info "Discovering data models..."
-    
     # Find all model directories in the project
     local model_dirs=()
     while IFS= read -r -d '' model_dir; do
@@ -321,14 +487,10 @@ discover_models() {
             
         done < <(find "$model_path" -maxdepth 1 -name "*.java" -print0 2>/dev/null)
     done
-    
-    log_info "Found $MODEL_COUNT models"
 }
 
 # Function to discover Vue views
 discover_views() {
-    log_info "Discovering Vue.js views..."
-    
     # Find all view directories (Vue, React, Angular, etc.)
     local views_dirs=()
     while IFS= read -r -d '' views_dir; do
@@ -362,14 +524,10 @@ discover_views() {
             VIEW_COUNT=$((VIEW_COUNT + 1))
         done < <(find "$views_path" -name "*.jsx" -o -name "*.tsx" -o -name "*.js" -print0 2>/dev/null)
     done
-    
-    log_info "Found $VIEW_COUNT views"
 }
 
 # Function to discover services
 discover_services() {
-    log_info "Discovering services..."
-    
     # Find all service directories in the project
     local service_dirs=()
     while IFS= read -r -d '' service_dir; do
@@ -399,14 +557,10 @@ discover_services() {
             SERVICE_COUNT=$((SERVICE_COUNT + 1))
         done < <(find "$service_path" -maxdepth 1 -name "*Service.java" -print0 2>/dev/null)
     done
-    
-    log_info "Found $SERVICE_COUNT services"
 }
 
 # Function to extract features from README
 extract_features() {
-    log_info "Extracting features from README..."
-    
     local readme="$REPO_ROOT/README.md"
     
     if [ ! -f "$readme" ]; then
@@ -424,12 +578,418 @@ extract_features() {
             break
         elif [ "$in_features" = true ] && [[ "$line" =~ ^[[:space:]]*[-*] ]]; then
             local feature=$(echo "$line" | sed 's/^[[:space:]]*[-*][[:space:]]*//')
+            # Extract just the feature name (before colon) and description
             FEATURES+=("$feature")
             FEATURE_COUNT=$((FEATURE_COUNT + 1))
         fi
     done < "$readme"
     
     log_info "Found $FEATURE_COUNT features"
+}
+
+# Function to extract project description from README
+extract_project_purpose() {
+    log_info "Extracting project purpose from README..."
+    
+    local readme="$REPO_ROOT/README.md"
+    
+    if [ ! -f "$readme" ]; then
+        echo ""
+        return
+    fi
+    
+    # Get first paragraph after title (usually the main description)
+    local purpose=$(sed -n '/^# /,/^$/p' "$readme" | sed '1d;$d' | grep -v "^#" | head -1)
+    
+    if [ -z "$purpose" ]; then
+        # Try to find description in first few non-heading lines
+        purpose=$(grep -v "^#" "$readme" | grep -v "^$" | grep -v "^[-*]" | head -1)
+    fi
+    
+    echo "$purpose"
+}
+
+# Function to extract domain keywords from README features and descriptions
+extract_domain_keywords() {
+    log_info "Extracting domain keywords..."
+    
+    local readme="$REPO_ROOT/README.md"
+    
+    if [ ! -f "$readme" ]; then
+        echo ""
+        return
+    fi
+    
+    # Extract action verbs and domain terms from Features section
+    local keywords=""
+    local in_features=false
+    
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^##[[:space:]]*Features ]]; then
+            in_features=true
+            continue
+        elif [[ "$line" =~ ^## ]] && [ "$in_features" = true ]; then
+            break
+        elif [ "$in_features" = true ] && [[ "$line" =~ ^[[:space:]]*[-*] ]]; then
+            # Extract feature line and get key terms (before colon)
+            local feature=$(echo "$line" | sed 's/^[[:space:]]*[-*][[:space:]]*//' | sed 's/:.*//')
+            keywords="${keywords}|${feature}"
+        fi
+    done < "$readme"
+    
+    # Also extract from project description (first paragraph)
+    local desc=$(sed -n '/^# /,/^$/p' "$readme" | sed '1d;$d' | grep -v "^#" | head -1)
+    if [ -n "$desc" ]; then
+        keywords="${keywords}|${desc}"
+    fi
+    
+    # Return cleaned keywords
+    echo "$keywords" | tr '[:upper:]' '[:lower:]'
+}
+
+# Function to extract action verbs and key nouns from project description
+extract_intent_context() {
+    local description="$1"
+    
+    if [ -z "$description" ]; then
+        echo ""
+        return
+    fi
+    
+    # Convert to lowercase for analysis
+    local desc_lower=$(echo "$description" | tr '[:upper:]' '[:lower:]')
+    
+    # Common action verbs in software contexts
+    local action_verbs="forecast|predict|estimate|analyze|calculate|browse|search|filter|manage|track|monitor|coordinate|schedule|process|deliver|purchase|order|sell|book|reserve|plan|organize|create|update|delete|view|list|import|export|generate|validate|verify|notify|send|publish|subscribe|authenticate|authorize|approve|reject|assign|allocate|measure|assess|evaluate|compare|recommend|suggest|optimize|improve|enhance|report|visualize|display|present|share|collaborate|communicate|integrate|sync|backup|restore|archive|audit|log|alert|remind"
+    
+    # Extract matching verbs from description
+    local found_verbs=""
+    for verb in $(echo "$action_verbs" | tr '|' ' '); do
+        if echo "$desc_lower" | grep -qw "$verb"; then
+            if [ -z "$found_verbs" ]; then
+                found_verbs="$verb"
+            else
+                found_verbs="${found_verbs}|${verb}"
+            fi
+        fi
+    done
+    
+    # Extract potential key nouns (words 4+ chars that aren't common words)
+    local common_words="this|that|with|from|into|about|using|based|have|been|will|should|could|would|their|there|where|which|when|then|than|them|these|those|what|some|more|most|very|only|just|also|well|even|much|such|both|each|other|another|between|through|during|before|after|above|below|under"
+    
+    local key_nouns=""
+    for word in $desc_lower; do
+        # Remove punctuation
+        word=$(echo "$word" | sed 's/[^a-z]//g')
+        
+        # Skip if too short, is a verb, or is a common word
+        if [ ${#word} -lt 4 ]; then
+            continue
+        fi
+        if echo "$action_verbs" | grep -qw "$word"; then
+            continue
+        fi
+        if echo "$common_words" | grep -qw "$word"; then
+            continue
+        fi
+        
+        # Add to key nouns
+        if [ -z "$key_nouns" ]; then
+            key_nouns="$word"
+        else
+            key_nouns="${key_nouns}|${word}"
+        fi
+    done
+    
+    # Return format: "verbs|nouns" separated by double pipe
+    echo "${found_verbs}||${key_nouns}"
+}
+
+# Function to infer actor role from controller name
+infer_actor_role() {
+    local controller="$1"
+    local domain_keywords="$2"
+    
+    # Common role patterns (domain-agnostic)
+    if echo "$controller" | grep -qi "auth\|login\|session\|security"; then
+        echo "system user"
+    elif echo "$controller" | grep -qi "admin\|system"; then
+        echo "administrator"
+    elif echo "$controller" | grep -qi "user\|account\|profile"; then
+        echo "user"
+    # Try to infer from domain keywords
+    elif echo "$domain_keywords" | grep -qi "project" && echo "$controller" | grep -qi "project"; then
+        echo "project manager"
+    elif echo "$domain_keywords" | grep -qi "team" && echo "$controller" | grep -qi "team"; then
+        echo "team member"
+    elif echo "$domain_keywords" | grep -qi "order\|cart\|product" && echo "$controller" | grep -qi "order"; then
+        echo "customer"
+    elif echo "$domain_keywords" | grep -qi "invoice\|payment" && echo "$controller" | grep -qi "invoice\|payment"; then
+        echo "accountant"
+    elif echo "$domain_keywords" | grep -qi "patient\|appointment" && echo "$controller" | grep -qi "patient\|appointment"; then
+        echo "healthcare provider"
+    else
+        echo "user"
+    fi
+}
+
+# Function to infer business goal from controller and domain
+infer_business_goal() {
+    local controller="$1"
+    local methods="$2"
+    local endpoint_list="$3"
+    local domain_keywords="$4"
+    local intent_context="$5"  # New parameter: extracted verbs||nouns
+    
+    # Extract controller entity name
+    local entity=$(echo "$controller" | sed 's/Controller$//' | sed 's/Api$//' | sed 's/\([A-Z]\)/ \1/g' | sed 's/^ //' | tr '[:upper:]' '[:lower:]')
+    
+    # Parse intent context if provided
+    local intent_verbs=""
+    local intent_nouns=""
+    if [ -n "$intent_context" ]; then
+        intent_verbs=$(echo "$intent_context" | cut -d'|' -f1)
+        intent_nouns=$(echo "$intent_context" | cut -d'|' -f3)
+    fi
+    
+    # Check for specialized operations in endpoint paths using intent verbs
+    if [ -n "$intent_verbs" ]; then
+        # Check if endpoint paths or methods match intent verbs
+        for verb in $(echo "$intent_verbs" | tr '|' ' '); do
+            if echo "$endpoint_list" | grep -qi "$verb" && echo "$methods" | grep -q "POST"; then
+                echo "${verb} and analyze ${entity} to support decision-making"
+                return
+            fi
+        done
+    fi
+    
+    # Check for common operational patterns in paths
+    if echo "$endpoint_list" | grep -qi "report\|analytics\|stats\|dashboard"; then
+        echo "generate ${entity} reports and analytics"
+        return
+    elif echo "$endpoint_list" | grep -qi "search.*filter\|filter.*search"; then
+        echo "search and filter ${entity} records efficiently"
+        return
+    elif echo "$endpoint_list" | grep -qi "export\|download"; then
+        echo "export ${entity} data for external analysis"
+        return
+    elif echo "$endpoint_list" | grep -qi "generate.*demo\|demo.*generate"; then
+        echo "generate sample ${entity} data for experimentation"
+        return
+    fi
+    
+    # Then check HTTP methods for CRUD patterns
+    local operation="manage"
+    if echo "$methods" | grep -q "POST" && echo "$methods" | grep -q "GET" && echo "$methods" | grep -q "PUT"; then
+        operation="create, view, and update"
+    elif echo "$methods" | grep -q "GET" && echo "$methods" | grep -q "POST"; then
+        operation="create and track"
+    elif echo "$methods" | grep -q "GET" && echo "$methods" | grep -q "PUT"; then
+        operation="view and update"
+    elif echo "$methods" | grep -q "GET" && echo "$methods" | grep -q "DELETE"; then
+        operation="view and manage"
+    elif echo "$methods" | grep -q "GET"; then
+        operation="view and retrieve"
+    elif echo "$methods" | grep -q "POST"; then
+        operation="create"
+    elif echo "$methods" | grep -q "PUT\|PATCH"; then
+        operation="update"
+    elif echo "$methods" | grep -q "DELETE"; then
+        operation="manage"
+    fi
+    
+    # Build goal based on entity and operation
+    echo "${operation} ${entity}"
+}
+
+# Function to infer business benefit from domain and controller
+infer_business_benefit() {
+    local controller="$1"
+    local goal="$2"
+    local domain_keywords="$3"
+    local intent_context="$4"  # New parameter: extracted verbs||nouns
+    
+    local entity=$(echo "$controller" | sed 's/Controller$//' | sed 's/Api$//' | tr '[:upper:]' '[:lower:]')
+    
+    # Parse intent context if provided
+    local intent_verbs=""
+    local intent_nouns=""
+    if [ -n "$intent_context" ]; then
+        intent_verbs=$(echo "$intent_context" | cut -d'|' -f1)
+        intent_nouns=$(echo "$intent_context" | cut -d'|' -f3)
+    fi
+    
+    # Strategic operations - use intent verbs for context
+    if echo "$goal" | grep -qiE "analyze|forecast|predict|estimate|calculate|compute"; then
+        if [ -n "$intent_verbs" ]; then
+            for verb in $(echo "$intent_verbs" | tr '|' ' '); do
+                case "$verb" in
+                    forecast|predict|estimate)
+                        echo "make informed predictions and data-driven planning decisions"
+                        return
+                        ;;
+                    optimize|improve|enhance)
+                        echo "optimize performance based on analytical insights"
+                        return
+                        ;;
+                    browse|search|discover)
+                        echo "discover and explore available options"
+                        return
+                        ;;
+                    purchase|order|buy)
+                        echo "complete transactions efficiently and securely"
+                        return
+                        ;;
+                    manage|coordinate|organize)
+                        echo "maintain control and organization of operations"
+                        return
+                        ;;
+                esac
+            done
+        fi
+    fi
+    
+    # Reporting operations
+    if echo "$goal" | grep -qi "report\|analytics"; then
+        echo "gain insights and track performance metrics"
+        return
+    fi
+    
+    # Bulk operations - operational efficiency
+    if echo "$goal" | grep -qi "import.*bulk"; then
+        echo "efficiently populate the system with existing data"
+        return
+    elif echo "$goal" | grep -qi "export\|download"; then
+        echo "analyze data in external tools or share with stakeholders"
+        return
+    fi
+    
+    # Search/filter - information access
+    if echo "$goal" | grep -qi "search.*filter\|filter.*search"; then
+        echo "quickly find relevant information"
+        return
+    fi
+    
+    # Test data generation - enabler
+    if echo "$goal" | grep -qi "generate.*demo\|sample.*data"; then
+        echo "experiment with features without affecting real data"
+        return
+    fi
+    
+    # CRUD operations - contextualize using intent nouns
+    if echo "$goal" | grep -qi "create.*track"; then
+        if [ -n "$intent_nouns" ]; then
+            # Match entity against intent nouns for context
+            for noun in $(echo "$intent_nouns" | tr '|' ' '); do
+                if echo "$entity" | grep -qi "$noun"; then
+                    # Found matching domain noun - provide contextual benefit
+                    if echo "$intent_verbs" | grep -qE "forecast|predict|estimate"; then
+                        echo "track ${noun} data to improve future predictions"
+                        return
+                    elif echo "$intent_verbs" | grep -qE "deliver|complete|process"; then
+                        echo "track ${noun} progress toward completion"
+                        return
+                    elif echo "$intent_verbs" | grep -qE "manage|coordinate|organize"; then
+                        echo "organize and monitor ${noun} effectively"
+                        return
+                    fi
+                fi
+            done
+        fi
+        # Generic tracking if no noun match
+        echo "track and monitor ${entity} over time"
+        return
+    elif echo "$goal" | grep -qi "create.*view.*update"; then
+        if [ -n "$intent_verbs" ] && echo "$intent_verbs" | grep -qE "manage|maintain|organize"; then
+            echo "maintain accurate and organized ${entity} records"
+        else
+            echo "maintain complete ${entity} information"
+        fi
+        return
+    elif echo "$goal" | grep -qi "view.*retrieve"; then
+        echo "access ${entity} information when needed"
+        return
+    fi
+    
+    # Fallback - use first intent verb if available
+    if [ -n "$intent_verbs" ]; then
+        local first_verb=$(echo "$intent_verbs" | cut -d'|' -f1)
+        echo "support ${first_verb} operations for ${entity}"
+        return
+    fi
+    
+    # Final fallback
+    echo "work with ${entity} data"
+}
+
+# Function to determine outcome focus (strategic vs operational)
+determine_outcome_focus() {
+    local controller="$1"
+    local endpoint_list="$2"
+    local endpoint_count="$3"
+    local domain_keywords="$4"
+    
+    # Authentication/Security is always an enabler
+    if echo "$controller" | grep -qi "auth\|login\|session\|security"; then
+        echo "enabler"
+        return
+    fi
+    
+    # Admin/Config/Settings are enablers
+    if echo "$controller" | grep -qi "admin\|config\|setting"; then
+        echo "enabler"
+        return
+    fi
+    
+    # Test/Demo data generation is support
+    if echo "$controller" | grep -qi "test\|demo" && echo "$endpoint_list" | grep -qi "generate"; then
+        echo "support"
+        return
+    fi
+    
+    # Strategic indicators (analysis, reporting, complex operations)
+    if echo "$endpoint_list" | grep -qi "calculate\|compute\|analyze\|report\|stats\|metrics\|dashboard"; then
+        echo "strategic"
+        return
+    fi
+    
+    # Check if controller name matches key domain terms (likely strategic)
+    local entity=$(echo "$controller" | sed 's/Controller$//' | sed 's/Api$//' | sed 's/\([A-Z]\)/ \1/g' | sed 's/^ //' | tr '[:upper:]' '[:lower:]')
+    
+    # Extract individual words from entity name to check against domain keywords
+    for word in $entity; do
+        if [ ${#word} -gt 3 ] && echo "$domain_keywords" | grep -qi "$word"; then
+            echo "strategic"
+            return
+        fi
+    done
+    
+    # Controllers with many endpoints are likely strategic
+    if [ "$endpoint_count" -ge 5 ]; then
+        echo "strategic"
+        return
+    fi
+    
+    # Default to operational
+    echo "operational"
+}
+
+# Function to map technical controllers to business outcomes (DOMAIN-AGNOSTIC)
+map_controller_to_outcome() {
+    local controller="$1"
+    local methods="$2"
+    local endpoint_list="$3"
+    local domain_keywords="${4:-}"
+    local intent_context="${5:-}"  # New parameter: verbs||nouns from description
+    
+    # Infer components dynamically
+    local actor=$(infer_actor_role "$controller" "$domain_keywords")
+    local goal=$(infer_business_goal "$controller" "$methods" "$endpoint_list" "$domain_keywords" "$intent_context")
+    local benefit=$(infer_business_benefit "$controller" "$goal" "$domain_keywords" "$intent_context")
+    local outcome_focus=$(determine_outcome_focus "$controller" "$endpoint_list" "0" "$domain_keywords")
+    
+    # Output in pipe-delimited format: actor|goal|benefit|outcome_focus
+    echo "${actor}|${goal}|${benefit}|${outcome_focus}"
 }
 
 # Detection functions for plan generation
@@ -838,12 +1398,37 @@ detect_project_modules() {
 
 # Main analysis
 echo "" >&2
-echo "🔍 Analyzing project..." >&2
+echo "🔍 Starting project analysis..." >&2
+echo "" >&2
+
+# Stage 1: Endpoints
+echo -n "📍 Stage 1/5: Discovering API endpoints... " >&2
 discover_endpoints
+echo "✓ Found $ENDPOINT_COUNT endpoints" >&2
+
+# Stage 2: Models
+echo -n "📦 Stage 2/5: Analyzing data models... " >&2
 discover_models
+echo "✓ Found $MODEL_COUNT models" >&2
+
+# Stage 3: Views
+echo -n "🎨 Stage 3/5: Discovering UI views... " >&2
 discover_views
+echo "✓ Found $VIEW_COUNT views" >&2
+
+# Stage 4: Services
+echo -n "⚙️  Stage 4/5: Detecting backend services... " >&2
 discover_services
+echo "✓ Found $SERVICE_COUNT services" >&2
+
+# Stage 5: Features
+echo -n "✨ Stage 5/5: Extracting features... " >&2
 extract_features
+echo "✓ Identified $FEATURE_COUNT features" >&2
+
+echo "" >&2
+echo "✅ Analysis complete!" >&2
+echo "" >&2
 
 # Generate API contract (OpenAPI 3.0 specification)
 generate_api_contract() {
@@ -1382,7 +1967,7 @@ generate_plan_md() {
     cat > "$plan_file" << EOF
 # Implementation Plan: ${display_name}
 
-**Branch**: \`001-reverse\` | **Date**: $date | **Spec**: [spec.md](./spec.md)
+**Branch**: \`$PROJECT_NAME\` | **Date**: $date | **Spec**: [spec.md](./spec.md)
 **Input**: Reverse-engineered specification from existing codebase
 
 **Note**: This plan documents the current implementation state of the ${display_name}
@@ -2043,51 +2628,251 @@ below represent the implemented functionality as detected from controllers, mode
 EOF
 
     # Generate dynamic user stories based on discovered capabilities
-    # Story 1: Primary data operations
-    cat >> /dev/stdout << 'EOFSTORY1'
-
-### User Story 1 - Data Operations (Priority: P1)
-
-As a **system user**, I want to **create, retrieve, update, and delete data entities** 
-so that **I can manage information within the system effectively**.
-
-**Why this priority**: Data operations are foundational to system functionality.
-
-**Independent Test**: Can be fully tested by performing CRUD operations on available entities and verifying data persistence.
-
-**Acceptance Scenarios**:
-
-1. **Given** I have proper authorization, **When** I create new entities, **Then** they are persisted correctly
-2. **Given** entities exist in the system, **When** I query for them, **Then** I receive accurate data
-3. **Given** I update existing entities, **When** changes are saved, **Then** modifications are reflected in subsequent retrievals
-4. **Given** I have permission to delete entities, **When** I remove an entity, **Then** it is no longer accessible
-
----
-
-EOFSTORY1
     
-    # Story 2: API Integration
-    cat >> /dev/stdout << 'EOFSTORY2'
+    # Get project purpose for context
+    local project_purpose=$(extract_project_purpose)
+    
+    # Extract domain keywords for context-aware mapping
+    local domain_keywords=$(extract_domain_keywords)
+    
+    # Extract intent context from PROJECT_DESCRIPTION (required)
+    local intent_context=""
+    if [ -z "$PROJECT_DESCRIPTION" ]; then
+        echo "Error: --description parameter is required for spec generation" >&2
+        echo "Example: --description 'forecast sprint delivery and predict completion'" >&2
+        exit 1
+    fi
+    intent_context=$(extract_intent_context "$PROJECT_DESCRIPTION")
+    log_info "Using provided project description for context"
+    
+    # Add project purpose context if available
+    if [ -n "$project_purpose" ]; then
+        cat >> /dev/stdout << EOFPURPOSE
 
-### User Story 2 - REST API Integration (Priority: P2)
+**Application Purpose**: $project_purpose
 
-As a **client application or service**, I want to **interact with the REST API endpoints** 
-so that **I can integrate with the system programmatically and automate workflows**.
+EOFPURPOSE
+    fi
+    
+    # Get unique controllers and sort by importance
+    local controllers=$(printf '%s\n' "${ENDPOINTS[@]}" | cut -d'|' -f3 | sort -u)
+    
+    # Separate controllers by outcome focus
+    declare -a strategic_controllers
+    declare -a operational_controllers
+    declare -a enabler_controllers
+    
+    local story_num=1
+    
+    # First pass: categorize controllers by business value
+    while IFS= read -r controller; do
+        if [ -z "$controller" ]; then
+            continue
+        fi
+        
+        # Skip pure test/debug controllers (but not Data Generation)
+        if echo "$controller" | grep -qiE "^(Test|AuthTest|Debug)"; then
+            log_info "  Skipping test/debug controller: $controller"
+            continue
+        fi
+        
+        # Collect endpoint information for this controller
+        local endpoint_count=0
+        local methods=""
+        local endpoint_list=""
+        
+        for endpoint_info in "${ENDPOINTS[@]}"; do
+            IFS='|' read -r method path ep_controller auth <<< "$endpoint_info"
+            if [ "$ep_controller" = "$controller" ]; then
+                endpoint_count=$((endpoint_count + 1))
+                endpoint_list="${endpoint_list}${path},"
+                if [ -z "$methods" ]; then
+                    methods="$method"
+                elif ! echo "$methods" | grep -q "$method"; then
+                    methods="$methods,$method"
+                fi
+            fi
+        done
+        
+        # Get outcome mapping from our domain-agnostic function
+        local outcome_info=$(map_controller_to_outcome "$controller" "$methods" "$endpoint_list" "$domain_keywords" "$intent_context")
+        IFS='|' read -r actor goal benefit outcome_focus <<< "$outcome_info"
+        
+        # Categorize by outcome focus
+        local controller_data="${controller}|${endpoint_count}|${methods}|${actor}|${goal}|${benefit}"
+        
+        case "$outcome_focus" in
+            strategic)
+                strategic_controllers+=("$controller_data")
+                ;;
+            operational)
+                operational_controllers+=("$controller_data")
+                ;;
+            *)
+                enabler_controllers+=("$controller_data")
+                ;;
+        esac
+    done <<< "$controllers"
+    
+    # Generate stories prioritizing strategic outcomes
+    # Process strategic controllers first (forecasting, planning, analysis)
+    for controller_data in "${strategic_controllers[@]}"; do
+        IFS='|' read -r controller endpoint_count methods actor goal benefit <<< "$controller_data"
+        
+        local feature_name=$(echo "$controller" | sed 's/Controller$//' | sed 's/\([A-Z]\)/ \1/g' | sed 's/^ //')
+        
+        # Strategic features get P0/P1 priority
+        local priority="P1"
+        
+        cat >> /dev/stdout << EOF
 
-**Why this priority**: API accessibility enables system integration and automation capabilities.
+### User Story $story_num - $feature_name (Priority: $priority)
 
-**Independent Test**: Can be fully tested by making HTTP requests to available endpoints and verifying responses match OpenAPI specification.
+As a **$actor**, I want to **$goal** 
+so that **I can $benefit**.
+
+**Why this priority**: Core business value - this capability directly supports the application's primary purpose.
+
+**Independent Test**: Can be tested by exercising the $endpoint_count available endpoints and verifying that users can achieve the stated goal.
 
 **Acceptance Scenarios**:
 
-1. **Given** I have valid credentials, **When** I call authenticated endpoints, **Then** I receive authorized responses
-2. **Given** I provide valid request data, **When** I make API calls, **Then** operations complete successfully
-3. **Given** I provide invalid data, **When** I make API calls, **Then** I receive appropriate error messages with details
-4. **Given** endpoints are available, **When** I access the API, **Then** responses follow consistent RESTful structure
+EOF
+        
+        # Generate outcome-focused acceptance scenarios (domain-agnostic)
+        local scenario_num=1
+        local entity=$(echo "$feature_name" | tr '[:upper:]' '[:lower:]')
+        
+        # Analyze goal for specific scenario types
+        if echo "$goal" | grep -qi "calculate\|compute\|analyze"; then
+            echo "$scenario_num. **Given** I have input data, **When** I request calculations, **Then** I receive accurate results with supporting details" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        elif echo "$goal" | grep -qi "generate.*report\|analytics"; then
+            echo "$scenario_num. **Given** I need insights, **When** I request reports, **Then** I receive comprehensive analytics with visualizations" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        elif echo "$goal" | grep -qi "search\|filter"; then
+            echo "$scenario_num. **Given** I have search criteria, **When** I search for records, **Then** I receive relevant results quickly" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        elif echo "$goal" | grep -qi "export\|download"; then
+            echo "$scenario_num. **Given** I need to share data, **When** I export records, **Then** I receive files in usable formats" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        elif echo "$goal" | grep -qi "import\|upload"; then
+            echo "$scenario_num. **Given** I have external data, **When** I import it, **Then** records are created correctly with validation" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        elif echo "$goal" | grep -qi "generate.*demo\|test"; then
+            echo "$scenario_num. **Given** I want to experiment, **When** I generate test data, **Then** realistic samples are created automatically" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        else
+            # Generic scenarios based on HTTP methods
+            if echo "$methods" | grep -q "GET"; then
+                echo "$scenario_num. **Given** I need information, **When** I request ${entity} data, **Then** I receive accurate and complete results" >> /dev/stdout
+                scenario_num=$((scenario_num + 1))
+            fi
+            
+            if echo "$methods" | grep -q "POST"; then
+                echo "$scenario_num. **Given** I provide valid ${entity} information, **When** I create new records, **Then** they are saved successfully" >> /dev/stdout
+                scenario_num=$((scenario_num + 1))
+            fi
+            
+            if echo "$methods" | grep -q "PUT\|PATCH"; then
+                echo "$scenario_num. **Given** I need to update ${entity} data, **When** I submit changes, **Then** modifications are applied correctly" >> /dev/stdout
+                scenario_num=$((scenario_num + 1))
+            fi
+        fi
+        
+        # Always add validation scenario
+        echo "$scenario_num. **Given** I provide invalid or incomplete data, **When** I attempt operations, **Then** I receive clear, actionable error messages" >> /dev/stdout
+        
+        echo "" >> /dev/stdout
+        echo "---" >> /dev/stdout
+        
+        story_num=$((story_num + 1))
+        
+        # Limit stories to avoid overwhelming output
+        if [ $story_num -gt 6 ]; then
+            break
+        fi
+    done
+    
+    # Process top operational controllers (but fewer of them)
+    local operational_limit=2
+    local operational_count=0
+    for controller_data in "${operational_controllers[@]}"; do
+        if [ $operational_count -ge $operational_limit ]; then
+            break
+        fi
+        
+        IFS='|' read -r controller endpoint_count methods actor goal benefit <<< "$controller_data"
+        
+        local feature_name=$(echo "$controller" | sed 's/Controller$//' | sed 's/\([A-Z]\)/ \1/g' | sed 's/^ //')
+        local priority="P2"
+        
+        cat >> /dev/stdout << EOF
+
+### User Story $story_num - $feature_name (Priority: $priority)
+
+As a **$actor**, I want to **$goal** 
+so that **I can $benefit**.
+
+**Why this priority**: Supporting capability that enables core forecasting and analysis features.
+
+**Independent Test**: Can be tested by exercising the $endpoint_count available endpoints and verifying expected behavior.
+
+**Acceptance Scenarios**:
+
+EOF
+        
+        # Generic acceptance scenarios for operational features
+        local scenario_num=1
+        
+        if echo "$methods" | grep -q "GET"; then
+            echo "$scenario_num. **Given** I access the system, **When** I request information, **Then** data is retrieved accurately" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        fi
+        
+        if echo "$methods" | grep -q "POST"; then
+            echo "$scenario_num. **Given** I provide valid data, **When** I create records, **Then** they are saved successfully" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        fi
+        
+        if echo "$methods" | grep -q "PUT\|PATCH"; then
+            echo "$scenario_num. **Given** I need to modify data, **When** I submit updates, **Then** changes are persisted correctly" >> /dev/stdout
+            scenario_num=$((scenario_num + 1))
+        fi
+        
+        echo "$scenario_num. **Given** I encounter errors, **When** operations fail, **Then** I receive helpful feedback" >> /dev/stdout
+        
+        echo "" >> /dev/stdout
+        echo "---" >> /dev/stdout
+        
+        story_num=$((story_num + 1))
+        operational_count=$((operational_count + 1))
+    done
+    
+    # Add a summary story if we have views (frontend)
+    if [ $VIEW_COUNT -gt 0 ]; then
+        cat >> /dev/stdout << EOF
+
+### User Story $story_num - User Interface Interactions (Priority: P1)
+
+As a **system user**, I want to **interact with a web-based interface** 
+so that **I can perform operations without needing to use API calls directly**.
+
+**Why this priority**: The UI provides the primary user experience with $VIEW_COUNT views available.
+
+**Independent Test**: Can be fully tested by navigating through available views and verifying all interactive elements function correctly.
+
+**Acceptance Scenarios**:
+
+1. **Given** I access the application, **When** I navigate between views, **Then** the interface responds smoothly
+2. **Given** I interact with forms, **When** I submit data, **Then** it is processed correctly
+3. **Given** I view data displays, **When** information is loaded, **Then** it is presented clearly and accurately
+4. **Given** errors occur, **When** I receive feedback, **Then** messages are helpful and actionable
 
 ---
 
-EOFSTORY2
+EOF
+    fi
 
     cat >> /dev/stdout << 'EOF'
 

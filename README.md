@@ -23,16 +23,43 @@ This toolkit extends Specify's capabilities by analyzing existing projects and g
 🔗 **Seamless Integration** - Installs directly into Specify's directory structure  
 📝 **Ready-to-Use Templates** - Output formats align with Specify's documentation standards
 
+## Available Versions
+
+This toolkit is available in two versions with identical functionality:
+
+**🐚 Bash Script** (Original)
+- Fast, zero-dependency single script
+- Perfect for CI/CD and Unix environments
+- Interactive progress with 5 analysis stages
+- Located in `reverse-engineer-bash/reverse-engineer.sh`
+
+**🐍 Python CLI** (New)
+- Cross-platform (Windows, macOS, Linux)
+- Modular and extensible
+- Interactive progress with 5 analysis stages
+- Install via pip from `reverse-engineer-python/`: `pip install -e reverse-engineer-python/`
+- See [reverse-engineer-python/README-PYTHON.md](reverse-engineer-python/README-PYTHON.md) for details
+
+**Which to use?** See [COMPARISON.md](COMPARISON.md) for a detailed comparison.
+
 ## Project Structure
 
 ```
 specify-reverse/
-├── scripts/
-│   └── reverse-engineer.sh       # Core analysis engine (see scripts/README.md)
+├── reverse-engineer-bash/
+│   └── reverse-engineer.sh       # Bash version (original)
+├── reverse-engineer-python/      # Python version (new)
+│   ├── reverse_engineer/         # Python package
+│   │   ├── cli.py                # Command-line interface
+│   │   ├── analyzer.py           # Project analysis
+│   │   └── generators.py         # Document generators
+│   ├── setup.py                  # Package configuration
+│   └── README-PYTHON.md          # Python version docs
 ├── prompts/
-│   └── speckit.reverse.prompt.md # GitHub Copilot integration prompt
-├── install.sh                    # Specify project installer
-└── README.md                     # This integration guide
+│   └── speckit.reverse.prompt.md # GitHub Copilot integration
+├── install.sh                    # Bash version installer
+├── README.md                     # This file
+└── docs/                         # Additional documentation
 ```
 
 ## Quick Integration

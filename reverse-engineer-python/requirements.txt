@@ -1,0 +1,2 @@
+# No external dependencies required
+# Python 3.7+ standard library only

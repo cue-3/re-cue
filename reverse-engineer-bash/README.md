@@ -347,7 +347,7 @@ Add to your `pom.xml` for automated documentation generation:
       <phase>compile</phase>
       <goals><goal>exec</goal></goals>
       <configuration>
-        <executable>./scripts/reverse-engineer.sh</executable>
+        <executable>./reverse-engineer-bash/reverse-engineer.sh</executable>
         <arguments>
           <argument>--api-contract</argument>
           <argument>--output</argument>
@@ -365,8 +365,8 @@ Add to your `package.json` scripts:
 ```json
 {
   "scripts": {
-    "docs": "./scripts/reverse-engineer.sh --spec --plan",
-    "api-docs": "./scripts/reverse-engineer.sh --api-contract",
+    "docs": "./reverse-engineer-bash/reverse-engineer.sh --spec --plan",
+    "api-docs": "./reverse-engineer-bash/reverse-engineer.sh --api-contract",
     "docs:watch": "nodemon --exec 'npm run docs' --watch src/"
   }
 }

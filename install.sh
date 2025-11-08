@@ -78,12 +78,12 @@ echo ""
 echo "Installing files..."
 
 # Copy reverse-engineer.sh
-if [ -f "$SCRIPT_DIR/scripts/reverse-engineer.sh" ]; then
-    cp "$SCRIPT_DIR/scripts/reverse-engineer.sh" "$SPECIFY_SCRIPTS_DIR/"
+if [ -f "$SCRIPT_DIR/reverse-engineer-bash/reverse-engineer.sh" ]; then
+    cp "$SCRIPT_DIR/reverse-engineer-bash/reverse-engineer.sh" "$SPECIFY_SCRIPTS_DIR/"
     chmod +x "$SPECIFY_SCRIPTS_DIR/reverse-engineer.sh"
     echo -e "${GREEN}✓${NC} Installed reverse-engineer.sh to $SPECIFY_SCRIPTS_DIR/"
 else
-    echo -e "${YELLOW}WARNING: scripts/reverse-engineer.sh not found in $SCRIPT_DIR${NC}"
+    echo -e "${YELLOW}WARNING: reverse-engineer-bash/reverse-engineer.sh not found in $SCRIPT_DIR${NC}"
 fi
 
 # Copy speckit.reverse.prompt.md

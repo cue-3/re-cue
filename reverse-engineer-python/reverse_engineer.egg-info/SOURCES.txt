@@ -1,0 +1,12 @@
+setup.py
+reverse_engineer/__init__.py
+reverse_engineer/__main__.py
+reverse_engineer/analyzer.py
+reverse_engineer/cli.py
+reverse_engineer/generators.py
+reverse_engineer/utils.py
+reverse_engineer.egg-info/PKG-INFO
+reverse_engineer.egg-info/SOURCES.txt
+reverse_engineer.egg-info/dependency_links.txt
+reverse_engineer.egg-info/entry_points.txt
+reverse_engineer.egg-info/top_level.txt
