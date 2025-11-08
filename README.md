@@ -1,27 +1,50 @@
-# Specify Reverse Engineering
+# RE-cue
 
-An essential add-on for GitHub's Spec Kit that automatically reverse engineers existing codebases into structured specifications and API contracts. Seamlessly integrates with the Specify workflow to bridge the gap between legacy code and modern specification-driven development.
+RE-cue (Reverse Engineer - cue) is a suite of tools that focuses on reverse engineering software products based on evaluation of source code. RE-cue was born out of dealing with the complexities of "Brownfield" development. Software development is hardest when you need to enter an existing project and are asked to maintain or improve on a project that you are inheriting in an unknown state. That is where RE-cue comes in. The goal of this suite is to review an existing code base and generate as much detail as possible for code owners.
 
-## Disclaimer
+## Important Disclaimer
 
->**This project is provided "as is" without warranty of any kind, either expressed or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. No warranties are made or to be inferred regarding the accuracy, completeness, reliability, or suitability of this software for any purpose. Use at your own risk.**
+**⚠️ AUTHORIZED USE ONLY - CODE OWNERS EXCLUSIVELY ⚠️**
+
+**This project is intended to be used BY AND FOR OWNERS OF THE SOURCE CODE TO BE ANALYZED. This tool is designed exclusively for legitimate code owners to analyze, document, and understand their own codebases.**
+
+**🚫 PROHIBITED USES:**
+- Reverse engineering copyrighted software without proper authorization
+- Analysis of patented algorithms or proprietary code without ownership rights
+- Any use on code where you do not hold explicit ownership or authorized access rights
+- Commercial or competitive analysis of third-party software
+
+**✅ INTENDED USES:**
+- Analysis of your own proprietary code
+- Documentation of legacy systems you own or maintain
+- Understanding inherited codebases within your organization
+- Internal code auditing and documentation for owned projects
+
+>**LEGAL NOTICE:** This project is provided "as is" without warranty of any kind, either expressed or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. No warranties are made or to be inferred regarding the accuracy, completeness, reliability, or suitability of this software for any purpose. Users are solely responsible for ensuring their use complies with all applicable laws, including but not limited to copyright, patent, and trade secret laws. Use at your own risk and legal responsibility.
 
 ## Overview
 
-This toolkit extends Specify's capabilities by analyzing existing projects and generating:
+RE-cue is a comprehensive reverse engineering toolkit designed to help software teams understand and document their existing codebases. This suite analyzes source code to generate detailed documentation and specifications, making it easier to maintain, extend, and modernize legacy systems.
 
-- **Feature Specifications** (spec.md) - Compatible with Specify's specification format
-- **Implementation Plans** (plan.md) - Ready for Specify's planning workflow  
-- **Data Model Documentation** (data-model.md) - Integrated with Specify's model templates
-- **API Contracts** (api-spec.json) - OpenAPI 3.0 specs for contract-first development
+**Key Capabilities:**
+- **Feature Specifications** (spec.md) - Business-focused documentation of existing functionality
+- **Implementation Plans** (plan.md) - Technical analysis and architectural documentation
+- **Data Model Documentation** (data-model.md) - Comprehensive data structure analysis
+- **API Contracts** (api-spec.json) - OpenAPI 3.0 specifications for existing endpoints
 
-## Why Use with Specify?
+**Primary Use Cases:**
+- � **Legacy System Documentation** - Generate comprehensive docs for undocumented codebases
+- 🔄 **Brownfield Project Onboarding** - Help new team members understand inherited projects
+- 📋 **Code Modernization** - Create foundation documentation for refactoring efforts
+- � **System Analysis** - Understand complex codebases through automated analysis
 
-🔄 **Bridge Legacy to Spec-First** - Transform existing code into Specify-compatible documentation  
-📋 **Consistent Workflows** - Generated specs follow Specify's established patterns  
-🚀 **Accelerate Adoption** - Quickly onboard existing projects to specification-driven development  
-🔗 **Seamless Integration** - Installs directly into Specify's directory structure  
-📝 **Ready-to-Use Templates** - Output formats align with Specify's documentation standards
+## Why Use RE-cue?
+
+🎯 **Automated Documentation** - Transform source code into readable specifications  
+📋 **Standardized Output** - Consistent documentation formats across projects  
+� **Rapid Understanding** - Quickly grasp complex legacy systems  
+� **Multiple Formats** - Generate various documentation types from single analysis  
+📝 **Business-Friendly** - Creates documentation accessible to technical and non-technical stakeholders
 
 ## Available Versions
 
