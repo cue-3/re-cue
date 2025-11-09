@@ -1,0 +1,2106 @@
+🔍 Running Use Case Prototype Analysis...
+👥 Discovering actors...
+  Found 95 Java files to analyze
+  Found security annotations in AuthTestController.java: ['USER']
+  Found security annotations in DataGenerationController.java: ['USER']
+  Found security annotations in OrganizationController.java: ['USER', 'USER', 'USER', 'USER', 'USER', 'USER']
+  Found security annotations in EstimateController.java: ['USER']
+  Found security annotations in SprintController.java: ['USER', 'USER']
+  Found security annotations in ProjectController.java: ['USER', 'USER', 'USER', 'USER', 'USER', 'USER', 'USER']
+  Found security annotations in StoryController.java: ['USER', 'USER', 'USER', 'USER', 'USER', 'USER', 'USER', 'USER', 'USER']
+  Found security annotations in ProjectForecastApiController.java: ['USER', 'USER', 'USER', 'USER']
+📋 Extracting use cases...
+  Found 12 controller files to analyze
+  Found methods in AuthController.java: ['login', 'logout', 'register', 'getCurrentUser', 'forgotPassword']
+  Found methods in SessionController.java: ['getActiveSessions', 'invalidateSession', 'invalidateAllSessions']
+  Found methods in AuthTestController.java: ['authTest', 'test']
+  Found methods in OrganizationController.java: ['createOrganization', 'listOrganizations', 'getOrganization', 'updateOrganization', 'deleteOrganization']
+  Found methods in EstimateController.java: ['getEstimate']
+  Found methods in SprintController.java: ['createSprint', 'getSprint', 'listSprints', 'updateSprint', 'deleteSprint']
+  Found methods in ProjectController.java: ['createProject', 'getProject', 'updateProject', 'deleteProject', 'listProjects']
+  Found methods in StoryController.java: ['createStory', 'getStory', 'updateStory', 'deleteStory', 'listStories']
+  Found methods in ProjectForecastApiController.java: ['projectForecast', 'saveForecast', 'loadForecast', 'getUserForecasts', 'deleteForecast']
+✅ Analysis complete: 1 actors, 45 use cases
+
+================================================================================
+JSON RESULTS:
+================================================================================
+{
+  "analysis_date": "2025-11-08T16:36:50.062646",
+  "repository": "/Users/squick/workspace/quickcue3/agile-forecaster",
+  "actors": [
+    {
+      "name": "User",
+      "type": "end_user",
+      "access_level": "authenticated",
+      "identified_from": [
+        "Security annotation in AuthTestController.java",
+        "Security annotation in DataGenerationController.java",
+        "Security annotation in OrganizationController.java",
+        "Security annotation in OrganizationController.java",
+        "Security annotation in OrganizationController.java",
+        "Security annotation in OrganizationController.java",
+        "Security annotation in OrganizationController.java",
+        "Security annotation in OrganizationController.java",
+        "Security annotation in EstimateController.java",
+        "Security annotation in SprintController.java",
+        "Security annotation in SprintController.java",
+        "Security annotation in ProjectController.java",
+        "Security annotation in ProjectController.java",
+        "Security annotation in ProjectController.java",
+        "Security annotation in ProjectController.java",
+        "Security annotation in ProjectController.java",
+        "Security annotation in ProjectController.java",
+        "Security annotation in ProjectController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in StoryController.java",
+        "Security annotation in ProjectForecastApiController.java",
+        "Security annotation in ProjectForecastApiController.java",
+        "Security annotation in ProjectForecastApiController.java",
+        "Security annotation in ProjectForecastApiController.java"
+      ]
+    }
+  ],
+  "use_cases": [
+    {
+      "id": "UC-001",
+      "name": "Login Auth",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates auth operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthController.java.login()"
+      ]
+    },
+    {
+      "id": "UC-002",
+      "name": "Logout Auth",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates auth operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthController.java.logout()"
+      ]
+    },
+    {
+      "id": "UC-003",
+      "name": "Register Auth",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates auth operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthController.java.register()"
+      ]
+    },
+    {
+      "id": "UC-004",
+      "name": "View Current User Auth",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view auth",
+        "System retrieves auth data",
+        "System displays auth information"
+      ],
+      "identified_from": [
+        "Controller method: AuthController.java.getCurrentUser()"
+      ]
+    },
+    {
+      "id": "UC-005",
+      "name": "Forgot Password Auth",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates auth operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthController.java.forgotPassword()"
+      ]
+    },
+    {
+      "id": "UC-006",
+      "name": "Validate Reset Token Auth",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates auth operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthController.java.validateResetToken()"
+      ]
+    },
+    {
+      "id": "UC-007",
+      "name": "Reset Password Auth",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates auth operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthController.java.resetPassword()"
+      ]
+    },
+    {
+      "id": "UC-008",
+      "name": "View Active Sessions Session",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view session",
+        "System retrieves session data",
+        "System displays session information"
+      ],
+      "identified_from": [
+        "Controller method: SessionController.java.getActiveSessions()"
+      ]
+    },
+    {
+      "id": "UC-009",
+      "name": "Invalidate Session Session",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates session operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: SessionController.java.invalidateSession()"
+      ]
+    },
+    {
+      "id": "UC-010",
+      "name": "Invalidate All Sessions Session",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates session operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: SessionController.java.invalidateAllSessions()"
+      ]
+    },
+    {
+      "id": "UC-011",
+      "name": "Auth Test AuthTest",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates authtest operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthTestController.java.authTest()"
+      ]
+    },
+    {
+      "id": "UC-012",
+      "name": "Test AuthTest",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates authtest operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: AuthTestController.java.test()"
+      ]
+    },
+    {
+      "id": "UC-013",
+      "name": "Create Organization Organization",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "New entity is created in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User navigates to organization creation page",
+        "User enters organization details",
+        "System validates input data",
+        "System creates new organization",
+        "System confirms successful creation"
+      ],
+      "identified_from": [
+        "Controller method: OrganizationController.java.createOrganization()"
+      ]
+    },
+    {
+      "id": "UC-014",
+      "name": "List Organizations Organization",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates organization operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: OrganizationController.java.listOrganizations()"
+      ]
+    },
+    {
+      "id": "UC-015",
+      "name": "View Organization Organization",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view organization",
+        "System retrieves organization data",
+        "System displays organization information"
+      ],
+      "identified_from": [
+        "Controller method: OrganizationController.java.getOrganization()"
+      ]
+    },
+    {
+      "id": "UC-016",
+      "name": "Update Organization Organization",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity data is updated in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects organization to update",
+        "User modifies organization details",
+        "System validates changes",
+        "System updates organization data",
+        "System confirms successful update"
+      ],
+      "identified_from": [
+        "Controller method: OrganizationController.java.updateOrganization()"
+      ]
+    },
+    {
+      "id": "UC-017",
+      "name": "Delete Organization Organization",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity is removed from the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects organization to delete",
+        "System requests confirmation",
+        "User confirms deletion",
+        "System removes organization",
+        "System confirms successful deletion"
+      ],
+      "identified_from": [
+        "Controller method: OrganizationController.java.deleteOrganization()"
+      ]
+    },
+    {
+      "id": "UC-018",
+      "name": "View Organization Projects Organization",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view organization",
+        "System retrieves organization data",
+        "System displays organization information"
+      ],
+      "identified_from": [
+        "Controller method: OrganizationController.java.getOrganizationProjects()"
+      ]
+    },
+    {
+      "id": "UC-019",
+      "name": "View Estimate Estimate",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view estimate",
+        "System retrieves estimate data",
+        "System displays estimate information"
+      ],
+      "identified_from": [
+        "Controller method: EstimateController.java.getEstimate()"
+      ]
+    },
+    {
+      "id": "UC-020",
+      "name": "Create Sprint Sprint",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "New entity is created in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User navigates to sprint creation page",
+        "User enters sprint details",
+        "System validates input data",
+        "System creates new sprint",
+        "System confirms successful creation"
+      ],
+      "identified_from": [
+        "Controller method: SprintController.java.createSprint()"
+      ]
+    },
+    {
+      "id": "UC-021",
+      "name": "View Sprint Sprint",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view sprint",
+        "System retrieves sprint data",
+        "System displays sprint information"
+      ],
+      "identified_from": [
+        "Controller method: SprintController.java.getSprint()"
+      ]
+    },
+    {
+      "id": "UC-022",
+      "name": "List Sprints Sprint",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates sprint operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: SprintController.java.listSprints()"
+      ]
+    },
+    {
+      "id": "UC-023",
+      "name": "Update Sprint Sprint",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity data is updated in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects sprint to update",
+        "User modifies sprint details",
+        "System validates changes",
+        "System updates sprint data",
+        "System confirms successful update"
+      ],
+      "identified_from": [
+        "Controller method: SprintController.java.updateSprint()"
+      ]
+    },
+    {
+      "id": "UC-024",
+      "name": "Delete Sprint Sprint",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity is removed from the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects sprint to delete",
+        "System requests confirmation",
+        "User confirms deletion",
+        "System removes sprint",
+        "System confirms successful deletion"
+      ],
+      "identified_from": [
+        "Controller method: SprintController.java.deleteSprint()"
+      ]
+    },
+    {
+      "id": "UC-025",
+      "name": "Upload Sprints Sprint",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates sprint operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: SprintController.java.uploadSprints()"
+      ]
+    },
+    {
+      "id": "UC-026",
+      "name": "Create Project Project",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "New entity is created in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User navigates to project creation page",
+        "User enters project details",
+        "System validates input data",
+        "System creates new project",
+        "System confirms successful creation"
+      ],
+      "identified_from": [
+        "Controller method: ProjectController.java.createProject()"
+      ]
+    },
+    {
+      "id": "UC-027",
+      "name": "View Project Project",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view project",
+        "System retrieves project data",
+        "System displays project information"
+      ],
+      "identified_from": [
+        "Controller method: ProjectController.java.getProject()"
+      ]
+    },
+    {
+      "id": "UC-028",
+      "name": "Update Project Project",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity data is updated in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects project to update",
+        "User modifies project details",
+        "System validates changes",
+        "System updates project data",
+        "System confirms successful update"
+      ],
+      "identified_from": [
+        "Controller method: ProjectController.java.updateProject()"
+      ]
+    },
+    {
+      "id": "UC-029",
+      "name": "Delete Project Project",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity is removed from the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects project to delete",
+        "System requests confirmation",
+        "User confirms deletion",
+        "System removes project",
+        "System confirms successful deletion"
+      ],
+      "identified_from": [
+        "Controller method: ProjectController.java.deleteProject()"
+      ]
+    },
+    {
+      "id": "UC-030",
+      "name": "List Projects Project",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates project operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: ProjectController.java.listProjects()"
+      ]
+    },
+    {
+      "id": "UC-031",
+      "name": "Create Default Project Project",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "New entity is created in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User navigates to project creation page",
+        "User enters project details",
+        "System validates input data",
+        "System creates new project",
+        "System confirms successful creation"
+      ],
+      "identified_from": [
+        "Controller method: ProjectController.java.createDefaultProject()"
+      ]
+    },
+    {
+      "id": "UC-032",
+      "name": "Create Story Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "New entity is created in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User navigates to story creation page",
+        "User enters story details",
+        "System validates input data",
+        "System creates new story",
+        "System confirms successful creation"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.createStory()"
+      ]
+    },
+    {
+      "id": "UC-033",
+      "name": "View Story Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view story",
+        "System retrieves story data",
+        "System displays story information"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.getStory()"
+      ]
+    },
+    {
+      "id": "UC-034",
+      "name": "Update Story Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity data is updated in the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects story to update",
+        "User modifies story details",
+        "System validates changes",
+        "System updates story data",
+        "System confirms successful update"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.updateStory()"
+      ]
+    },
+    {
+      "id": "UC-035",
+      "name": "Delete Story Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity is removed from the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects story to delete",
+        "System requests confirmation",
+        "User confirms deletion",
+        "System removes story",
+        "System confirms successful deletion"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.deleteStory()"
+      ]
+    },
+    {
+      "id": "UC-036",
+      "name": "List Stories Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates story operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.listStories()"
+      ]
+    },
+    {
+      "id": "UC-037",
+      "name": "View Stories By Project Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view story",
+        "System retrieves story data",
+        "System displays story information"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.getStoriesByProject()"
+      ]
+    },
+    {
+      "id": "UC-038",
+      "name": "View Stories By Sprint Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view story",
+        "System retrieves story data",
+        "System displays story information"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.getStoriesBySprint()"
+      ]
+    },
+    {
+      "id": "UC-039",
+      "name": "View Stories By Points Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view story",
+        "System retrieves story data",
+        "System displays story information"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.getStoriesByPoints()"
+      ]
+    },
+    {
+      "id": "UC-040",
+      "name": "Upload Stories Story",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates story operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: StoryController.java.uploadStories()"
+      ]
+    },
+    {
+      "id": "UC-041",
+      "name": "Project Forecast ProjectForecastApi",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates projectforecastapi operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: ProjectForecastApiController.java.projectForecast()"
+      ]
+    },
+    {
+      "id": "UC-042",
+      "name": "Save Forecast ProjectForecastApi",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates projectforecastapi operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: ProjectForecastApiController.java.saveForecast()"
+      ]
+    },
+    {
+      "id": "UC-043",
+      "name": "Load Forecast ProjectForecastApi",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User initiates projectforecastapi operation",
+        "System processes request",
+        "System returns result"
+      ],
+      "identified_from": [
+        "Controller method: ProjectForecastApiController.java.loadForecast()"
+      ]
+    },
+    {
+      "id": "UC-044",
+      "name": "View User Forecasts ProjectForecastApi",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Operation completes successfully",
+        "User receives appropriate response"
+      ],
+      "main_scenario": [
+        "User requests to view projectforecastapi",
+        "System retrieves projectforecastapi data",
+        "System displays projectforecastapi information"
+      ],
+      "identified_from": [
+        "Controller method: ProjectForecastApiController.java.getUserForecasts()"
+      ]
+    },
+    {
+      "id": "UC-045",
+      "name": "Delete Forecast ProjectForecastApi",
+      "primary_actor": "User",
+      "secondary_actors": [],
+      "preconditions": [
+        "Entity must exist in the system",
+        "User must have appropriate permissions"
+      ],
+      "postconditions": [
+        "Entity is removed from the system",
+        "User receives confirmation"
+      ],
+      "main_scenario": [
+        "User selects projectforecastapi to delete",
+        "System requests confirmation",
+        "User confirms deletion",
+        "System removes projectforecastapi",
+        "System confirms successful deletion"
+      ],
+      "identified_from": [
+        "Controller method: ProjectForecastApiController.java.deleteForecast()"
+      ]
+    }
+  ],
+  "summary": {
+    "total_actors": 1,
+    "total_use_cases": 45,
+    "actor_types": {
+      "end_user": 1,
+      "internal_user": 0,
+      "external_system": 0
+    }
+  }
+}
+
+================================================================================
+MARKDOWN REPORT:
+================================================================================
+# Use Case Analysis Report (Prototype)
+
+**Generated**: 2025-11-08
+**Repository**: agile-forecaster
+**Actors Found**: 1
+**Use Cases Found**: 45
+
+---
+
+## Actors
+
+### End User Actors
+
+- **User** (authenticated)
+  - Identified from: Security annotation in AuthTestController.java
+  - Identified from: Security annotation in DataGenerationController.java
+
+---
+
+## Use Cases
+
+### UC-001: Login Auth
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates auth operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthController.java.login()
+
+---
+
+### UC-002: Logout Auth
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates auth operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthController.java.logout()
+
+---
+
+### UC-003: Register Auth
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates auth operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthController.java.register()
+
+---
+
+### UC-004: View Current User Auth
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view auth
+2. System retrieves auth data
+3. System displays auth information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthController.java.getCurrentUser()
+
+---
+
+### UC-005: Forgot Password Auth
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates auth operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthController.java.forgotPassword()
+
+---
+
+### UC-006: Validate Reset Token Auth
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates auth operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthController.java.validateResetToken()
+
+---
+
+### UC-007: Reset Password Auth
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates auth operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthController.java.resetPassword()
+
+---
+
+### UC-008: View Active Sessions Session
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view session
+2. System retrieves session data
+3. System displays session information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: SessionController.java.getActiveSessions()
+
+---
+
+### UC-009: Invalidate Session Session
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates session operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: SessionController.java.invalidateSession()
+
+---
+
+### UC-010: Invalidate All Sessions Session
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates session operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: SessionController.java.invalidateAllSessions()
+
+---
+
+### UC-011: Auth Test AuthTest
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates authtest operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthTestController.java.authTest()
+
+---
+
+### UC-012: Test AuthTest
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates authtest operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: AuthTestController.java.test()
+
+---
+
+### UC-013: Create Organization Organization
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User navigates to organization creation page
+2. User enters organization details
+3. System validates input data
+4. System creates new organization
+5. System confirms successful creation
+
+**Postconditions**:
+- New entity is created in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: OrganizationController.java.createOrganization()
+
+---
+
+### UC-014: List Organizations Organization
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates organization operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: OrganizationController.java.listOrganizations()
+
+---
+
+### UC-015: View Organization Organization
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view organization
+2. System retrieves organization data
+3. System displays organization information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: OrganizationController.java.getOrganization()
+
+---
+
+### UC-016: Update Organization Organization
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects organization to update
+2. User modifies organization details
+3. System validates changes
+4. System updates organization data
+5. System confirms successful update
+
+**Postconditions**:
+- Entity data is updated in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: OrganizationController.java.updateOrganization()
+
+---
+
+### UC-017: Delete Organization Organization
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects organization to delete
+2. System requests confirmation
+3. User confirms deletion
+4. System removes organization
+5. System confirms successful deletion
+
+**Postconditions**:
+- Entity is removed from the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: OrganizationController.java.deleteOrganization()
+
+---
+
+### UC-018: View Organization Projects Organization
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view organization
+2. System retrieves organization data
+3. System displays organization information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: OrganizationController.java.getOrganizationProjects()
+
+---
+
+### UC-019: View Estimate Estimate
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view estimate
+2. System retrieves estimate data
+3. System displays estimate information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: EstimateController.java.getEstimate()
+
+---
+
+### UC-020: Create Sprint Sprint
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User navigates to sprint creation page
+2. User enters sprint details
+3. System validates input data
+4. System creates new sprint
+5. System confirms successful creation
+
+**Postconditions**:
+- New entity is created in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: SprintController.java.createSprint()
+
+---
+
+### UC-021: View Sprint Sprint
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view sprint
+2. System retrieves sprint data
+3. System displays sprint information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: SprintController.java.getSprint()
+
+---
+
+### UC-022: List Sprints Sprint
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates sprint operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: SprintController.java.listSprints()
+
+---
+
+### UC-023: Update Sprint Sprint
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects sprint to update
+2. User modifies sprint details
+3. System validates changes
+4. System updates sprint data
+5. System confirms successful update
+
+**Postconditions**:
+- Entity data is updated in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: SprintController.java.updateSprint()
+
+---
+
+### UC-024: Delete Sprint Sprint
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects sprint to delete
+2. System requests confirmation
+3. User confirms deletion
+4. System removes sprint
+5. System confirms successful deletion
+
+**Postconditions**:
+- Entity is removed from the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: SprintController.java.deleteSprint()
+
+---
+
+### UC-025: Upload Sprints Sprint
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates sprint operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: SprintController.java.uploadSprints()
+
+---
+
+### UC-026: Create Project Project
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User navigates to project creation page
+2. User enters project details
+3. System validates input data
+4. System creates new project
+5. System confirms successful creation
+
+**Postconditions**:
+- New entity is created in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: ProjectController.java.createProject()
+
+---
+
+### UC-027: View Project Project
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view project
+2. System retrieves project data
+3. System displays project information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: ProjectController.java.getProject()
+
+---
+
+### UC-028: Update Project Project
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects project to update
+2. User modifies project details
+3. System validates changes
+4. System updates project data
+5. System confirms successful update
+
+**Postconditions**:
+- Entity data is updated in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: ProjectController.java.updateProject()
+
+---
+
+### UC-029: Delete Project Project
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects project to delete
+2. System requests confirmation
+3. User confirms deletion
+4. System removes project
+5. System confirms successful deletion
+
+**Postconditions**:
+- Entity is removed from the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: ProjectController.java.deleteProject()
+
+---
+
+### UC-030: List Projects Project
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates project operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: ProjectController.java.listProjects()
+
+---
+
+### UC-031: Create Default Project Project
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User navigates to project creation page
+2. User enters project details
+3. System validates input data
+4. System creates new project
+5. System confirms successful creation
+
+**Postconditions**:
+- New entity is created in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: ProjectController.java.createDefaultProject()
+
+---
+
+### UC-032: Create Story Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User navigates to story creation page
+2. User enters story details
+3. System validates input data
+4. System creates new story
+5. System confirms successful creation
+
+**Postconditions**:
+- New entity is created in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: StoryController.java.createStory()
+
+---
+
+### UC-033: View Story Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view story
+2. System retrieves story data
+3. System displays story information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: StoryController.java.getStory()
+
+---
+
+### UC-034: Update Story Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects story to update
+2. User modifies story details
+3. System validates changes
+4. System updates story data
+5. System confirms successful update
+
+**Postconditions**:
+- Entity data is updated in the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: StoryController.java.updateStory()
+
+---
+
+### UC-035: Delete Story Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects story to delete
+2. System requests confirmation
+3. User confirms deletion
+4. System removes story
+5. System confirms successful deletion
+
+**Postconditions**:
+- Entity is removed from the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: StoryController.java.deleteStory()
+
+---
+
+### UC-036: List Stories Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates story operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: StoryController.java.listStories()
+
+---
+
+### UC-037: View Stories By Project Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view story
+2. System retrieves story data
+3. System displays story information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: StoryController.java.getStoriesByProject()
+
+---
+
+### UC-038: View Stories By Sprint Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view story
+2. System retrieves story data
+3. System displays story information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: StoryController.java.getStoriesBySprint()
+
+---
+
+### UC-039: View Stories By Points Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view story
+2. System retrieves story data
+3. System displays story information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: StoryController.java.getStoriesByPoints()
+
+---
+
+### UC-040: Upload Stories Story
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates story operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: StoryController.java.uploadStories()
+
+---
+
+### UC-041: Project Forecast ProjectForecastApi
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates projectforecastapi operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: ProjectForecastApiController.java.projectForecast()
+
+---
+
+### UC-042: Save Forecast ProjectForecastApi
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates projectforecastapi operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: ProjectForecastApiController.java.saveForecast()
+
+---
+
+### UC-043: Load Forecast ProjectForecastApi
+
+**Primary Actor**: User
+
+**Preconditions**:
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User initiates projectforecastapi operation
+2. System processes request
+3. System returns result
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: ProjectForecastApiController.java.loadForecast()
+
+---
+
+### UC-044: View User Forecasts ProjectForecastApi
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User requests to view projectforecastapi
+2. System retrieves projectforecastapi data
+3. System displays projectforecastapi information
+
+**Postconditions**:
+- Operation completes successfully
+- User receives appropriate response
+
+**Identified From**:
+- Controller method: ProjectForecastApiController.java.getUserForecasts()
+
+---
+
+### UC-045: Delete Forecast ProjectForecastApi
+
+**Primary Actor**: User
+
+**Preconditions**:
+- Entity must exist in the system
+- User must have appropriate permissions
+
+**Main Success Scenario**:
+1. User selects projectforecastapi to delete
+2. System requests confirmation
+3. User confirms deletion
+4. System removes projectforecastapi
+5. System confirms successful deletion
+
+**Postconditions**:
+- Entity is removed from the system
+- User receives confirmation
+
+**Identified From**:
+- Controller method: ProjectForecastApiController.java.deleteForecast()
+
+---
+
+
+## Summary
+
+This prototype analysis identified 1 actors and 45 use cases
+from the existing codebase. This demonstrates the feasibility of automated use case
+generation for reverse engineering legacy applications.
+
+**Note**: This is a prototype implementation. The full implementation will include
+more sophisticated pattern recognition, system boundary analysis, and relationship mapping.
+
+✅ Outputs saved to: /Users/squick/workspace/quickcue3/agile-forecaster/use-case-prototype-output

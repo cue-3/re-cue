@@ -1,12 +1,14 @@
 # RE-cue
 
-RE-cue (Reverse Engineer - cue) is a suite of tools that focuses on reverse engineering software products based on evaluation of source code. RE-cue was born out of dealing with the complexities of "Brownfield" development. Software development is hardest when you need to enter an existing project and are asked to maintain or improve on a project that you are inheriting in an unknown state. That is where RE-cue comes in. The goal of this suite is to review an existing code base and generate as much detail as possible for code owners.
+*Cue your software RE-development journey*
+
+RE-cue will assist in reverse engineering software products based on source code evaluation. RE-cue was born out of dealing with the complexities of "brownfield" development. Software development is hardest when you enter an existing project and are asked to maintain or improve a project that you are inheriting in an unknown state. That is where RE-cue comes in. RE-cue will review an existing code base and generate architectural documentation for code owners.
 
 ## Important Disclaimer
 
 **⚠️ AUTHORIZED USE ONLY - CODE OWNERS EXCLUSIVELY ⚠️**
 
-**This project is intended to be used BY AND FOR OWNERS OF THE SOURCE CODE TO BE ANALYZED. This tool is designed exclusively for legitimate code owners to analyze, document, and understand their own codebases.**
+**RE-cue is intended to be used BY and FOR OWNERS OF THE SOURCE CODE to be analyzed. RE-cue is designed exclusively for legitimate code owners to analyze, document, and understand their own codebases.**
 
 **🚫 PROHIBITED USES:**
 - Reverse engineering copyrighted software without proper authorization
@@ -31,6 +33,7 @@ RE-cue is a comprehensive reverse engineering toolkit designed to help software 
 - **Implementation Plans** (plan.md) - Technical analysis and architectural documentation
 - **Data Model Documentation** (data-model.md) - Comprehensive data structure analysis
 - **API Contracts** (api-spec.json) - OpenAPI 3.0 specifications for existing endpoints
+- **Use Case Analysis** (use-cases.md) - *(Coming Soon)* Actor identification, system boundaries, and business process documentation
 
 **Primary Use Cases:**
 - � **Legacy System Documentation** - Generate comprehensive docs for undocumented codebases

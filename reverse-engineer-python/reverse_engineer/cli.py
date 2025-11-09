@@ -13,7 +13,8 @@ from .generators import (
     SpecGenerator,
     PlanGenerator,
     DataModelGenerator,
-    ApiContractGenerator
+    ApiContractGenerator,
+    UseCaseMarkdownGenerator
 )
 from .utils import find_repo_root, log_info, log_section
 
@@ -22,7 +23,7 @@ def interactive_mode():
     """Run interactive mode to gather user inputs."""
     print("""
 ╔════════════════════════════════════════════════════════════════════════════╗
-║                   Specify - Reverse Engineering                            ║
+║                   RE-cue - Reverse Engineering                             ║
 ║                         Interactive Mode                                   ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 """)
@@ -65,10 +66,13 @@ def interactive_mode():
     generate_api_contract = input("   Generate API contract (api-spec.json)? [Y/n]: ").strip().lower()
     generate_api_contract = generate_api_contract != 'n'
     
+    generate_use_cases = input("   Generate use case analysis (use-cases.md)? [Y/n]: ").strip().lower()
+    generate_use_cases = generate_use_cases != 'n'
+    
     print()
     
     # Check if at least one option selected
-    if not any([generate_spec, generate_plan, generate_data_model, generate_api_contract]):
+    if not any([generate_spec, generate_plan, generate_data_model, generate_api_contract, generate_use_cases]):
         print("❌ Error: At least one generation option must be selected.", file=sys.stderr)
         sys.exit(1)
     
@@ -109,6 +113,8 @@ def interactive_mode():
         print(f"   ✓ Data Model (data-model.md)")
     if generate_api_contract:
         print(f"   ✓ API Contract (api-spec.json)")
+    if generate_use_cases:
+        print(f"   ✓ Use Case Analysis (use-cases.md)")
     if description:
         print(f"📄 Description: {description}")
     print(f"📋 Format: {output_format}")
@@ -134,6 +140,7 @@ def interactive_mode():
     config.plan = generate_plan
     config.data_model = generate_data_model
     config.api_contract = generate_api_contract
+    config.use_cases = generate_use_cases
     config.description = description
     config.format = output_format
     config.verbose = verbose
@@ -146,7 +153,7 @@ def print_help_banner():
     """Print the help banner."""
     print("""
 ╔════════════════════════════════════════════════════════════════════════════╗
-║                   Specify - Reverse Engineering                            ║
+║                   RE-cue - Reverse Engineering                             ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
 No generation flags specified. Please provide at least one flag:
@@ -171,12 +178,18 @@ No generation flags specified. Please provide at least one flag:
                   • REST endpoint documentation
                   • Request/response schemas
 
+  --use-cases     Generate use case analysis (use-cases.md)
+                  • Actor identification and analysis
+                  • System boundary mapping
+                  • Use case extraction and documentation
+
 Examples:
   reverse-engineer --spec
   reverse-engineer --plan
   reverse-engineer --data-model
   reverse-engineer --api-contract
-  reverse-engineer --spec --plan --data-model --api-contract
+  reverse-engineer --use-cases
+  reverse-engineer --spec --plan --data-model --api-contract --use-cases
 
 Use --help for more options.
     """)
@@ -194,7 +207,8 @@ Examples:
   reverse-engineer --plan
   reverse-engineer --data-model
   reverse-engineer --api-contract
-  reverse-engineer --spec --plan --data-model --api-contract
+  reverse-engineer --use-cases
+  reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --spec --output my-spec.md
   reverse-engineer --spec --format json --output spec.json
   reverse-engineer --spec --plan --verbose
@@ -210,6 +224,7 @@ The script will:
      - plan.md: Technical implementation plan with architecture
      - data-model.md: Detailed data model documentation
      - api-spec.json: OpenAPI 3.0 specification for API contracts
+     - use-cases.md: Actor analysis and use case documentation
         """
     )
     
@@ -222,6 +237,8 @@ The script will:
                         help='Generate data model documentation (data-model.md)')
     parser.add_argument('--api-contract', action='store_true',
                         help='Generate API contract (api-spec.json)')
+    parser.add_argument('--use-cases', action='store_true',
+                        help='Generate use case analysis (use-cases.md)')
     
     # Options
     parser.add_argument('-d', '--description', type=str,
@@ -234,9 +251,83 @@ The script will:
                         help='Output format: markdown or json (default: markdown)')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Show detailed analysis progress')
+    parser.add_argument('--phased', action='store_true',
+                        help='Run analysis in phases with user prompts between phases')
+    parser.add_argument('--phase', type=str, choices=['1', '2', '3', '4', 'all'],
+                        help='Run specific phase: 1=structure, 2=actors, 3=boundaries, 4=use-cases, all=run all')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0.0')
     
     return parser
+
+
+def run_phased_analysis(args):
+    """Run analysis in phases with separate documents."""
+    from .phase_manager import (
+        PhaseManager, 
+        run_phase_1, 
+        run_phase_2, 
+        run_phase_3, 
+        run_phase_4
+    )
+    
+    # Find repository root
+    if args.path:
+        repo_root = Path(args.path).resolve()
+        if not repo_root.exists():
+            print(f"Error: Specified path does not exist: {args.path}", file=sys.stderr)
+            sys.exit(1)
+        if not repo_root.is_dir():
+            print(f"Error: Specified path is not a directory: {args.path}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        repo_root = find_repo_root(Path.cwd())
+        if not repo_root:
+            print("Error: Could not determine repository root.", file=sys.stderr)
+            print("Tip: Use --path to specify the project directory.", file=sys.stderr)
+            sys.exit(1)
+    
+    # Setup output directory
+    project_name = repo_root.name + "-re"
+    output_dir = repo_root / "specs" / project_name
+    
+    # Initialize phase manager
+    phase_manager = PhaseManager(repo_root, output_dir)
+    
+    # Initialize analyzer
+    log_section("RE-cue - Phased Reverse Engineering")
+    analyzer = ProjectAnalyzer(repo_root, verbose=args.verbose)
+    
+    # Determine which phase to run
+    phase = args.phase
+    
+    if phase == 'all':
+        # Run all phases sequentially
+        run_phase_1(analyzer, phase_manager, args.verbose)
+        run_phase_2(analyzer, phase_manager, args.verbose)
+        run_phase_3(analyzer, phase_manager, args.verbose)
+        run_phase_4(analyzer, phase_manager, args.verbose)
+    elif phase == '1':
+        run_phase_1(analyzer, phase_manager, args.verbose)
+    elif phase == '2':
+        # Load previous state if exists
+        state = phase_manager.load_state()
+        if state and state.get('last_phase') != '1':
+            print("Warning: Phase 1 may not have been completed yet.", file=sys.stderr)
+        run_phase_2(analyzer, phase_manager, args.verbose)
+    elif phase == '3':
+        state = phase_manager.load_state()
+        if state and state.get('last_phase') not in ['1', '2']:
+            print("Warning: Previous phases may not have been completed yet.", file=sys.stderr)
+        run_phase_3(analyzer, phase_manager, args.verbose)
+    elif phase == '4':
+        state = phase_manager.load_state()
+        if state and state.get('last_phase') not in ['1', '2', '3']:
+            print("Warning: Previous phases may not have been completed yet.", file=sys.stderr)
+        run_phase_4(analyzer, phase_manager, args.verbose)
+    
+    print("\n" + "═" * 70, file=sys.stderr)
+    print(f"📁 All documents saved to: {output_dir}", file=sys.stderr)
+    print("═" * 70 + "\n", file=sys.stderr)
 
 
 def main():
@@ -249,8 +340,13 @@ def main():
     else:
         args = parser.parse_args()
     
+    # Handle phased execution
+    if hasattr(args, 'phase') and args.phase:
+        run_phased_analysis(args)
+        return
+    
     # Check if at least one generation flag is provided
-    if not any([args.spec, args.plan, args.data_model, args.api_contract]):
+    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases]):
         print_help_banner()
         sys.exit(1)
     
@@ -290,7 +386,7 @@ def main():
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Initialize analyzer
-    log_section("Specify - Reverse Engineering")
+    log_section("RE-cue - Reverse Engineering")
     
     analyzer = ProjectAnalyzer(repo_root, verbose=args.verbose)
     analyzer.analyze()
@@ -335,6 +431,16 @@ def main():
         with open(api_contract_file, 'w') as f:
             f.write(api_contract_content)
     
+    # Generate use cases if requested
+    if args.use_cases:
+        use_cases_file = output_path.parent / "use-cases.md"
+        print("\n📝 Generating use case analysis...", file=sys.stderr)
+        use_case_gen = UseCaseMarkdownGenerator(analyzer)
+        use_case_content = use_case_gen.generate()
+        
+        with open(use_cases_file, 'w') as f:
+            f.write(use_case_content)
+    
     # Display results
     log_section("Generation Complete")
     print()
@@ -351,11 +457,16 @@ def main():
     if args.api_contract:
         print(f"✅ API contract saved to: {output_path.parent / 'contracts' / 'api-spec.json'}", file=sys.stderr)
     
+    if args.use_cases:
+        print(f"✅ Use cases saved to: {output_path.parent / 'use-cases.md'}", file=sys.stderr)
+    
     print("\n📊 Analysis Statistics:", file=sys.stderr)
     print(f"   • API Endpoints: {analyzer.endpoint_count}", file=sys.stderr)
     print(f"   • Data Models: {analyzer.model_count}", file=sys.stderr)
     print(f"   • UI Views: {analyzer.view_count}", file=sys.stderr)
     print(f"   • Backend Services: {analyzer.service_count}", file=sys.stderr)
+    print(f"   • Actors: {analyzer.actor_count}", file=sys.stderr)
+    print(f"   • Use Cases: {analyzer.use_case_count}", file=sys.stderr)
     print()
     
     if args.format == 'markdown':

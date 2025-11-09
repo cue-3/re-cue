@@ -1027,3 +1027,688 @@ class ApiContractGenerator(BaseGenerator):
             }
             for controller in sorted(controllers)
         ]
+
+
+class UseCaseMarkdownGenerator(BaseGenerator):
+    """Generator for use-cases.md files."""
+    
+    def generate(self) -> str:
+        """Generate use case documentation."""
+        project_info = self.analyzer.get_project_info()
+        display_name = format_project_name(project_info["name"])
+        
+        output = [
+            f"# Use Cases: {display_name}",
+            "",
+            f"**Generated**: {self.date}",
+            "**Source**: Reverse-engineered from project codebase",
+            f"**Total Actors**: {self.analyzer.actor_count}",
+            f"**Total System Boundaries**: {self.analyzer.system_boundary_count}",
+            f"**Total Use Cases**: {self.analyzer.use_case_count}",
+            "",
+            f"This document provides comprehensive use case analysis for the {display_name} application,",
+            "identifying the actors, system boundaries, and use cases derived from the codebase.",
+            "",
+            "---",
+            "",
+            "## Overview",
+            "",
+            f"The {display_name} system involves {self.analyzer.actor_count} identified actors",
+            f"interacting through {self.analyzer.use_case_count} use cases across",
+            f"{self.analyzer.system_boundary_count} system boundaries.",
+            "",
+            "### Quick Summary",
+            "",
+        ]
+        
+        # Add actors summary
+        if self.analyzer.actors:
+            output.append("**Actors**:")
+            for actor in self.analyzer.actors[:5]:  # Limit to first 5
+                output.append(f"- **{actor.name}** ({actor.type}) - Access: {actor.access_level}")
+            if len(self.analyzer.actors) > 5:
+                output.append(f"- ... and {len(self.analyzer.actors) - 5} more")
+            output.append("")
+        
+        # Add system boundaries summary
+        if self.analyzer.system_boundaries:
+            output.append("**System Boundaries**:")
+            for boundary in self.analyzer.system_boundaries[:3]:  # Limit to first 3
+                output.append(f"- **{boundary.name}** ({boundary.type}) - {len(boundary.components)} components")
+            if len(self.analyzer.system_boundaries) > 3:
+                output.append(f"- ... and {len(self.analyzer.system_boundaries) - 3} more")
+            output.append("")
+        
+        # Add use cases summary
+        if self.analyzer.use_cases:
+            output.append("**Primary Use Cases**:")
+            for use_case in self.analyzer.use_cases[:8]:  # Limit to first 8
+                output.append(f"- {use_case.name}")
+            if len(self.analyzer.use_cases) > 8:
+                output.append(f"- ... and {len(self.analyzer.use_cases) - 8} more")
+            output.append("")
+        
+        output.extend([
+            "---",
+            "",
+            "## Actors",
+            "",
+            f"The system has identified {self.analyzer.actor_count} actors based on security patterns,",
+            "controller access patterns, and external system integrations.",
+            "",
+        ])
+        
+        # Generate detailed actor sections
+        if self.analyzer.actors:
+            for actor in self.analyzer.actors:
+                output.extend([
+                    f"### {actor.name}",
+                    "",
+                    f"**Type**: {actor.type.title()}",
+                    f"**Access Level**: {actor.access_level}",
+                ])
+                
+                if actor.identified_from:
+                    output.extend([
+                        "",
+                        "**Evidence Found**:",
+                    ])
+                    for evidence in actor.identified_from[:3]:  # Limit evidence
+                        output.append(f"- {evidence}")
+                    if len(actor.identified_from) > 3:
+                        output.append(f"- ... and {len(actor.identified_from) - 3} more")
+                
+                output.extend([
+                    "",
+                    "---",
+                    "",
+                ])
+        else:
+            output.append("*No actors identified in the current analysis.*")
+            output.append("")
+        
+        output.extend([
+            "## System Boundaries",
+            "",
+            f"The analysis identified {self.analyzer.system_boundary_count} system boundaries",
+            "based on package structure, configuration files, and architectural patterns.",
+            "",
+        ])
+        
+        # Generate system boundary sections
+        if self.analyzer.system_boundaries:
+            for boundary in self.analyzer.system_boundaries:
+                output.extend([
+                    f"### {boundary.name}",
+                    "",
+                    f"**Type**: {boundary.type.title()}",
+                ])
+                
+                if boundary.components:
+                    output.extend([
+                        "",
+                        "**Components**:",
+                    ])
+                    for component in boundary.components[:5]:  # Limit components
+                        output.append(f"- {component}")
+                    if len(boundary.components) > 5:
+                        output.append(f"- ... and {len(boundary.components) - 5} more")
+                
+                if boundary.interfaces:
+                    output.extend([
+                        "",
+                        "**Interfaces**:",
+                    ])
+                    for interface in boundary.interfaces[:3]:  # Limit interfaces
+                        output.append(f"- {interface}")
+                    if len(boundary.interfaces) > 3:
+                        output.append(f"- ... and {len(boundary.interfaces) - 3} more")
+                
+                output.extend([
+                    "",
+                    "---",
+                    "",
+                ])
+        else:
+            output.append("*No system boundaries identified in the current analysis.*")
+            output.append("")
+        
+        output.extend([
+            "## Relationships",
+            "",
+            f"The system contains {len(self.analyzer.relationships)} relationships",
+            "between actors and system components.",
+            "",
+        ])
+        
+        # Generate relationship sections
+        if self.analyzer.relationships:
+            # Group relationships by type
+            relationship_groups = {}
+            for rel in self.analyzer.relationships:
+                if rel.relationship_type not in relationship_groups:
+                    relationship_groups[rel.relationship_type] = []
+                relationship_groups[rel.relationship_type].append(rel)
+            
+            for rel_type, relationships in relationship_groups.items():
+                output.extend([
+                    f"### {rel_type.title()} Relationships",
+                    "",
+                ])
+                
+                for rel in relationships[:5]:  # Limit to 5 per type
+                    output.append(f"- **{rel.from_entity}** {rel.relationship_type} **{rel.to_entity}**")
+                    if rel.mechanism:
+                        output.append(f"  - Mechanism: {rel.mechanism}")
+                
+                if len(relationships) > 5:
+                    output.append(f"- ... and {len(relationships) - 5} more {rel_type} relationships")
+                
+                output.append("")
+        else:
+            output.append("*No relationships identified in the current analysis.*")
+            output.append("")
+        
+        output.extend([
+            "---",
+            "",
+            "## Use Cases",
+            "",
+            f"The analysis extracted {self.analyzer.use_case_count} use cases from controller methods,",
+            "business logic patterns, and user interaction flows.",
+            "",
+        ])
+        
+        # Generate use case sections
+        if self.analyzer.use_cases:
+            # Group use cases by actor
+            use_cases_by_actor = {}
+            for use_case in self.analyzer.use_cases:
+                actor = use_case.primary_actor or "System"
+                if actor not in use_cases_by_actor:
+                    use_cases_by_actor[actor] = []
+                use_cases_by_actor[actor].append(use_case)
+            
+            for actor, use_cases in use_cases_by_actor.items():
+                output.extend([
+                    f"### {actor} Use Cases",
+                    "",
+                    f"Total: {len(use_cases)} use cases",
+                    "",
+                ])
+                
+                # Show all use cases with full detail
+                for i, use_case in enumerate(use_cases, 1):
+                    output.extend([
+                        f"#### UC{i:02d}: {use_case.name}",
+                        "",
+                        f"**Primary Actor**: {use_case.primary_actor}",
+                    ])
+                    
+                    if use_case.secondary_actors:
+                        output.append(f"**Secondary Actors**: {', '.join(use_case.secondary_actors)}")
+                    
+                    if use_case.preconditions:
+                        output.extend([
+                            "",
+                            "**Preconditions**:",
+                        ])
+                        for precondition in use_case.preconditions:
+                            output.append(f"- {precondition}")
+                    
+                    if use_case.postconditions:
+                        output.extend([
+                            "",
+                            "**Postconditions**:",
+                        ])
+                        for postcondition in use_case.postconditions:
+                            output.append(f"- {postcondition}")
+                    
+                    if use_case.main_scenario:
+                        output.extend([
+                            "",
+                            "**Main Scenario**:",
+                        ])
+                        for j, step in enumerate(use_case.main_scenario, 1):
+                            output.append(f"{j}. {step}")
+                    
+                    if use_case.extensions:
+                        output.extend([
+                            "",
+                            "**Extensions**:",
+                        ])
+                        for extension in use_case.extensions[:3]:  # Limit extensions to 3
+                            output.append(f"- {extension}")
+                        if len(use_case.extensions) > 3:
+                            output.append(f"- *... and {len(use_case.extensions) - 3} more extensions*")
+                    
+                    output.extend([
+                        "",
+                        "---",
+                        "",
+                    ])
+        else:
+            output.append("*No use cases identified in the current analysis.*")
+            output.append("")
+        
+        output.extend([
+            "## Use Case Diagram",
+            "",
+            "```mermaid",
+            "graph TD",
+            f"    %% {display_name} Use Case Diagram",
+            "",
+        ])
+        
+        # Add actors to diagram
+        for actor in self.analyzer.actors:
+            actor_id = actor.name.replace(' ', '').replace('-', '_')
+            if actor.type == "external_system":
+                output.append(f"    {actor_id}[{actor.name}]")
+                output.append(f"    {actor_id} -.-> |external| System")
+            else:
+                output.append(f"    {actor_id}({actor.name})")
+        
+        output.append("")
+        
+        # Add use cases to diagram (limit to avoid clutter)
+        for use_case in self.analyzer.use_cases[:15]:
+            use_case_id = use_case.name.replace(' ', '').replace('-', '_').replace('(', '').replace(')', '')
+            safe_name = use_case.name.replace('"', "'")
+            output.append(f"    {use_case_id}[\"{safe_name}\"]")
+        
+        output.append("")
+        
+        # Add relationships to diagram
+        for use_case in self.analyzer.use_cases[:15]:
+            if use_case.primary_actor:
+                actor_id = use_case.primary_actor.replace(' ', '').replace('-', '_')
+                use_case_id = use_case.name.replace(' ', '').replace('-', '_').replace('(', '').replace(')', '')
+                output.append(f"    {actor_id} --> {use_case_id}")
+        
+        output.extend([
+            "```",
+            "",
+            "---",
+            "",
+            "## System Architecture Diagram",
+            "",
+            "```mermaid",
+            "graph LR",
+            f"    %% {display_name} System Architecture",
+            "",
+        ])
+        
+        # Add actors as external entities
+        for actor in self.analyzer.actors:
+            actor_id = actor.name.replace(' ', '').replace('-', '_')
+            if actor.type == "external_system":
+                output.append(f"    {actor_id}[{actor.name}]")
+                output.append(f"    style {actor_id} fill:#ffeb3b")
+            else:
+                output.append(f"    {actor_id}({actor.name})")
+                output.append(f"    style {actor_id} fill:#4caf50")
+        
+        output.append("")
+        
+        # Add system boundaries as subgraphs
+        for i, boundary in enumerate(self.analyzer.system_boundaries[:5]):  # Limit to 5 boundaries
+            boundary_id = boundary.name.replace(' ', '').replace('-', '_')
+            safe_name = boundary.name.replace('"', "'")
+            
+            output.append(f"    subgraph {boundary_id} [\"{safe_name}\"]")
+            
+            # Add components within the boundary
+            for j, component in enumerate(boundary.components[:3]):  # Limit to 3 components per boundary
+                comp_id = f"{boundary_id}_comp{j+1}"
+                comp_name = component.replace('"', "'")
+                output.append(f"        {comp_id}[{comp_name}]")
+            
+            output.append("    end")
+            output.append("")
+        
+        # Add relationships between actors and system boundaries
+        for rel in self.analyzer.relationships[:10]:  # Limit to 10 relationships
+            from_id = rel.from_entity.replace(' ', '').replace('-', '_')
+            to_id = rel.to_entity.replace(' ', '').replace('-', '_')
+            
+            # Try to find matching boundary or create a simple connection
+            if any(boundary.name == rel.to_entity for boundary in self.analyzer.system_boundaries):
+                output.append(f"    {from_id} --> {to_id}")
+            elif any(actor.name == rel.from_entity for actor in self.analyzer.actors):
+                output.append(f"    {from_id} --> {to_id}")
+        
+        output.extend([
+            "```",
+            "",
+            "---",
+            "",
+            "## Analysis Methodology",
+            "",
+            "This use case analysis was generated by examining:",
+            "",
+            "1. **Security Annotations**: @PreAuthorize, @Secured, @RolesAllowed patterns",
+            "2. **Controller Methods**: REST endpoint patterns and HTTP operations",
+            "3. **Package Structure**: Logical boundaries and component organization",
+            "4. **Configuration Files**: External system integrations and dependencies",
+            "5. **Business Logic**: Service layer patterns and workflow analysis",
+            "",
+            "### Actor Discovery",
+            "- **Security Patterns**: Role-based access control annotations",
+            "- **UI Patterns**: Frontend routing and component access patterns",
+            "- **External Systems**: API calls, database connections, third-party integrations",
+            "",
+            "### System Boundary Analysis",
+            "- **Package Structure**: Java package organization",
+            "- **Configuration Boundaries**: Application properties and profiles",
+            "- **Architectural Layers**: Controller, service, repository patterns",
+            "",
+            "### Use Case Extraction",
+            "- **Controller Analysis**: HTTP methods mapped to business operations",
+            "- **Business Logic**: Service method patterns and workflows",
+            "- **Data Flow**: Model relationships and transaction boundaries",
+            "",
+            "---",
+            "",
+            "## Diagrams",
+            "",
+            "This document includes two Mermaid diagrams:",
+            "",
+            "1. **Use Case Diagram**: Shows actors and their associated use cases",
+            "2. **System Architecture Diagram**: Displays system boundaries, components, and relationships",
+            "",
+            "These diagrams can be rendered in any Mermaid-compatible viewer (GitHub, GitLab, VS Code, etc.).",
+            "",
+            "---",
+            "",
+            "## Recommendations",
+            "",
+            "Based on this analysis, consider the following:",
+            "",
+            "### Documentation",
+            "- Create formal use case specifications for complex workflows",
+            "- Document actor permissions and access control policies",
+            "- Maintain architectural decision records for system boundaries",
+            "",
+            "### Testing",
+            "- Implement user acceptance tests for each identified use case",
+            "- Create integration tests for actor-system interactions",
+            "- Validate system boundary contracts with component tests",
+            "",
+            "### Architecture",
+            "- Review identified system boundaries for proper separation of concerns",
+            "- Consider extracting external system interactions into dedicated services",
+            "- Evaluate actor permission models for security best practices",
+            "",
+            "---",
+            "",
+            f"**Generated**: {self.datetime} by reverse-engineer",
+            f"**Analysis**: {self.analyzer.actor_count} actors, {self.analyzer.system_boundary_count} boundaries, {self.analyzer.use_case_count} use cases",
+            f"**Source**: {self.analyzer.endpoint_count} endpoints, {self.analyzer.model_count} models, {self.analyzer.service_count} services",
+        ])
+        
+        return "\n".join(output)
+
+
+class StructureDocGenerator(BaseGenerator):
+    """Generator for Phase 1: Project Structure documentation."""
+    
+    def generate(self) -> str:
+        """Generate Phase 1 structure documentation."""
+        project_name = format_project_name(self.analyzer.repo_root.name)
+        
+        output = [
+            f"# Phase 1: Project Structure Analysis",
+            f"## {project_name}",
+            "",
+            f"**Generated**: {self.date}",
+            f"**Analysis Phase**: 1 of 4 - Project Structure",
+            "",
+            "---",
+            "",
+            "## Overview",
+            "",
+            "This document contains the results of Phase 1 analysis: discovering the basic",
+            "structure of the project including endpoints, models, views, services, and features.",
+            "",
+            f"- **API Endpoints**: {self.analyzer.endpoint_count}",
+            f"- **Data Models**: {self.analyzer.model_count}",
+            f"- **UI Views**: {self.analyzer.view_count}",
+            f"- **Backend Services**: {self.analyzer.service_count}",
+            f"- **Features**: {self.analyzer.feature_count}",
+            "",
+            "---",
+            "",
+            "## API Endpoints",
+            "",
+        ]
+        
+        if self.analyzer.endpoints:
+            for endpoint in self.analyzer.endpoints:
+                output.append(f"- `{endpoint.method} {endpoint.path}`")
+                if endpoint.authenticated:
+                    output.append(f"  - 🔒 Requires authentication")
+                output.append(f"  - Controller: `{endpoint.controller}`")
+                output.append("")
+        else:
+            output.append("*No endpoints discovered*")
+            output.append("")
+        
+        output.extend([
+            "---",
+            "",
+            "## Data Models",
+            "",
+        ])
+        
+        if self.analyzer.models:
+            for model in self.analyzer.models:
+                output.append(f"### {model.name}")
+                output.append(f"- **Fields**: {model.fields}")
+                if model.file_path:
+                    output.append(f"- **Location**: `{model.file_path.relative_to(self.analyzer.repo_root)}`")
+                output.append("")
+        else:
+            output.append("*No models discovered*")
+            output.append("")
+        
+        output.extend([
+            "---",
+            "",
+            "## UI Views",
+            "",
+        ])
+        
+        if self.analyzer.views:
+            for view in self.analyzer.views:
+                output.append(f"- **{view.name}** (`{view.file_name}`)")
+        else:
+            output.append("*No views discovered*")
+        
+        output.extend([
+            "",
+            "---",
+            "",
+            "## Backend Services",
+            "",
+        ])
+        
+        if self.analyzer.services:
+            for service in self.analyzer.services:
+                output.append(f"- `{service.name}`")
+        else:
+            output.append("*No services discovered*")
+        
+        output.extend([
+            "",
+            "---",
+            "",
+            "## Features",
+            "",
+        ])
+        
+        if self.analyzer.features:
+            for i, feature in enumerate(self.analyzer.features, 1):
+                output.append(f"{i}. {feature}")
+        else:
+            output.append("*No features identified*")
+        
+        output.extend([
+            "",
+            "---",
+            "",
+            "## Next Steps",
+            "",
+            "To continue to Phase 2 (Actor Discovery), run:",
+            "",
+            f"```bash",
+            f"python3 -m reverse_engineer --phase 2 --path {self.analyzer.repo_root}",
+            f"```",
+            "",
+            f"**Generated**: {self.datetime} by reverse-engineer",
+        ])
+        
+        return "\n".join(output)
+
+
+class ActorDocGenerator(BaseGenerator):
+    """Generator for Phase 2: Actor Discovery documentation."""
+    
+    def generate(self) -> str:
+        """Generate Phase 2 actor documentation."""
+        project_name = format_project_name(self.analyzer.repo_root.name)
+        
+        output = [
+            f"# Phase 2: Actor Discovery",
+            f"## {project_name}",
+            "",
+            f"**Generated**: {self.date}",
+            f"**Analysis Phase**: 2 of 4 - Actor Discovery",
+            "",
+            "---",
+            "",
+            "## Overview",
+            "",
+            "This document contains the results of Phase 2 analysis: identifying all actors",
+            "(users, systems, roles) that interact with the system.",
+            "",
+            f"- **Total Actors**: {self.analyzer.actor_count}",
+            "",
+            "---",
+            "",
+            "## Actors",
+            "",
+        ]
+        
+        if self.analyzer.actors:
+            for actor in self.analyzer.actors:
+                output.extend([
+                    f"### {actor.name}",
+                    "",
+                    f"- **Type**: {actor.type.replace('_', ' ').title()}",
+                    f"- **Access Level**: {actor.access_level}",
+                    "",
+                ])
+                
+                if actor.identified_from:
+                    output.append("**Evidence**:")
+                    for evidence in actor.identified_from:
+                        output.append(f"- {evidence}")
+                    output.append("")
+                
+                output.extend([
+                    "---",
+                    "",
+                ])
+        else:
+            output.append("*No actors discovered*")
+            output.append("")
+        
+        output.extend([
+            "## Next Steps",
+            "",
+            "To continue to Phase 3 (System Boundary Mapping), run:",
+            "",
+            f"```bash",
+            f"python3 -m reverse_engineer --phase 3 --path {self.analyzer.repo_root}",
+            f"```",
+            "",
+            f"**Generated**: {self.datetime} by reverse-engineer",
+        ])
+        
+        return "\n".join(output)
+
+
+class BoundaryDocGenerator(BaseGenerator):
+    """Generator for Phase 3: System Boundary documentation."""
+    
+    def generate(self) -> str:
+        """Generate Phase 3 boundary documentation."""
+        project_name = format_project_name(self.analyzer.repo_root.name)
+        
+        output = [
+            f"# Phase 3: System Boundary Analysis",
+            f"## {project_name}",
+            "",
+            f"**Generated**: {self.date}",
+            f"**Analysis Phase**: 3 of 4 - System Boundaries",
+            "",
+            "---",
+            "",
+            "## Overview",
+            "",
+            "This document contains the results of Phase 3 analysis: mapping system boundaries,",
+            "modules, services, and architectural layers.",
+            "",
+            f"- **Total Boundaries**: {self.analyzer.system_boundary_count}",
+            "",
+            "---",
+            "",
+            "## System Boundaries",
+            "",
+        ]
+        
+        if self.analyzer.system_boundaries:
+            for boundary in self.analyzer.system_boundaries:
+                output.extend([
+                    f"### {boundary.name}",
+                    "",
+                    f"- **Type**: {boundary.type.replace('_', ' ').title()}",
+                    f"- **Components**: {len(boundary.components)}",
+                    "",
+                ])
+                
+                if boundary.components:
+                    output.append("**Components**:")
+                    for component in boundary.components:
+                        output.append(f"- `{component}`")
+                    output.append("")
+                
+                if boundary.interfaces:
+                    output.append("**Interfaces**:")
+                    for interface in boundary.interfaces:
+                        output.append(f"- {interface}")
+                    output.append("")
+                
+                output.extend([
+                    "---",
+                    "",
+                ])
+        else:
+            output.append("*No system boundaries discovered*")
+            output.append("")
+        
+        output.extend([
+            "## Next Steps",
+            "",
+            "To continue to Phase 4 (Use Case Extraction), run:",
+            "",
+            f"```bash",
+            f"python3 -m reverse_engineer --phase 4 --path {self.analyzer.repo_root}",
+            f"```",
+            "",
+            f"**Generated**: {self.datetime} by reverse-engineer",
+        ])
+        
+        return "\n".join(output)
+

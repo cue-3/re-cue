@@ -1,11 +1,11 @@
 """
-Specify Reverse Engineering - Python CLI Tool
+RE-cue Reverse Engineering - Python CLI Tool
 
-A tool for reverse-engineering specifications from existing codebases.
+Reverse-engineers documentation from existing Java Spring Boot codebases.
 """
 
 __version__ = "1.0.0"
-__author__ = "Specify Reverse Engineering"
+__author__ = "RE-cue Reverse Engineering"
 
 from .cli import main
 
