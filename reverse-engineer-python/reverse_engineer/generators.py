@@ -1032,683 +1032,506 @@ class ApiContractGenerator(BaseGenerator):
 class UseCaseMarkdownGenerator(BaseGenerator):
     """Generator for use-cases.md files."""
     
+    def _load_template(self, template_name: str) -> str:
+        """Load a template file."""
+        template_dir = Path(__file__).parent / "templates"
+        template_path = template_dir / template_name
+        
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template not found: {template_path}")
+        
+        return template_path.read_text()
+    
+    def _build_actors_summary(self) -> str:
+        """Build the actors summary section."""
+        if not self.analyzer.actors:
+            return "*No actors identified in the current analysis.*"
+        
+        lines = []
+        for actor in self.analyzer.actors:
+            lines.append(f"- **{actor.name}** ({actor.type}) - Access: {actor.access_level}")
+        
+        return "\n".join(lines)
+    
+    def _build_boundaries_summary(self) -> str:
+        """Build the system boundaries summary section."""
+        if not self.analyzer.system_boundaries:
+            return "*No system boundaries identified in the current analysis.*"
+        
+        lines = []
+        for boundary in self.analyzer.system_boundaries:
+            lines.append(f"- **{boundary.name}** ({boundary.type}) - {len(boundary.components)} components")
+        
+        return "\n".join(lines)
+    
+    def _build_use_cases_summary(self) -> str:
+        """Build the use cases summary section."""
+        if not self.analyzer.use_cases:
+            return "*No use cases identified in the current analysis.*"
+        
+        lines = []
+        for use_case in self.analyzer.use_cases:
+            lines.append(f"- {use_case.name}")
+        
+        return "\n".join(lines)
+    
+    def _build_business_context(self) -> str:
+        """Build the business context table."""
+        if not hasattr(self.analyzer, 'business_context'):
+            return "*No business context information available.*"
+        
+        context = self.analyzer.business_context
+        lines = []
+        
+        # Transaction boundaries
+        if context.get('transactions'):
+            readonly_count = sum(1 for t in context['transactions'] if t.get('readonly', False))
+            write_count = len(context['transactions']) - readonly_count
+            lines.append(f"| Transaction Boundaries | {len(context['transactions'])} total | Write: {write_count}, Read-Only: {readonly_count} |")
+        
+        # Validation rules
+        if context.get('validations'):
+            validation_types = {}
+            for v in context['validations']:
+                vtype = v.get('type', 'unknown')
+                validation_types[vtype] = validation_types.get(vtype, 0) + 1
+            
+            types_summary = ", ".join([f"{vtype.replace('_', ' ').title()}: {count}" 
+                                       for vtype, count in sorted(validation_types.items(), key=lambda x: x[1], reverse=True)])
+            lines.append(f"| Validation Rules | {len(context['validations'])} constraints | {types_summary} |")
+        
+        # Business workflows
+        if context.get('workflows'):
+            workflow_types = {}
+            for w in context['workflows']:
+                wtype = w.get('type', 'unknown')
+                workflow_types[wtype] = workflow_types.get(wtype, 0) + 1
+            
+            types_summary = ", ".join([f"{wtype.replace('_', ' ').title()}: {count}" 
+                                       for wtype, count in sorted(workflow_types.items(), key=lambda x: x[1], reverse=True)])
+            lines.append(f"| Business Workflows | {len(context['workflows'])} patterns | {types_summary} |")
+        
+        # Business rules
+        if context.get('business_rules'):
+            rule_types = {}
+            for r in context['business_rules']:
+                rtype = r.get('rule_type', 'unknown')
+                rule_types[rtype] = rule_types.get(rtype, 0) + 1
+            
+            types_summary = ", ".join([f"{rtype.replace('_', ' ').title()}: {count}" 
+                                       for rtype, count in sorted(rule_types.items(), key=lambda x: x[1], reverse=True)])
+            lines.append(f"| Business Rules | {len(context['business_rules'])} derived | {types_summary} |")
+        
+        return "\n".join(lines) if lines else "*No business context information available.*"
+    
+    def _build_use_cases_detailed(self) -> str:
+        """Build the detailed use cases section."""
+        if not self.analyzer.use_cases:
+            return "*No use cases identified in the current analysis.*"
+        
+        lines = []
+        
+        # Group use cases by actor
+        use_cases_by_actor = {}
+        for use_case in self.analyzer.use_cases:
+            actor = use_case.primary_actor or "System"
+            if actor not in use_cases_by_actor:
+                use_cases_by_actor[actor] = []
+            use_cases_by_actor[actor].append(use_case)
+        
+        for actor, use_cases in use_cases_by_actor.items():
+            lines.append(f"### {actor} Use Cases")
+            lines.append("")
+            lines.append(f"Total: {len(use_cases)} use cases")
+            lines.append("")
+            
+            # Show all use cases with full detail
+            for i, use_case in enumerate(use_cases, 1):
+                lines.append(f"#### UC{i:02d}: {use_case.name}")
+                lines.append("")
+                lines.append(f"**Primary Actor**: {use_case.primary_actor}")
+                
+                if use_case.secondary_actors:
+                    lines.append(f"**Secondary Actors**: {', '.join(use_case.secondary_actors)}")
+                
+                if use_case.preconditions:
+                    lines.append("")
+                    lines.append("**Preconditions**:")
+                    for precondition in use_case.preconditions:
+                        lines.append(f"- {precondition}")
+                
+                if use_case.postconditions:
+                    lines.append("")
+                    lines.append("**Postconditions**:")
+                    for postcondition in use_case.postconditions:
+                        lines.append(f"- {postcondition}")
+                
+                if use_case.main_scenario:
+                    lines.append("")
+                    lines.append("**Main Scenario**:")
+                    for j, step in enumerate(use_case.main_scenario, 1):
+                        lines.append(f"{j}. {step}")
+                
+                if use_case.extensions:
+                    lines.append("")
+                    lines.append("**Extensions**:")
+                    for extension in use_case.extensions:
+                        lines.append(f"- {extension}")
+                
+                lines.append("")
+                lines.append("---")
+                lines.append("")
+        
+        return "\n".join(lines)
+    
     def generate(self) -> str:
-        """Generate use case documentation."""
+        """Generate use case documentation using template."""
         project_info = self.analyzer.get_project_info()
         display_name = format_project_name(project_info["name"])
         
-        output = [
-            f"# Use Cases: {display_name}",
-            "",
-            f"**Generated**: {self.date}",
-            "**Source**: Reverse-engineered from project codebase",
-            f"**Total Actors**: {self.analyzer.actor_count}",
-            f"**Total System Boundaries**: {self.analyzer.system_boundary_count}",
-            f"**Total Use Cases**: {self.analyzer.use_case_count}",
-            "",
-            f"This document provides comprehensive use case analysis for the {display_name} application,",
-            "identifying the actors, system boundaries, and use cases derived from the codebase.",
-            "",
-            "---",
-            "",
-            "## Overview",
-            "",
-            f"The {display_name} system involves {self.analyzer.actor_count} identified actors",
-            f"interacting through {self.analyzer.use_case_count} use cases across",
-            f"{self.analyzer.system_boundary_count} system boundaries.",
-            "",
-            "### Quick Summary",
-            "",
-        ]
+        # Load template
+        template = self._load_template("phase4-use-cases.md")
         
-        # Add actors summary
-        if self.analyzer.actors:
-            output.append("**Actors**:")
-            for actor in self.analyzer.actors[:5]:  # Limit to first 5
-                output.append(f"- **{actor.name}** ({actor.type}) - Access: {actor.access_level}")
-            if len(self.analyzer.actors) > 5:
-                output.append(f"- ... and {len(self.analyzer.actors) - 5} more")
-            output.append("")
+        # Build content sections
+        business_context = self._build_business_context()
+        use_cases_detailed = self._build_use_cases_detailed()
+        use_cases_detailed = self._build_use_cases_detailed()
         
-        # Add system boundaries summary
-        if self.analyzer.system_boundaries:
-            output.append("**System Boundaries**:")
-            for boundary in self.analyzer.system_boundaries[:3]:  # Limit to first 3
-                output.append(f"- **{boundary.name}** ({boundary.type}) - {len(boundary.components)} components")
-            if len(self.analyzer.system_boundaries) > 3:
-                output.append(f"- ... and {len(self.analyzer.system_boundaries) - 3} more")
-            output.append("")
+        # Additional sections - keeping placeholders for now
+        use_case_relationships = "*Not yet implemented in current analysis.*"
+        actor_boundary_matrix = "*Not yet implemented in current analysis.*"
+        business_rules = "*Included in Business Context section above.*"
+        workflows = "*Included in Business Context section above.*"
+        extension_points = "*Not yet implemented in current analysis.*"
+        validation_rules = "*Included in Business Context section above.*"
+        transaction_boundaries = "*Included in Business Context section above.*"
         
-        # Add use cases summary
-        if self.analyzer.use_cases:
-            output.append("**Primary Use Cases**:")
-            for use_case in self.analyzer.use_cases[:8]:  # Limit to first 8
-                output.append(f"- {use_case.name}")
-            if len(self.analyzer.use_cases) > 8:
-                output.append(f"- ... and {len(self.analyzer.use_cases) - 8} more")
-            output.append("")
+        # Populate template variables
+        output = template.replace("{{PROJECT_NAME}}", project_info["name"])
+        output = output.replace("{{DATE}}", self.datetime)
+        output = output.replace("{{PROJECT_NAME_DISPLAY}}", display_name)
+        output = output.replace("{{ACTOR_COUNT}}", str(self.analyzer.actor_count))
+        output = output.replace("{{USE_CASE_COUNT}}", str(self.analyzer.use_case_count))
+        output = output.replace("{{BOUNDARY_COUNT}}", str(self.analyzer.system_boundary_count))
+        output = output.replace("{{BUSINESS_CONTEXT}}", business_context)
+        output = output.replace("{{USE_CASES_DETAILED}}", use_cases_detailed)
+        output = output.replace("{{USE_CASE_RELATIONSHIPS}}", use_case_relationships)
+        output = output.replace("{{ACTOR_BOUNDARY_MATRIX}}", actor_boundary_matrix)
+        output = output.replace("{{BUSINESS_RULES}}", business_rules)
+        output = output.replace("{{WORKFLOWS}}", workflows)
+        output = output.replace("{{EXTENSION_POINTS}}", extension_points)
+        output = output.replace("{{VALIDATION_RULES}}", validation_rules)
+        output = output.replace("{{TRANSACTION_BOUNDARIES}}", transaction_boundaries)
         
-        output.extend([
-            "---",
-            "",
-            "## Actors",
-            "",
-            f"The system has identified {self.analyzer.actor_count} actors based on security patterns,",
-            "controller access patterns, and external system integrations.",
-            "",
-        ])
-        
-        # Generate detailed actor sections
-        if self.analyzer.actors:
-            for actor in self.analyzer.actors:
-                output.extend([
-                    f"### {actor.name}",
-                    "",
-                    f"**Type**: {actor.type.title()}",
-                    f"**Access Level**: {actor.access_level}",
-                ])
-                
-                if actor.identified_from:
-                    output.extend([
-                        "",
-                        "**Evidence Found**:",
-                    ])
-                    for evidence in actor.identified_from[:3]:  # Limit evidence
-                        output.append(f"- {evidence}")
-                    if len(actor.identified_from) > 3:
-                        output.append(f"- ... and {len(actor.identified_from) - 3} more")
-                
-                output.extend([
-                    "",
-                    "---",
-                    "",
-                ])
-        else:
-            output.append("*No actors identified in the current analysis.*")
-            output.append("")
-        
-        output.extend([
-            "## System Boundaries",
-            "",
-            f"The analysis identified {self.analyzer.system_boundary_count} system boundaries",
-            "based on package structure, configuration files, and architectural patterns.",
-            "",
-        ])
-        
-        # Generate system boundary sections
-        if self.analyzer.system_boundaries:
-            for boundary in self.analyzer.system_boundaries:
-                output.extend([
-                    f"### {boundary.name}",
-                    "",
-                    f"**Type**: {boundary.type.title()}",
-                ])
-                
-                if boundary.components:
-                    output.extend([
-                        "",
-                        "**Components**:",
-                    ])
-                    for component in boundary.components[:5]:  # Limit components
-                        output.append(f"- {component}")
-                    if len(boundary.components) > 5:
-                        output.append(f"- ... and {len(boundary.components) - 5} more")
-                
-                if boundary.interfaces:
-                    output.extend([
-                        "",
-                        "**Interfaces**:",
-                    ])
-                    for interface in boundary.interfaces[:3]:  # Limit interfaces
-                        output.append(f"- {interface}")
-                    if len(boundary.interfaces) > 3:
-                        output.append(f"- ... and {len(boundary.interfaces) - 3} more")
-                
-                output.extend([
-                    "",
-                    "---",
-                    "",
-                ])
-        else:
-            output.append("*No system boundaries identified in the current analysis.*")
-            output.append("")
-        
-        output.extend([
-            "## Relationships",
-            "",
-            f"The system contains {len(self.analyzer.relationships)} relationships",
-            "between actors and system components.",
-            "",
-        ])
-        
-        # Generate relationship sections
-        if self.analyzer.relationships:
-            # Group relationships by type
-            relationship_groups = {}
-            for rel in self.analyzer.relationships:
-                if rel.relationship_type not in relationship_groups:
-                    relationship_groups[rel.relationship_type] = []
-                relationship_groups[rel.relationship_type].append(rel)
-            
-            for rel_type, relationships in relationship_groups.items():
-                output.extend([
-                    f"### {rel_type.title()} Relationships",
-                    "",
-                ])
-                
-                for rel in relationships[:5]:  # Limit to 5 per type
-                    output.append(f"- **{rel.from_entity}** {rel.relationship_type} **{rel.to_entity}**")
-                    if rel.mechanism:
-                        output.append(f"  - Mechanism: {rel.mechanism}")
-                
-                if len(relationships) > 5:
-                    output.append(f"- ... and {len(relationships) - 5} more {rel_type} relationships")
-                
-                output.append("")
-        else:
-            output.append("*No relationships identified in the current analysis.*")
-            output.append("")
-        
-        output.extend([
-            "---",
-            "",
-            "## Use Cases",
-            "",
-            f"The analysis extracted {self.analyzer.use_case_count} use cases from controller methods,",
-            "business logic patterns, and user interaction flows.",
-            "",
-        ])
-        
-        # Generate use case sections
-        if self.analyzer.use_cases:
-            # Group use cases by actor
-            use_cases_by_actor = {}
-            for use_case in self.analyzer.use_cases:
-                actor = use_case.primary_actor or "System"
-                if actor not in use_cases_by_actor:
-                    use_cases_by_actor[actor] = []
-                use_cases_by_actor[actor].append(use_case)
-            
-            for actor, use_cases in use_cases_by_actor.items():
-                output.extend([
-                    f"### {actor} Use Cases",
-                    "",
-                    f"Total: {len(use_cases)} use cases",
-                    "",
-                ])
-                
-                # Show all use cases with full detail
-                for i, use_case in enumerate(use_cases, 1):
-                    output.extend([
-                        f"#### UC{i:02d}: {use_case.name}",
-                        "",
-                        f"**Primary Actor**: {use_case.primary_actor}",
-                    ])
-                    
-                    if use_case.secondary_actors:
-                        output.append(f"**Secondary Actors**: {', '.join(use_case.secondary_actors)}")
-                    
-                    if use_case.preconditions:
-                        output.extend([
-                            "",
-                            "**Preconditions**:",
-                        ])
-                        for precondition in use_case.preconditions:
-                            output.append(f"- {precondition}")
-                    
-                    if use_case.postconditions:
-                        output.extend([
-                            "",
-                            "**Postconditions**:",
-                        ])
-                        for postcondition in use_case.postconditions:
-                            output.append(f"- {postcondition}")
-                    
-                    if use_case.main_scenario:
-                        output.extend([
-                            "",
-                            "**Main Scenario**:",
-                        ])
-                        for j, step in enumerate(use_case.main_scenario, 1):
-                            output.append(f"{j}. {step}")
-                    
-                    if use_case.extensions:
-                        output.extend([
-                            "",
-                            "**Extensions**:",
-                        ])
-                        for extension in use_case.extensions[:3]:  # Limit extensions to 3
-                            output.append(f"- {extension}")
-                        if len(use_case.extensions) > 3:
-                            output.append(f"- *... and {len(use_case.extensions) - 3} more extensions*")
-                    
-                    output.extend([
-                        "",
-                        "---",
-                        "",
-                    ])
-        else:
-            output.append("*No use cases identified in the current analysis.*")
-            output.append("")
-        
-        output.extend([
-            "## Use Case Diagram",
-            "",
-            "```mermaid",
-            "graph TD",
-            f"    %% {display_name} Use Case Diagram",
-            "",
-        ])
-        
-        # Add actors to diagram
-        for actor in self.analyzer.actors:
-            actor_id = actor.name.replace(' ', '').replace('-', '_')
-            if actor.type == "external_system":
-                output.append(f"    {actor_id}[{actor.name}]")
-                output.append(f"    {actor_id} -.-> |external| System")
-            else:
-                output.append(f"    {actor_id}({actor.name})")
-        
-        output.append("")
-        
-        # Add use cases to diagram (limit to avoid clutter)
-        for use_case in self.analyzer.use_cases[:15]:
-            use_case_id = use_case.name.replace(' ', '').replace('-', '_').replace('(', '').replace(')', '')
-            safe_name = use_case.name.replace('"', "'")
-            output.append(f"    {use_case_id}[\"{safe_name}\"]")
-        
-        output.append("")
-        
-        # Add relationships to diagram
-        for use_case in self.analyzer.use_cases[:15]:
-            if use_case.primary_actor:
-                actor_id = use_case.primary_actor.replace(' ', '').replace('-', '_')
-                use_case_id = use_case.name.replace(' ', '').replace('-', '_').replace('(', '').replace(')', '')
-                output.append(f"    {actor_id} --> {use_case_id}")
-        
-        output.extend([
-            "```",
-            "",
-            "---",
-            "",
-            "## System Architecture Diagram",
-            "",
-            "```mermaid",
-            "graph LR",
-            f"    %% {display_name} System Architecture",
-            "",
-        ])
-        
-        # Add actors as external entities
-        for actor in self.analyzer.actors:
-            actor_id = actor.name.replace(' ', '').replace('-', '_')
-            if actor.type == "external_system":
-                output.append(f"    {actor_id}[{actor.name}]")
-                output.append(f"    style {actor_id} fill:#ffeb3b")
-            else:
-                output.append(f"    {actor_id}({actor.name})")
-                output.append(f"    style {actor_id} fill:#4caf50")
-        
-        output.append("")
-        
-        # Add system boundaries as subgraphs
-        for i, boundary in enumerate(self.analyzer.system_boundaries[:5]):  # Limit to 5 boundaries
-            boundary_id = boundary.name.replace(' ', '').replace('-', '_')
-            safe_name = boundary.name.replace('"', "'")
-            
-            output.append(f"    subgraph {boundary_id} [\"{safe_name}\"]")
-            
-            # Add components within the boundary
-            for j, component in enumerate(boundary.components[:3]):  # Limit to 3 components per boundary
-                comp_id = f"{boundary_id}_comp{j+1}"
-                comp_name = component.replace('"', "'")
-                output.append(f"        {comp_id}[{comp_name}]")
-            
-            output.append("    end")
-            output.append("")
-        
-        # Add relationships between actors and system boundaries
-        for rel in self.analyzer.relationships[:10]:  # Limit to 10 relationships
-            from_id = rel.from_entity.replace(' ', '').replace('-', '_')
-            to_id = rel.to_entity.replace(' ', '').replace('-', '_')
-            
-            # Try to find matching boundary or create a simple connection
-            if any(boundary.name == rel.to_entity for boundary in self.analyzer.system_boundaries):
-                output.append(f"    {from_id} --> {to_id}")
-            elif any(actor.name == rel.from_entity for actor in self.analyzer.actors):
-                output.append(f"    {from_id} --> {to_id}")
-        
-        output.extend([
-            "```",
-            "",
-            "---",
-            "",
-            "## Analysis Methodology",
-            "",
-            "This use case analysis was generated by examining:",
-            "",
-            "1. **Security Annotations**: @PreAuthorize, @Secured, @RolesAllowed patterns",
-            "2. **Controller Methods**: REST endpoint patterns and HTTP operations",
-            "3. **Package Structure**: Logical boundaries and component organization",
-            "4. **Configuration Files**: External system integrations and dependencies",
-            "5. **Business Logic**: Service layer patterns and workflow analysis",
-            "",
-            "### Actor Discovery",
-            "- **Security Patterns**: Role-based access control annotations",
-            "- **UI Patterns**: Frontend routing and component access patterns",
-            "- **External Systems**: API calls, database connections, third-party integrations",
-            "",
-            "### System Boundary Analysis",
-            "- **Package Structure**: Java package organization",
-            "- **Configuration Boundaries**: Application properties and profiles",
-            "- **Architectural Layers**: Controller, service, repository patterns",
-            "",
-            "### Use Case Extraction",
-            "- **Controller Analysis**: HTTP methods mapped to business operations",
-            "- **Business Logic**: Service method patterns and workflows",
-            "- **Data Flow**: Model relationships and transaction boundaries",
-            "",
-            "---",
-            "",
-            "## Diagrams",
-            "",
-            "This document includes two Mermaid diagrams:",
-            "",
-            "1. **Use Case Diagram**: Shows actors and their associated use cases",
-            "2. **System Architecture Diagram**: Displays system boundaries, components, and relationships",
-            "",
-            "These diagrams can be rendered in any Mermaid-compatible viewer (GitHub, GitLab, VS Code, etc.).",
-            "",
-            "---",
-            "",
-            "## Recommendations",
-            "",
-            "Based on this analysis, consider the following:",
-            "",
-            "### Documentation",
-            "- Create formal use case specifications for complex workflows",
-            "- Document actor permissions and access control policies",
-            "- Maintain architectural decision records for system boundaries",
-            "",
-            "### Testing",
-            "- Implement user acceptance tests for each identified use case",
-            "- Create integration tests for actor-system interactions",
-            "- Validate system boundary contracts with component tests",
-            "",
-            "### Architecture",
-            "- Review identified system boundaries for proper separation of concerns",
-            "- Consider extracting external system interactions into dedicated services",
-            "- Evaluate actor permission models for security best practices",
-            "",
-            "---",
-            "",
-            f"**Generated**: {self.datetime} by reverse-engineer",
-            f"**Analysis**: {self.analyzer.actor_count} actors, {self.analyzer.system_boundary_count} boundaries, {self.analyzer.use_case_count} use cases",
-            f"**Source**: {self.analyzer.endpoint_count} endpoints, {self.analyzer.model_count} models, {self.analyzer.service_count} services",
-        ])
-        
-        return "\n".join(output)
+        return output
 
 
 class StructureDocGenerator(BaseGenerator):
     """Generator for Phase 1: Project Structure documentation."""
     
+    def _load_template(self, template_name: str) -> str:
+        """Load a template file."""
+        template_dir = Path(__file__).parent / "templates"
+        template_path = template_dir / template_name
+        
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template not found: {template_path}")
+        
+        return template_path.read_text()
+    
+    def _build_endpoints_table(self) -> str:
+        """Build the API endpoints table."""
+        if not self.analyzer.endpoints:
+            return "*No endpoints discovered*"
+        
+        lines = []
+        for endpoint in self.analyzer.endpoints:
+            auth = "🔒" if endpoint.authenticated else ""
+            lines.append(f"| {endpoint.method} | {endpoint.path} | {endpoint.controller} {auth} |")
+        
+        return "\n".join(lines)
+    
+    def _build_models_table(self) -> str:
+        """Build the data models table."""
+        if not self.analyzer.models:
+            return "*No models discovered*"
+        
+        lines = []
+        for model in self.analyzer.models:
+            location = str(model.file_path.relative_to(self.analyzer.repo_root)) if model.file_path else "N/A"
+            lines.append(f"| {model.name} | {model.fields} | `{location}` |")
+        
+        return "\n".join(lines)
+    
+    def _build_views_table(self) -> str:
+        """Build the UI views table."""
+        if not self.analyzer.views:
+            return "*No views discovered*"
+        
+        lines = []
+        for view in self.analyzer.views:
+            lines.append(f"| {view.name} | `{view.file_name}` |")
+        
+        return "\n".join(lines)
+    
+    def _build_services_list(self) -> str:
+        """Build the backend services list."""
+        if not self.analyzer.services:
+            return "*No services discovered*"
+        
+        lines = []
+        for service in self.analyzer.services:
+            lines.append(f"- `{service.name}`")
+        
+        return "\n".join(lines)
+    
+    def _build_features_table(self) -> str:
+        """Build the features table."""
+        if not self.analyzer.features:
+            return "*No features were identified during analysis. Features may be documented in README files or project documentation.*"
+        
+        lines = []
+        current_category = "General"
+        
+        for i, feature in enumerate(self.analyzer.features, 1):
+            # Split feature at first colon to separate name from description
+            if ': ' in feature:
+                name, description = feature.split(': ', 1)
+                current_category = name  # Update category for subsequent items
+                lines.append(f"| {i} | {name} | {description} |")
+            else:
+                # No colon found - use as description with current category
+                lines.append(f"| {i} | {current_category} | {feature} |")
+        
+        return "\n".join(lines)
+    
     def generate(self) -> str:
-        """Generate Phase 1 structure documentation."""
+        """Generate Phase 1 structure documentation using template."""
         project_name = format_project_name(self.analyzer.repo_root.name)
         
-        output = [
-            f"# Phase 1: Project Structure Analysis",
-            f"## {project_name}",
-            "",
-            f"**Generated**: {self.date}",
-            f"**Analysis Phase**: 1 of 4 - Project Structure",
-            "",
-            "---",
-            "",
-            "## Overview",
-            "",
-            "This document contains the results of Phase 1 analysis: discovering the basic",
-            "structure of the project including endpoints, models, views, services, and features.",
-            "",
-            f"- **API Endpoints**: {self.analyzer.endpoint_count}",
-            f"- **Data Models**: {self.analyzer.model_count}",
-            f"- **UI Views**: {self.analyzer.view_count}",
-            f"- **Backend Services**: {self.analyzer.service_count}",
-            f"- **Features**: {self.analyzer.feature_count}",
-            "",
-            "---",
-            "",
-            "## API Endpoints",
-            "",
-        ]
+        # Load template
+        template = self._load_template("phase1-structure.md")
         
-        if self.analyzer.endpoints:
-            for endpoint in self.analyzer.endpoints:
-                output.append(f"- `{endpoint.method} {endpoint.path}`")
-                if endpoint.authenticated:
-                    output.append(f"  - 🔒 Requires authentication")
-                output.append(f"  - Controller: `{endpoint.controller}`")
-                output.append("")
-        else:
-            output.append("*No endpoints discovered*")
-            output.append("")
+        # Build content sections
+        endpoints_table = self._build_endpoints_table()
+        models_table = self._build_models_table()
+        views_table = self._build_views_table()
+        services_list = self._build_services_list()
+        features_table = self._build_features_table()
         
-        output.extend([
-            "---",
-            "",
-            "## Data Models",
-            "",
-        ])
+        # Populate template variables
+        output = template.replace("{{PROJECT_NAME}}", self.analyzer.repo_root.name)
+        output = output.replace("{{DATE}}", self.datetime)
+        output = output.replace("{{ENDPOINT_COUNT}}", str(self.analyzer.endpoint_count))
+        output = output.replace("{{MODEL_COUNT}}", str(self.analyzer.model_count))
+        output = output.replace("{{VIEW_COUNT}}", str(self.analyzer.view_count))
+        output = output.replace("{{SERVICE_COUNT}}", str(self.analyzer.service_count))
+        output = output.replace("{{FEATURE_COUNT}}", str(self.analyzer.feature_count))
+        output = output.replace("{{PROJECT_PATH}}", str(self.analyzer.repo_root))
         
-        if self.analyzer.models:
-            for model in self.analyzer.models:
-                output.append(f"### {model.name}")
-                output.append(f"- **Fields**: {model.fields}")
-                if model.file_path:
-                    output.append(f"- **Location**: `{model.file_path.relative_to(self.analyzer.repo_root)}`")
-                output.append("")
-        else:
-            output.append("*No models discovered*")
-            output.append("")
+        # Replace table placeholders with actual content
+        # For endpoints table, replace the template row with actual rows
+        template_row = "| {{HTTP_METHOD}} | {{HTTP_ENDPOINT}} | {{API_CONTROLLER}} |"
+        output = output.replace(template_row, endpoints_table)
         
-        output.extend([
-            "---",
-            "",
-            "## UI Views",
-            "",
-        ])
+        # For models table
+        template_row = "| {{MODEL}} | {{FIELDS}} | {{DATA_MODEL_LOCATION}} |"
+        output = output.replace(template_row, models_table)
         
-        if self.analyzer.views:
-            for view in self.analyzer.views:
-                output.append(f"- **{view.name}** (`{view.file_name}`)")
-        else:
-            output.append("*No views discovered*")
+        # For views table
+        template_row = "| {{UI_VIEW_NAME}} | {{UI_COMPONENT_FILE}} |"
+        output = output.replace(template_row, views_table)
         
-        output.extend([
-            "",
-            "---",
-            "",
-            "## Backend Services",
-            "",
-        ])
+        # For services list
+        output = output.replace("{{SERVICES_LIST}}", services_list)
         
-        if self.analyzer.services:
-            for service in self.analyzer.services:
-                output.append(f"- `{service.name}`")
-        else:
-            output.append("*No services discovered*")
-        
-        output.extend([
-            "",
-            "---",
-            "",
-            "## Features",
-            "",
-        ])
-        
+        # For features table - handle both cases (with/without table header)
         if self.analyzer.features:
-            for i, feature in enumerate(self.analyzer.features, 1):
-                output.append(f"{i}. {feature}")
+            # Features exist, just replace the table content
+            output = output.replace("{{FEATURES_TABLE}}", features_table)
         else:
-            output.append("*No features identified*")
+            # No features, replace table section with message
+            features_section = """| # | Name | Description |
+|---|------|-------------|
+{{FEATURES_TABLE}}"""
+            output = output.replace(features_section, features_table)
         
-        output.extend([
-            "",
-            "---",
-            "",
-            "## Next Steps",
-            "",
-            "To continue to Phase 2 (Actor Discovery), run:",
-            "",
-            f"```bash",
-            f"python3 -m reverse_engineer --phase 2 --path {self.analyzer.repo_root}",
-            f"```",
-            "",
-            f"**Generated**: {self.datetime} by reverse-engineer",
-        ])
-        
-        return "\n".join(output)
+        return output
 
 
 class ActorDocGenerator(BaseGenerator):
     """Generator for Phase 2: Actor Discovery documentation."""
     
+    def _load_template(self, template_name: str) -> str:
+        """Load a template file."""
+        template_dir = Path(__file__).parent / "templates"
+        template_path = template_dir / template_name
+        
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template not found: {template_path}")
+        
+        return template_path.read_text()
+    
+    def _build_actors_table(self) -> str:
+        """Build the actors table."""
+        if not self.analyzer.actors:
+            return "*No actors discovered*"
+        
+        lines = []
+        for actor in self.analyzer.actors:
+            actor_type = actor.type.replace('_', ' ').title()
+            evidence = ", ".join(actor.identified_from) if actor.identified_from else "N/A"
+            lines.append(f"| {actor.name} | {actor_type} | {actor.access_level} | {evidence} |")
+        
+        return "\n".join(lines)
+    
+    def _count_actor_types(self) -> tuple:
+        """Count actors by type."""
+        internal_users = sum(1 for a in self.analyzer.actors if a.type in ['user', 'admin', 'role'])
+        end_users = sum(1 for a in self.analyzer.actors if a.type == 'end_user')
+        external_systems = sum(1 for a in self.analyzer.actors if a.type == 'external_system')
+        return internal_users, end_users, external_systems
+    
+    def _build_access_levels_summary(self) -> str:
+        """Build access levels summary."""
+        if not self.analyzer.actors:
+            return "*No access levels defined*"
+        
+        access_levels = {}
+        for actor in self.analyzer.actors:
+            level = actor.access_level
+            access_levels[level] = access_levels.get(level, 0) + 1
+        
+        lines = []
+        for level, count in sorted(access_levels.items(), key=lambda x: x[1], reverse=True):
+            lines.append(f"- **{level}**: {count} actor(s)")
+        
+        return "\n".join(lines)
+    
     def generate(self) -> str:
-        """Generate Phase 2 actor documentation."""
+        """Generate Phase 2 actor documentation using template."""
         project_name = format_project_name(self.analyzer.repo_root.name)
         
-        output = [
-            f"# Phase 2: Actor Discovery",
-            f"## {project_name}",
-            "",
-            f"**Generated**: {self.date}",
-            f"**Analysis Phase**: 2 of 4 - Actor Discovery",
-            "",
-            "---",
-            "",
-            "## Overview",
-            "",
-            "This document contains the results of Phase 2 analysis: identifying all actors",
-            "(users, systems, roles) that interact with the system.",
-            "",
-            f"- **Total Actors**: {self.analyzer.actor_count}",
-            "",
-            "---",
-            "",
-            "## Actors",
-            "",
-        ]
+        # Load template
+        template = self._load_template("phase2-actors.md")
         
-        if self.analyzer.actors:
-            for actor in self.analyzer.actors:
-                output.extend([
-                    f"### {actor.name}",
-                    "",
-                    f"- **Type**: {actor.type.replace('_', ' ').title()}",
-                    f"- **Access Level**: {actor.access_level}",
-                    "",
-                ])
-                
-                if actor.identified_from:
-                    output.append("**Evidence**:")
-                    for evidence in actor.identified_from:
-                        output.append(f"- {evidence}")
-                    output.append("")
-                
-                output.extend([
-                    "---",
-                    "",
-                ])
-        else:
-            output.append("*No actors discovered*")
-            output.append("")
+        # Build content sections
+        actors_table = self._build_actors_table()
+        internal_users, end_users, external_systems = self._count_actor_types()
+        access_levels_summary = self._build_access_levels_summary()
         
-        output.extend([
-            "## Next Steps",
-            "",
-            "To continue to Phase 3 (System Boundary Mapping), run:",
-            "",
-            f"```bash",
-            f"python3 -m reverse_engineer --phase 3 --path {self.analyzer.repo_root}",
-            f"```",
-            "",
-            f"**Generated**: {self.datetime} by reverse-engineer",
-        ])
+        # Populate template variables
+        output = template.replace("{{PROJECT_NAME}}", self.analyzer.repo_root.name)
+        output = output.replace("{{DATE}}", self.datetime)
+        output = output.replace("{{ACTOR_COUNT}}", str(self.analyzer.actor_count))
+        output = output.replace("{{INTERNAL_USER_COUNT}}", str(internal_users))
+        output = output.replace("{{END_USER_COUNT}}", str(end_users))
+        output = output.replace("{{EXTERNAL_SYSTEM_COUNT}}", str(external_systems))
+        output = output.replace("{{PROJECT_PATH}}", str(self.analyzer.repo_root))
+        output = output.replace("{{ACCESS_LEVELS_SUMMARY}}", access_levels_summary)
         
-        return "\n".join(output)
+        # Replace table template row with actual data
+        template_row = "| {{ACTOR}} | {{ACTOR_TYPE}} | {{ACTOR_ACCESS_LEVEL}} | {{ACTOR_EVIDENCE}} |"
+        output = output.replace(template_row, actors_table)
+        
+        # Placeholders for future features
+        output = output.replace("{{SECURITY_ANNOTATIONS_SUMMARY}}", "*Not yet implemented*")
+        output = output.replace("{{ACTOR_RELATIONSHIPS}}", "*Not yet implemented*")
+        
+        return output
 
 
 class BoundaryDocGenerator(BaseGenerator):
     """Generator for Phase 3: System Boundary documentation."""
     
+    def _load_template(self, template_name: str) -> str:
+        """Load a template file."""
+        template_dir = Path(__file__).parent / "templates"
+        template_path = template_dir / template_name
+        
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template not found: {template_path}")
+        
+        return template_path.read_text()
+    
+    def _build_boundaries_table(self) -> str:
+        """Build the system boundaries table."""
+        if not self.analyzer.system_boundaries:
+            return "*No system boundaries discovered*"
+        
+        lines = []
+        for boundary in self.analyzer.system_boundaries:
+            boundary_type = boundary.type.replace('_', ' ').title()
+            component_count = len(boundary.components)
+            key_components = ", ".join(boundary.components) if boundary.components else "N/A"
+            lines.append(f"| {boundary.name} | {boundary_type} | {component_count} | {key_components} |")
+        
+        return "\n".join(lines)
+    
+    def _count_boundary_metrics(self) -> tuple:
+        """Count boundary-related metrics."""
+        total_boundaries = self.analyzer.system_boundary_count
+        subsystems = sum(1 for b in self.analyzer.system_boundaries if b.type in ['subsystem', 'module'])
+        layers = sum(1 for b in self.analyzer.system_boundaries if b.type in ['layer', 'tier'])
+        total_components = sum(len(b.components) for b in self.analyzer.system_boundaries)
+        return total_boundaries, subsystems, layers, total_components
+    
+    def _build_subsystem_architecture(self) -> str:
+        """Build subsystem architecture table."""
+        subsystems = [b for b in self.analyzer.system_boundaries if b.type in ['subsystem', 'module']]
+        if not subsystems:
+            return "*No subsystems identified*"
+        
+        lines = []
+        for subsystem in subsystems:
+            component_count = len(subsystem.components)
+            components_list = ", ".join(subsystem.components) if subsystem.components else "N/A"
+            interface_count = len(subsystem.interfaces) if subsystem.interfaces else 0
+            lines.append(f"| {subsystem.name} | {component_count} | {interface_count} | {components_list} |")
+        
+        return "\n".join(lines)
+    
+    def _build_layer_organization(self) -> str:
+        """Build layer organization summary."""
+        layers = [b for b in self.analyzer.system_boundaries if b.type in ['layer', 'tier']]
+        if not layers:
+            return "*No layers identified*"
+        
+        lines = []
+        for layer in layers:
+            lines.append(f"- **{layer.name}**: {len(layer.components)} component(s)")
+        
+        return "\n".join(lines)
+    
     def generate(self) -> str:
-        """Generate Phase 3 boundary documentation."""
+        """Generate Phase 3 boundary documentation using template."""
         project_name = format_project_name(self.analyzer.repo_root.name)
         
-        output = [
-            f"# Phase 3: System Boundary Analysis",
-            f"## {project_name}",
-            "",
-            f"**Generated**: {self.date}",
-            f"**Analysis Phase**: 3 of 4 - System Boundaries",
-            "",
-            "---",
-            "",
-            "## Overview",
-            "",
-            "This document contains the results of Phase 3 analysis: mapping system boundaries,",
-            "modules, services, and architectural layers.",
-            "",
-            f"- **Total Boundaries**: {self.analyzer.system_boundary_count}",
-            "",
-            "---",
-            "",
-            "## System Boundaries",
-            "",
-        ]
+        # Load template
+        template = self._load_template("phase3-boundaries.md")
         
-        if self.analyzer.system_boundaries:
-            for boundary in self.analyzer.system_boundaries:
-                output.extend([
-                    f"### {boundary.name}",
-                    "",
-                    f"- **Type**: {boundary.type.replace('_', ' ').title()}",
-                    f"- **Components**: {len(boundary.components)}",
-                    "",
-                ])
-                
-                if boundary.components:
-                    output.append("**Components**:")
-                    for component in boundary.components:
-                        output.append(f"- `{component}`")
-                    output.append("")
-                
-                if boundary.interfaces:
-                    output.append("**Interfaces**:")
-                    for interface in boundary.interfaces:
-                        output.append(f"- {interface}")
-                    output.append("")
-                
-                output.extend([
-                    "---",
-                    "",
-                ])
-        else:
-            output.append("*No system boundaries discovered*")
-            output.append("")
+        # Build content sections
+        boundaries_table = self._build_boundaries_table()
+        boundary_count, subsystem_count, layer_count, component_count = self._count_boundary_metrics()
+        subsystem_architecture = self._build_subsystem_architecture()
+        layer_organization = self._build_layer_organization()
         
-        output.extend([
-            "## Next Steps",
-            "",
-            "To continue to Phase 4 (Use Case Extraction), run:",
-            "",
-            f"```bash",
-            f"python3 -m reverse_engineer --phase 4 --path {self.analyzer.repo_root}",
-            f"```",
-            "",
-            f"**Generated**: {self.datetime} by reverse-engineer",
-        ])
+        # Populate template variables
+        output = template.replace("{{PROJECT_NAME}}", self.analyzer.repo_root.name)
+        output = output.replace("{{DATE}}", self.datetime)
+        output = output.replace("{{BOUNDARY_COUNT}}", str(boundary_count))
+        output = output.replace("{{SUBSYSTEM_COUNT}}", str(subsystem_count))
+        output = output.replace("{{LAYER_COUNT}}", str(layer_count))
+        output = output.replace("{{COMPONENT_COUNT}}", str(component_count))
+        output = output.replace("{{PROJECT_PATH}}", str(self.analyzer.repo_root))
+        output = output.replace("{{SUBSYSTEM_ARCHITECTURE}}", subsystem_architecture)
+        output = output.replace("{{LAYER_ORGANIZATION}}", layer_organization)
+        output = output.replace("{{BOUNDARIES_TABLE}}", boundaries_table)
         
-        return "\n".join(output)
+        # Placeholders for future features
+        output = output.replace("{{COMPONENT_MAPPING}}", "*Not yet implemented*")
+        output = output.replace("{{BOUNDARY_INTERACTIONS}}", "*Not yet implemented*")
+        output = output.replace("{{TECH_STACK_BY_BOUNDARY}}", "*Not yet implemented*")
+        
+        return output
 

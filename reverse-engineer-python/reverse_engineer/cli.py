@@ -178,7 +178,8 @@ No generation flags specified. Please provide at least one flag:
                   • REST endpoint documentation
                   • Request/response schemas
 
-  --use-cases     Generate use case analysis (use-cases.md)
+  --use-cases     Generate phased analysis (phase1-4 documents)
+                  • Project structure analysis
                   • Actor identification and analysis
                   • System boundary mapping
                   • Use case extraction and documentation
@@ -208,6 +209,7 @@ Examples:
   reverse-engineer --data-model
   reverse-engineer --api-contract
   reverse-engineer --use-cases
+  reverse-engineer --use-cases /path/to/project
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --spec --output my-spec.md
   reverse-engineer --spec --format json --output spec.json
@@ -219,14 +221,18 @@ The script will:
   2. Analyze data models and their fields
   3. Identify Vue.js views and components
   4. Extract services and their purposes
-  5. Generate requested documentation:
+  5. Generate requested documentation in re-<project-name>/ directory:
      - spec.md: User stories, requirements, success criteria
      - plan.md: Technical implementation plan with architecture
      - data-model.md: Detailed data model documentation
      - api-spec.json: OpenAPI 3.0 specification for API contracts
-     - use-cases.md: Actor analysis and use case documentation
+     - phase1-structure.md, phase2-actors.md, phase3-boundaries.md, phase4-use-cases.md: Phased analysis
         """
     )
+    
+    # Positional argument for project path (optional)
+    parser.add_argument('project_path', nargs='?', type=str,
+                        help='Path to project directory to analyze (default: current directory)')
     
     # Generation flags
     parser.add_argument('--spec', action='store_true',
@@ -238,15 +244,15 @@ The script will:
     parser.add_argument('--api-contract', action='store_true',
                         help='Generate API contract (api-spec.json)')
     parser.add_argument('--use-cases', action='store_true',
-                        help='Generate use case analysis (use-cases.md)')
+                        help='Generate phased analysis (phase1-structure.md, phase2-actors.md, phase3-boundaries.md, phase4-use-cases.md)')
     
     # Options
     parser.add_argument('-d', '--description', type=str,
                         help='Describe project intent (e.g., "forecast sprint delivery")')
     parser.add_argument('-o', '--output', type=str,
-                        help='Output file path (default: specs/<project-name>/spec.md)')
+                        help='Output file path (default: <project-root>/re-<project-name>/spec.md)')
     parser.add_argument('-p', '--path', type=str,
-                        help='Path to project directory to analyze (default: current directory)')
+                        help='Path to project directory to analyze (alternative to positional arg)')
     parser.add_argument('-f', '--format', choices=['markdown', 'json'], default='markdown',
                         help='Output format: markdown or json (default: markdown)')
     parser.add_argument('-v', '--verbose', action='store_true',
@@ -270,14 +276,15 @@ def run_phased_analysis(args):
         run_phase_4
     )
     
-    # Find repository root
-    if args.path:
-        repo_root = Path(args.path).resolve()
+    # Find repository root - check both positional and flag arguments
+    project_path = args.project_path or args.path
+    if project_path:
+        repo_root = Path(project_path).resolve()
         if not repo_root.exists():
-            print(f"Error: Specified path does not exist: {args.path}", file=sys.stderr)
+            print(f"Error: Specified path does not exist: {project_path}", file=sys.stderr)
             sys.exit(1)
         if not repo_root.is_dir():
-            print(f"Error: Specified path is not a directory: {args.path}", file=sys.stderr)
+            print(f"Error: Specified path is not a directory: {project_path}", file=sys.stderr)
             sys.exit(1)
     else:
         repo_root = find_repo_root(Path.cwd())
@@ -286,9 +293,10 @@ def run_phased_analysis(args):
             print("Tip: Use --path to specify the project directory.", file=sys.stderr)
             sys.exit(1)
     
-    # Setup output directory
-    project_name = repo_root.name + "-re"
-    output_dir = repo_root / "specs" / project_name
+    # Setup output directory - save to re-<project_name> in project root
+    project_name = repo_root.name
+    output_dir = repo_root / f"re-{project_name}"
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     # Initialize phase manager
     phase_manager = PhaseManager(repo_root, output_dir)
@@ -356,15 +364,16 @@ def main():
         print("Example: --description 'forecast sprint delivery and predict completion'\n", file=sys.stderr)
         sys.exit(1)
     
-    # Find repository root
-    if args.path:
+    # Find repository root - check both positional and flag arguments
+    project_path = args.project_path or args.path
+    if project_path:
         # Use specified path
-        repo_root = Path(args.path).resolve()
+        repo_root = Path(project_path).resolve()
         if not repo_root.exists():
-            print(f"Error: Specified path does not exist: {args.path}", file=sys.stderr)
+            print(f"Error: Specified path does not exist: {project_path}", file=sys.stderr)
             sys.exit(1)
         if not repo_root.is_dir():
-            print(f"Error: Specified path is not a directory: {args.path}", file=sys.stderr)
+            print(f"Error: Specified path is not a directory: {project_path}", file=sys.stderr)
             sys.exit(1)
     else:
         # Auto-detect from current directory
@@ -376,12 +385,13 @@ def main():
     
     # Get project directory name for output path
     project_name = repo_root.name
-
-    # Add identifier to project name to show it's reverse-engineered
-    project_name += "-re"
     
-    # Set default output file
-    output_file = args.output or str(repo_root / "specs" / project_name / "spec.md")
+    # Create output directory: re-<project_name> in project root
+    output_dir = repo_root / f"re-{project_name}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Set default output file - save to re-<project_name> directory
+    output_file = args.output or str(output_dir / "spec.md")
     output_path = Path(output_file)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
@@ -431,15 +441,47 @@ def main():
         with open(api_contract_file, 'w') as f:
             f.write(api_contract_content)
     
-    # Generate use cases if requested
+    # Generate use cases if requested (generates all 4 phase documents by default)
     if args.use_cases:
-        use_cases_file = output_path.parent / "use-cases.md"
-        print("\n📝 Generating use case analysis...", file=sys.stderr)
+        from .generators import StructureDocGenerator, ActorDocGenerator, BoundaryDocGenerator
+        
+        # Phase 1: Structure
+        phase1_file = output_path.parent / "phase1-structure.md"
+        print("\n📝 Generating Phase 1: Project Structure...", file=sys.stderr)
+        phase1_gen = StructureDocGenerator(analyzer)
+        phase1_content = phase1_gen.generate()
+        with open(phase1_file, 'w') as f:
+            f.write(phase1_content)
+        
+        # Phase 2: Actors
+        phase2_file = output_path.parent / "phase2-actors.md"
+        print("📝 Generating Phase 2: Actor Discovery...", file=sys.stderr)
+        phase2_gen = ActorDocGenerator(analyzer)
+        phase2_content = phase2_gen.generate()
+        with open(phase2_file, 'w') as f:
+            f.write(phase2_content)
+        
+        # Phase 3: Boundaries
+        phase3_file = output_path.parent / "phase3-boundaries.md"
+        print("📝 Generating Phase 3: System Boundaries...", file=sys.stderr)
+        phase3_gen = BoundaryDocGenerator(analyzer)
+        phase3_content = phase3_gen.generate()
+        with open(phase3_file, 'w') as f:
+            f.write(phase3_content)
+        
+        # Phase 4: Use Cases
+        phase4_file = output_path.parent / "phase4-use-cases.md"
+        print("📝 Generating Phase 4: Use Case Analysis...", file=sys.stderr)
         use_case_gen = UseCaseMarkdownGenerator(analyzer)
         use_case_content = use_case_gen.generate()
-        
-        with open(use_cases_file, 'w') as f:
+        with open(phase4_file, 'w') as f:
             f.write(use_case_content)
+        
+        print("\n✅ All phase documents generated:", file=sys.stderr)
+        print(f"   - {phase1_file}", file=sys.stderr)
+        print(f"   - {phase2_file}", file=sys.stderr)
+        print(f"   - {phase3_file}", file=sys.stderr)
+        print(f"   - {phase4_file}", file=sys.stderr)
     
     # Display results
     log_section("Generation Complete")
@@ -457,8 +499,7 @@ def main():
     if args.api_contract:
         print(f"✅ API contract saved to: {output_path.parent / 'contracts' / 'api-spec.json'}", file=sys.stderr)
     
-    if args.use_cases:
-        print(f"✅ Use cases saved to: {output_path.parent / 'use-cases.md'}", file=sys.stderr)
+    # Note: --use-cases output messages are shown immediately after generation
     
     print("\n📊 Analysis Statistics:", file=sys.stderr)
     print(f"   • API Endpoints: {analyzer.endpoint_count}", file=sys.stderr)
@@ -469,7 +510,7 @@ def main():
     print(f"   • Use Cases: {analyzer.use_case_count}", file=sys.stderr)
     print()
     
-    if args.format == 'markdown':
+    if args.spec and args.format == 'markdown':
         print("📖 View the specification:", file=sys.stderr)
         print(f"   cat {output_path}", file=sys.stderr)
         print("   # or", file=sys.stderr)

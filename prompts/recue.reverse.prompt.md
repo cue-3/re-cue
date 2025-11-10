@@ -3,21 +3,21 @@ description: Reverse engineer the feature specification, plan, and other documen
 ---
 
 ## User Input
-The user wants to reverse engineer the feature specification, plan, and other documents from the codebase. They MUST provide a feature description after the `/speckit.reverse` command. 
+The user wants to reverse engineer the feature specification, plan, and other documents from the codebase. They MUST provide a feature description after the `/recue.reverse` command. 
 
 ## Outline
-The text the user typed after `/speckit.reverse` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
+The text the user typed after `/recue.reverse` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
 Given that feature description, do this:
 
 1. **Generate a concise short name**  (2-4 words) for the branch: `reverse-engineer-spec`
-2. Run the script `.specify/scripts/bash/reverse-engineer.sh --data-model`.
+2. Run the script `.github/scripts/reverse-engineer.sh --data-model`.
 3. Return a message that the data model file has been generated.
-4. Run the script `.specify/scripts/bash/reverse-engineer.sh --api-contract`.
+4. Run the script `.github/scripts/reverse-engineer.sh --api-contract`.
 5. Return a message that the API contract file has been generated.
-6. Run the script `.specify/scripts/bash/reverse-engineer.sh --spec --description '$ARGUMENTS'`.
+6. Run the script `.github/scripts/reverse-engineer.sh --spec --description '$ARGUMENTS'`.
 7. Return a message that the implementation plan file has been generated.
-8. Run the script `.specify/scripts/bash/reverse-engineer.sh --plan`.
+8. Run the script `.github/scripts/reverse-engineer.sh --plan`.
 9. Return a message that the implementation plan file has been generated.
 
 ## General Guidelines

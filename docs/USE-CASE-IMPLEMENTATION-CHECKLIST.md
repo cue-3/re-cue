@@ -220,7 +220,10 @@
   - [ ] Test bash script integration
 
 ### 6.2 GitHub Copilot Integration
-- [ ] **Update `speckit.reverse.prompt.md`**
+- [ ] **Update documentation**
+  - [ ] Update main README.md with use case examples
+  - [ ] **Update `recue.reverse.prompt.md`**
+  - [ ] Add use case documentation to reverse-engineer-python/README-PYTHON.md
   - [ ] Add use case generation to automated workflow
   - [ ] Include use case analysis in prompt context
   - [ ] Test GitHub Copilot integration

@@ -37,8 +37,14 @@ reverse-engineer-python/
 │   ├── __main__.py           # Module entry point
 │   ├── cli.py                # Command-line interface
 │   ├── analyzer.py           # Project analysis engine
-│   ├── generators.py         # Documentation generators
-│   └── utils.py              # Utility functions
+│   ├── generators.py         # Documentation generators (template-based)
+│   ├── utils.py              # Utility functions
+│   └── templates/            # ✨ Output templates (customizable)
+│       ├── README.md         # Template documentation
+│       ├── phase1-structure.md
+│       ├── phase2-actors.md
+│       ├── phase3-boundaries.md
+│       └── phase4-use-cases.md
 ├── setup.py                  # pip installation config
 ├── requirements.txt          # Dependencies (none!)
 ├── install-python.sh         # Quick installer script
@@ -57,6 +63,24 @@ reverse-engineer-python/
 - 💻 **Cross-Platform**: Works on macOS, Linux, and Windows
 - 📊 **Interactive Progress**: Real-time feedback with 5 analysis stages
 - 🎨 **Interactive Mode**: Run without arguments for guided setup
+- ✨ **Template System**: Customizable output templates for all document types
+
+## Template Customization
+
+The Python CLI uses a template-based system for generating documentation. You can customize the output format by editing template files in `reverse_engineer/templates/`:
+
+- **`phase1-structure.md`** - Project structure analysis template
+- **`phase2-actors.md`** - Actor discovery template
+- **`phase3-boundaries.md`** - System boundary mapping template
+- **`phase4-use-cases.md`** - Use case extraction template
+
+See `reverse_engineer/templates/README.md` for template documentation and customization guide.
+
+**Benefits**:
+- ✅ Customize output without modifying code
+- ✅ Consistent formatting across all analyses
+- ✅ Easy to add or remove sections
+- ✅ Support for organization-specific standards
 
 ## Documentation
 

@@ -393,7 +393,7 @@ class UseCaseGenerator(BaseGenerator):
 Update `reverse-engineer-bash/reverse-engineer.sh` to include use case analysis using Python backend.
 
 #### 6.2 GitHub Copilot Integration
-Update `prompts/speckit.reverse.prompt.md` to include use case generation in automated workflows.
+Update `prompts/recue.reverse.prompt.md` to include use case generation in automated workflows.
 
 #### 6.3 Documentation Updates
 - Update README.md with new capability

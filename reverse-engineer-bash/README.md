@@ -16,10 +16,10 @@ The script discovers and analyzes:
 
 ## GitHub Copilot Integration
 
-This script is designed to work seamlessly with the GitHub Copilot prompt located at `../prompts/speckit.reverse.prompt.md`. When installed in a Specify project (via `../install.sh`), users can trigger automated reverse engineering by typing:
+This script is designed to work seamlessly with the GitHub Copilot prompt located at `../prompts/recue.reverse.prompt.md`. When installed in a Specify project (via `../install.sh`), users can trigger automated reverse engineering by typing:
 
 ```
-/speckit.reverse
+/recue.reverse
 ```
 
 The prompt automatically executes this script with all flags (`--spec --plan --data-model --api-contract`) and provides status updates.
@@ -35,7 +35,7 @@ Generate all documentation types:
 
 **Through GitHub Copilot (when installed):**
 ```
-/speckit.reverse
+/recue.reverse
 ```
 
 Generate just an API contract:
@@ -327,13 +327,13 @@ This provides detailed output showing:
 
 ### GitHub Copilot Prompt Integration
 
-The companion prompt file (`../prompts/speckit.reverse.prompt.md`) provides:
-- **Automated workflow triggers** via `/speckit.reverse [description]` commands
+The companion prompt file (`../prompts/recue.reverse.prompt.md`) provides:
+- **Automated workflow triggers** via `/recue.reverse [description]` commands
 - **Context for AI analysis** with business-focused documentation guidelines
 - **Specify-compatible output** following established specification patterns
 - **Sequential execution** of all script flags with status reporting
 
-When installed via the root `install.sh` script, the prompt is placed at `.github/prompts/speckit.reverse.prompt.md` in the target Specify project.
+When installed via the root `install.sh` script, the prompt is placed at `.github/prompts/recue.reverse.prompt.md` in the target Specify project.
 
 ### Maven Integration
 Add to your `pom.xml` for automated documentation generation:
