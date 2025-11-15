@@ -3,6 +3,16 @@ languageCode = 'en-us'
 title = 'RE-cue - Reverse Engineering Toolkit'
 theme = 're-cue-theme'
 
+# Enable following symbolic links
+[security]
+  [security.exec]
+    allow = ['^(dart-)?sass(-embedded)?$', '^go$', '^npx$', '^postcss$']
+  [security.funcs]
+    getenv = ['^HUGO_', '^CI$']
+  [security.http]
+    methods = ['(?i)GET|POST']
+    urls = ['.*']
+
 [caches]
   [caches.images]
     dir = ':cacheDir/images'
