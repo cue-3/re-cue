@@ -3,6 +3,10 @@ languageCode = 'en-us'
 title = 'RE-cue - Reverse Engineering Toolkit'
 theme = 're-cue-theme'
 
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'
+    
 [params]
   description = 'Automatically generate comprehensive documentation from your existing codebase'
   author = 'quickcue3'
