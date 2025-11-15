@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
-from .analyzer import ProjectAnalyzer
+from .analyzer import ProjectAnalyzer, create_analyzer, PLUGIN_ARCHITECTURE_AVAILABLE
 from .generators import (
     SpecGenerator,
     PlanGenerator,
@@ -17,6 +17,9 @@ from .generators import (
     UseCaseMarkdownGenerator
 )
 from .utils import find_repo_root, log_info, log_section
+
+if PLUGIN_ARCHITECTURE_AVAILABLE:
+    from .detectors import TechDetector
 
 
 def interactive_mode():
@@ -234,6 +237,15 @@ The script will:
     parser.add_argument('project_path', nargs='?', type=str,
                         help='Path to project directory to analyze (default: current directory)')
     
+    # Framework detection flags
+    framework_group = parser.add_argument_group('framework detection')
+    framework_group.add_argument('--list-frameworks', action='store_true',
+                                 help='List all supported frameworks and exit')
+    framework_group.add_argument('--detect', action='store_true',
+                                 help='Detect framework of the project and exit')
+    framework_group.add_argument('--framework', type=str,
+                                 help='Force specific framework analyzer (e.g., java_spring, nodejs_express, python_django)')
+    
     # Generation flags
     parser.add_argument('--spec', action='store_true',
                         help='Generate specification document (spec.md)')
@@ -338,6 +350,37 @@ def run_phased_analysis(args):
     print("═" * 70 + "\n", file=sys.stderr)
 
 
+def list_frameworks():
+    """List all supported frameworks."""
+    print("\n🔧 Supported Frameworks:\n")
+    print("  java_spring      - Java Spring Boot applications")
+    print("  nodejs_express   - Node.js with Express framework")
+    print("  nodejs_nestjs    - Node.js with NestJS framework")
+    print("  python_django    - Python Django applications")
+    print("  python_flask     - Python Flask applications")
+    print("  python_fastapi   - Python FastAPI applications")
+    print("  dotnet           - .NET/ASP.NET applications")
+    print("  ruby_rails       - Ruby on Rails applications")
+    print("\nUse --framework <name> to force a specific analyzer.")
+    print("Use --detect to auto-detect the framework.\n")
+
+
+def detect_framework(repo_root, verbose=False):
+    """Detect and display framework information."""
+    if not PLUGIN_ARCHITECTURE_AVAILABLE:
+        print("\n❌ Framework detection not available (plugin architecture not loaded)\n", file=sys.stderr)
+        return
+    
+    detector = TechDetector(repo_root)
+    tech_stack = detector.detect()
+    
+    print("\n🔍 Framework Detection Results:\n")
+    print(f"  Framework:  {tech_stack.framework_id}")
+    print(f"  Language:   {tech_stack.language}")
+    print(f"  Confidence: {tech_stack.confidence:.1%}")
+    print()
+
+
 def main():
     """Main entry point for the CLI."""
     parser = create_parser()
@@ -347,6 +390,21 @@ def main():
         args = interactive_mode()
     else:
         args = parser.parse_args()
+    
+    # Handle --list-frameworks
+    if hasattr(args, 'list_frameworks') and args.list_frameworks:
+        list_frameworks()
+        return
+    
+    # Handle --detect
+    if hasattr(args, 'detect') and args.detect:
+        project_path = args.project_path or args.path or '.'
+        repo_root = Path(project_path).resolve()
+        if not repo_root.exists() or not repo_root.is_dir():
+            print(f"Error: Invalid project path: {project_path}", file=sys.stderr)
+            sys.exit(1)
+        detect_framework(repo_root, verbose=args.verbose if hasattr(args, 'verbose') else False)
+        return
     
     # Handle phased execution
     if hasattr(args, 'phase') and args.phase:
@@ -448,7 +506,8 @@ def main():
         # Phase 1: Structure
         phase1_file = output_path.parent / "phase1-structure.md"
         print("\n📝 Generating Phase 1: Project Structure...", file=sys.stderr)
-        phase1_gen = StructureDocGenerator(analyzer)
+        framework_id = getattr(analyzer, 'framework_id', None)
+        phase1_gen = StructureDocGenerator(analyzer, framework_id)
         phase1_content = phase1_gen.generate()
         with open(phase1_file, 'w') as f:
             f.write(phase1_content)
@@ -456,7 +515,7 @@ def main():
         # Phase 2: Actors
         phase2_file = output_path.parent / "phase2-actors.md"
         print("📝 Generating Phase 2: Actor Discovery...", file=sys.stderr)
-        phase2_gen = ActorDocGenerator(analyzer)
+        phase2_gen = ActorDocGenerator(analyzer, framework_id)
         phase2_content = phase2_gen.generate()
         with open(phase2_file, 'w') as f:
             f.write(phase2_content)
@@ -464,7 +523,7 @@ def main():
         # Phase 3: Boundaries
         phase3_file = output_path.parent / "phase3-boundaries.md"
         print("📝 Generating Phase 3: System Boundaries...", file=sys.stderr)
-        phase3_gen = BoundaryDocGenerator(analyzer)
+        phase3_gen = BoundaryDocGenerator(analyzer, framework_id)
         phase3_content = phase3_gen.generate()
         with open(phase3_file, 'w') as f:
             f.write(phase3_content)
@@ -472,7 +531,7 @@ def main():
         # Phase 4: Use Cases
         phase4_file = output_path.parent / "phase4-use-cases.md"
         print("📝 Generating Phase 4: Use Case Analysis...", file=sys.stderr)
-        use_case_gen = UseCaseMarkdownGenerator(analyzer)
+        use_case_gen = UseCaseMarkdownGenerator(analyzer, framework_id)
         use_case_content = use_case_gen.generate()
         with open(phase4_file, 'w') as f:
             f.write(use_case_content)

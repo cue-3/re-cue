@@ -34,7 +34,7 @@ theme = 're-cue-theme'
     weight = 3
   [[menu.main]]
     name = 'Documentation'
-    url = '/#documentation'
+    url = '/docs/'
     weight = 4
   [[menu.main]]
     name = 'GitHub'

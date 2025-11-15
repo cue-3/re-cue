@@ -1,0 +1,104 @@
+framework:
+  id: "nodejs_express"
+  name: "Node.js Express"
+  language: "javascript"
+  version_detection:
+    - file: "package.json"
+      patterns:
+        - '"express":'
+        - '"@nestjs/core":'
+
+file_patterns:
+  routes:
+    - "*routes.js"
+    - "*routes.ts"
+    - "*controller.js"
+    - "*controller.ts"
+    - "*/routes/*.js"
+    - "*/routes/*.ts"
+    - "*/controllers/*.js"
+    - "*/controllers/*.ts"
+  models:
+    - "*model.js"
+    - "*model.ts"
+    - "*/models/*.js"
+    - "*/models/*.ts"
+    - "*/schemas/*.js"
+    - "*/schemas/*.ts"
+  services:
+    - "*service.js"
+    - "*service.ts"
+    - "*/services/*.js"
+    - "*/services/*.ts"
+
+patterns:
+  endpoints:
+    express:
+      - pattern: "(app|router)\\.(get|post|put|delete|patch)\\s*\\(['\"]([^'\"]+)['\"]"
+        method_group: 2
+        path_group: 3
+    nestjs:
+      - pattern: "@(Get|Post|Put|Delete|Patch)\\s*\\(['\"]([^'\"]*)['\"]\\)"
+        method_group: 1
+        path_group: 2
+      - pattern: "@Controller\\s*\\(['\"]([^'\"]+)['\"]\\)"
+        type: "controller_base"
+        path_group: 1
+  
+  security:
+    - pattern: "passport\\.authenticate"
+      type: "passport"
+    - pattern: "@UseGuards\\("
+      type: "nestjs_guard"
+    - pattern: "(requireAuth|isAuthenticated)"
+      type: "middleware"
+    - pattern: "(checkRole|hasRole)\\("
+      type: "role_check"
+    - pattern: "@Roles\\("
+      type: "nestjs_roles"
+  
+  models:
+    mongoose:
+      - pattern: "new Schema\\("
+      - pattern: "mongoose\\.model\\("
+    sequelize:
+      - pattern: "sequelize\\.define\\("
+      - pattern: "DataTypes\\."
+    typeorm:
+      - pattern: "@Entity\\("
+      - pattern: "@Column\\("
+
+directory_structure:
+  source_root: "src"
+  routes: "src/routes"
+  controllers: "src/controllers"
+  models: "src/models"
+  services: "src/services"
+
+default_actors:
+  - name: "Anonymous User"
+    type: "external"
+    access_level: "public"
+  - name: "Authenticated User"
+    type: "external"
+    access_level: "authenticated"
+  - name: "Admin"
+    type: "external"
+    access_level: "admin"
+
+default_boundaries:
+  - name: "Express Routes"
+    type: "external"
+    description: "HTTP endpoints"
+  - name: "NestJS Controllers"
+    type: "external"
+    description: "HTTP controllers"
+  - name: "Services"
+    type: "internal"
+    description: "Business logic"
+  - name: "ORM Layer"
+    type: "data"
+    description: "Database access"
+  - name: "Middleware"
+    type: "internal"
+    description: "Request processing"

@@ -1,2 +1,2 @@
-# No external dependencies required
-# Python 3.7+ standard library only
+# Python 3.7+ standard library + YAML support
+pyyaml>=6.0

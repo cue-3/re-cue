@@ -5,12 +5,13 @@ Generators for creating documentation files from analyzed project data.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .analyzer import ProjectAnalyzer
 
 from .utils import extract_intent_context, format_project_name
+from .templates.template_loader import TemplateLoader
 
 
 class BaseGenerator:
@@ -1032,15 +1033,14 @@ class ApiContractGenerator(BaseGenerator):
 class UseCaseMarkdownGenerator(BaseGenerator):
     """Generator for use-cases.md files."""
     
+    def __init__(self, analyzer, framework_id: Optional[str] = None):
+        """Initialize generator with optional framework ID."""
+        super().__init__(analyzer)
+        self.template_loader = TemplateLoader(framework_id)
+    
     def _load_template(self, template_name: str) -> str:
-        """Load a template file."""
-        template_dir = Path(__file__).parent / "templates"
-        template_path = template_dir / template_name
-        
-        if not template_path.exists():
-            raise FileNotFoundError(f"Template not found: {template_path}")
-        
-        return template_path.read_text()
+        """Load a template file with framework-specific fallback."""
+        return self.template_loader.load(template_name)
     
     def _build_actors_summary(self) -> str:
         """Build the actors summary section."""
@@ -1229,15 +1229,14 @@ class UseCaseMarkdownGenerator(BaseGenerator):
 class StructureDocGenerator(BaseGenerator):
     """Generator for Phase 1: Project Structure documentation."""
     
+    def __init__(self, analyzer: 'ProjectAnalyzer', framework_id: Optional[str] = None):
+        """Initialize generator with optional framework ID."""
+        super().__init__(analyzer)
+        self.template_loader = TemplateLoader(framework_id)
+    
     def _load_template(self, template_name: str) -> str:
-        """Load a template file."""
-        template_dir = Path(__file__).parent / "templates"
-        template_path = template_dir / template_name
-        
-        if not template_path.exists():
-            raise FileNotFoundError(f"Template not found: {template_path}")
-        
-        return template_path.read_text()
+        """Load a template file with framework-specific fallback."""
+        return self.template_loader.load(template_name)
     
     def _build_endpoints_table(self) -> str:
         """Build the API endpoints table."""
@@ -1362,15 +1361,14 @@ class StructureDocGenerator(BaseGenerator):
 class ActorDocGenerator(BaseGenerator):
     """Generator for Phase 2: Actor Discovery documentation."""
     
+    def __init__(self, analyzer: 'ProjectAnalyzer', framework_id: Optional[str] = None):
+        """Initialize generator with optional framework ID."""
+        super().__init__(analyzer)
+        self.template_loader = TemplateLoader(framework_id)
+    
     def _load_template(self, template_name: str) -> str:
-        """Load a template file."""
-        template_dir = Path(__file__).parent / "templates"
-        template_path = template_dir / template_name
-        
-        if not template_path.exists():
-            raise FileNotFoundError(f"Template not found: {template_path}")
-        
-        return template_path.read_text()
+        """Load a template file with framework-specific fallback."""
+        return self.template_loader.load(template_name)
     
     def _build_actors_table(self) -> str:
         """Build the actors table."""
@@ -1444,15 +1442,14 @@ class ActorDocGenerator(BaseGenerator):
 class BoundaryDocGenerator(BaseGenerator):
     """Generator for Phase 3: System Boundary documentation."""
     
+    def __init__(self, analyzer: 'ProjectAnalyzer', framework_id: Optional[str] = None):
+        """Initialize generator with optional framework ID."""
+        super().__init__(analyzer)
+        self.template_loader = TemplateLoader(framework_id)
+    
     def _load_template(self, template_name: str) -> str:
-        """Load a template file."""
-        template_dir = Path(__file__).parent / "templates"
-        template_path = template_dir / template_name
-        
-        if not template_path.exists():
-            raise FileNotFoundError(f"Template not found: {template_path}")
-        
-        return template_path.read_text()
+        """Load a template file with framework-specific fallback."""
+        return self.template_loader.load(template_name)
     
     def _build_boundaries_table(self) -> str:
         """Build the system boundaries table."""

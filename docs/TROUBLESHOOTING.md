@@ -1,3 +1,8 @@
+---
+title: "Troubleshooting Guide"
+weight: 20
+---
+
 # RE-cue Troubleshooting Guide
 
 **Last Updated**: November 9, 2025  

@@ -6,9 +6,41 @@ This directory contains the Hugo static site for RE-cue.
 
 - `hugo.toml` - Site configuration
 - `content/` - Markdown content files
+  - `content/docs/` - **Symbolic link to `../../docs/`** (single source of truth)
 - `data/` - Data files (features, steps, documentation)
 - `themes/re-cue-theme/` - Custom Hugo theme
 - `static/` - Static assets (CSS, images)
+
+## Content Management
+
+### Documentation Files
+
+The `content/docs/` directory is a **symbolic link** to the main `docs/` directory at the repository root. This means:
+
+- ✅ **Single source of truth** - Edit files in `/docs/` and they automatically appear in the Hugo site
+- ✅ **No duplication** - Documentation is maintained in one place
+- ✅ **Hugo frontmatter required** - All docs files need YAML frontmatter with `title` and `weight`
+
+Example frontmatter:
+```yaml
+---
+title: "Document Title"
+weight: 10
+---
+```
+
+### Adding New Documentation
+
+1. Create or edit markdown files in `/docs/` directory
+2. Add Hugo frontmatter at the top of each file
+3. Files automatically appear in the Hugo site via symlink
+4. Update navigation in theme layouts if needed
+
+### Navigation Updates
+
+Edit these files to update documentation navigation:
+- `themes/re-cue-theme/layouts/_default/single.html` - Individual doc page sidebar
+- `themes/re-cue-theme/layouts/docs/list.html` - Docs index page with cards
 
 ## Building the Site
 
@@ -120,6 +152,14 @@ hugo
 ## Customization
 
 ### Colors
+
+The site uses a consistent color scheme:
+
+- Dark Blue: `#0a1929` - Primary backgrounds
+- Medium Blue: `#1e3a5f` - Secondary backgrounds
+- Light Blue: `#4a90e2` - Highlights and accents
+- Accent Blue: `#64b5f6` - Interactive elements
+- White: `#ffffff` - Text and contrast
 
 Edit `hugo.toml` to change the color scheme:
 

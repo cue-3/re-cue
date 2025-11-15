@@ -1,3 +1,8 @@
+---
+title: "Changelog"
+weight: 10
+---
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

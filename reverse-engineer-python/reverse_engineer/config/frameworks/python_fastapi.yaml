@@ -1,0 +1,93 @@
+framework:
+  id: "python_fastapi"
+  name: "Python FastAPI"
+  language: "python"
+  version_detection:
+    - file: "requirements.txt"
+      pattern: "fastapi"
+    - file: "main.py"
+      pattern: "from fastapi import"
+
+file_patterns:
+  routes:
+    - "main.py"
+    - "app.py"
+    - "*/routers/*.py"
+    - "*/api/*.py"
+  models:
+    - "models.py"
+    - "schemas.py"
+    - "*/models/*.py"
+    - "*/schemas/*.py"
+  services:
+    - "*service.py"
+    - "*/services/*.py"
+
+patterns:
+  endpoints:
+    app_decorators:
+      - pattern: "@app\\.(get|post|put|delete|patch)\\(['\"]([^'\"]+)['\"]"
+        method_group: 1
+        path_group: 2
+    router_decorators:
+      - pattern: "@router\\.(get|post|put|delete|patch)\\(['\"]([^'\"]+)['\"]"
+        method_group: 1
+        path_group: 2
+    async_detection:
+      - pattern: "async\\s+def\\s+(\\w+)"
+        type: "async_function"
+  
+  security:
+    dependencies:
+      - pattern: "Depends\\("
+        type: "dependency"
+      - pattern: "Security\\("
+        type: "security"
+    oauth2:
+      - pattern: "HTTPBearer"
+      - pattern: "OAuth2PasswordBearer"
+      - pattern: "OAuth2AuthorizationCodeBearer"
+  
+  models:
+    pydantic:
+      - pattern: "class\\s+(\\w+)\\(BaseModel\\)"
+        type: "schema"
+      - pattern: "class\\s+(\\w+)\\(.*Base.*\\)"
+        type: "model"
+      - pattern: "(\\w+):\\s*(str|int|float|bool|List|Dict|Optional)"
+        type: "field"
+    routers:
+      - pattern: "APIRouter\\((?:.*prefix=['\"]([^'\"]+)['\"])?"
+        prefix_group: 1
+
+directory_structure:
+  routers: "*/routers"
+  schemas: "*/schemas"
+  models: "*/models"
+  services: "*/services"
+  api: "*/api"
+
+default_actors:
+  - name: "Anonymous"
+    type: "external"
+    access_level: "public"
+  - name: "Authenticated"
+    type: "external"
+    access_level: "authenticated"
+  - name: "Admin"
+    type: "external"
+    access_level: "admin"
+
+default_boundaries:
+  - name: "FastAPI Routes"
+    type: "external"
+    description: "HTTP endpoints"
+  - name: "Pydantic Schemas"
+    type: "data"
+    description: "Data validation models"
+  - name: "FastAPI Services"
+    type: "internal"
+    description: "Business logic"
+  - name: "Database Layer"
+    type: "data"
+    description: "Persistence layer"

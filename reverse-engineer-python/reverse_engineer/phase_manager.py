@@ -136,7 +136,8 @@ def run_phase_1(analyzer, phase_manager: PhaseManager, verbose: bool = False):
     output_file = phase_manager.get_phase_output_file('1')
     
     print(f"\n📝 Generating Phase 1 documentation...", file=sys.stderr)
-    generator = StructureDocGenerator(analyzer)
+    framework_id = getattr(analyzer, 'framework_id', None)
+    generator = StructureDocGenerator(analyzer, framework_id)
     content = generator.generate()
     
     with open(output_file, 'w') as f:
@@ -187,7 +188,8 @@ def run_phase_2(analyzer, phase_manager: PhaseManager, verbose: bool = False):
     output_file = phase_manager.get_phase_output_file('2')
     
     print(f"📝 Generating Phase 2 documentation...", file=sys.stderr)
-    generator = ActorDocGenerator(analyzer)
+    framework_id = getattr(analyzer, 'framework_id', None)
+    generator = ActorDocGenerator(analyzer, framework_id)
     content = generator.generate()
     
     with open(output_file, 'w') as f:
@@ -232,7 +234,8 @@ def run_phase_3(analyzer, phase_manager: PhaseManager, verbose: bool = False):
     output_file = phase_manager.get_phase_output_file('3')
     
     print(f"📝 Generating Phase 3 documentation...", file=sys.stderr)
-    generator = BoundaryDocGenerator(analyzer)
+    framework_id = getattr(analyzer, 'framework_id', None)
+    generator = BoundaryDocGenerator(analyzer, framework_id)
     content = generator.generate()
     
     with open(output_file, 'w') as f:
@@ -293,7 +296,8 @@ def run_phase_4(analyzer, phase_manager: PhaseManager, verbose: bool = False):
     output_file = phase_manager.get_phase_output_file('4')
     
     print(f"📝 Generating Phase 4 documentation...", file=sys.stderr)
-    generator = UseCaseMarkdownGenerator(analyzer)
+    framework_id = getattr(analyzer, 'framework_id', None)
+    generator = UseCaseMarkdownGenerator(analyzer, framework_id)
     content = generator.generate()
     
     with open(output_file, 'w') as f:

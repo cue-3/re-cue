@@ -129,6 +129,33 @@ python3 -m reverse_engineer --use-cases --phased ~/projects/my-spring-app
 
 See [docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md](docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md) for complete feature documentation.
 
+## Supported Frameworks
+
+RE-cue automatically detects and analyzes multiple technology stacks:
+
+| Framework | Language | Version | Status | Guide |
+|-----------|----------|---------|--------|-------|
+| **Spring Boot** | Java | 2.x, 3.x | ✅ Full Support | [Java Spring Guide](docs/frameworks/java-spring-guide.md) |
+| **Express** | Node.js | 4.x+ | 🚧 In Development | [Node.js Guide](docs/frameworks/nodejs-guide.md) |
+| **NestJS** | TypeScript | 9.x+ | 🚧 In Development | [Node.js Guide](docs/frameworks/nodejs-guide.md) |
+| **Django** | Python | 3.x, 4.x | 🚧 In Development | [Python Guide](docs/frameworks/python-guide.md) |
+| **Flask** | Python | 2.x, 3.x | 🚧 In Development | [Python Guide](docs/frameworks/python-guide.md) |
+| **FastAPI** | Python | 0.95+ | 🚧 In Development | [Python Guide](docs/frameworks/python-guide.md) |
+| **ASP.NET Core** | C# | 6.0+ | 🚧 Planned | [.NET Guide](docs/frameworks/dotnet-guide.md) |
+| **Ruby on Rails** | Ruby | 6.x, 7.x | 🚧 Planned | Coming Soon |
+
+**Framework Detection** - RE-cue automatically identifies your framework by analyzing:
+- Build files (`pom.xml`, `package.json`, `requirements.txt`, etc.)
+- Project structure and directory conventions
+- Framework-specific configuration files
+
+**Manual Selection** - Override auto-detection when needed:
+```bash
+reverse-engineer --spec --framework nodejs_express --path ~/projects/my-app
+```
+
+See [docs/frameworks/README.md](docs/frameworks/README.md) for complete framework support documentation.
+
 ## Available Versions
 
 This toolkit is available in two versions with identical functionality:
@@ -145,6 +172,7 @@ This toolkit is available in two versions with identical functionality:
 - Interactive progress with 8 analysis stages
 - Enhanced business context analysis (transactions, validations, workflows)
 - Phased analysis with state persistence
+- Multi-framework support (Java Spring, Node.js, Python, .NET)
 - Install via pip from `reverse-engineer-python/`: `pip install -e reverse-engineer-python/`
 - See [reverse-engineer-python/README-PYTHON.md](reverse-engineer-python/README-PYTHON.md) for details
 

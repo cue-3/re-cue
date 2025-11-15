@@ -1,5 +1,8 @@
 """
 Core analyzer module for discovering project components.
+
+This module now supports multiple frameworks through a plugin architecture.
+The original ProjectAnalyzer class delegates to framework-specific analyzers.
 """
 
 import re
@@ -8,6 +11,14 @@ from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 
 from .utils import log_info
+
+# Import new plugin architecture
+try:
+    from .detectors import TechDetector
+    from .analyzers import JavaSpringAnalyzer
+    PLUGIN_ARCHITECTURE_AVAILABLE = True
+except ImportError:
+    PLUGIN_ARCHITECTURE_AVAILABLE = False
 
 
 class SecurityPatternAnalyzer:
@@ -3069,3 +3080,51 @@ class ProjectAnalyzer:
             return ["Entity is removed from the system", "User receives confirmation"]
         else:
             return ["Operation completes successfully", "User receives appropriate response"]
+
+
+
+# Compatibility wrapper for new plugin architecture
+def create_analyzer(repo_root: Path, verbose: bool = False):
+    """
+    Create an analyzer instance using the new plugin architecture if available.
+    Falls back to legacy ProjectAnalyzer if plugins are not available.
+    
+    This function provides backward compatibility during the transition.
+    """
+    if PLUGIN_ARCHITECTURE_AVAILABLE:
+        try:
+            # Import additional analyzers
+            from .analyzers import (
+                NodeExpressAnalyzer,
+                DjangoAnalyzer,
+                FlaskAnalyzer,
+                FastAPIAnalyzer
+            )
+            
+            # Detect technology stack
+            tech_stack = TechDetector(repo_root, verbose).detect()
+            
+            if verbose:
+                print(f"Detected framework: {tech_stack.name}")
+            
+            # Return appropriate analyzer based on framework
+            if tech_stack.framework_id == "java_spring":
+                return JavaSpringAnalyzer(repo_root, verbose)
+            elif tech_stack.framework_id in ["nodejs_express", "nodejs_nestjs"]:
+                return NodeExpressAnalyzer(repo_root, verbose)
+            elif tech_stack.framework_id == "python_django":
+                return DjangoAnalyzer(repo_root, verbose)
+            elif tech_stack.framework_id == "python_flask":
+                return FlaskAnalyzer(repo_root, verbose)
+            elif tech_stack.framework_id == "python_fastapi":
+                return FastAPIAnalyzer(repo_root, verbose)
+            else:
+                if verbose:
+                    print(f"Using legacy analyzer for {tech_stack.name}")
+        except Exception as e:
+            if verbose:
+                print(f"Plugin architecture failed: {e}, using legacy analyzer")
+    
+    # Fall back to original ProjectAnalyzer
+    return ProjectAnalyzer(repo_root, verbose)
+

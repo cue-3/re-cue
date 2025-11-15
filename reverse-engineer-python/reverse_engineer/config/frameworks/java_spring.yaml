@@ -1,0 +1,105 @@
+framework:
+  id: "java_spring"
+  name: "Java Spring Boot"
+  language: "java"
+  version_detection:
+    - file: "pom.xml"
+      pattern: "<artifactId>spring-boot</artifactId>"
+    - file: "build.gradle"
+      pattern: "spring-boot"
+
+file_patterns:
+  controllers:
+    - "*Controller.java"
+    - "*RestController.java"
+  models:
+    - "*/model/*.java"
+    - "*/entity/*.java"
+    - "*/domain/*.java"
+  services:
+    - "*Service.java"
+    - "*ServiceImpl.java"
+  repositories:
+    - "*Repository.java"
+
+annotations:
+  endpoints:
+    rest_controller: "@RestController"
+    controller: "@Controller"
+    mappings:
+      - "@GetMapping"
+      - "@PostMapping"
+      - "@PutMapping"
+      - "@DeleteMapping"
+      - "@PatchMapping"
+      - "@RequestMapping"
+  
+  security:
+    authorization:
+      - "@PreAuthorize"
+      - "@Secured"
+      - "@RolesAllowed"
+    access:
+      - "@PermitAll"
+      - "@DenyAll"
+  
+  models:
+    jpa:
+      - "@Entity"
+      - "@Table"
+      - "@Embeddable"
+    mongodb:
+      - "@Document"
+      - "@DBRef"
+  
+  services:
+    - "@Service"
+    - "@Component"
+    - "@Repository"
+
+patterns:
+  endpoint_extraction:
+    - pattern: '@(GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)\s*\(\s*["'']([^"'']+)["'']\s*\)'
+      method_group: 1
+      path_group: 2
+    - pattern: '@RequestMapping\s*\([^)]*value\s*=\s*["'']([^"'']+)["''][^)]*\)'
+      path_group: 1
+  
+  security_extraction:
+    role_patterns:
+      - pattern: "hasRole\\('([^']+)'\\)"
+        group: 1
+      - pattern: 'ROLE_([A-Z_]+)'
+        group: 1
+      - pattern: '@PreAuthorize\s*\(\s*["'']hasRole\(''([^'']+)''\)["'']'
+        group: 1
+
+directory_structure:
+  source_root: "src/main/java"
+  test_root: "src/test/java"
+  resources: "src/main/resources"
+
+default_actors:
+  - name: "Anonymous User"
+    type: "external"
+    access_level: "public"
+  - name: "Authenticated User"
+    type: "external"
+    access_level: "authenticated"
+  - name: "Admin"
+    type: "external"
+    access_level: "admin"
+
+default_boundaries:
+  - name: "Spring Controllers"
+    type: "external"
+    description: "REST API endpoints"
+  - name: "Spring Services"
+    type: "internal"
+    description: "Business logic layer"
+  - name: "JPA Repositories"
+    type: "data"
+    description: "Data access layer"
+  - name: "External Services"
+    type: "external"
+    description: "Third-party integrations"

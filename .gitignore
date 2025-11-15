@@ -244,6 +244,10 @@ obj/
 out/
 dist/
 
+# Documentation
+docs/_build/
+docs/archive/
+
 # Package managers lock files (optional - uncomment if you want to ignore)
 # package-lock.json
 # yarn.lock

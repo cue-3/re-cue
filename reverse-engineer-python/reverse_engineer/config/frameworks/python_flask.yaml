@@ -1,0 +1,89 @@
+framework:
+  id: "python_flask"
+  name: "Python Flask"
+  language: "python"
+  version_detection:
+    - file: "requirements.txt"
+      pattern: "flask"
+    - file: "app.py"
+      pattern: "from flask import"
+
+file_patterns:
+  routes:
+    - "app.py"
+    - "routes.py"
+    - "*/routes/*.py"
+    - "*_routes.py"
+  models:
+    - "models.py"
+    - "*/models/*.py"
+  blueprints:
+    - "*_blueprint.py"
+    - "*/blueprints/*.py"
+
+patterns:
+  endpoints:
+    app_routes:
+      - pattern: "@app\\.route\\(['\"]([^'\"]+)['\"](?:[^)]*methods=\\[([^\\]]+)\\])?"
+        path_group: 1
+        methods_group: 2
+    blueprint_routes:
+      - pattern: "@(\\w+)\\.route\\(['\"]([^'\"]+)['\"](?:[^)]*methods=\\[([^\\]]+)\\])?"
+        blueprint_group: 1
+        path_group: 2
+        methods_group: 3
+  
+  security:
+    decorators:
+      - "@login_required"
+      - "@auth_required"
+      - "@requires_auth"
+      - "@jwt_required"
+      - "@token_required"
+    role_decorators:
+      - "@roles_required"
+      - "@roles_accepted"
+  
+  models:
+    sqlalchemy:
+      - pattern: "class\\s+(\\w+)\\(.*db\\.Model.*\\)"
+        type: "model"
+      - pattern: "db\\.Column\\("
+        type: "column"
+      - pattern: "db\\.relationship\\("
+        type: "relationship"
+    blueprints:
+      - pattern: "Blueprint\\(['\"]([^'\"]+)['\"]"
+        name_group: 1
+
+directory_structure:
+  routes: "*/routes"
+  models: "*/models"
+  blueprints: "*/blueprints"
+  templates: "*/templates"
+  static: "*/static"
+
+default_actors:
+  - name: "Anonymous"
+    type: "external"
+    access_level: "public"
+  - name: "Authenticated"
+    type: "external"
+    access_level: "authenticated"
+  - name: "Admin"
+    type: "external"
+    access_level: "admin"
+
+default_boundaries:
+  - name: "Flask Routes"
+    type: "external"
+    description: "HTTP endpoints"
+  - name: "SQLAlchemy ORM"
+    type: "data"
+    description: "Database models"
+  - name: "Flask Blueprints"
+    type: "internal"
+    description: "Modular components"
+  - name: "Flask Extensions"
+    type: "internal"
+    description: "Plugin integrations"

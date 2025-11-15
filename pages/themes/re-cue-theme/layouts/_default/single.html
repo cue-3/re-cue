@@ -1,0 +1,38 @@
+{{ define "main" }}
+<main class="docs-page">
+    <div class="container">
+        <div class="docs-layout">
+            <!-- Sidebar Navigation -->
+            <aside class="docs-sidebar">
+                <h3>Documentation</h3>
+                <nav class="docs-nav">
+                    <ul>
+                        <li><a href="/re-cue/docs/changelog/">Changelog</a></li>
+                        <li><a href="/re-cue/docs/troubleshooting/">Troubleshooting</a></li>
+                        <li><a href="/re-cue/docs/technical-reference/">Technical Reference</a></li>
+                        <li><a href="/re-cue/docs/multi-framework-plan/">Multi-Framework Plan</a></li>
+                        <li><a href="/re-cue/docs/enhancement-backlog/">Enhancement Backlog</a></li>
+                        <li>
+                            <strong>Framework Guides</strong>
+                            <ul>
+                                <li><a href="/re-cue/docs/frameworks/">Overview</a></li>
+                                <li><a href="/re-cue/docs/frameworks/java-spring-guide/">Java Spring Boot</a></li>
+                                <li><a href="/re-cue/docs/frameworks/nodejs-guide/">Node.js</a></li>
+                                <li><a href="/re-cue/docs/frameworks/python-guide/">Python</a></li>
+                                <li><a href="/re-cue/docs/frameworks/dotnet-guide/">.NET</a></li>
+                                <li><a href="/re-cue/docs/frameworks/extending-frameworks/">Extending Frameworks</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <article class="docs-content">
+                <h1>{{ .Title }}</h1>
+                {{ .Content }}
+            </article>
+        </div>
+    </div>
+</main>
+{{ end }}

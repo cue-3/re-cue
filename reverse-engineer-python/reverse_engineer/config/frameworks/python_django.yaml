@@ -1,0 +1,96 @@
+framework:
+  id: "python_django"
+  name: "Python Django"
+  language: "python"
+  version_detection:
+    - file: "requirements.txt"
+      pattern: "django"
+    - file: "manage.py"
+      pattern: "django"
+
+file_patterns:
+  views:
+    - "views.py"
+    - "*/views/*.py"
+  models:
+    - "models.py"
+    - "*/models/*.py"
+  urls:
+    - "urls.py"
+    - "*/urls.py"
+  serializers:
+    - "serializers.py"
+    - "*/serializers/*.py"
+
+patterns:
+  endpoints:
+    function_views:
+      - pattern: "@api_view\\(\\[([^\\]]+)\\]\\)"
+        type: "decorator"
+    class_views:
+      - pattern: "class\\s+(\\w+)\\(.*APIView\\)"
+        type: "class_based"
+    viewsets:
+      - pattern: "class\\s+(\\w+)\\(.*ViewSet\\)"
+        type: "viewset"
+    url_patterns:
+      - pattern: "path\\(['\"]([^'\"]+)['\"]"
+        path_group: 1
+      - pattern: "re_path\\(r['\"]([^'\"]+)['\"]"
+        path_group: 1
+      - pattern: "router\\.register\\(r?['\"]([^'\"]+)['\"]"
+        path_group: 1
+  
+  security:
+    decorators:
+      - "@login_required"
+      - "@permission_required"
+      - "@user_passes_test"
+    mixins:
+      - "LoginRequiredMixin"
+      - "PermissionRequiredMixin"
+    drf_permissions:
+      - "IsAuthenticated"
+      - "IsAdminUser"
+      - "AllowAny"
+  
+  models:
+    - pattern: "class\\s+(\\w+)\\(models\\.Model\\)"
+      type: "model"
+    - pattern: "models\\.(CharField|IntegerField|ForeignKey|TextField)"
+      type: "field"
+
+directory_structure:
+  apps: "*/apps/*"
+  models: "*/models.py"
+  views: "*/views.py"
+  urls: "*/urls.py"
+  templates: "*/templates"
+
+default_actors:
+  - name: "Anonymous"
+    type: "external"
+    access_level: "public"
+  - name: "Authenticated"
+    type: "external"
+    access_level: "authenticated"
+  - name: "Staff"
+    type: "external"
+    access_level: "staff"
+  - name: "Admin"
+    type: "external"
+    access_level: "admin"
+
+default_boundaries:
+  - name: "Django Views/URLs"
+    type: "external"
+    description: "HTTP endpoints"
+  - name: "Django ORM"
+    type: "data"
+    description: "Database models"
+  - name: "Django Middleware"
+    type: "internal"
+    description: "Request/response processing"
+  - name: "Django Templates"
+    type: "presentation"
+    description: "UI layer"
