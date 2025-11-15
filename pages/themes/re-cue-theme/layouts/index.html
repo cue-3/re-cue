@@ -4,11 +4,10 @@
     <section class="hero">
         <div class="container">
             <h1>{{ .Site.Title }}</h1>
-            <p class="tagline">Comprehensive Reverse Engineering</p>
-            <p class="subtitle">{{ .Site.Params.description }}</p>
+            {{ .Content }}
             <div class="cta-buttons">
                 <a href="{{ .Site.Params.github }}" class="btn btn-primary">Get Started</a>
-                <a href="#documentation" class="btn btn-secondary">View Docs</a>
+                <a href="/re-cue/docs/" class="btn btn-secondary">View Docs</a>
             </div>
         </div>
     </section>

@@ -1,6 +1,6 @@
 baseURL = 'https://www.re-cue.net/'
 languageCode = 'en-us'
-title = 'RE-cue - Reverse Engineering Toolkit'
+title = 'RE-cue — Reverse Engineering Toolkit'
 theme = 're-cue-theme'
 
 # Enable following symbolic links

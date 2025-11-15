@@ -2,6 +2,10 @@
   icon: "🔍"
   description: "Automatically detects project structure, dependencies, and architectural patterns"
 
+- name: "Multi-Stack Support"
+  icon: "🧩"
+  description: "Supports analysis across multiple programming languages and frameworks"
+
 - name: "Actor Identification"
   icon: "👥"
   description: "Discovers all system actors, their roles, and interactions"
