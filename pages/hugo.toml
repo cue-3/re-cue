@@ -1,4 +1,4 @@
-baseURL = 'https://cue-3.github.io/re-cue/'
+baseURL = 'https://www.re-cue.net/'
 languageCode = 'en-us'
 title = 'RE-cue - Reverse Engineering Toolkit'
 theme = 're-cue-theme'
