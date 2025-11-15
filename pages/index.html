@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE-cue - Reverse Engineering Toolkit</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">RE-cue</div>
+            <ul class="nav-menu">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#documentation">Documentation</a></li>
+                <li><a href="https://github.com/quickcue3/re-cue" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>RE-cue</h1>
+            <p class="tagline">Reverse Engineering Made Simple</p>
+            <p class="subtitle">Automatically generate comprehensive documentation from your existing codebase</p>
+            <div class="cta-buttons">
+                <a href="#installation" class="btn btn-primary">Get Started</a>
+                <a href="https://github.com/quickcue3/re-cue" class="btn btn-secondary" target="_blank">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Phased Analysis</h3>
+                    <p>Four-phase approach: Structure, Actors, Boundaries, and Use Cases</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Deep Discovery</h3>
+                    <p>Automatically identifies API endpoints, data models, services, and actors</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Rich Documentation</h3>
+                    <p>Generates specifications, plans, data models, and API contracts</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Use Case Extraction</h3>
+                    <p>Identifies business processes and workflows from code</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Actor Analysis</h3>
+                    <p>Maps security roles, permissions, and access patterns</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏗️</div>
+                    <h3>Architecture Mapping</h3>
+                    <p>Visualizes system boundaries, layers, and components</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Analyze</h3>
+                    <p>Point RE-cue at your codebase and let it discover components, patterns, and relationships</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Generate</h3>
+                    <p>Automatically create comprehensive documentation in markdown and JSON formats</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Review</h3>
+                    <p>Get clear, structured documentation covering all aspects of your system</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="installation" class="installation">
+        <div class="container">
+            <h2>Installation</h2>
+            <div class="install-content">
+                <div class="install-method">
+                    <h3>Quick Install</h3>
+                    <pre><code>cd reverse-engineer-python
+./install-python.sh</code></pre>
+                </div>
+                <div class="install-method">
+                    <h3>Run Analysis</h3>
+                    <pre><code># Generate all phase documents
+python3 -m reverse_engineer --use-cases --path /path/to/project
+
+# Generate specific documents
+python3 -m reverse_engineer --spec --plan --data-model</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="documentation" class="documentation">
+        <div class="container">
+            <h2>Documentation Outputs</h2>
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <h3>Phase 1: Structure</h3>
+                    <p>API endpoints, data models, UI views, services, and features</p>
+                </div>
+                <div class="doc-card">
+                    <h3>Phase 2: Actors</h3>
+                    <p>User roles, permissions, and external system interactions</p>
+                </div>
+                <div class="doc-card">
+                    <h3>Phase 3: Boundaries</h3>
+                    <p>System boundaries, subsystems, layers, and architecture</p>
+                </div>
+                <div class="doc-card">
+                    <h3>Phase 4: Use Cases</h3>
+                    <p>Business processes, workflows, and use case scenarios</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 RE-cue. Open Source Project.</p>
+            <p>
+                <a href="https://github.com/quickcue3/re-cue" target="_blank">GitHub</a> | 
+                <a href="https://github.com/quickcue3/re-cue/blob/main/LICENSE" target="_blank">License</a> | 
+                <a href="https://github.com/quickcue3/re-cue/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

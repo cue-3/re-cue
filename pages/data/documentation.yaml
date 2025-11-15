@@ -1,0 +1,19 @@
+- phase: 1
+  title: "Project Structure"
+  description: "Complete overview of your codebase structure, dependencies, and technologies"
+  file: "phase1-structure.md"
+
+- phase: 2
+  title: "Actor Analysis"
+  description: "Detailed analysis of all system actors, their roles, and capabilities"
+  file: "phase2-actors.md"
+
+- phase: 3
+  title: "System Boundaries"
+  description: "Mapping of system boundaries, subsystems, and architectural layers"
+  file: "phase3-boundaries.md"
+
+- phase: 4
+  title: "Use Cases"
+  description: "Comprehensive use cases with business context and interaction scenarios"
+  file: "phase4-use-cases.md"

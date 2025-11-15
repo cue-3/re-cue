@@ -1,0 +1,11 @@
+- step: 1
+  title: "Clone & Install"
+  description: "Clone the repository and run the installation script"
+
+- step: 2
+  title: "Run Analysis"
+  description: "Point RE-cue at your project directory"
+
+- step: 3
+  title: "Review Docs"
+  description: "Access comprehensive documentation in the output folder"

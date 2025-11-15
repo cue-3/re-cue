@@ -1,0 +1,88 @@
+{{ define "main" }}
+<main>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>{{ .Site.Title }}</h1>
+            <p class="tagline">Comprehensive Reverse Engineering</p>
+            <p class="subtitle">{{ .Site.Params.description }}</p>
+            <div class="cta-buttons">
+                <a href="{{ .Site.Params.github }}" class="btn btn-primary">Get Started</a>
+                <a href="#documentation" class="btn btn-secondary">View Docs</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                {{ range .Site.Data.features }}
+                <div class="feature-card">
+                    <div class="feature-icon">{{ .icon }}</div>
+                    <h3>{{ .name }}</h3>
+                    <p>{{ .description }}</p>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="process-steps">
+                {{ range .Site.Data.steps }}
+                <div class="step">
+                    <div class="step-number">{{ .step }}</div>
+                    <h3>{{ .title }}</h3>
+                    <p>{{ .description }}</p>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="installation">
+        <div class="container">
+            <h2>Quick Installation</h2>
+            <div class="install-content">
+                <div class="install-method">
+                    <h3>Clone the Repository</h3>
+                    <pre><code>git clone https://github.com/quickcue3/re-cue.git
+cd re-cue</code></pre>
+                </div>
+                <div class="install-method">
+                    <h3>Run Installation Script</h3>
+                    <pre><code>./install.sh</code></pre>
+                </div>
+                <div class="install-method">
+                    <h3>Analyze Your Project</h3>
+                    <pre><code>reverse-engineer --use-cases /path/to/your/project</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="documentation" class="documentation">
+        <div class="container">
+            <h2>Generated Documentation</h2>
+            <p>RE-cue generates four comprehensive documentation phases:</p>
+            <div class="doc-grid">
+                {{ range .Site.Data.documentation }}
+                <div class="doc-card">
+                    <div class="doc-phase">Phase {{ .phase }}</div>
+                    <h3>{{ .title }}</h3>
+                    <p>{{ .description }}</p>
+                    <div class="doc-file">{{ .file }}</div>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+    </section>
+</main>
+{{ end }}

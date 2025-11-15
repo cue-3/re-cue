@@ -1,0 +1,12 @@
+<header>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="nav-brand">RE-cue</a>
+            <ul class="nav-menu">
+                {{ range .Site.Menus.main }}
+                <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                {{ end }}
+            </ul>
+        </div>
+    </nav>
+</header>

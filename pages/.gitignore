@@ -1,0 +1,12 @@
+# Ignore Hugo build output
+/public/
+/resources/_gen/
+
+# Ignore Hugo cache
+/.hugo_build.lock
+
+# Ignore local development files
+.DS_Store
+*.swp
+*.swo
+*~

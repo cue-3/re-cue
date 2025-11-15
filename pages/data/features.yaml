@@ -1,0 +1,23 @@
+- name: "Smart Analysis"
+  icon: "🔍"
+  description: "Automatically detects project structure, dependencies, and architectural patterns"
+
+- name: "Actor Identification"
+  icon: "👥"
+  description: "Discovers all system actors, their roles, and interactions"
+
+- name: "Boundary Mapping"
+  icon: "🗺️"
+  description: "Maps system boundaries, subsystems, and their relationships"
+
+- name: "Use Case Generation"
+  icon: "📋"
+  description: "Creates detailed use cases with business context and scenarios"
+
+- name: "Multiple Formats"
+  icon: "📄"
+  description: "Generates documentation in Markdown and PlantUML formats"
+
+- name: "Open Source"
+  icon: "💡"
+  description: "Free and open-source with active community support"

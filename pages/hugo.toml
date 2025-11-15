@@ -1,0 +1,38 @@
+baseURL = 'https://quickcue3.github.io/re-cue/'
+languageCode = 'en-us'
+title = 'RE-cue - Reverse Engineering Toolkit'
+theme = 're-cue-theme'
+
+[params]
+  description = 'Automatically generate comprehensive documentation from your existing codebase'
+  author = 'quickcue3'
+  github = 'https://github.com/quickcue3/re-cue'
+
+[params.colors]
+  darkBlue = '#0a1929'
+  mediumBlue = '#1e3a5f'
+  lightBlue = '#4a90e2'
+  accentBlue = '#64b5f6'
+  white = '#ffffff'
+
+[menu]
+  [[menu.main]]
+    name = 'Features'
+    url = '/#features'
+    weight = 1
+  [[menu.main]]
+    name = 'How It Works'
+    url = '/#how-it-works'
+    weight = 2
+  [[menu.main]]
+    name = 'Installation'
+    url = '/#installation'
+    weight = 3
+  [[menu.main]]
+    name = 'Documentation'
+    url = '/#documentation'
+    weight = 4
+  [[menu.main]]
+    name = 'GitHub'
+    url = 'https://github.com/quickcue3/re-cue'
+    weight = 5
