@@ -2,7 +2,7 @@
 
 ## Summary
 
-We have successfully implemented **Phase 1 of the Use Case Creation capability** for the RE-cue toolkit. The implementation is fully functional and has been tested on a real Spring Boot project (agile-forecaster).
+We have successfully implemented **Phase 1 of the Use Case Creation capability** for the RE-cue toolkit. The implementation is fully functional and has been tested on real Spring Boot projects.
 
 ## ✅ What We've Completed
 
@@ -49,7 +49,7 @@ We have successfully implemented **Phase 1 of the Use Case Creation capability**
 
 ## 🚀 Real-World Validation
 
-The implementation was successfully tested on the **agile-forecaster** Spring Boot project and generated:
+The implementation has been successfully tested on Spring Boot projects and can generate:
 
 - **50 API endpoints** analyzed
 - **1 actor** identified (User with authenticated access)
@@ -93,7 +93,7 @@ The foundation is now solid for Phase 2 enhancements:
 
 ```bash
 # Generate use case analysis for any Spring Boot project
-reverse-engineer --use-cases --path /path/to/project
+reverse-engineer --use-cases --path ~/projects/my-app
 
 # Combined analysis with all documentation types
 reverse-engineer --spec --plan --data-model --api-contract --use-cases --description "project description"

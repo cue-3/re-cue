@@ -169,7 +169,7 @@ interacting through {{USE_CASE_COUNT}} use cases across
 **Generated Output**:
 ```markdown
 # Phase 4: Use Case Analysis
-## agile-forecaster
+## Sample Project
 
 **Generated**: 2025-01-25
 **Analysis Phase**: 4 of 4 - Use Case Extraction

@@ -234,7 +234,7 @@ Examples:
   ./reverse-engineer.sh --spec --output my-spec.md
   ./reverse-engineer.sh --spec --format json --output spec.json
   ./reverse-engineer.sh --spec --plan --verbose
-  ./reverse-engineer.sh --spec --path /path/to/project --description "external project"
+  ./reverse-engineer.sh --spec --path ~/projects/my-app --description "external project"
 
 The script will:
   1. Discover API endpoints from Spring Boot controllers

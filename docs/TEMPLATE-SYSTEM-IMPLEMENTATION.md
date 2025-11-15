@@ -215,7 +215,7 @@ python3 -m py_compile reverse_engineer/generators.py
 python3 -m reverse_engineer --help
 
 # Test use case generation
-python3 -m reverse_engineer --use-cases /path/to/project
+python3 -m reverse_engineer --use-cases ~/projects/my-app
 ```
 
 ## Success Criteria

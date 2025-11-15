@@ -12,7 +12,7 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "Usage: $0 <target-directory>"
     echo ""
-    echo "Example: $0 /path/to/project"
+    echo "Example: $0 ~/projects/my-app"
     echo ""
     echo "The target directory must contain a .github directory."
     exit 1

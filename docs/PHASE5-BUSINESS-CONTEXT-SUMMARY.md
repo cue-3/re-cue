@@ -276,10 +276,10 @@ BusinessProcessIdentifier (~500 lines)
 
 ```bash
 # Standard analysis (includes business context automatically)
-python -m reverse_engineer --use-cases /path/to/project
+python -m reverse_engineer --use-cases ~/projects/my-app
 
 # Phased analysis (Phase 4 includes business context)
-python -m reverse_engineer --phase 4 /path/to/project
+python -m reverse_engineer --phase 4 ~/projects/my-app
 ```
 
 ### Programmatic

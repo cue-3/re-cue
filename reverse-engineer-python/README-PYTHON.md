@@ -85,7 +85,7 @@ reverse-engineer --spec --description "manage orders" --output docs/api-spec.md
 reverse-engineer --spec --description "track inventory" --format json
 
 # Analyze a project in a different directory
-reverse-engineer --spec --path /Users/dev/my-project --description "external codebase"
+reverse-engineer --spec --path ~/projects/my-app --description "external codebase"
 
 # Verbose mode for debugging
 reverse-engineer --spec --plan --verbose --description "process payments"

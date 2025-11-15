@@ -118,13 +118,13 @@ Generates use-cases.md with:
 Generate use case documentation:
 ```bash
 # Python version (recommended for use cases)
-python3 -m reverse_engineer --use-cases /path/to/spring-boot-project
+python3 -m reverse_engineer --use-cases ~/projects/my-spring-app
 
 # With verbose output
-python3 -m reverse_engineer --use-cases --verbose /path/to/spring-boot-project
+python3 -m reverse_engineer --use-cases --verbose ~/projects/my-spring-app
 
 # Phased analysis (resumable)
-python3 -m reverse_engineer --use-cases --phased /path/to/spring-boot-project
+python3 -m reverse_engineer --use-cases --phased ~/projects/my-spring-app
 ```
 
 See [docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md](docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md) for complete feature documentation.
@@ -212,7 +212,7 @@ git clone https://github.com/cue-3/re-cue.git
 
 # Install into your project (only requires .github directory)
 cd re-cue
-./install.sh /path/to/your/project
+./install.sh ~/projects/my-app
 ```
 
 This integrates the toolkit into your project structure:
@@ -499,25 +499,25 @@ jobs:
 **No endpoints discovered?**
 ```bash
 # Verify Spring annotations exist
-grep -r "@RestController\|@GetMapping" /path/to/project/src/main
+grep -r "@RestController\|@GetMapping" ~/projects/my-app/src/main
 ```
 
 **Analysis taking too long?**
 ```bash
 # Use phased analysis for large projects
-python3 -m reverse_engineer --use-cases --phased /path/to/project
+python3 -m reverse_engineer --use-cases --phased ~/projects/my-app
 ```
 
 **No actors detected?**
 ```bash
 # Check for security annotations
-grep -r "@PreAuthorize\|@Secured" /path/to/project/src
+grep -r "@PreAuthorize\|@Secured" ~/projects/my-app/src
 ```
 
 **Business context showing zeros?**
 ```bash
 # Verify transaction and validation annotations
-grep -r "@Transactional\|@NotNull\|@Valid" /path/to/project/src
+grep -r "@Transactional\|@NotNull\|@Valid" ~/projects/my-app/src
 ```
 
 For comprehensive troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) with 70+ documented issues and solutions.

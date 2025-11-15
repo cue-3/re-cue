@@ -78,11 +78,11 @@ Before submitting a pull request, test your changes:
 
 ```bash
 # Test the reverse engineering script
-cd /path/to/test/project
-/path/to/specify-reverse/reverse-engineer-bash/reverse-engineer.sh --spec --verbose
+cd ~/projects/test-app
+~/re-cue/reverse-engineer-bash/reverse-engineer.sh --spec --verbose
 
 # Test the installation script
-/path/to/specify-reverse/install.sh /path/to/test/specify/project
+~/re-cue/install.sh ~/projects/test-app
 
 # Verify output files are generated correctly
 ls -la specs/001-reverse/
