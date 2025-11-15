@@ -105,7 +105,7 @@ python3 -m reverse_engineer --spec --plan --data-model --api-contract --descript
 ### Analyze External Project
 
 ```bash
-python3 -m reverse_engineer --spec --path /path/to/project --description "external codebase"
+python3 -m reverse_engineer --spec --path ~/projects/my-app --description "external codebase"
 ```
 
 ### JSON Output Format
