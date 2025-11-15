@@ -403,7 +403,7 @@ To improve the reverse engineering capabilities:
 ### Development Setup
 
 ```bash
-git clone https://github.com/quickcue3/specify-reverse.git
+git clone https://github.com/cue-3/specify-reverse.git
 cd specify-reverse/scripts
 chmod +x reverse-engineer.sh
 

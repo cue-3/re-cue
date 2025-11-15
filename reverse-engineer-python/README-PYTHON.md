@@ -17,7 +17,7 @@ A Python command-line tool for reverse-engineering specifications from existing 
 
 ```bash
 # Clone the repository
-git clone https://github.com/quickcue3/specify-reverse.git
+git clone https://github.com/cue-3/specify-reverse.git
 cd specify-reverse
 
 # Install the package
@@ -246,7 +246,7 @@ MIT License - see LICENSE file for details
 
 ## Links
 
-- **GitHub Repository**: https://github.com/quickcue3/specify-reverse
+- **GitHub Repository**: https://github.com/cue-3/specify-reverse
 - **Original Bash Script**: `reverse-engineer-bash/reverse-engineer.sh`
 - **Documentation**: See main README.md
 

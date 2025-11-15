@@ -46,7 +46,7 @@ hugo
 
 ## Deployment to GitHub Pages
 
-The site is configured to deploy to `https://quickcue3.github.io/re-cue/`.
+The site is configured to deploy to `https://cue-3.github.io/re-cue/`.
 
 ### GitHub Actions Workflow
 

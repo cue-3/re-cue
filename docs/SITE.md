@@ -26,7 +26,7 @@ open index.html
 
 ## GitHub Pages Setup
 
-The site will be automatically published to: `https://quickcue3.github.io/re-cue/`
+The site will be automatically published to: `https://cue-3.github.io/re-cue/`
 
 To enable GitHub Pages:
 1. Go to repository Settings

@@ -15,7 +15,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Specify Reverse Engineering",
     author_email="",
-    url="https://github.com/quickcue3/specify-reverse",
+    url="https://github.com/cue-3/specify-reverse",
     packages=find_packages(),
     python_requires=">=3.7",
     install_requires=[

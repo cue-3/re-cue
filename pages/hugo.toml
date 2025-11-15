@@ -1,4 +1,4 @@
-baseURL = 'https://quickcue3.github.io/re-cue/'
+baseURL = 'https://cue-3.github.io/re-cue/'
 languageCode = 'en-us'
 title = 'RE-cue - Reverse Engineering Toolkit'
 theme = 're-cue-theme'
@@ -9,8 +9,8 @@ theme = 're-cue-theme'
     
 [params]
   description = 'Automatically generate comprehensive documentation from your existing codebase'
-  author = 'quickcue3'
-  github = 'https://github.com/quickcue3/re-cue'
+  author = 'cue-3'
+  github = 'https://github.com/cue-3/re-cue'
 
 [params.colors]
   darkBlue = '#0a1929'
@@ -38,5 +38,5 @@ theme = 're-cue-theme'
     weight = 4
   [[menu.main]]
     name = 'GitHub'
-    url = 'https://github.com/quickcue3/re-cue'
+    url = 'https://github.com/cue-3/re-cue'
     weight = 5

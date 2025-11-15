@@ -1,12 +1,12 @@
 name = "RE-cue Theme"
 license = "MIT"
-licenselink = "https://github.com/quickcue3/re-cue/blob/main/LICENSE"
+licenselink = "https://github.com/cue-3/re-cue/blob/main/LICENSE"
 description = "A clean, modern theme for the RE-cue reverse engineering toolkit"
-homepage = "https://github.com/quickcue3/re-cue"
+homepage = "https://github.com/cue-3/re-cue"
 tags = ["documentation", "single-page", "responsive"]
 features = ["responsive", "dark-theme", "animated"]
 min_version = "0.120.0"
 
 [author]
-  name = "quickcue3"
-  homepage = "https://github.com/quickcue3"
+  name = "cue-3"
+  homepage = "https://github.com/cue-3"

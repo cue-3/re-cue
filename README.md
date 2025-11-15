@@ -208,7 +208,7 @@ re-cue/
 
 ```bash
 # Clone the reverse engineering toolkit
-git clone https://github.com/quickcue3/re-cue.git
+git clone https://github.com/cue-3/re-cue.git
 
 # Install into your project (only requires .github directory)
 cd re-cue
