@@ -12,6 +12,6 @@ jobs:
         run: ./reverse-engineer-bash/reverse-engineer.sh --data-model
       - name: Commit updated data model
         run: |
-          git add specs/
+          git add docs/generated/
           git commit -m "Update data model from code analysis"
           git push
