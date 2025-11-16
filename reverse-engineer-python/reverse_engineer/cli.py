@@ -468,6 +468,10 @@ def main():
     
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    # Always show output paths for debugging
+    print(f"📁 Output directory: {output_dir.absolute()}", file=sys.stderr)
+    print(f"📄 Spec file: {output_path.absolute()}", file=sys.stderr)
+    
     # Initialize analyzer
     log_section("RE-cue - Reverse Engineering")
     
