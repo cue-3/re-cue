@@ -5,7 +5,7 @@ weight: 30
 
 # RE-cue Technical Reference
 
-**Last Updated**: November 15, 2025  
+**Last Updated**: November 16, 2025  
 **Version**: 2.0
 
 This document provides comprehensive technical reference for RE-cue's architecture, implementation details, and current capabilities.
@@ -35,6 +35,7 @@ RE-cue uses a template-based system for generating documentation. Templates are 
 | `phase2-actors.md` | Actor discovery | ✅ Implemented | 10+ |
 | `phase3-boundaries.md` | System boundary mapping | ✅ Implemented | 12+ |
 | `phase4-use-cases.md` | Use case extraction | ✅ Implemented | 20+ |
+| `4+1-architecture-template.md` | Comprehensive 4+1 Architecture View | ✅ Implemented | 80+ |
 
 ### Template Syntax
 
@@ -79,6 +80,121 @@ RE-cue uses a template-based system for generating documentation. Templates are 
 - `{{GENERATION_TIME}}` - Time taken to generate analysis
 - `{{FRAMEWORK_DETECTED}}` - Detected framework (e.g., "Java Spring Boot")
 - `{{ANALYSIS_VERSION}}` - RE-cue version used
+
+### 4+1 Architecture View Template Variables
+
+The 4+1 Architecture View template (`4+1-architecture-template.md`) uses Philippe Kruchten's architectural view model with five concurrent views:
+
+#### Overview & Metadata
+- `{{PROJECT_NAME}}` - Project name
+- `{{GENERATION_DATE}}` - Document generation date
+- `{{VERSION_NUMBER}}` - Document version
+- `{{AUTHOR_NAMES}}` - Document authors
+
+#### Logical View Variables
+- `{{DOMAIN_MODEL_DESCRIPTION}}` - Overview of domain models
+- `{{CATEGORY_1}}`, `{{CATEGORY_2}}` - Model categories (e.g., "Core Business", "Supporting")
+- `{{SUBSYSTEM_DESCRIPTION}}` - Subsystem architecture overview
+- `{{SUBSYSTEM_NAME}}`, `{{SUBSYSTEM_PURPOSE}}` - Subsystem details
+- `{{SERVICE_COUNT}}` - Number of backend services
+- `{{COMPONENT_COUNT}}`, `{{KEY_COMPONENTS}}` - Component metrics
+- `{{ADDITIONAL_COMPONENT_CATEGORY}}` - Additional component types
+- `{{TOP_LAYER}}`, `{{MIDDLE_LAYER}}`, `{{DATA_LAYER}}` - Architecture layers
+- `{{LAYER_DESCRIPTION}}`, `{{LAYER_DETAILS}}` - Layer descriptions
+- `{{COMPONENT_GROUP}}`, `{{COMMUNICATION_PROTOCOL}}` - Component organization
+
+#### Process View Variables
+- `{{PROCESS_NAME_1}}`, `{{PROCESS_NAME_2}}`, `{{PROCESS_NAME_3}}` - Key processes
+- `{{BACKGROUND_PROCESS}}` - Background/async processes
+- `{{PROCESS_DESCRIPTION}}` - Process descriptions
+- `{{STEP_1}}` through `{{STEP_11}}` - Process steps
+- `{{SUBSTEP}}` - Sub-step details
+- `{{TRANSACTION_COUNT}}`, `{{WRITE_OPERATION_COUNT}}`, `{{READ_OPERATION_COUNT}}` - Concurrency metrics
+- `{{WORKFLOW_PATTERN_COUNT}}`, `{{PATTERN_TYPE}}`, `{{PATTERN_COUNT}}` - Workflow patterns
+- `{{SYNCHRONIZATION_TYPE_1}}`, `{{SYNCHRONIZATION_TYPE_2}}`, `{{SYNCHRONIZATION_TYPE_3}}` - Sync mechanisms
+- `{{SYNC_DESCRIPTION}}` - Synchronization details
+
+#### Development View Variables
+- `{{PROJECT_ROOT}}` - Root project directory
+- `{{MODULE_1}}`, `{{MODULE_2}}`, `{{MODULE_3}}` - Project modules
+- `{{MODULE_DESCRIPTION}}` - Module purposes
+- `{{LANGUAGE}}` - Programming language
+- `{{PACKAGE}}`, `{{PACKAGE_ROOT}}`, `{{SUBPACKAGE}}` - Package organization
+- `{{FOLDER}}`, `{{SUBFOLDER}}` - Directory structure
+- `{{FOLDER_DESCRIPTION}}` - Directory purposes
+- `{{BUILD_FILE}}`, `{{MAIN_FILE}}`, `{{CONFIG_FILE}}` - Key files
+- `{{FILE_DESCRIPTION}}` - File purposes
+- `{{PACKAGE_DESCRIPTION}}`, `{{ITEM_COUNT}}` - Package metrics
+- `{{ITEM_1}}`, `{{ITEM_2}}`, `{{ITEM_3}}` - Package items
+- `{{ITEM_TYPE}}`, `{{SUBITEM}}` - Item classifications
+- `{{LAYER_1}}`, `{{LAYER_2}}`, `{{INFRASTRUCTURE}}` - Technology layers
+- `{{TECHNOLOGY_1}}` through `{{TECHNOLOGY_5}}` - Technologies used
+- `{{BUILD_PROCESS_DESCRIPTION}}`, `{{DEPLOYMENT_DESCRIPTION}}` - Build/deploy info
+- `{{ORCHESTRATION}}`, `{{ORCHESTRATION_TOOL}}` - Orchestration details
+
+#### Physical View Variables
+- `{{CLIENT_USER_LAYER}}`, `{{APPLICATION_SERVER_LAYER}}` - Deployment layers
+- `{{CLIENT_APPLICATION}}`, `{{APPLICATION_SERVER}}`, `{{DATABASE}}` - Infrastructure components
+- `{{FEATURE_1}}` through `{{FEATURE_4}}` - Component features
+- `{{PROTOCOL_PORT}}`, `{{PORT_NUMBER}}`, `{{PROTOCOL}}` - Network configuration
+- `{{SECURITY}}`, `{{CONNECTION_DETAILS}}` - Security and connection info
+- `{{DATABASE_DETAILS}}`, `{{ITEM_1}}` through `{{ITEM_3}}` - Database configuration
+- `{{AUTH_METHOD}}`, `{{DATA_FORMAT}}`, `{{ADDITIONAL_DETAIL}}`, `{{DETAIL_VALUE}}` - Communication details
+- `{{CONNECTION_TYPE}}` - Connection types
+- `{{CONTAINER_TECHNOLOGY}}`, `{{DEPLOYMENT_FILE}}` - Container configuration
+- `{{SERVICE_1}}`, `{{SERVICE_2}}`, `{{SERVICE_3}}` - Container services
+- `{{SERVICE_DESCRIPTION}}`, `{{VOLUME_DETAILS}}`, `{{DEPENDENCIES}}` - Service details
+- `{{CONFIG_DETAILS}}`, `{{ADDITIONAL_PROPERTY}}`, `{{PROPERTY_DETAILS}}` - Configuration
+- `{{SECURITY_LAYER_1}}`, `{{SECURITY_LAYER_2}}`, `{{SECURITY_LAYER_3}}` - Security layers
+- `{{CONSIDERATION_1}}` through `{{CONSIDERATION_4}}` - Scalability considerations
+- `{{CONSIDERATION_DESCRIPTION}}` - Consideration details
+
+#### Use Case View Variables
+- `{{ACTOR_COUNT}}` - Number of actors
+- `{{ACTOR_1}}`, `{{ACTOR_2}}`, `{{ACTOR_3}}` - Key actors
+- `{{ACTOR_TYPE}}`, `{{ACCESS_LEVEL}}`, `{{ACTOR_DESCRIPTION}}` - Actor details
+- `{{USE_CASE_NAME}}` - Use case names
+- `{{ACTORS}}` - Use case actors
+- `{{METHOD_ACTION}}`, `{{ACTION}}`, `{{RESULT}}` - Technical flow elements
+- `{{COMPONENT}}`, `{{SUBCOMPONENT}}` - Flow components
+- `{{STEP_1}}` through `{{STEP_11}}` - Scenario steps
+- `{{STEP_2_DESCRIPTION}}`, `{{STEP_3_DESCRIPTION}}`, `{{STEP_5_DESCRIPTION}}`, `{{STEP_6_DESCRIPTION}}` - Complex steps
+- `{{DETAIL_A}}` through `{{DETAIL_H}}` - Step details
+- `{{TOTAL_USE_CASES}}`, `{{CATEGORY}}`, `{{CATEGORY_COUNT}}` - Use case statistics
+- `{{OPERATION_TYPE}}`, `{{OPERATION_COUNT}}` - Operation metrics
+- `{{DETAIL_LABEL}}`, `{{DETAIL_COUNT}}` - Additional metrics
+- `{{SCENARIO_1}}` through `{{SCENARIO_6}}` - Key scenarios
+- `{{SYSTEMS}}`, `{{COMPLEXITY}}` - Scenario details
+
+#### Architecture Principles & Quality
+- `{{PRINCIPLE_1}}` through `{{PRINCIPLE_8}}` - Design principles
+- `{{PRINCIPLE_DESCRIPTION}}` - Principle descriptions
+- `{{PATTERN_1}}` through `{{PATTERN_7}}` - Architectural patterns
+- `{{PATTERN_DESCRIPTION}}` - Pattern descriptions
+- `{{IMPLEMENTATION_DETAILS}}`, `{{STATUS}}` - Quality attribute details
+
+#### Technology Decisions & Constraints
+- `{{LAYER_COMPONENT}}` - Component layer
+- `{{DECISION_1}}` through `{{DECISION_7}}` - Technology decisions
+- `{{TECHNOLOGY}}`, `{{RATIONALE}}` - Decision details
+- `{{CONSTRAINT_1}}` through `{{CONSTRAINT_6}}` - System constraints
+- `{{CONSTRAINT_DESCRIPTION}}` - Constraint details
+
+#### Future Considerations
+- `{{ENHANCEMENT_1}}` through `{{ENHANCEMENT_5}}` - Planned enhancements
+- `{{ENHANCEMENT_DESCRIPTION}}` - Enhancement descriptions
+- `{{EXTENSION_1}}` through `{{EXTENSION_6}}` - Feature extensions
+- `{{EXTENSION_DESCRIPTION}}` - Extension descriptions
+
+#### Conclusion & Metadata
+- `{{ARCHITECTURE_SUMMARY}}` - Overall architecture summary
+- `{{ARCHITECTURAL_QUALITIES}}` - Key qualities achieved
+- `{{TECHNOLOGIES_AND_PRACTICES}}` - Technologies used
+- `{{LOGICAL_VIEW_SUMMARY}}` through `{{USE_CASE_VIEW_SUMMARY}}` - View summaries
+- `{{MISSION_STATEMENT}}`, `{{KEY_QUALITIES}}` - Mission and qualities
+- `{{DOCUMENT_METADATA}}`, `{{LAST_UPDATED_DATE}}` - Document metadata
+
+**Total Variables**: 80+ placeholders providing comprehensive architectural documentation
 
 ### Template Loading System
 
@@ -592,7 +708,7 @@ def _is_test_file(file_path: Path) -> bool:
 - ✅ Python FastAPI
 
 #### Template System
-- ✅ 17 templates with standardized syntax
+- ✅ 5 core templates (phases 1-4 + 4+1 architecture view)
 - ✅ Framework-aware template loading
 - ✅ Template validation system
 - ✅ 90 template tests passing
@@ -737,4 +853,4 @@ output = generator.generate()
 
 *This technical reference is maintained as the authoritative source for RE-cue's implementation details and capabilities.*
 
-**Last Updated**: November 15, 2025
+**Last Updated**: November 16, 2025
