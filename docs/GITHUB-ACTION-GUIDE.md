@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Analyze codebase
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "My awesome project"
           generate-spec: true
@@ -80,7 +80,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Generate documentation
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "E-commerce Platform API"
           generate-spec: true
@@ -108,7 +108,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Generate and commit docs
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "Microservice Analysis"
           commit-changes: true
@@ -131,7 +131,7 @@ jobs:
       
       - name: Analyze changes
         id: analyze
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "PR Documentation Check"
           output-dir: .pr-docs
@@ -170,7 +170,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Analyze ${{ matrix.service }}
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           project-path: services/${{ matrix.service }}
           description: "${{ matrix.service }} microservice"
@@ -196,7 +196,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Update documentation
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "Weekly Documentation Refresh"
           commit-changes: true
@@ -220,7 +220,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Analyze Spring Boot application
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "Spring Boot REST API"
           generate-api-contract: true
@@ -252,7 +252,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Generate documentation
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "Project Documentation"
           output-dir: site/content/generated
@@ -286,7 +286,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Generate documentation
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           description: "Release ${{ github.ref_name }}"
       
@@ -328,7 +328,7 @@ jobs:
           path: docs
       
       - name: Generate documentation
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+        uses: cue-3/re-cue/.github/actions/re-cue@main
         with:
           project-path: source
           description: "API Documentation"
@@ -451,7 +451,7 @@ permissions:
 Verify the action path and version:
 
 ```yaml
-uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+uses: cue-3/re-cue/.github/actions/re-cue@main
 ```
 
 ## Contributing

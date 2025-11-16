@@ -262,7 +262,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Analyze Codebase
-        uses: cue-3/re-cue/.github/actions/analyze-codebase@v1
+        uses: cue-3/re-cue/.github/actions/re-cue@v1
         with:
           project-path: ./
           description: "Analyze codebase for documentation"
@@ -545,8 +545,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Generate API contracts
-        run: ./.github/scripts/reverse-engineer.sh --api-contract
+      - uses: cue-3/re-cue/.github/actions/re-cue@v1
+        with:
+          generate-api-contract: true
+          commit-changes: true
       - name: Commit updated contracts
         run: |
           git add specs/

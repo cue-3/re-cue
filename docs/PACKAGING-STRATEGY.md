@@ -17,7 +17,7 @@ RE-cue can be consumed in three primary ways:
 ```
 .github/
   actions/
-    analyze-codebase/
+    re-cue/
       action.yml          # Action definition
       README.md          # Action-specific docs
 ```
@@ -38,13 +38,13 @@ git push origin v1 --force
 
 ```yaml
 # Use specific version
-- uses: cue-3/re-cue/.github/actions/analyze-codebase@v1.0.0
+- uses: cue-3/re-cue/.github/actions/re-cue@v1.0.0
 
 # Use major version (recommended - gets latest v1.x updates)
-- uses: cue-3/re-cue/.github/actions/analyze-codebase@v1
+- uses: cue-3/re-cue/.github/actions/re-cue@v1
 
 # Use latest main (not recommended for production)
-- uses: cue-3/re-cue/.github/actions/analyze-codebase@main
+- uses: cue-3/re-cue/.github/actions/re-cue@main
 ```
 
 ### Benefits
@@ -173,7 +173,7 @@ echo "re-cue>=2.0.0" >> requirements.txt
 ### Create Dockerfile
 
 ```dockerfile
-# .github/actions/analyze-codebase/Dockerfile
+# .github/actions/re-cue/Dockerfile
 FROM python:3.9-slim
 
 # Install system dependencies
@@ -197,9 +197,9 @@ CMD ["--help"]
 
 ```bash
 # Build image
-docker build -t cue3/re-cue:2.0.0 \
+docker build -t cue3/re-cue:1.0.0 \
              -t cue3/re-cue:latest \
-             -f .github/actions/analyze-codebase/Dockerfile .
+             -f .github/actions/re-cue/Dockerfile .
 
 # Push to Docker Hub
 docker push cue3/re-cue:2.0.0
@@ -382,7 +382,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Test on Spring Boot sample
-        uses: ./..github/actions/analyze-codebase
+        uses: ./.github/actions/re-cue
         with:
           project-path: tests/fixtures/spring-boot-sample
           description: "Test Spring Boot"
@@ -393,7 +393,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Test on Node.js sample
-        uses: ./.github/actions/analyze-codebase
+        uses: ./.github/actions/re-cue
         with:
           project-path: tests/fixtures/nodejs-sample
           description: "Test Node.js"

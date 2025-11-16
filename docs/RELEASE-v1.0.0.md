@@ -14,8 +14,8 @@ RE-cue v1.0.0 marks the first official public release of the Universal Reverse E
 ### 🚀 Distribution & Packaging
 
 **GitHub Action** (Primary Distribution)
-- Composite action at `.github/actions/analyze-codebase/`
-- Ready for use: `uses: cue-3/re-cue/.github/actions/analyze-codebase@v1`
+- Composite action at `.github/actions/re-cue/`
+- Ready for use: `uses: cue-3/re-cue/.github/actions/re-cue@v1`
 - Fast execution (no Docker overhead)
 - Configurable inputs for spec, plan, data-model, api-contract, use-cases
 - Automatic commit support for documentation updates
@@ -137,7 +137,7 @@ reverse-engineer-python/
 
 **GitHub Action Structure**
 ```
-.github/actions/analyze-codebase/
+.github/actions/re-cue/
 └── action.yml                    # Composite action definition
 ```
 
@@ -154,7 +154,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: cue-3/re-cue/.github/actions/analyze-codebase@v1
+      - uses: cue-3/re-cue/.github/actions/re-cue@v1
         with:
           project-path: ./
           generate-spec: true
@@ -193,7 +193,7 @@ re-cue --spec --phased ~/projects/my-app
 ### 1. GitHub Action (Primary)
 
 **Status**: ✅ Available Now  
-**Usage**: `uses: cue-3/re-cue/.github/actions/analyze-codebase@v1`  
+**Usage**: `uses: cue-3/re-cue/.github/actions/re-cue@v1`  
 **Benefits**:
 - Zero-configuration setup
 - Integrates with existing workflows
@@ -323,7 +323,7 @@ re-cue --spec --phased ~/projects/my-app
 ### Links
 - Repository: https://github.com/cue-3/re-cue
 - Documentation Site: https://cue-3.github.io/re-cue/
-- GitHub Action: https://github.com/cue-3/re-cue/tree/main/.github/actions/analyze-codebase
+- GitHub Action: https://github.com/cue-3/re-cue/tree/main/.github/actions/re-cue
 - Issues: https://github.com/cue-3/re-cue/issues
 
 ## Contributors
@@ -349,5 +349,5 @@ Special thanks to:
 
 Start using it today:
 ```yaml
-- uses: cue-3/re-cue/.github/actions/analyze-codebase@v1
+- uses: cue-3/re-cue/.github/actions/re-cue@v1
 ```
