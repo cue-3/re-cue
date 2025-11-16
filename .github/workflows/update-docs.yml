@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Generate Data Model
-        run: ./.github/scripts/reverse-engineer.sh --data-model
+        run: ./reverse-engineer-bash/reverse-engineer.sh --data-model
       - name: Commit updated data model
         run: |
           git add specs/
