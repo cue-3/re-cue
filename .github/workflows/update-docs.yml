@@ -1,0 +1,17 @@
+# .github/workflows/update-docs.yml
+name: Update Documentation
+on:
+  push:
+    branches: [main]
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generate Data Model
+        run: ./.github/scripts/reverse-engineer.sh --data-model
+      - name: Commit updated data model
+        run: |
+          git add specs/
+          git commit -m "Update data model from code analysis"
+          git push
