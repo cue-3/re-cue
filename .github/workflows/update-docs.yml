@@ -14,17 +14,16 @@ defaults:
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
-    env: 
-      USER_EMAIL: ${{ secrets.USER_EMAIL }}
-      USER_NAME: ${{ secrets.USER_NAME }}
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Git user
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
       - name: Generate Data Model
         run: ./reverse-engineer-bash/reverse-engineer.sh --data-model
       - name: Commit updated data model
         run: |
-          git config --global user.email "$USER_EMAIL"
-          git config --global user.name "$USER_NAME"
           git add docs/generated/
           git commit -m "Update data model from code analysis"
           git push
