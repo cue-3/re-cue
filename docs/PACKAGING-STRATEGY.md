@@ -26,24 +26,24 @@ RE-cue can be consumed in three primary ways:
 
 ```bash
 # Tag releases for stable versions
-git tag v2.0.0
-git push origin v2.0.0
+git tag v1.0.0
+git push origin v1.0.0
 
 # Update major version tags
-git tag -f v2
-git push origin v2 --force
+git tag -f v1
+git push origin v1 --force
 ```
 
 ### Usage in Other Projects
 
 ```yaml
 # Use specific version
-- uses: cue-3/re-cue/.github/actions/analyze-codebase@v2.0.0
+- uses: cue-3/re-cue/.github/actions/analyze-codebase@v1.0.0
 
-# Use major version (recommended)
-- uses: cue-3/re-cue/.github/actions/analyze-codebase@v2
+# Use major version (recommended - gets latest v1.x updates)
+- uses: cue-3/re-cue/.github/actions/analyze-codebase@v1
 
-# Use latest main (for testing)
+# Use latest main (not recommended for production)
 - uses: cue-3/re-cue/.github/actions/analyze-codebase@main
 ```
 
@@ -66,14 +66,17 @@ git push origin v2 --force
 #### Prepare for Publishing
 
 ```bash
-# Update version in setup.py
-version="2.0.0"
+# Update version in setup.py and pyproject.toml
+version="1.0.0"
 
 # Build distribution
 cd reverse-engineer-python
 python -m build
 
-# Upload to PyPI
+# Test upload to TestPyPI first
+python -m twine upload --repository testpypi dist/*
+
+# Upload to PyPI (production)
 python -m twine upload dist/*
 ```
 
@@ -400,16 +403,19 @@ jobs:
 
 ### Phase 1: GitHub Action (Completed) ✅
 - [x] Create composite action definition
-- [x] Add comprehensive documentation
+- [x] Add comprehensive documentation (GITHUB-ACTION-GUIDE.md)
 - [x] Create usage examples
+- [x] Fix pip cache dependency issue
+- [x] Test in production repository
 
-### Phase 2: Python Package
-- [ ] Create pyproject.toml
-- [ ] Update MANIFEST.in
-- [ ] Test package build locally
+### Phase 2: Python Package (Ready for PyPI)
+- [x] Create pyproject.toml
+- [x] Create MANIFEST.in
+- [x] Test package build locally (v1.0.0)
+- [x] Copy LICENSE file to package
 - [ ] Publish to TestPyPI
 - [ ] Publish to PyPI
-- [ ] Update installation docs
+- [ ] Update installation docs for PyPI
 
 ### Phase 3: Docker Container
 - [ ] Create Dockerfile
@@ -435,14 +441,13 @@ jobs:
 
 ### Version Support
 
-- **v2.x**: Current stable (full support)
-- **v1.x**: Legacy (security fixes only)
-- **v3.x**: Next major (development)
+- **v1.x**: Current stable (full support)
+- **v2.x**: Next major (planned for 2026)
 
 ### Update Cadence
 
-- **Patch releases** (v2.0.x): Bug fixes, weekly as needed
-- **Minor releases** (v2.x.0): New features, monthly
+- **Patch releases** (v1.0.x): Bug fixes, as needed
+- **Minor releases** (v1.x.0): New features, quarterly
 - **Major releases** (vX.0.0): Breaking changes, yearly
 
 ### Deprecation Policy
@@ -451,6 +456,33 @@ jobs:
 - Update documentation with migration guide
 - Provide automated migration tools when possible
 
+## 11. Known Issues & Resolutions
+
+### Issue: Pip Cache Lookup Failure
+
+**Problem**: GitHub Action failed with "No file in /home/runner/work/*/matched to [**/requirements.txt or **/pyproject.toml]"
+
+**Root Cause**: The `cache: 'pip'` option in `actions/setup-python@v4` was looking for requirements files in the **target repository** instead of the RE-cue action repository.
+
+**Solution**: Removed `cache: 'pip'` from action.yml since:
+- Only 2 dependencies (jinja2, pyyaml)
+- Install time is minimal (< 5 seconds)
+- Caching provides negligible benefit
+
+**Commit**: Fixed in commit b008ae1
+
+### Testing Recommendations
+
+1. **Test in Real Repository**: Always test GitHub Action in actual target repository before releasing
+2. **Check Dependency Paths**: Ensure action doesn't rely on target repo having specific files
+3. **Minimal Dependencies**: Keep action dependencies lightweight to avoid cache complexity
+
 ## Conclusion
 
 This multi-faceted packaging strategy ensures RE-cue can be easily adopted across different use cases and environments, maximizing reach and usability while maintaining high quality and ease of maintenance.
+
+**Current Status (v1.0.0)**:
+- ✅ GitHub Action: Released and tested
+- ✅ Python Package: Built and ready for PyPI
+- 🚧 Docker Container: Planned for v1.1.0
+- 🚧 GitHub Marketplace: Planned for v1.1.0
