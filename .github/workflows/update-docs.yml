@@ -16,14 +16,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      
+      - name: Install Python dependencies
+        run: |
+          cd reverse-engineer-python
+          pip install -e .
+      
       - name: Set up Git user
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-      - name: Generate Data Model
-        run: ./reverse-engineer-bash/reverse-engineer.sh --data-model
-      - name: Commit updated data model
+      
+      - name: Generate Documentation
+        run: |
+          cd reverse-engineer-python
+          python -m reverse_engineer --data-model
+      
+      - name: Commit updated documentation
         run: |
           git add docs/generated/
-          git commit -m "Update data model from code analysis"
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update documentation from code analysis [skip ci]"
+            git push
+          fi
