@@ -25,6 +25,7 @@ jobs:
       
       - name: Install Python dependencies
         run: |
+          pip install jinja2 pyyaml
           cd reverse-engineer-python
           pip install -e .
       
