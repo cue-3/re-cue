@@ -444,19 +444,23 @@ def main():
     # Get project directory name for output path
     project_name = repo_root.name
     
-    # Create output directory: re-<project_name> in project root
-    output_dir = repo_root / f"re-{project_name}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
     # Set default output file - save to re-<project_name> directory
-    output_file = args.output or str(output_dir / "spec.md")
-    output_path = Path(output_file)
+    if args.output:
+        output_path = Path(args.output)
+        # If output_path exists as a directory or ends with /, it's a directory
+        if (output_path.exists() and output_path.is_dir()) or str(output_path).endswith('/'):
+            # Use the provided directory
+            output_dir = output_path
+            output_path = output_dir / "spec.md"
+        else:
+            # Assume it's a file path
+            output_dir = output_path.parent
+    else:
+        # Default: create re-<project_name> directory in project root
+        output_dir = repo_root / f"re-{project_name}"
+        output_path = output_dir / "spec.md"
     
-    # If output_path exists as a directory or ends with /, append spec.md
-    if (output_path.exists() and output_path.is_dir()) or str(output_path).endswith('/'):
-        output_path = output_path / "spec.md"
-    
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     # Initialize analyzer
     log_section("RE-cue - Reverse Engineering")
