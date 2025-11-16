@@ -451,6 +451,11 @@ def main():
     # Set default output file - save to re-<project_name> directory
     output_file = args.output or str(output_dir / "spec.md")
     output_path = Path(output_file)
+    
+    # If output_path exists as a directory or ends with /, append spec.md
+    if (output_path.exists() and output_path.is_dir()) or str(output_path).endswith('/'):
+        output_path = output_path / "spec.md"
+    
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Initialize analyzer
