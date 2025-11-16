@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'pages/**'
+      - 'docs/**'
+      - '.github/workflows/hugo.yml'
   workflow_dispatch:
 permissions:
   contents: read
