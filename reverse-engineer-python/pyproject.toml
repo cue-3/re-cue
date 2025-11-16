@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-cue"
+version = "1.0.0"
+description = "RE-cue: Universal reverse engineering toolkit for multi-framework codebases"
+readme = "README-PYTHON.md"
+authors = [
+    {name = "RE-cue Project"},
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "jinja2>=3.0.0",
+    "pyyaml>=6.0",
+]
+requires-python = ">=3.9"
+keywords = ["reverse-engineering", "documentation", "api", "openapi", "specification", "code-analysis"]
+
+[project.urls]
+Homepage = "https://github.com/cue-3/re-cue"
+Documentation = "https://cue-3.github.io/re-cue/"
+Repository = "https://github.com/cue-3/re-cue"
+"Bug Tracker" = "https://github.com/cue-3/re-cue/issues"
+Changelog = "https://github.com/cue-3/re-cue/blob/main/docs/CHANGELOG.md"
+
+[project.scripts]
+re-cue = "reverse_engineer.cli:main"
+reverse-engineer = "reverse_engineer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["reverse_engineer*"]
+
+[tool.setuptools.package-data]
+reverse_engineer = [
+    "templates/**/*.md",
+    "templates/**/*.json", 
+    "templates/**/*.yaml",
+    "templates/**/*.yml",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

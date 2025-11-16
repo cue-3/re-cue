@@ -12,12 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [1.0.0] - 2025-11-15
 
 ### Added
-- **Multi-Framework Support**:
-  - Java Spring Boot
-  - Node.js (Express, NestJS)
-  - Python (Django, Flask, FastAPI)
-  - .NET (ASP.NET Core 6.0+)
-  - Ruby on Rails (planned)
+- **Multi-Framework Support**: Expanded beyond Java to support multiple technology stacks
 - Framework-specific detection and analysis patterns
 - Comprehensive framework guides for each supported stack
 - Hugo-based documentation website with integrated guides
