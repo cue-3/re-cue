@@ -23,8 +23,8 @@ jobs:
         run: ./reverse-engineer-bash/reverse-engineer.sh --data-model
       - name: Commit updated data model
         run: |
-          git config --global user.email "${USER_EMAIL}"
-          git config --global user.name "${USER_NAME}"
+          git config --global user.email "$USER_EMAIL"
+          git config --global user.name "$USER_NAME"
           git add docs/generated/
           git commit -m "Update data model from code analysis"
           git push
