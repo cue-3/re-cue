@@ -187,12 +187,18 @@ No generation flags specified. Please provide at least one flag:
                   • System boundary mapping
                   • Use case extraction and documentation
 
+  --fourplusone   Generate 4+1 Architecture View document
+                  • Combines all phase data into comprehensive architecture doc
+                  • Uses Philippe Kruchten's 4+1 architectural view model
+                  • Includes logical, process, development, physical, and use case views
+
 Examples:
   reverse-engineer --spec
   reverse-engineer --plan
   reverse-engineer --data-model
   reverse-engineer --api-contract
   reverse-engineer --use-cases
+  reverse-engineer --use-cases --fourplusone
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
 
 Use --help for more options.
@@ -212,6 +218,7 @@ Examples:
   reverse-engineer --data-model
   reverse-engineer --api-contract
   reverse-engineer --use-cases
+  reverse-engineer --use-cases --fourplusone
   reverse-engineer --use-cases /path/to/project
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --spec --output my-spec.md
@@ -230,6 +237,7 @@ The script will:
      - data-model.md: Detailed data model documentation
      - api-spec.json: OpenAPI 3.0 specification for API contracts
      - phase1-structure.md, phase2-actors.md, phase3-boundaries.md, phase4-use-cases.md: Phased analysis
+     - fourplusone-architecture.md: 4+1 Architecture View document (comprehensive architecture documentation)
         """
     )
     
@@ -257,6 +265,8 @@ The script will:
                         help='Generate API contract (api-spec.json)')
     parser.add_argument('--use-cases', action='store_true',
                         help='Generate phased analysis (phase1-structure.md, phase2-actors.md, phase3-boundaries.md, phase4-use-cases.md)')
+    parser.add_argument('--fourplusone', action='store_true',
+                        help='Generate 4+1 architecture view document (fourplusone-architecture.md) - requires --use-cases data')
     
     # Options
     parser.add_argument('-d', '--description', type=str,
@@ -273,7 +283,7 @@ The script will:
                         help='Run analysis in phases with user prompts between phases')
     parser.add_argument('--phase', type=str, choices=['1', '2', '3', '4', 'all'],
                         help='Run specific phase: 1=structure, 2=actors, 3=boundaries, 4=use-cases, all=run all')
-    parser.add_argument('--version', action='version', version='%(prog)s 1.0.0')
+    parser.add_argument('--version', action='version', version='%(prog)s 1.1.0')
     
     return parser
 
@@ -556,6 +566,37 @@ def main():
         print(f"   - {phase2_file}", file=sys.stderr)
         print(f"   - {phase3_file}", file=sys.stderr)
         print(f"   - {phase4_file}", file=sys.stderr)
+    
+    # Generate 4+1 architecture document if requested
+    if args.fourplusone:
+        from .generators import FourPlusOneDocGenerator
+        
+        # Ensure we have all the data needed (run full analysis if not already done)
+        if args.use_cases:
+            # Data already collected above
+            pass
+        else:
+            # Need to run full analysis
+            print("\n🔄 Running full analysis for 4+1 architecture document...", file=sys.stderr)
+            analyzer.discover_endpoints()
+            analyzer.discover_models()
+            analyzer.discover_views()
+            analyzer.discover_services()
+            analyzer.extract_features()
+            analyzer.discover_actors()
+            analyzer.discover_system_boundaries()
+            analyzer.map_relationships()
+            analyzer.extract_use_cases()
+        
+        fourplusone_file = output_path.parent / "fourplusone-architecture.md"
+        print("\n📝 Generating 4+1 Architecture View document...", file=sys.stderr)
+        framework_id = getattr(analyzer, 'framework_id', None)
+        fourplusone_gen = FourPlusOneDocGenerator(analyzer, framework_id)
+        fourplusone_content = fourplusone_gen.generate()
+        with open(fourplusone_file, 'w') as f:
+            f.write(fourplusone_content)
+        
+        print(f"✅ 4+1 Architecture document generated: {fourplusone_file}", file=sys.stderr)
     
     # Display results
     log_section("Generation Complete")

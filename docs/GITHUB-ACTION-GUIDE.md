@@ -51,6 +51,7 @@ jobs:
 | `generate-data-model` | Generate data-model.md | No | `true` |
 | `generate-api-contract` | Generate api-spec.json | No | `true` |
 | `generate-use-cases` | Generate phase1-4.md | No | `true` |
+| `generate-fourplusone` | Generate fourplusone-architecture.md | No | `true` |
 | `generate-all` | Generate all docs (overrides flags) | No | `false` |
 | `output-dir` | Output directory | No | `docs/generated` |
 | `commit-changes` | Auto-commit docs | No | `false` |
@@ -274,6 +275,7 @@ This generates:
 - `phase2-actors.md` - Actor identification
 - `phase3-boundaries.md` - System boundaries
 - `phase4-use-cases.md` - Use case documentation
+- `fourplusone-architecture.md` - 4+1 Architecture View document
 
 ### Example 8: Use Case Analysis Only
 

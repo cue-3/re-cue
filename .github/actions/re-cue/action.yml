@@ -42,6 +42,11 @@ inputs:
     required: false
     default: 'true'
   
+  generate-fourplusone:
+    description: 'Generate 4+1 Architecture View document (fourplusone-architecture.md)'
+    required: false
+    default: 'true'
+  
   generate-all:
     description: 'Generate all documentation types (overrides individual flags)'
     required: false
@@ -112,7 +117,7 @@ runs:
         
         # Check for generate-all flag first
         if [ "${{ inputs.generate-all }}" = "true" ]; then
-          ARGS="--spec --plan --data-model --api-contract --use-cases"
+          ARGS="--spec --plan --data-model --api-contract --use-cases --fourplusone"
         else
           # Individual flags
           if [ "${{ inputs.generate-spec }}" = "true" ]; then
@@ -133,6 +138,10 @@ runs:
           
           if [ "${{ inputs.generate-use-cases }}" = "true" ]; then
             ARGS="$ARGS --use-cases"
+          fi
+          
+          if [ "${{ inputs.generate-fourplusone }}" = "true" ]; then
+            ARGS="$ARGS --fourplusone"
           fi
         fi
         
