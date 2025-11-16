@@ -447,8 +447,14 @@ def main():
     # Set default output file - save to re-<project_name> directory
     if args.output:
         output_path = Path(args.output)
-        # If output_path exists as a directory or ends with /, it's a directory
-        if (output_path.exists() and output_path.is_dir()) or str(output_path).endswith('/'):
+        # Treat as directory if: it exists as a dir, ends with /, or has no file extension
+        is_directory = (
+            (output_path.exists() and output_path.is_dir()) or
+            str(output_path).endswith('/') or
+            (not output_path.suffix)  # No file extension like .md
+        )
+        
+        if is_directory:
             # Use the provided directory
             output_dir = output_path
             output_path = output_dir / "spec.md"
