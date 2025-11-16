@@ -270,6 +270,7 @@ jobs:
           generate-plan: true
           generate-data-model: true
           generate-api-contract: true
+          generate-use-cases: true
           commit-changes: false
       
       - name: Upload Documentation
@@ -277,6 +278,17 @@ jobs:
         with:
           name: specifications
           path: specs/001-reverse/
+```
+
+**Or use `generate-all` for comprehensive documentation:**
+
+```yaml
+      - name: Analyze Codebase (All Docs)
+        uses: cue-3/re-cue/.github/actions/re-cue@v1
+        with:
+          project-path: ./
+          description: "Complete project documentation"
+          generate-all: true
 ```
 
 See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for advanced usage patterns.

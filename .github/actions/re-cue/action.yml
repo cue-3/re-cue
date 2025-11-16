@@ -37,6 +37,16 @@ inputs:
     required: false
     default: 'true'
   
+  generate-use-cases:
+    description: 'Generate phased analysis documents (phase1-structure.md through phase4-use-cases.md)'
+    required: false
+    default: 'true'
+  
+  generate-all:
+    description: 'Generate all documentation types (overrides individual flags)'
+    required: false
+    default: 'false'
+  
   output-dir:
     description: 'Output directory for generated documentation'
     required: false
@@ -100,20 +110,30 @@ runs:
         # Build command arguments
         ARGS=""
         
-        if [ "${{ inputs.generate-spec }}" = "true" ]; then
-          ARGS="$ARGS --spec"
-        fi
-        
-        if [ "${{ inputs.generate-plan }}" = "true" ]; then
-          ARGS="$ARGS --plan"
-        fi
-        
-        if [ "${{ inputs.generate-data-model }}" = "true" ]; then
-          ARGS="$ARGS --data-model"
-        fi
-        
-        if [ "${{ inputs.generate-api-contract }}" = "true" ]; then
-          ARGS="$ARGS --api-contract"
+        # Check for generate-all flag first
+        if [ "${{ inputs.generate-all }}" = "true" ]; then
+          ARGS="--spec --plan --data-model --api-contract --use-cases"
+        else
+          # Individual flags
+          if [ "${{ inputs.generate-spec }}" = "true" ]; then
+            ARGS="$ARGS --spec"
+          fi
+          
+          if [ "${{ inputs.generate-plan }}" = "true" ]; then
+            ARGS="$ARGS --plan"
+          fi
+          
+          if [ "${{ inputs.generate-data-model }}" = "true" ]; then
+            ARGS="$ARGS --data-model"
+          fi
+          
+          if [ "${{ inputs.generate-api-contract }}" = "true" ]; then
+            ARGS="$ARGS --api-contract"
+          fi
+          
+          if [ "${{ inputs.generate-use-cases }}" = "true" ]; then
+            ARGS="$ARGS --use-cases"
+          fi
         fi
         
         # Run analysis

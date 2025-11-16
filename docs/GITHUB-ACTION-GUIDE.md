@@ -50,6 +50,8 @@ jobs:
 | `generate-plan` | Generate plan.md | No | `true` |
 | `generate-data-model` | Generate data-model.md | No | `true` |
 | `generate-api-contract` | Generate api-spec.json | No | `true` |
+| `generate-use-cases` | Generate phase1-4.md | No | `true` |
+| `generate-all` | Generate all docs (overrides flags) | No | `false` |
 | `output-dir` | Output directory | No | `docs/generated` |
 | `commit-changes` | Auto-commit docs | No | `false` |
 | `commit-message` | Commit message | No | `docs: Update generated documentation [skip ci]` |
@@ -231,6 +233,74 @@ jobs:
         with:
           name: openapi-spec
           path: docs/api/api-spec.json
+```
+
+### Example 7: Generate All Documentation
+
+Use the `generate-all` flag for comprehensive documentation:
+
+```yaml
+name: Comprehensive Documentation
+on:
+  push:
+    branches: [main]
+
+jobs:
+  full-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Generate all documentation
+        uses: cue-3/re-cue/.github/actions/re-cue@v1
+        with:
+          description: "Complete project documentation"
+          generate-all: true
+          output-dir: docs/comprehensive
+      
+      - name: Upload documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: comprehensive-docs
+          path: docs/comprehensive/
+```
+
+This generates:
+- `spec.md` - Feature specification
+- `plan.md` - Implementation plan
+- `data-model.md` - Data model documentation
+- `contracts/api-spec.json` - OpenAPI specification
+- `phase1-structure.md` - Project structure analysis
+- `phase2-actors.md` - Actor identification
+- `phase3-boundaries.md` - System boundaries
+- `phase4-use-cases.md` - Use case documentation
+
+### Example 8: Use Case Analysis Only
+
+Generate only phase documents for use case analysis:
+
+```yaml
+name: Use Case Documentation
+on:
+  push:
+    paths:
+      - 'src/**/*.java'
+
+jobs:
+  use-cases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Generate use case analysis
+        uses: cue-3/re-cue/.github/actions/re-cue@v1
+        with:
+          description: "Business process analysis"
+          generate-spec: false
+          generate-plan: false
+          generate-data-model: false
+          generate-api-contract: false
+          generate-use-cases: true
 ```
 
 ## Deployment Strategies
