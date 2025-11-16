@@ -158,25 +158,40 @@ See [docs/frameworks/README.md](docs/frameworks/README.md) for complete framewor
 
 ## Available Versions
 
-This toolkit is available in two versions with identical functionality:
+RE-cue v1.0.0 is available in multiple distribution formats:
 
-**🐚 Bash Script** (Original)
+### 📦 **GitHub Action** (Recommended for CI/CD)
+```yaml
+- uses: cue-3/re-cue/.github/actions/analyze-codebase@v1
+  with:
+    project-path: ./
+    generate-spec: true
+    generate-plan: true
+```
+See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usage guide.
+
+### 🐚 **Bash Script** (Original)
 - Fast, zero-dependency single script
-- Perfect for CI/CD and Unix environments
+- Perfect for local analysis and Unix environments
 - Interactive progress with 5 analysis stages
 - Located in `reverse-engineer-bash/reverse-engineer.sh`
 
-**🐍 Python CLI** (New)
+### 🐍 **Python Package** (Full-Featured)
 - Cross-platform (Windows, macOS, Linux)
 - Modular and extensible
 - Interactive progress with 8 analysis stages
 - Enhanced business context analysis (transactions, validations, workflows)
 - Phased analysis with state persistence
 - Multi-framework support (Java Spring, Node.js, Python, .NET)
-- Install via pip from `reverse-engineer-python/`: `pip install -e reverse-engineer-python/`
+- Install via pip: `pip install -e reverse-engineer-python/`
 - See [reverse-engineer-python/README-PYTHON.md](reverse-engineer-python/README-PYTHON.md) for details
 
-**Which to use?** See [COMPARISON.md](COMPARISON.md) for a detailed comparison.
+### 🐳 **Docker Container** (Coming Soon)
+- Isolated execution environment
+- Pre-configured with all dependencies
+- Perfect for containerized workflows
+
+**Which to use?** See [docs/PACKAGING-STRATEGY.md](docs/PACKAGING-STRATEGY.md) for detailed comparison.
 
 ### Feature Comparison
 
@@ -232,7 +247,43 @@ re-cue/
 
 ## Quick Integration
 
-### Step 1: Install into Your Project
+### Option 1: GitHub Action (Recommended for CI/CD)
+
+Add to your workflow file (`.github/workflows/analyze.yml`):
+
+```yaml
+name: Code Analysis
+on: [push, pull_request]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Analyze Codebase
+        uses: cue-3/re-cue/.github/actions/analyze-codebase@v1
+        with:
+          project-path: ./
+          description: "Analyze codebase for documentation"
+          generate-spec: true
+          generate-plan: true
+          generate-data-model: true
+          generate-api-contract: true
+          commit-changes: false
+      
+      - name: Upload Documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: specifications
+          path: specs/001-reverse/
+```
+
+See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for advanced usage patterns.
+
+### Option 2: Local Installation
+
+#### Install Bash Script
 
 ```bash
 # Clone the reverse engineering toolkit
@@ -257,7 +308,20 @@ your-project/
 
 **Note:** The install script only requires a `.github` directory in your project, which is standard for any GitHub repository.
 
-### Step 2: Reverse Engineer Your Codebase
+#### Install Python Package
+
+```bash
+# Install from source
+pip install -e reverse-engineer-python/
+
+# Or install from PyPI (coming soon)
+pip install re-cue
+
+# Run analysis
+re-cue --spec --plan --use-cases ~/projects/my-app
+```
+
+### Step 2: Analyze Your Codebase
 
 **Manual Script Usage:**
 ```bash
@@ -584,14 +648,26 @@ Help improve RE-cue reverse engineering toolkit:
 
 ## Project Status
 
-**Current Version**: 1.0 (95% complete)  
-**Latest Feature**: Use Case Analysis with Business Context (Phase 5 & 6)  
-**Test Coverage**: 23 tests, 100% passing  
-**Documentation**: 1400+ lines across 4 comprehensive guides  
-**Installation**: Simplified to `.github/scripts/` directory structure  
-**Timeline**: 4 weeks ahead of original 6-week schedule
+**Current Version**: v1.0.0 (Released)  
+**Release Date**: January 2025  
+**Distribution**: GitHub Action + PyPI Package (Ready) | Docker (Planned)  
+**Latest Feature**: Multi-framework reverse engineering with business context analysis  
+**Test Coverage**: 90+ tests across template system, analyzers, and integrations  
+**Documentation**: Comprehensive guides for GitHub Action, packaging, and framework support  
 
-See [docs/USE-CASE-IMPLEMENTATION-STATUS.md](docs/USE-CASE-IMPLEMENTATION-STATUS.md) for detailed roadmap and progress tracking.
+### Release Highlights
+
+**v1.0.0 - Universal Reverse Engineering Toolkit**
+- ✅ GitHub Composite Action for CI/CD workflows
+- ✅ PyPI-ready Python package with modern packaging (pyproject.toml)
+- ✅ Multi-framework support (Java Spring Boot, Node.js, Python, .NET, Ruby)
+- ✅ Intelligent framework detection and configuration
+- ✅ Jinja2 template system with 90+ test cases
+- ✅ Use case analysis with business context extraction
+- ✅ Hugo documentation site at [cue-3.github.io/re-cue](https://cue-3.github.io/re-cue/)
+- ✅ Comprehensive documentation (1000+ lines across multiple guides)
+
+See [docs/CHANGELOG.md](docs/CHANGELOG.md) for complete release notes and [docs/USE-CASE-IMPLEMENTATION-STATUS.md](docs/USE-CASE-IMPLEMENTATION-STATUS.md) for roadmap.
 
 ---
 
