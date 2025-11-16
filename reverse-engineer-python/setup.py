@@ -9,17 +9,26 @@ long_description = readme_file.read_text() if readme_file.exists() else ""
 
 setup(
     name="reverse-engineer",
-    version="1.0.0",
-    description="Reverse-engineer specifications from existing codebases",
+    version="2.0.0",
+    description="RE-cue: Universal reverse engineering toolkit for multi-framework codebases",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Specify Reverse Engineering",
+    author="RE-cue Project",
     author_email="",
-    url="https://github.com/cue-3/specify-reverse",
+    url="https://github.com/cue-3/re-cue",
     packages=find_packages(),
+    package_data={
+        'reverse_engineer': [
+            'templates/**/*.md',
+            'templates/**/*.json',
+            'templates/**/*.yaml',
+        ],
+    },
+    include_package_data=True,
     python_requires=">=3.7",
     install_requires=[
-        # No external dependencies required!
+        "pyyaml>=6.0",
+        "jinja2>=3.0.0",
     ],
     entry_points={
         "console_scripts": [

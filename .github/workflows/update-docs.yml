@@ -37,7 +37,7 @@ jobs:
       - name: Generate Documentation
         run: |
           cd reverse-engineer-python
-          python -m reverse_engineer --data-model
+          python -m reverse_engineer  --spec --plan --data-model --api-contract --description "reverse engineer re-cue"
       
       - name: Commit updated documentation
         run: |

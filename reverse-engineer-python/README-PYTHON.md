@@ -1,16 +1,18 @@
-# Reverse Engineer - Python CLI
+# RE-cue - Python Implementation
 
-A Python command-line tool for reverse-engineering specifications from existing codebases. This is a Python implementation of the original bash script with the same functionality.
+A Python command-line tool for reverse-engineering specifications from existing codebases with multi-framework support. This implementation extends the original bash script with enhanced templating, cross-platform compatibility, and support for multiple technology stacks.
 
 ## Features
 
+- 🌐 **Multi-Framework Support**: Java (Spring Boot), Node.js (Express, NestJS), Python (Django, Flask, FastAPI), .NET (ASP.NET Core)
 - 🔍 **Automatic Discovery**: Finds API endpoints, data models, views, and services
 - 📝 **Multiple Formats**: Generates Markdown and JSON specifications
 - 🎯 **OpenAPI Support**: Creates OpenAPI 3.0 API contracts
 - ✨ **Advanced Templating**: Jinja2-powered templates with conditionals, loops, and filters
+- 🧪 **Comprehensive Testing**: 90+ test cases for quality assurance
 - 🚀 **Minimal Dependencies**: Only PyYAML and Jinja2 required
 - 💻 **Cross-Platform**: Works on macOS, Linux, and Windows
-- 📊 **Interactive Progress**: Real-time feedback with 8 analysis stages
+- 📊 **Interactive Progress**: Real-time feedback with analysis stages
 
 ## Installation
 
@@ -18,8 +20,8 @@ A Python command-line tool for reverse-engineering specifications from existing 
 
 ```bash
 # Clone the repository
-git clone https://github.com/cue-3/specify-reverse.git
-cd specify-reverse
+git clone https://github.com/cue-3/re-cue.git
+cd re-cue/reverse-engineer-python
 
 # Install the package
 pip install -e .
@@ -192,24 +194,37 @@ Each stage completes independently, providing immediate feedback on discovery pr
 
 ```
 reverse_engineer/
-├── __init__.py          # Package initialization
-├── cli.py               # Command-line interface
-├── analyzer.py          # Project analysis logic
-├── generators.py        # Documentation generators
-└── utils.py             # Utility functions
+├── __init__.py              # Package initialization
+├── __main__.py              # Module entry point
+├── cli.py                   # Command-line interface
+├── analyzer.py              # Project analysis logic
+├── generators.py            # Documentation generators
+├── phase_manager.py         # Phase execution management
+├── utils.py                 # Utility functions
+└── templates/               # Jinja2 template system
+    ├── template_loader.py   # Template loading logic
+    ├── template_validator.py # Template validation
+    ├── common/              # Common templates
+    └── frameworks/          # Framework-specific templates
 
-setup.py                 # Package setup
-README-PYTHON.md         # This file
+setup.py                     # Package setup
+requirements.txt             # Dependencies
+README-PYTHON.md             # This file
+tests/                       # Test suite (90+ tests)
 ```
 
 ## Supported Project Types
 
-The tool can analyze:
+The tool can analyze multiple technology stacks:
 
-- **Java**: Spring Boot applications with Maven/Gradle
-- **JavaScript/TypeScript**: Vue.js, React, Angular applications
-- **Python**: Django, Flask, FastAPI applications
+- **Java**: Spring Boot applications (2.x, 3.x) with Maven/Gradle
+- **Node.js**: Express and NestJS applications
+- **Python**: Django, Flask, and FastAPI applications  
+- **.NET**: ASP.NET Core applications (6.0+)
+- **Frontend**: Vue.js, React, Angular applications
 - **Multiple frameworks** in the same project
+
+For framework-specific details, see the [Framework Guides](../docs/frameworks/).
 
 ## Comparison with Bash Version
 
@@ -294,10 +309,12 @@ MIT License - see LICENSE file for details
 
 ## Links
 
-- **GitHub Repository**: https://github.com/cue-3/specify-reverse
+- **GitHub Repository**: https://github.com/cue-3/re-cue
+- **Documentation Website**: https://cue-3.github.io/re-cue/
+- **Framework Guides**: [docs/frameworks/](../docs/frameworks/)
 - **Original Bash Script**: `reverse-engineer-bash/reverse-engineer.sh`
-- **Documentation**: See main README.md
+- **Main Documentation**: See [README.md](../README.md)
 
 ---
 
-**🚀 Accelerate your transition to specification-driven development with Specify**
+**🚀 RE-cue: Universal Reverse Engineering Toolkit**
