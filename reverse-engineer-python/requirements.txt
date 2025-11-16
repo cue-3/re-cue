@@ -1,2 +1,5 @@
 # Python 3.7+ standard library + YAML support
 pyyaml>=6.0
+
+# Jinja2 for advanced templating
+jinja2>=3.0.0
