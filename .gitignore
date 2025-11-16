@@ -197,7 +197,6 @@ testing/
 # Generated documentation (exclude from repo)
 specs/
 contracts/
-docs/generated/
 
 # Backup files
 *.bak
