@@ -7,9 +7,10 @@ A Python command-line tool for reverse-engineering specifications from existing 
 - 🔍 **Automatic Discovery**: Finds API endpoints, data models, views, and services
 - 📝 **Multiple Formats**: Generates Markdown and JSON specifications
 - 🎯 **OpenAPI Support**: Creates OpenAPI 3.0 API contracts
-- 🚀 **Zero Dependencies**: Pure Python with no external packages required
+- ✨ **Advanced Templating**: Jinja2-powered templates with conditionals, loops, and filters
+- 🚀 **Minimal Dependencies**: Only PyYAML and Jinja2 required
 - 💻 **Cross-Platform**: Works on macOS, Linux, and Windows
-- 📊 **Interactive Progress**: Real-time feedback with 5 analysis stages
+- 📊 **Interactive Progress**: Real-time feedback with 8 analysis stages
 
 ## Installation
 
@@ -121,6 +122,53 @@ reverse-engineer --api-contract --output api-docs/openapi.json
 - Complete endpoint documentation
 - Request/response schemas
 - Authentication requirements
+
+## Advanced Templating with Jinja2
+
+The Python version now uses Jinja2 as its template engine, enabling sophisticated template features:
+
+### Key Capabilities
+
+**Conditional Sections**: Show content only when relevant
+```jinja2
+{% if actor_count > 0 %}
+## Actors ({{actor_count}})
+{% for actor in actors %}
+- {{actor.name}} ({{actor.type}})
+{% endfor %}
+{% endif %}
+```
+
+**Loops**: Iterate over collections
+```jinja2
+{% for endpoint in endpoints %}
+{{loop.index}}. {{endpoint.method}} {{endpoint.path}}
+{% endfor %}
+```
+
+**Filters**: Transform data during rendering
+```jinja2
+{{project_name | upper}}           {# MY PROJECT #}
+{{text | replace('_', ' ') | title}} {# Hello World #}
+{{items | length}}                  {# 5 #}
+```
+
+**Complex Logic**: Multi-level conditionals
+```jinja2
+{% if score >= 90 %}A
+{% elif score >= 80 %}B
+{% else %}F
+{% endif %}
+```
+
+### Documentation
+
+For complete templating documentation and examples:
+- See [docs/JINJA2-TEMPLATE-GUIDE.md](../../docs/JINJA2-TEMPLATE-GUIDE.md) for the full guide
+- See [docs/JINJA2-GENERATOR-EXAMPLES.md](../../docs/JINJA2-GENERATOR-EXAMPLES.md) for practical examples
+- Check [templates/common/example-jinja2-features.md](reverse_engineer/templates/common/example-jinja2-features.md) for template examples
+
+All existing templates remain compatible - Jinja2 adds capabilities without breaking changes.
 
 ## Analysis Stages
 

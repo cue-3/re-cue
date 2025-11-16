@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Optional
 import re
+from jinja2 import Environment, FileSystemLoader, select_autoescape, Template
 
 
 class TemplateLoader:
@@ -46,6 +47,21 @@ class TemplateLoader:
                 self.framework_dir = self.template_dir / "frameworks" / framework_id
         else:
             self.framework_dir = None
+        
+        # Initialize Jinja2 environment
+        # Add both framework-specific and common directories to the loader search path
+        search_paths = []
+        if self.framework_dir and self.framework_dir.exists():
+            search_paths.append(str(self.framework_dir))
+        search_paths.append(str(self.common_dir))
+        
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(search_paths),
+            autoescape=select_autoescape(['html', 'xml']),
+            trim_blocks=True,
+            lstrip_blocks=True,
+            keep_trailing_newline=True
+        )
     
     def load(self, template_name: str) -> str:
         """Load a template with fallback logic.
@@ -158,26 +174,42 @@ class TemplateLoader:
         return result
     
     def apply_variables(self, template: str, **variables) -> str:
-        """Apply variables to template.
+        """Apply variables to template using Jinja2.
         
-        Replaces {variable_name} placeholders with provided values.
+        Replaces {variable_name} and {{variable_name}} placeholders with provided values.
+        Supports Jinja2 features like conditionals, loops, and filters.
         
         Args:
-            template: Template string with {placeholders}
+            template: Template string with {{placeholders}} or Jinja2 syntax
             **variables: Variable name-value pairs
         
         Returns:
             Template with variables replaced
+            
+        Examples:
+            # Simple variable substitution
+            apply_variables("Hello {{name}}", name="World")
+            
+            # With conditionals
+            apply_variables("{% if count > 0 %}Found {{count}}{% endif %}", count=5)
+            
+            # With loops
+            apply_variables("{% for item in items %}{{item}}{% endfor %}", items=[1,2,3])
+            
+            # With filters
+            apply_variables("{{name | upper}}", name="hello")
         """
-        result = template
+        # Create a Jinja2 template from the string
+        jinja_template = self.jinja_env.from_string(template)
         
-        for key, value in variables.items():
-            placeholder = f"{{{key}}}"
-            # Convert value to string, handle None
-            str_value = str(value) if value is not None else ""
-            result = result.replace(placeholder, str_value)
+        # Render the template with provided variables
+        # Only convert None to empty string, preserve types for everything else
+        processed_vars = {
+            key: ("" if value is None else value)
+            for key, value in variables.items()
+        }
         
-        return result
+        return jinja_template.render(**processed_vars)
     
     def get_template_path(self, template_name: str) -> Optional[Path]:
         """Get the actual path of a template (framework-specific or common).
@@ -200,6 +232,30 @@ class TemplateLoader:
             return common_path
         
         return None
+    
+    def render_template(self, template_name: str, **variables) -> str:
+        """Load and render a template file using Jinja2.
+        
+        This is a convenience method that combines load() and apply_variables().
+        
+        Args:
+            template_name: Name of template file (e.g., 'endpoint_section.md')
+            **variables: Variable name-value pairs
+        
+        Returns:
+            Rendered template content
+        
+        Raises:
+            FileNotFoundError: If template not found
+            
+        Example:
+            loader = TemplateLoader('java_spring')
+            output = loader.render_template('phase1-structure.md', 
+                                           PROJECT_NAME='MyApp',
+                                           ENDPOINT_COUNT=5)
+        """
+        template_content = self.load(template_name)
+        return self.apply_variables(template_content, **variables)
     
     def __repr__(self) -> str:
         """String representation."""
