@@ -30,21 +30,6 @@ weight: 45
 
 ### High Priority
 
-#### ENH-TMPL-001: Jinja2 Template Engine Integration
-**Description**: Replace simple string replacement with Jinja2 for advanced templating capabilities  
-**Benefits**:
-- Conditional sections: `{% if actor_count > 0 %}`
-- Loops: `{% for actor in actors %}`
-- Filters: `{{ project_name | upper }}`
-- Template inheritance and includes
-
-**Effort**: Medium (2-3 days)  
-**Impact**: High - enables much more sophisticated templates  
-**Dependencies**: None  
-**Category**: Template System
-
----
-
 #### ENH-TMPL-002: Custom Template Directories
 **Description**: Allow users to specify custom template directories  
 **Benefits**:

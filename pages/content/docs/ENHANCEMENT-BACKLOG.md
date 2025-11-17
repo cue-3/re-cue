@@ -9,6 +9,8 @@ weight: 45
 **Purpose**: Comprehensive list of potential enhancements for GitHub issue creation  
 **Status**: Ready for prioritization and issue creation
 
+![Enhancement Count](https://img.shields.io/badge/Enhancements-55-blue?style=flat-square)
+
 ---
 
 ## Table of Contents
@@ -29,21 +31,6 @@ weight: 45
 ## Template System Enhancements
 
 ### High Priority
-
-#### ENH-TMPL-001: Jinja2 Template Engine Integration
-**Description**: Replace simple string replacement with Jinja2 for advanced templating capabilities  
-**Benefits**:
-- Conditional sections: `{% if actor_count > 0 %}`
-- Loops: `{% for actor in actors %}`
-- Filters: `{{ project_name | upper }}`
-- Template inheritance and includes
-
-**Effort**: Medium (2-3 days)  
-**Impact**: High - enables much more sophisticated templates  
-**Dependencies**: None  
-**Category**: Template System
-
----
 
 #### ENH-TMPL-002: Custom Template Directories
 **Description**: Allow users to specify custom template directories  
