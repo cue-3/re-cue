@@ -143,7 +143,6 @@ class TestFileTracker(unittest.TestCase):
         
         # Modify content but keep same size/time (simulate touch)
         # In reality, mtime would change, but let's test hash check
-        original_mtime = test_file.stat().st_mtime
         test_file.write_text("CONTENT")  # Same length, different content
         
         # If we force the mtime back (not normally possible but for test)
