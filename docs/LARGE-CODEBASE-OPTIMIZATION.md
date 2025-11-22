@@ -161,8 +161,8 @@ processor = ParallelProcessor(
 | First analysis (all files) | 0.023s | Baseline |
 | Re-analysis (unchanged, incremental) | 0.004s | **5.96x** |
 | Re-analysis (no incremental) | 0.023s | 1.0x |
-| Parallel (50 controllers) | 0.025s | N/A |
-| Sequential (50 controllers) | 0.006s | N/A |
+| Parallel (50 controllers) | 0.008s | N/A |
+| Sequential (50 controllers) | 0.010s | N/A |
 
 **Key Insights:**
 - Incremental analysis provides dramatic speedup for unchanged files
