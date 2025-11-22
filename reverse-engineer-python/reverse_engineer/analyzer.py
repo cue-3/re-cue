@@ -1906,16 +1906,23 @@ class BusinessProcessIdentifier:
 class ProjectAnalyzer:
     """Analyzes a project to discover its components."""
     
-    def __init__(self, repo_root: Path, verbose: bool = False):
+    def __init__(self, repo_root: Path, verbose: bool = False, 
+                 enable_optimizations: bool = True,
+                 enable_incremental: bool = True,
+                 max_workers: Optional[int] = None):
         """
         Initialize the analyzer.
         
         Args:
             repo_root: Path to the repository root
             verbose: Whether to show detailed progress
+            enable_optimizations: Enable parallel processing and other optimizations
+            enable_incremental: Enable incremental analysis (skip unchanged files)
+            max_workers: Maximum number of worker processes for parallel processing
         """
         self.repo_root = repo_root
         self.verbose = verbose
+        self.enable_optimizations = enable_optimizations
         
         # Existing collections
         self.endpoints: List[Endpoint] = []
@@ -1937,6 +1944,25 @@ class ProjectAnalyzer:
             'workflows': [],
             'business_rules': []
         }
+        
+        # Initialize optimized analyzer if optimizations are enabled
+        self.optimized_analyzer = None
+        if enable_optimizations:
+            try:
+                from .optimized_analyzer import OptimizedAnalyzer
+                output_dir = repo_root / "specs" / "001-reverse"
+                self.optimized_analyzer = OptimizedAnalyzer(
+                    repo_root=repo_root,
+                    output_dir=output_dir,
+                    enable_incremental=enable_incremental,
+                    enable_parallel=True,
+                    max_workers=max_workers,
+                    verbose=verbose
+                )
+            except Exception as e:
+                if verbose:
+                    log_info(f"Warning: Could not initialize optimizations: {e}", verbose)
+                self.optimized_analyzer = None
     
     def _is_test_file(self, file_path: Path) -> bool:
         """Check if a file is a test file that should be excluded from analysis."""
@@ -2064,24 +2090,58 @@ class ProjectAnalyzer:
         for pattern in ["controller", "controllers", "api"]:
             controller_dirs.extend(self.repo_root.rglob(f"src/**/{pattern}/"))
         
-        # Also search for *Controller.java files
-        if not controller_dirs:
-            log_info("  No controller directories found, searching for *Controller.java files...", self.verbose)
-            controller_files = list(self.repo_root.rglob("src/**/*Controller.java"))
-            controller_dirs = list(set(f.parent for f in controller_files))
+        # Collect all controller files
+        controller_files = []
+        if controller_dirs:
+            for controller_dir in controller_dirs:
+                for java_file in controller_dir.glob("*Controller.java"):
+                    if not self._is_test_file(java_file):
+                        controller_files.append(java_file)
         
-        if not controller_dirs:
+        # Also search for *Controller.java files if no directories found
+        if not controller_files:
+            log_info("  No controller directories found, searching for *Controller.java files...", self.verbose)
+            all_controller_files = list(self.repo_root.rglob("src/**/*Controller.java"))
+            controller_files = [f for f in all_controller_files if not self._is_test_file(f)]
+        
+        if not controller_files:
             log_info("  No controllers found in project", self.verbose)
             return
         
-        for controller_dir in controller_dirs:
-            for java_file in controller_dir.glob("*Controller.java"):
-                # Skip test files
-                if self._is_test_file(java_file):
-                    if self.verbose:
-                        log_info(f"  Skipping test controller: {java_file.name}", self.verbose)
-                    continue
-                    
+        # Use optimized processing if available and beneficial
+        if self.optimized_analyzer and len(controller_files) > 10:
+            log_info(f"  Using optimized processing for {len(controller_files)} controllers...", self.verbose)
+            
+            try:
+                from .optimized_analyzer import process_java_controller
+                results = self.optimized_analyzer.process_files_optimized(
+                    controller_files,
+                    process_java_controller,
+                    "Analyzing controllers"
+                )
+                
+                # Extract endpoints from results
+                for result in results:
+                    if 'endpoints' in result:
+                        for ep_dict in result['endpoints']:
+                            endpoint = Endpoint(
+                                method=ep_dict['method'],
+                                path=ep_dict['path'],
+                                controller=ep_dict['controller'],
+                                authenticated=ep_dict['authenticated']
+                            )
+                            self.endpoints.append(endpoint)
+                    elif 'error' in result:
+                        log_info(f"  Error processing {result.get('file', 'unknown')}: {result['error']}", self.verbose)
+            
+            except Exception as e:
+                log_info(f"  Warning: Optimized processing failed, falling back to sequential: {e}", self.verbose)
+                # Fall back to sequential processing
+                for java_file in controller_files:
+                    self._analyze_controller_file(java_file)
+        else:
+            # Use original sequential processing
+            for java_file in controller_files:
                 self._analyze_controller_file(java_file)
         
         log_info(f"Found {self.endpoint_count} endpoints", self.verbose)
@@ -3084,12 +3144,22 @@ class ProjectAnalyzer:
 
 
 # Compatibility wrapper for new plugin architecture
-def create_analyzer(repo_root: Path, verbose: bool = False):
+def create_analyzer(repo_root: Path, verbose: bool = False, 
+                   enable_optimizations: bool = True,
+                   enable_incremental: bool = True,
+                   max_workers: Optional[int] = None):
     """
     Create an analyzer instance using the new plugin architecture if available.
     Falls back to legacy ProjectAnalyzer if plugins are not available.
     
     This function provides backward compatibility during the transition.
+    
+    Args:
+        repo_root: Path to repository root
+        verbose: Enable verbose output
+        enable_optimizations: Enable parallel processing and optimizations
+        enable_incremental: Enable incremental analysis
+        max_workers: Maximum worker processes
     """
     if PLUGIN_ARCHITECTURE_AVAILABLE:
         try:
@@ -3108,6 +3178,7 @@ def create_analyzer(repo_root: Path, verbose: bool = False):
                 print(f"Detected framework: {tech_stack.name}")
             
             # Return appropriate analyzer based on framework
+            # Note: Framework-specific analyzers may not support all optimization parameters yet
             if tech_stack.framework_id == "java_spring":
                 return JavaSpringAnalyzer(repo_root, verbose)
             elif tech_stack.framework_id in ["nodejs_express", "nodejs_nestjs"]:
@@ -3125,6 +3196,12 @@ def create_analyzer(repo_root: Path, verbose: bool = False):
             if verbose:
                 print(f"Plugin architecture failed: {e}, using legacy analyzer")
     
-    # Fall back to original ProjectAnalyzer
-    return ProjectAnalyzer(repo_root, verbose)
+    # Fall back to original ProjectAnalyzer with optimization support
+    return ProjectAnalyzer(
+        repo_root, 
+        verbose, 
+        enable_optimizations=enable_optimizations,
+        enable_incremental=enable_incremental,
+        max_workers=max_workers
+    )
 
