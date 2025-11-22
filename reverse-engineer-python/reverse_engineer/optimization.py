@@ -15,6 +15,7 @@ import multiprocessing
 import os
 import signal
 import sys
+import threading
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, asdict
 from datetime import datetime
@@ -251,7 +252,7 @@ class ParallelProcessor:
         self.max_workers = max_workers or multiprocessing.cpu_count()
         self.max_errors = max_errors
         self.verbose = verbose
-        self._stop_requested = False
+        self._stop_event = threading.Event()
         
         # Set up signal handler for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -260,7 +261,7 @@ class ParallelProcessor:
     def _signal_handler(self, signum, frame):
         """Handle termination signals."""
         print("\n\nReceived stop signal. Terminating gracefully...", file=sys.stderr)
-        self._stop_requested = True
+        self._stop_event.set()
     
     def process_files(self, 
                      files: List[Path], 
@@ -297,7 +298,7 @@ class ParallelProcessor:
                 # Process results as they complete
                 for future in as_completed(future_to_file):
                     # Check for stop request or max errors
-                    if self._stop_requested or error_count >= self.max_errors:
+                    if self._stop_event.is_set() or error_count >= self.max_errors:
                         # Graceful shutdown: cancel pending futures and wait for running ones
                         executor.shutdown(wait=True, cancel_futures=False)
                         break
@@ -326,7 +327,7 @@ class ParallelProcessor:
         
         except KeyboardInterrupt:
             print("\n\nInterrupted by user. Cleaning up...", file=sys.stderr)
-            self._stop_requested = True
+            self._stop_event.set()
         
         finally:
             progress.finish()
