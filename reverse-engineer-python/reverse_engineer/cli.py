@@ -283,6 +283,20 @@ The script will:
                         help='Run analysis in phases with user prompts between phases')
     parser.add_argument('--phase', type=str, choices=['1', '2', '3', '4', 'all'],
                         help='Run specific phase: 1=structure, 2=actors, 3=boundaries, 4=use-cases, all=run all')
+    
+    # Performance optimization flags
+    perf_group = parser.add_argument_group('performance optimizations (for large codebases)')
+    perf_group.add_argument('--parallel', action='store_true', default=True,
+                           help='Enable parallel file processing (default: enabled)')
+    perf_group.add_argument('--no-parallel', dest='parallel', action='store_false',
+                           help='Disable parallel processing')
+    perf_group.add_argument('--incremental', action='store_true', default=True,
+                           help='Enable incremental analysis - skip unchanged files (default: enabled)')
+    perf_group.add_argument('--no-incremental', dest='incremental', action='store_false',
+                           help='Disable incremental analysis - analyze all files')
+    perf_group.add_argument('--max-workers', type=int, default=None,
+                           help='Maximum number of worker processes (default: CPU count)')
+    
     parser.add_argument('--version', action='version', version='%(prog)s 1.1.0')
     
     return parser
@@ -325,7 +339,13 @@ def run_phased_analysis(args):
     
     # Initialize analyzer
     log_section("RE-cue - Phased Reverse Engineering")
-    analyzer = ProjectAnalyzer(repo_root, verbose=args.verbose)
+    analyzer = ProjectAnalyzer(
+        repo_root, 
+        verbose=args.verbose,
+        enable_optimizations=args.parallel,
+        enable_incremental=args.incremental,
+        max_workers=args.max_workers
+    )
     
     # Determine which phase to run
     phase = args.phase
@@ -481,7 +501,13 @@ def main():
     # Initialize analyzer
     log_section("RE-cue - Reverse Engineering")
     
-    analyzer = ProjectAnalyzer(repo_root, verbose=args.verbose)
+    analyzer = ProjectAnalyzer(
+        repo_root, 
+        verbose=args.verbose,
+        enable_optimizations=args.parallel,
+        enable_incremental=args.incremental,
+        max_workers=args.max_workers
+    )
     analyzer.analyze()
     
     # Generate spec.md if requested
