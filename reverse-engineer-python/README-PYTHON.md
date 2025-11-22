@@ -99,7 +99,7 @@ For projects with 1000+ files, RE-cue offers several performance optimizations:
 
 - **Incremental Analysis**: Skips unchanged files on re-analysis
   - Tracks file metadata (size, modification time)
-  - **5-6x speedup** on repeated analysis of unchanged codebases
+  - In a benchmark on a 1200-file Python project, incremental analysis provided a 5.96x speedup on repeated runs. Actual speedup may vary depending on project size and file change frequency.
   - JSON-based state persistence across runs
   - Automatic change detection for modified files
 
