@@ -6,7 +6,7 @@ preconditions, postconditions, main scenarios, and extension scenarios.
 
 import re
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Optional
 from dataclasses import dataclass, field
 
 
