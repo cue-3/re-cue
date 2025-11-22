@@ -60,7 +60,7 @@ class TestLargeCodebaseOptimization(unittest.TestCase):
     
     def _generate_controller_content(self, name: str, index: int) -> str:
         """Generate controller file content."""
-        name_lower = name.lower()
+        name_lower = name.lower()  # Define before f-string
         return f"""
 package com.example.controller;
 
@@ -76,7 +76,7 @@ public class {name} {{
         return new ArrayList<>();
     }}
     
-    @GetMapping("/{{id}}")
+    @GetMapping("/{{{{id}}}}")  
     @PreAuthorize("hasRole('ADMIN')")
     public Object getById(@PathVariable Long id) {{
         return null;
@@ -88,13 +88,13 @@ public class {name} {{
         return entity;
     }}
     
-    @PutMapping("/{{id}}")
+    @PutMapping("/{{{{id}}}}")
     @PreAuthorize("hasRole('ADMIN')")
     public Object update(@PathVariable Long id, @RequestBody Object entity) {{
         return entity;
     }}
     
-    @DeleteMapping("/{{id}}")
+    @DeleteMapping("/{{{{id}}}}")
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {{
     }}

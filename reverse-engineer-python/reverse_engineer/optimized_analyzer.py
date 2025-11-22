@@ -8,6 +8,7 @@ This module extends the base analyzer with:
 - Early termination on errors
 """
 
+import re
 from pathlib import Path
 from typing import List, Optional, Callable, Any
 import sys
@@ -212,11 +213,10 @@ def process_java_controller(file_path: Path) -> dict:
     """
     Process a Java controller file to extract endpoints.
     This is a module-level function for parallel processing.
+    
+    Note: Import of re module is at module level to avoid overhead.
     """
     try:
-        from .analyzer import ProjectAnalyzer
-        import re
-        
         content = read_file_efficiently(file_path)
         endpoints = []
         
@@ -265,10 +265,10 @@ def process_java_model(file_path: Path) -> dict:
     """
     Process a Java model file to extract model information.
     This is a module-level function for parallel processing.
+    
+    Note: Import of re module is at module level to avoid overhead.
     """
     try:
-        import re
-        
         content = read_file_efficiently(file_path)
         model_name = file_path.stem
         

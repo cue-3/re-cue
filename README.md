@@ -212,10 +212,17 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 | **Workflow Patterns** | ❌ | ✅ NEW |
 | **Phased Analysis** | ❌ | ✅ NEW |
 | **State Persistence** | ❌ | ✅ NEW |
-| **Test Coverage** | ❌ | ✅ 23 tests |
+| **Parallel Processing** | ❌ | ✅ NEW |
+| **Incremental Analysis** | ❌ | ✅ NEW |
+| **Large Codebase (1000+ files)** | ⚠️ Slow | ✅ Optimized |
+| **Test Coverage** | ❌ | ✅ 248 tests |
 | **Extensibility** | Limited | High |
 
-**Recommendation**: Use Python version for use case analysis and business context extraction. Use Bash version for quick spec/plan/data-model generation in Unix environments.
+**Performance:** Python version includes optimizations for large codebases with **5-6x speedup** on repeated analysis through incremental processing and parallel file analysis.
+
+**Recommendation**: 
+- Use Python version for **large codebases (1000+ files)**, use case analysis, and business context extraction
+- Use Bash version for quick spec/plan/data-model generation in Unix environments with small to medium codebases
 
 ## Project Structure
 

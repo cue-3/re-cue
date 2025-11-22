@@ -225,7 +225,17 @@ class ProgressReporter:
 
 
 class ParallelProcessor:
-    """Process files in parallel with error handling."""
+    """
+    Process files in parallel with error handling.
+    
+    Thread Safety:
+    - Uses ProcessPoolExecutor which creates separate processes (not threads)
+    - Each worker process has its own memory space, so no shared state issues
+    - Progress tracking uses instance variables, safe when used from single thread
+    - Not safe to call process_files from multiple threads simultaneously
+    
+    Usage: Create one instance per analysis task, use from single thread.
+    """
     
     def __init__(self, max_workers: Optional[int] = None, 
                  max_errors: int = 10,
@@ -288,7 +298,8 @@ class ParallelProcessor:
                 for future in as_completed(future_to_file):
                     # Check for stop request or max errors
                     if self._stop_requested or error_count >= self.max_errors:
-                        executor.shutdown(wait=False, cancel_futures=True)
+                        # Graceful shutdown: cancel pending futures and wait for running ones
+                        executor.shutdown(wait=True, cancel_futures=False)
                         break
                     
                     file_path = future_to_file[future]
