@@ -34,6 +34,7 @@ RE-cue is a comprehensive reverse engineering toolkit designed to help software 
 - **Data Model Documentation** (data-model.md) - Comprehensive data structure analysis
 - **API Contracts** (api-spec.json) - OpenAPI 3.0 specifications for existing endpoints
 - **Use Case Analysis** (use-cases.md) - ✨ **NEW** Actor identification, system boundaries, and business process documentation with transaction/validation/workflow analysis
+- **Interactive Use Case Refinement** - ✨ **NEW** Edit and improve generated use cases through an interactive text-based interface
 
 **Primary Use Cases:**
 - � **Legacy System Documentation** - Generate comprehensive docs for undocumented codebases
@@ -125,9 +126,12 @@ python3 -m reverse_engineer --use-cases --verbose ~/projects/my-spring-app
 
 # Phased analysis (resumable)
 python3 -m reverse_engineer --use-cases --phased ~/projects/my-spring-app
+
+# Interactively refine generated use cases
+python3 -m reverse_engineer --refine-use-cases re-my-spring-app/phase4-use-cases.md
 ```
 
-See [docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md](docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md) for complete feature documentation.
+See [docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md](docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md) for complete feature documentation and [docs/INTERACTIVE-USE-CASE-REFINEMENT.md](docs/INTERACTIVE-USE-CASE-REFINEMENT.md) for interactive refinement guide.
 
 ## Supported Frameworks
 

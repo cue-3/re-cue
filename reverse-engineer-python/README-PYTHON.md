@@ -9,6 +9,7 @@ A Python command-line tool for reverse-engineering specifications from existing 
 - 📝 **Multiple Formats**: Generates Markdown and JSON specifications
 - 🎯 **OpenAPI Support**: Creates OpenAPI 3.0 API contracts
 - ✨ **Advanced Templating**: Jinja2-powered templates with conditionals, loops, and filters
+- 🎭 **Interactive Use Case Refinement**: Edit and improve generated use cases through text-based interface
 - 🧪 **Comprehensive Testing**: 90+ test cases for quality assurance
 - 🚀 **Minimal Dependencies**: Only PyYAML and Jinja2 required
 - 💻 **Cross-Platform**: Works on macOS, Linux, and Windows
@@ -69,6 +70,8 @@ reverse-engineer --spec --plan --data-model --api-contract --description "projec
 --plan                 Generate implementation plan (plan.md)
 --data-model           Generate data model documentation (data-model.md)
 --api-contract         Generate API contract (api-spec.json)
+--use-cases            Generate use case analysis (phase1-4 documents)
+--refine-use-cases FILE Interactively refine existing use cases from FILE
 
 -d, --description TEXT Project description (required for --spec)
 -o, --output PATH      Output file path (default: specs/001-reverse/spec.md)
@@ -77,6 +80,29 @@ reverse-engineer --spec --plan --data-model --api-contract --description "projec
 -v, --verbose          Show detailed analysis progress
 --help                 Show help message
 ```
+
+### Interactive Use Case Refinement
+
+After generating use cases, you can interactively refine them:
+
+```bash
+# Generate initial use cases
+reverse-engineer --use-cases /path/to/project
+
+# Refine use cases interactively
+reverse-engineer --refine-use-cases re-myproject/phase4-use-cases.md
+```
+
+Features:
+- Edit use case names and descriptions
+- Modify actors (primary and secondary)
+- Add, edit, or remove preconditions and postconditions
+- Refine main scenario steps
+- Add extension scenarios for error handling
+- Automatic backup before saving changes
+- Preserves document structure and metadata
+
+See [docs/INTERACTIVE-USE-CASE-REFINEMENT.md](../docs/INTERACTIVE-USE-CASE-REFINEMENT.md) for detailed guide.
 
 ### Performance Optimization Options (for Large Codebases)
 

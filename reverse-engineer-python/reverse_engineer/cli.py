@@ -187,6 +187,14 @@ No generation flags specified. Please provide at least one flag:
                   • System boundary mapping
                   • Use case extraction and documentation
 
+  --refine-use-cases FILE
+                  Interactively refine existing use cases from FILE
+                  • Edit use case names and descriptions
+                  • Add/remove preconditions and postconditions
+                  • Refine main scenario steps
+                  • Add extension scenarios
+                  • Save refined use cases back to file
+
   --fourplusone   Generate 4+1 Architecture View document
                   • Combines all phase data into comprehensive architecture doc
                   • Uses Philippe Kruchten's 4+1 architectural view model
@@ -200,6 +208,7 @@ Examples:
   reverse-engineer --use-cases
   reverse-engineer --use-cases --fourplusone
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
+  reverse-engineer --refine-use-cases use-cases.md
 
 Use --help for more options.
     """)
@@ -267,6 +276,8 @@ The script will:
                         help='Generate phased analysis (phase1-structure.md, phase2-actors.md, phase3-boundaries.md, phase4-use-cases.md)')
     parser.add_argument('--fourplusone', action='store_true',
                         help='Generate 4+1 architecture view document (fourplusone-architecture.md) - requires --use-cases data')
+    parser.add_argument('--refine-use-cases', type=str, metavar='FILE',
+                        help='Interactively refine existing use cases from FILE (e.g., use-cases.md or phase4-use-cases.md)')
     
     # Options
     parser.add_argument('-d', '--description', type=str,
@@ -434,6 +445,16 @@ def main():
             print(f"Error: Invalid project path: {project_path}", file=sys.stderr)
             sys.exit(1)
         detect_framework(repo_root, verbose=args.verbose if hasattr(args, 'verbose') else False)
+        return
+    
+    # Handle interactive refinement mode
+    if hasattr(args, 'refine_use_cases') and args.refine_use_cases:
+        from .interactive_editor import run_interactive_editor
+        use_case_file = Path(args.refine_use_cases)
+        if not use_case_file.exists():
+            print(f"Error: Use case file not found: {args.refine_use_cases}", file=sys.stderr)
+            sys.exit(1)
+        run_interactive_editor(use_case_file)
         return
     
     # Handle phased execution
