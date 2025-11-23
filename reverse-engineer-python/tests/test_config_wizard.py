@@ -12,7 +12,6 @@ from reverse_engineer.config_wizard import (
     WizardConfig,
     ConfigProfile,
     ConfigurationWizard,
-    run_wizard,
     list_profiles,
     load_profile,
     delete_profile
