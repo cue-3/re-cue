@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 
 
-
+import logging
 
 @dataclass
 class WizardConfig:
@@ -549,8 +549,9 @@ preferences. Let's get started!
                 # Return the framework with highest confidence
                 best_stack = max(stacks, key=lambda s: s.confidence)
                 return best_stack.framework_id
-        except Exception:
-            pass
+        except Exception as e:
+            # If TechDetector is not available or detection fails, just return None.
+            logging.debug("Framework detection failed: %s", e, exc_info=True)
         
         return None
 
