@@ -72,7 +72,7 @@ jobs:
           cd pages
           npm ci
           cd themes/docsy
-          npm ci
+          npm install
           cd ../../..
       - name: Configure Git
         run: |
