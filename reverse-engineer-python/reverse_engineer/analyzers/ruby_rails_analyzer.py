@@ -8,7 +8,7 @@ and project structure.
 
 import re
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 from .base_analyzer import (
     BaseAnalyzer, Endpoint, Model, Service, Actor,
