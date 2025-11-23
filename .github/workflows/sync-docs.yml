@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - recue-cmd
     paths:
       - 'docs/**'
       - '.github/workflows/sync-docs.yml'
