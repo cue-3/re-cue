@@ -10,7 +10,7 @@ This module provides advanced system boundary detection capabilities including:
 
 import re
 from pathlib import Path
-from typing import List, Dict, Set, Optional, Tuple, Any
+from typing import List, Dict, Set, Optional, Any
 from dataclasses import dataclass, field
 from collections import defaultdict
 
