@@ -149,11 +149,20 @@ validate_framework_documentation() {
         fi
     fi
     
-    # Check frameworks README
-    if check_file_exists "docs/frameworks/README.md" "Frameworks README"; then
-        if ! check_framework_documented "$framework" "$framework_search" "docs/frameworks/README.md"; then
-            auto_generate_framework_entry "$framework" "docs/frameworks/README.md"
+    # Check frameworks README or _index.md
+    local frameworks_doc=""
+    if [[ -f "docs/frameworks/README.md" ]]; then
+        frameworks_doc="docs/frameworks/README.md"
+    elif [[ -f "docs/frameworks/_index.md" ]]; then
+        frameworks_doc="docs/frameworks/_index.md"
+    fi
+    
+    if [[ -n "$frameworks_doc" ]]; then
+        if ! check_framework_documented "$framework" "$framework_search" "$frameworks_doc"; then
+            auto_generate_framework_entry "$framework" "$frameworks_doc"
         fi
+    else
+        log_warning "Neither docs/frameworks/README.md nor docs/frameworks/_index.md exists"
     fi
     
     # Check if framework-specific guide exists
@@ -278,8 +287,6 @@ check_documentation_structure() {
     local required_files=(
         "README.md"
         "docs/_index.md"
-        "docs/frameworks/README.md"
-        "docs/frameworks/_index.md"
         "pages/content/_index.md"
         "pages/content/docs/_index.md"
         "pages/content/docs/installation.md"
@@ -290,6 +297,13 @@ check_documentation_structure() {
     for file in "${required_files[@]}"; do
         check_file_exists "$file" "Required documentation file"
     done
+    
+    # Check for frameworks documentation (either README.md or _index.md)
+    if [[ ! -f "docs/frameworks/README.md" ]] && [[ ! -f "docs/frameworks/_index.md" ]]; then
+        log_error "Neither docs/frameworks/README.md nor docs/frameworks/_index.md exists"
+    else
+        log_success "Frameworks documentation exists"
+    fi
 }
 
 # Check for framework consistency across documentation
