@@ -244,8 +244,8 @@ end
         analyzer = RubyRailsAnalyzer(self.test_path, verbose=False)
         actors = analyzer.discover_actors()
         
-        # Verify
-        self.assertGreaterEqual(len(actors), 2)
+        # Verify - at least Guest, User, and Admin should be found
+        self.assertGreaterEqual(len(actors), 3)
         actor_names = [a.name for a in actors]
         self.assertIn('Guest', actor_names)
         self.assertIn('User', actor_names)

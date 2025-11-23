@@ -173,8 +173,9 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 log_info(f"  Found {method} route: {path}", self.verbose)
             
             # Parse namespace routes
-            namespace_pattern = r'namespace\s+:([\w]+)\s+do\s*\n(.*?)\n\s*end'
-            for match in re.finditer(namespace_pattern, content, re.DOTALL):
+            # Note: This is a simplified parser. For production use, consider a more robust Ruby parser.
+            namespace_pattern = r'namespace\s+:([\w]+)\s+do(.*?)end'
+            for match in re.finditer(namespace_pattern, content, re.DOTALL | re.MULTILINE):
                 namespace = match.group(1)
                 namespace_content = match.group(2)
                 
@@ -220,7 +221,8 @@ class RubyRailsAnalyzer(BaseAnalyzer):
             if self._is_test_file(model_file):
                 continue
             
-            if model_file.name in ['application_record.rb', 'concerns']:
+            # Skip application_record.rb and files in concerns directory
+            if model_file.name == 'application_record.rb' or 'concerns' in model_file.parts:
                 continue
             
             self._analyze_model_file(model_file)
