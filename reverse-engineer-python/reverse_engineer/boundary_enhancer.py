@@ -488,8 +488,8 @@ class MicroserviceBoundaryDetector:
                         if self.verbose:
                             log_info(f"  Detected microservice from Gradle module: {module_name}")
                             
-            except Exception:
-                pass
+            except Exception as exc:
+                log_info(f"  Exception occurred while parsing Gradle modules from {gradle_settings}: {exc}")
         
         return services
     
