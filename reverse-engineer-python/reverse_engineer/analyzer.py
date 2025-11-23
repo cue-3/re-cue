@@ -22,7 +22,7 @@ except ImportError:
 
 # Import enhanced boundary detection
 try:
-    from .boundary_enhancer import BoundaryEnhancer, EnhancedBoundary
+    from .boundary_enhancer import BoundaryEnhancer
     ENHANCED_BOUNDARY_AVAILABLE = True
 except ImportError:
     ENHANCED_BOUNDARY_AVAILABLE = False
