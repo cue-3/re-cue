@@ -3,7 +3,6 @@ title: ".NET Guide"
 weight: 54
 ---
 
-# .NET / ASP.NET Core Framework Guide
 
 This guide covers RE-cue's support for .NET and ASP.NET Core projects.
 

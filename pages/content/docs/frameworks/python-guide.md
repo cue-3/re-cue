@@ -3,7 +3,6 @@ title: "Python Guide"
 weight: 53
 ---
 
-# Python Web Frameworks Guide
 
 This guide covers RE-cue's support for Python web frameworks, including Django, Flask, and FastAPI.
 
