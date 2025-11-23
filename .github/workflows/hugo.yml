@@ -70,7 +70,10 @@ jobs:
       - name: Install Node.js dependencies
         run: |
           cd pages
-          [[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || npm install
+          npm ci
+          cd themes/docsy
+          npm ci
+          cd ../../..
       - name: Configure Git
         run: |
           git config core.quotepath false
