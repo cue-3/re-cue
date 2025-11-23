@@ -254,6 +254,17 @@ The script will:
     parser.add_argument('project_path', nargs='?', type=str,
                         help='Path to project directory to analyze (default: current directory)')
     
+    # Wizard and configuration profile management
+    wizard_group = parser.add_argument_group('configuration wizard and profiles')
+    wizard_group.add_argument('--wizard', action='store_true',
+                             help='Launch interactive configuration wizard for guided setup')
+    wizard_group.add_argument('--load-profile', type=str, metavar='NAME',
+                             help='Load a saved configuration profile by name')
+    wizard_group.add_argument('--list-profiles', action='store_true',
+                             help='List all saved configuration profiles')
+    wizard_group.add_argument('--delete-profile', type=str, metavar='NAME',
+                             help='Delete a saved configuration profile')
+    
     # Framework detection flags
     framework_group = parser.add_argument_group('framework detection')
     framework_group.add_argument('--list-frameworks', action='store_true',
@@ -431,6 +442,59 @@ def main():
         args = interactive_mode()
     else:
         args = parser.parse_args()
+    
+    # Handle configuration profile commands
+    if hasattr(args, 'list_profiles') and args.list_profiles:
+        from .config_wizard import list_profiles
+        list_profiles()
+        return
+    
+    if hasattr(args, 'delete_profile') and args.delete_profile:
+        from .config_wizard import delete_profile
+        delete_profile(args.delete_profile)
+        return
+    
+    # Handle --wizard flag
+    if hasattr(args, 'wizard') and args.wizard:
+        from .config_wizard import run_wizard
+        wizard_config = run_wizard()
+        # Convert wizard config to args-like object
+        args.path = wizard_config.project_path
+        args.project_path = wizard_config.project_path
+        args.framework = wizard_config.framework
+        args.spec = wizard_config.generate_spec
+        args.plan = wizard_config.generate_plan
+        args.data_model = wizard_config.generate_data_model
+        args.api_contract = wizard_config.generate_api_contract
+        args.use_cases = wizard_config.generate_use_cases
+        args.description = wizard_config.description
+        args.format = wizard_config.output_format
+        args.verbose = wizard_config.verbose
+        args.phased = wizard_config.phased
+        args.output = wizard_config.output_directory
+        # Continue with normal execution
+    
+    # Handle --load-profile flag
+    if hasattr(args, 'load_profile') and args.load_profile:
+        from .config_wizard import load_profile
+        wizard_config = load_profile(args.load_profile)
+        if not wizard_config:
+            sys.exit(1)
+        # Convert wizard config to args-like object
+        args.path = wizard_config.project_path
+        args.project_path = wizard_config.project_path
+        args.framework = wizard_config.framework
+        args.spec = wizard_config.generate_spec
+        args.plan = wizard_config.generate_plan
+        args.data_model = wizard_config.generate_data_model
+        args.api_contract = wizard_config.generate_api_contract
+        args.use_cases = wizard_config.generate_use_cases
+        args.description = wizard_config.description
+        args.format = wizard_config.output_format
+        args.verbose = wizard_config.verbose
+        args.phased = wizard_config.phased
+        args.output = wizard_config.output_directory
+        # Continue with normal execution
     
     # Handle --list-frameworks
     if hasattr(args, 'list_frameworks') and args.list_frameworks:
