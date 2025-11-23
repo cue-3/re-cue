@@ -69,7 +69,8 @@ jobs:
           echo "Node.js: $(node --version)"
       - name: Install Node.js dependencies
         run: |
-          [[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true
+          cd pages
+          [[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || npm install
       - name: Configure Git
         run: |
           git config core.quotepath false
