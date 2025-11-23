@@ -265,8 +265,6 @@ spring.jpa.hibernate.ddl-auto=update
         # Check for expected boundaries (layers or domain/package-based)
         has_presentation = any("presentation" in name.lower() or "controller" in name.lower() 
                               for name in boundary_names)
-        has_business = any("business" in name.lower() or "service" in name.lower() 
-                          for name in boundary_names)
         
         # Should find at least presentation layer (controller exists in test data)
         self.assertTrue(has_presentation, 
