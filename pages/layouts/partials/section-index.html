@@ -1,0 +1,59 @@
+{{/* 
+  Custom RE-cue Section Index Override
+  
+  Original: themes/docsy/layouts/_partials/section-index.html
+  Overridden: 2025-11-23
+  Reason: Display section links in a table format instead of card/entry layout
+  
+  IMPORTANT: When updating Docsy theme, check if section-index.html has changed.
+  
+  Changes from original:
+  - Replaced div.entry structure with table layout
+  - Added table headers for Guide and Description columns
+  - Maintained all filtering and parameter logic from original
+  - Preserved simple_list and no_list functionality
+*/}}
+
+<div class="section-index">
+    {{ $page := .Page -}}
+    {{ $pages := (where .Site.Pages "Section" .Section).ByWeight -}}
+    {{ $pages = (where $pages "Type" "!=" "search") }}
+    {{ $pages = (where $pages ".Params.hide_summary" "!=" true) -}}
+    {{ $pages = (where $pages ".Parent" "!=" nil) -}}
+    {{ $pages = (where $pages ".Parent.File" "!=" nil) -}}
+    {{ if $page.File -}}
+        {{ $pages = (where $pages "Parent.File.UniqueID" "==" $page.File.UniqueID) -}}
+    {{ end -}}
+    {{ if or $page.Params.no_list (eq (len $pages) 0) -}}
+    {{/* If no_list is true or we don't have subpages we don't show a list of subpages */}}
+    {{ else if $page.Params.simple_list -}}
+    {{/* If simple_list is true we show a bulleted list of subpages */}}
+        <ul>
+            {{ range $pages -}}
+                {{ $manualLink := cond (isset .Params "manuallink") .Params.manualLink ( cond (isset .Params "manuallinkrelref") (relref . .Params.manualLinkRelref) .RelPermalink) }}
+                <li><a href="{{ $manualLink }}"{{ with .Params.manualLinkTitle }} title="{{ . }}"{{ end }}{{ with .Params.manualLinkTarget }} target="{{ . }}"{{ if eq . "_blank" }} rel="noopener"{{ end }}{{ end }}>{{- .Title -}}</a></li>
+            {{ end -}}
+        </ul>
+    {{ else -}}
+    {{/* Table layout for formatted list of subpages with descriptions */}}
+    <table class="table table-hover section-index-table">
+        <thead>
+            <tr>
+                <th scope="col">Guide</th>
+                <th scope="col">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{ range $pages -}}
+            {{ $manualLink := cond (isset .Params "manuallink") .Params.manualLink ( cond (isset .Params "manuallinkrelref") (relref . .Params.manualLinkRelref) .RelPermalink) -}}
+            <tr>
+                <td>
+                    <a href="{{ $manualLink }}"{{ with .Params.manualLinkTitle }} title="{{ . }}"{{ end }}{{ with .Params.manualLinkTarget }} target="{{ . }}"{{ if eq . "_blank" }} rel="noopener"{{ end }}{{ end }}>{{- .Title -}}</a>
+                </td>
+                <td>{{ .Description | markdownify }}</td>
+            </tr>
+        {{ end -}}
+        </tbody>
+    </table>
+    {{ end -}}
+</div>
