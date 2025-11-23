@@ -272,8 +272,8 @@ spring.jpa.hibernate.ddl-auto=update
         self.assertTrue(has_presentation, 
                        f"Expected presentation/controller boundary, got: {boundary_names}")
         
-        # Note: Business layer may not be detected if service file doesn't have @Service annotation
-        # This is expected behavior - the test creates service directory but no actual service class
+        # Note: Business layer may not be detected because the test creates a service directory
+        # but does not create actual Java files with @Service annotations in that directory
     
     def test_use_case_extraction_accuracy(self):
         """Test the accuracy of use case extraction."""

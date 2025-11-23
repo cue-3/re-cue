@@ -2637,9 +2637,9 @@ class ProjectAnalyzer:
             self.enhanced_boundary_analysis = enhanced_results
             
             if self.verbose:
-                log_info(f"  Detected {len(enhanced_results['layers'])} architectural layers", self.verbose)
-                log_info(f"  Detected {len(enhanced_results['domains'])} domain boundaries", self.verbose)
-                log_info(f"  Detected {len(enhanced_results['microservices'])} microservices", self.verbose)
+                log_info(f"  Detected {len(enhanced_results['layers'])} architectural layers")
+                log_info(f"  Detected {len(enhanced_results['domains'])} domain boundaries")
+                log_info(f"  Detected {len(enhanced_results['microservices'])} microservices")
         else:
             # Fallback to original detection methods
             log_info("Using standard boundary detection...", self.verbose)

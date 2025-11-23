@@ -10,11 +10,18 @@ This module provides advanced system boundary detection capabilities including:
 
 import re
 from pathlib import Path
-from typing import List, Dict, Set, Optional, Tuple
+from typing import List, Dict, Set, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from collections import defaultdict
 
 from .utils import log_info
+
+
+# Configuration constants
+MIN_DOMAIN_COMPONENTS = 2  # Minimum components required to recognize a domain
+MAX_COMPONENTS_DISPLAY = 50  # Maximum components to include in boundary display
+MAX_INTERFACES_DISPLAY = 20  # Maximum interfaces to include in boundary display
+MAX_DEPENDENCIES_DISPLAY = 10  # Maximum dependencies to include in boundary display
 
 
 @dataclass
@@ -286,7 +293,7 @@ class DomainBoundaryDetector:
         # Convert to EnhancedBoundary objects
         boundaries = {}
         for domain, info in domains.items():
-            if len(info['components']) >= 2:  # Only meaningful domains
+            if len(info['components']) >= MIN_DOMAIN_COMPONENTS:  # Only meaningful domains
                 boundary = EnhancedBoundary(
                     name=f"{domain.title()} Domain",
                     boundary_type='domain',
@@ -607,7 +614,7 @@ class MicroserviceBoundaryDetector:
             if '/test/' not in str(java_file) and '\\test\\' not in str(java_file):
                 components.append(java_file.stem)
         
-        return components[:50]  # Limit for readability
+        return components[:MAX_COMPONENTS_DISPLAY]  # Limit for readability
     
     def _get_module_interfaces(self, module_path: Path) -> List[str]:
         """Get list of interfaces (API endpoints) in a module."""
@@ -626,7 +633,7 @@ class MicroserviceBoundaryDetector:
             except Exception:
                 continue
         
-        return interfaces[:20]  # Limit for readability
+        return interfaces[:MAX_INTERFACES_DISPLAY]  # Limit for readability
     
     def _get_module_dependencies(self, module_path: Path) -> List[str]:
         """Get list of dependencies for a module."""
@@ -640,7 +647,7 @@ class MicroserviceBoundaryDetector:
                 # Extract artifactId from dependencies
                 artifact_pattern = r'<dependency>.*?<artifactId>([^<]+)</artifactId>.*?</dependency>'
                 artifacts = re.findall(artifact_pattern, content, re.DOTALL)
-                dependencies.extend(artifacts[:10])  # Top 10 dependencies
+                dependencies.extend(artifacts[:MAX_DEPENDENCIES_DISPLAY])  # Top dependencies
             except Exception:
                 pass
         
@@ -743,11 +750,16 @@ class BoundaryEnhancer:
         self.microservice_detector = MicroserviceBoundaryDetector(repo_root, verbose)
         self.interaction_analyzer = BoundaryInteractionAnalyzer(verbose)
     
-    def enhance_boundaries(self) -> Dict[str, any]:
+    def enhance_boundaries(self) -> Dict[str, Any]:
         """Perform comprehensive boundary detection and analysis.
         
         Returns:
-            Dictionary containing all detected boundaries and analysis
+            Dictionary containing all detected boundaries and analysis results with keys:
+            - 'layers': Dict of architectural layers
+            - 'domains': Dict of domain boundaries
+            - 'microservices': List of microservices
+            - 'all_boundaries': List of all boundaries
+            - 'interactions': Dict of boundary interactions
         """
         if self.verbose:
             log_info("Starting enhanced boundary detection...")
