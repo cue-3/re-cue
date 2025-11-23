@@ -3,7 +3,6 @@ title: "Node.js Guide"
 weight: 52
 ---
 
-# Node.js Framework Guide
 
 This guide covers RE-cue's support for Node.js web frameworks, including Express.js and NestJS.
 

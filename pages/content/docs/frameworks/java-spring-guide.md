@@ -3,7 +3,6 @@ title: "Java Spring Boot Guide"
 weight: 51
 ---
 
-# Java Spring Boot Framework Guide
 
 This guide covers RE-cue's support for Java Spring Boot projects, including Spring MVC, Spring Data, Spring Security, and related technologies.
 

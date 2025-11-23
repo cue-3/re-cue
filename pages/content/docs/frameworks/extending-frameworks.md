@@ -3,7 +3,6 @@ title: "Extending Frameworks"
 weight: 55
 ---
 
-# Extending RE-cue: Adding New Framework Support
 
 This guide explains how to add support for new web frameworks to RE-cue. Whether you're adding support for a new language ecosystem or a specific framework within an existing language, this guide will walk you through the process.
 

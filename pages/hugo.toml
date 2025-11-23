@@ -1,12 +1,36 @@
 baseURL = 'https://www.re-cue.net/'
 languageCode = 'en-us'
 title = 'RE-cue'
-theme = 're-cue-theme'
+theme = 'docsy'
+enableRobotsTXT = true
+enableGitInfo = true
+
+[languages]
+[languages.en]
+languageCode = 'en-us'
+languageName = 'English'
+weight = 1
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.parser.attribute]
+      block = true
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    style = 'monokai'
+    lineNos = false
+    lineNumbersInTable = false
+    noClasses = false
+
+[outputs]
+  home = ['HTML', 'RSS']
+  section = ['HTML', 'RSS']
 
 # Enable following symbolic links
 [security]
   [security.exec]
-    allow = ['^(dart-)?sass(-embedded)?$', '^go$', '^npx$', '^postcss$']
+    allow = ['^(dart-)?sass(-embedded)?$', '^go$', '^npx$', '^postcss$', '^git$']
   [security.funcs]
     getenv = ['^HUGO_', '^CI$']
   [security.http]
@@ -20,27 +44,78 @@ theme = 're-cue-theme'
 [params]
   description = 'Automatically generate comprehensive documentation from your existing codebase'
   author = 'cue-3'
-  github = 'https://github.com/cue-3/re-cue'
+  copyright = 'cue-3'
+  privacy_policy = ''
+  version_menu = 'Releases'
+  archived_version = false
+  version = '1.0.0'
+  url_latest_version = 'https://www.re-cue.net'
+  # Commented out to disable page edit/view/create links
+  # github_repo = 'https://github.com/cue-3/re-cue'
+  # github_project_repo = 'https://github.com/cue-3/re-cue'
+  # github_branch = 'main'
+  
+[params.ui]
+  showLightDarkModeMenu = true
+  sidebar_menu_compact = false
+  sidebar_menu_foldable = true
+  sidebar_cache_limit = 10
+  breadcrumb_disable = false
+  navbar_logo = true
+  footer_about_enable = true
 
-[params.colors]
-  darkBlue = '#0a1929'
-  mediumBlue = '#1e3a5f'
-  lightBlue = '#4a90e2'
-  accentBlue = '#64b5f6'
-  white = '#ffffff'
+# Disable page editing features for public site
+[params.ui.readingtime]
+  enable = false
+
+# Disable all page editing links
+[params.editURL]
+  enable = false
+
+# Disable GitHub edit links
+[params.github]
+  editURL = ""
+  viewURL = ""
+  createURL = ""
+  issueURL = ""
+  projectURL = ""
+  branch = ""
+  
+[params.ui.feedback]
+  enable = true
+  yes = 'Glad to hear it! Please <a href="https://github.com/cue-3/re-cue/issues/new">tell us how we can improve</a>.'
+  no = 'Sorry to hear that. Please <a href="https://github.com/cue-3/re-cue/issues/new">tell us how we can improve</a>.'
+
+[params.links]
+[[params.links.user]]
+  name = 'GitHub'
+  url = 'https://github.com/cue-3/re-cue'
+  icon = 'fab fa-github'
+  desc = 'Development takes place here!'
+[[params.links.user]]
+  name = 'GitHub Discussions'
+  url = 'https://github.com/cue-3/re-cue/discussions'
+  icon = 'fa fa-comments'
+  desc = 'Chat with other project users'
+
+[[params.links.developer]]
+  name = 'GitHub'
+  url = 'https://github.com/cue-3/re-cue'
+  icon = 'fab fa-github'
+  desc = 'Development takes place here!'
 
 [menu]
   [[menu.main]]
-    name = 'Features'
-    url = '/#features'
+    name = 'Installation'
+    url = '/docs/installation/'
     weight = 1
   [[menu.main]]
     name = 'How It Works'
-    url = '/#how-it-works'
+    url = '/docs/how-it-works/'
     weight = 2
   [[menu.main]]
-    name = 'Installation'
-    url = '/#installation'
+    name = 'Features'
+    url = '/docs/features/'
     weight = 3
   [[menu.main]]
     name = 'Documentation'
