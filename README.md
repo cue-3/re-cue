@@ -256,7 +256,34 @@ re-cue/
     └── USE-CASE-IMPLEMENTATION-STATUS.md  # Feature roadmap
 ```
 
-## Quick Integration
+## Quick Start
+
+### 5-Minute Quick Start
+
+**New to RE-cue?** Get started in 5 minutes:
+
+```bash
+# 1. Install Python version
+pip install -e reverse-engineer-python/
+
+# 2. Navigate to your project
+cd ~/projects/my-spring-app
+
+# 3. Generate all documentation
+recue --spec --plan --data-model --api-contract --use-cases
+
+# 4. Review generated files
+ls -la re-my-spring-app/
+```
+
+**That's it!** Your documentation is now in the `re-my-spring-app/` directory.
+
+**Next Steps:**
+- 📖 Read the [Getting Started Guide](docs/user-guides/GETTING-STARTED.md) for detailed walkthrough
+- 📚 Explore the [Complete User Guide](docs/user-guides/USER-GUIDE.md) for all features
+- ✅ Review [Best Practices](docs/user-guides/BEST-PRACTICES.md) for production usage
+
+## Integration Options
 
 ### Option 1: GitHub Action (Recommended for CI/CD)
 
@@ -599,15 +626,53 @@ jobs:
 - Validation annotations: `@NotNull`, `@Size`, `@Email`, `@Pattern`, `@Valid`
 - Workflow annotations: `@Async`, `@Scheduled`, `@Retryable`
 
-## Support & Resources
+## 📚 Documentation & User Guides
+
+### Comprehensive User Guides
+
+**New to RE-cue?** Start with our complete guide collection:
+
+- 🚀 **[Getting Started Guide](docs/user-guides/GETTING-STARTED.md)** - Install and run your first analysis in 5 minutes
+- 📖 **[Complete User Guide](docs/user-guides/USER-GUIDE.md)** - Full reference for all features and workflows
+- ⚡ **[Advanced Usage Guide](docs/user-guides/ADVANCED-USAGE.md)** - Power-user techniques and customization
+- ✅ **[Best Practices Guide](docs/user-guides/BEST-PRACTICES.md)** - Proven patterns from experienced users
+
+**[Browse All User Guides →](docs/user-guides/)**
+
+### Quick Start by Experience
+
+**Beginner** (First time using RE-cue)
+```bash
+# Install Python version
+pip install -e reverse-engineer-python/
+
+# Run your first analysis
+recue --spec --plan --use-cases
+
+# Read the Getting Started guide
+open docs/user-guides/GETTING-STARTED.md
+```
+
+**Intermediate** (Know the basics, want to integrate)
+- [CI/CD Integration](docs/user-guides/BEST-PRACTICES.md#cicd-integration)
+- [Workflow Integration](docs/user-guides/USER-GUIDE.md#workflow-integration)
+- [GitHub Action Guide](docs/developer-guides/GITHUB-ACTION-GUIDE.md)
+
+**Advanced** (Power user, need customization)
+- [Template Customization](docs/user-guides/ADVANCED-USAGE.md#template-system)
+- [API Integration](docs/user-guides/ADVANCED-USAGE.md#api-integration)
+- [Performance Tuning](docs/user-guides/ADVANCED-USAGE.md#performance-tuning)
+
+### Additional Resources
 
 - 📖 **Script Documentation**: See [reverse-engineer-bash/README.md](reverse-engineer-bash/README.md) for bash version details
-- � **Python Documentation**: See [reverse-engineer-python/README-PYTHON.md](reverse-engineer-python/README-PYTHON.md) for Python version details
+- 🐍 **Python Documentation**: See [reverse-engineer-python/README-PYTHON.md](reverse-engineer-python/README-PYTHON.md) for Python version details
 - ✨ **Use Case Feature**: See [docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md](docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md) for business context analysis
-- 🔧 **Troubleshooting**: See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and solutions
+- 🔧 **Troubleshooting**: See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for 70+ common issues and solutions
+- 🎯 **Framework Guides**: See [docs/frameworks/](docs/frameworks/) for framework-specific documentation
 - 📊 **Implementation Status**: See [docs/USE-CASE-IMPLEMENTATION-STATUS.md](docs/USE-CASE-IMPLEMENTATION-STATUS.md) for feature roadmap
-- 🐛 **Issues**: Report issues via GitHub Issues
-- 💬 **Community**: Join discussions for workflow questions
+- 🐛 **Issues**: Report issues via [GitHub Issues](https://github.com/cue-3/re-cue/issues)
+- 💬 **Community**: Join [discussions](https://github.com/cue-3/re-cue/discussions) for workflow questions
 
 ## Troubleshooting
 
@@ -690,7 +755,11 @@ Help improve RE-cue reverse engineering toolkit:
 - ✅ Jinja2 template system with 90+ test cases
 - ✅ Use case analysis with business context extraction
 - ✅ Hugo documentation site at [cue-3.github.io/re-cue](https://cue-3.github.io/re-cue/)
-- ✅ Comprehensive documentation (1000+ lines across multiple guides)
+- ✅ **Comprehensive user guides** - 3000+ lines across 4 detailed guides
+  - [Getting Started Guide](docs/user-guides/GETTING-STARTED.md)
+  - [Complete User Guide](docs/user-guides/USER-GUIDE.md)
+  - [Advanced Usage Guide](docs/user-guides/ADVANCED-USAGE.md)
+  - [Best Practices Guide](docs/user-guides/BEST-PRACTICES.md)
 
 See [docs/CHANGELOG.md](docs/CHANGELOG.md) for complete release notes and [docs/USE-CASE-IMPLEMENTATION-STATUS.md](docs/USE-CASE-IMPLEMENTATION-STATUS.md) for roadmap.
 
