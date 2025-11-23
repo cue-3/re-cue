@@ -1,1 +1,45 @@
 // Custom styles for RE-cue documentation
+
+// Override navbar background to match body in light and dark modes
+.td-navbar {
+  background: var(--bs-body-bg) !important;
+  border-bottom: 1px solid var(--bs-border-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  .nav-link {
+    color: var(--bs-body-color) !important;
+    
+    &:hover {
+      color: var(--bs-primary) !important;
+    }
+  }
+
+  .navbar-brand {
+    color: var(--bs-body-color) !important;
+  }
+}
+
+.navbar-bg-onscroll {
+  background: var(--bs-body-bg) !important;
+}
+
+.td-navbar-cover {
+  @include media-breakpoint-up(md) {
+    background: transparent !important;
+  }
+
+  &.navbar-bg-onscroll {
+    background: var(--bs-body-bg) !important;
+    
+    .nav-link {
+      color: var(--bs-body-color) !important;
+    }
+  }
+}
+
+// Dark mode adjustments
+[data-bs-theme="dark"] {
+  .td-navbar {
+    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+  }
+}
