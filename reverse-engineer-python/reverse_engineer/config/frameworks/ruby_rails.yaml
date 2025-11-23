@@ -1,0 +1,182 @@
+framework:
+  id: "ruby_rails"
+  name: "Ruby on Rails"
+  language: "ruby"
+  version_detection:
+    - file: "Gemfile"
+      pattern: "gem ['\"]rails['\"]"
+    - file: "config.ru"
+      pattern: "Rails.application"
+    - file: "Rakefile"
+      pattern: "Rails.application"
+
+file_patterns:
+  controllers:
+    - "*_controller.rb"
+    - "app/controllers/*_controller.rb"
+  models:
+    - "app/models/*.rb"
+  views:
+    - "app/views/**/*.erb"
+    - "app/views/**/*.haml"
+    - "app/views/**/*.slim"
+  routes:
+    - "config/routes.rb"
+  concerns:
+    - "app/controllers/concerns/*.rb"
+    - "app/models/concerns/*.rb"
+  jobs:
+    - "app/jobs/*.rb"
+  mailers:
+    - "app/mailers/*.rb"
+
+patterns:
+  routes:
+    resources:
+      - pattern: "resources\\s+:(\\w+)"
+        resource_group: 1
+      - pattern: "resource\\s+:(\\w+)"
+        resource_group: 1
+    member_routes:
+      - pattern: "member\\s+do\\s*\\n([^e][^n][^d])*end"
+        type: "member"
+    collection_routes:
+      - pattern: "collection\\s+do\\s*\\n([^e][^n][^d])*end"
+        type: "collection"
+    verb_routes:
+      - pattern: "(get|post|put|patch|delete)\\s+['\"]([^'\"]+)['\"]"
+        method_group: 1
+        path_group: 2
+    namespace:
+      - pattern: "namespace\\s+:(\\w+)"
+        namespace_group: 1
+  
+  controllers:
+    class_definition:
+      - pattern: "class\\s+(\\w+Controller)\\s*<\\s*ApplicationController"
+        name_group: 1
+    actions:
+      - pattern: "def\\s+(\\w+)"
+        action_group: 1
+    before_action:
+      - pattern: "before_action\\s+:(\\w+)"
+        callback_group: 1
+      - pattern: "before_filter\\s+:(\\w+)"
+        callback_group: 1
+    skip_before_action:
+      - pattern: "skip_before_action\\s+:(\\w+)"
+        callback_group: 1
+  
+  security:
+    authentication:
+      - "authenticate_user!"
+      - "require_login"
+      - "signed_in?"
+      - "current_user"
+    authorization:
+      - "authorize"
+      - "authorize!"
+      - "can\\?"
+      - "cannot\\?"
+    devise:
+      - "devise_for"
+      - "authenticate_.*!"
+    pundit:
+      - "authorize\\s+@\\w+"
+      - "policy_scope"
+  
+  models:
+    class_definition:
+      - pattern: "class\\s+(\\w+)\\s*<\\s*ApplicationRecord"
+        name_group: 1
+      - pattern: "class\\s+(\\w+)\\s*<\\s*ActiveRecord::Base"
+        name_group: 1
+    associations:
+      has_many:
+        - pattern: "has_many\\s+:(\\w+)"
+          association_group: 1
+      has_one:
+        - pattern: "has_one\\s+:(\\w+)"
+          association_group: 1
+      belongs_to:
+        - pattern: "belongs_to\\s+:(\\w+)"
+          association_group: 1
+      has_and_belongs_to_many:
+        - pattern: "has_and_belongs_to_many\\s+:(\\w+)"
+          association_group: 1
+    validations:
+      - pattern: "validates\\s+:(\\w+)"
+        field_group: 1
+      - pattern: "validates_presence_of\\s+:(\\w+)"
+        field_group: 1
+      - pattern: "validates_uniqueness_of\\s+:(\\w+)"
+        field_group: 1
+      - pattern: "validates_length_of\\s+:(\\w+)"
+        field_group: 1
+      - pattern: "validates_format_of\\s+:(\\w+)"
+        field_group: 1
+    scopes:
+      - pattern: "scope\\s+:(\\w+)"
+        scope_group: 1
+    callbacks:
+      - "before_validation"
+      - "after_validation"
+      - "before_save"
+      - "after_save"
+      - "before_create"
+      - "after_create"
+      - "before_update"
+      - "after_update"
+      - "before_destroy"
+      - "after_destroy"
+
+directory_structure:
+  source_root: "app"
+  controllers: "app/controllers"
+  models: "app/models"
+  views: "app/views"
+  helpers: "app/helpers"
+  mailers: "app/mailers"
+  jobs: "app/jobs"
+  assets: "app/assets"
+  config: "config"
+  routes: "config/routes.rb"
+  db: "db"
+  migrations: "db/migrate"
+  test_root: "test"
+  spec_root: "spec"
+
+default_actors:
+  - name: "Guest"
+    type: "external"
+    access_level: "public"
+    description: "Unauthenticated visitor"
+  - name: "User"
+    type: "external"
+    access_level: "authenticated"
+    description: "Authenticated user"
+  - name: "Admin"
+    type: "external"
+    access_level: "admin"
+    description: "Administrator with elevated privileges"
+  - name: "System"
+    type: "system"
+    access_level: "system"
+    description: "Background jobs and scheduled tasks"
+
+default_boundaries:
+  - name: "Rails Controllers"
+    type: "external"
+    description: "HTTP request handlers and API endpoints"
+  - name: "Rails Models"
+    type: "data"
+    description: "ActiveRecord models and business logic"
+  - name: "Rails Views"
+    type: "presentation"
+    description: "UI templates and rendering layer"
+  - name: "Background Jobs"
+    type: "internal"
+    description: "Asynchronous processing with ActiveJob/Sidekiq"
+  - name: "External Services"
+    type: "external"
+    description: "Third-party APIs and integrations"
