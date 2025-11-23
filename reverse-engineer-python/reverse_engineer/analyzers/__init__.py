@@ -15,6 +15,7 @@ from .nodejs_express_analyzer import NodeExpressAnalyzer
 from .python_django_analyzer import DjangoAnalyzer
 from .python_flask_analyzer import FlaskAnalyzer
 from .python_fastapi_analyzer import FastAPIAnalyzer
+from .ruby_rails_analyzer import RubyRailsAnalyzer
 
 __all__ = [
     'BaseAnalyzer',
@@ -30,4 +31,5 @@ __all__ = [
     'DjangoAnalyzer',
     'FlaskAnalyzer',
     'FastAPIAnalyzer',
+    'RubyRailsAnalyzer',
 ]

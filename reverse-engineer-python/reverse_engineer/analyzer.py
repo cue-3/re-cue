@@ -3168,7 +3168,8 @@ def create_analyzer(repo_root: Path, verbose: bool = False,
                 NodeExpressAnalyzer,
                 DjangoAnalyzer,
                 FlaskAnalyzer,
-                FastAPIAnalyzer
+                FastAPIAnalyzer,
+                RubyRailsAnalyzer
             )
             
             # Detect technology stack
@@ -3189,6 +3190,8 @@ def create_analyzer(repo_root: Path, verbose: bool = False,
                 return FlaskAnalyzer(repo_root, verbose)
             elif tech_stack.framework_id == "python_fastapi":
                 return FastAPIAnalyzer(repo_root, verbose)
+            elif tech_stack.framework_id == "ruby_rails":
+                return RubyRailsAnalyzer(repo_root, verbose)
             else:
                 if verbose:
                     print(f"Using legacy analyzer for {tech_stack.name}")
