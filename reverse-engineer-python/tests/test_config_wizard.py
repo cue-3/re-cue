@@ -4,7 +4,6 @@ Tests for configuration wizard functionality.
 
 import unittest
 import tempfile
-import json
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
