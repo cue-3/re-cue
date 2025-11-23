@@ -20,6 +20,13 @@ try:
 except ImportError:
     PLUGIN_ARCHITECTURE_AVAILABLE = False
 
+# Import enhanced boundary detection
+try:
+    from .boundary_enhancer import BoundaryEnhancer
+    ENHANCED_BOUNDARY_AVAILABLE = True
+except ImportError:
+    ENHANCED_BOUNDARY_AVAILABLE = False
+
 
 class SecurityPatternAnalyzer:
     """Analyzes Spring Security patterns to identify actors and their roles."""
@@ -1945,6 +1952,9 @@ class ProjectAnalyzer:
             'business_rules': []
         }
         
+        # Enhanced boundary analysis results
+        self.enhanced_boundary_analysis: Dict = {}
+        
         # Initialize optimized analyzer if optimizations are enabled
         self.optimized_analyzer = None
         if enable_optimizations:
@@ -2601,17 +2611,44 @@ class ProjectAnalyzer:
         log_info(f"Found {self.actor_count} actors", self.verbose)
 
     def discover_system_boundaries(self):
-        """Identify system and subsystem boundaries."""
+        """Identify system and subsystem boundaries with enhanced detection."""
         log_info("Discovering system boundaries...", self.verbose)
         
         # Clear existing boundaries
         self.system_boundaries.clear()
         
-        # Analyze package structure for boundaries
-        self._analyze_package_boundaries()
-        
-        # Analyze configuration-based boundaries
-        self._analyze_configuration_boundaries()
+        # Use enhanced boundary detection if available
+        if ENHANCED_BOUNDARY_AVAILABLE:
+            log_info("Using enhanced boundary detection...", self.verbose)
+            enhancer = BoundaryEnhancer(self.repo_root, self.verbose)
+            enhanced_results = enhancer.enhance_boundaries()
+            
+            # Convert EnhancedBoundary objects to SystemBoundary
+            for enhanced in enhanced_results['all_boundaries']:
+                boundary = SystemBoundary(
+                    name=enhanced.name,
+                    components=enhanced.components[:50],  # Limit for readability
+                    interfaces=enhanced.interfaces[:20],
+                    type=enhanced.boundary_type
+                )
+                self.system_boundaries.append(boundary)
+            
+            # Store enhanced analysis for later use
+            self.enhanced_boundary_analysis = enhanced_results
+            
+            if self.verbose:
+                log_info(f"  Detected {len(enhanced_results['layers'])} architectural layers")
+                log_info(f"  Detected {len(enhanced_results['domains'])} domain boundaries")
+                log_info(f"  Detected {len(enhanced_results['microservices'])} microservices")
+        else:
+            # Fallback to original detection methods
+            log_info("Using standard boundary detection...", self.verbose)
+            
+            # Analyze package structure for boundaries
+            self._analyze_package_boundaries()
+            
+            # Analyze configuration-based boundaries
+            self._analyze_configuration_boundaries()
         
         log_info(f"Found {self.system_boundary_count} system boundaries", self.verbose)
 
