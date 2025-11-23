@@ -204,6 +204,7 @@ preferences. Let's get started!
             self.config = loaded_config
             print(f"\n✅ Loaded profile: {profile_name}")
             print()
+            # Show summary for user to review (confirmation happens in main run flow)
             self._show_summary_and_confirm()
             return True
         else:

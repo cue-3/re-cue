@@ -459,8 +459,9 @@ def main():
         from .config_wizard import run_wizard
         wizard_config = run_wizard()
         # Convert wizard config to args-like object
+        # Set both path and project_path for compatibility with different code paths
         args.path = wizard_config.project_path
-        args.project_path = wizard_config.project_path
+        args.project_path = wizard_config.project_path  # Some functions check project_path
         args.framework = wizard_config.framework
         args.spec = wizard_config.generate_spec
         args.plan = wizard_config.generate_plan
@@ -481,8 +482,9 @@ def main():
         if not wizard_config:
             sys.exit(1)
         # Convert wizard config to args-like object
+        # Set both path and project_path for compatibility with different code paths
         args.path = wizard_config.project_path
-        args.project_path = wizard_config.project_path
+        args.project_path = wizard_config.project_path  # Some functions check project_path
         args.framework = wizard_config.framework
         args.spec = wizard_config.generate_spec
         args.plan = wizard_config.generate_plan

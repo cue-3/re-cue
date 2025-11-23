@@ -204,6 +204,8 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 | **Platforms** | Unix/Linux/macOS | Windows/macOS/Linux |
 | **Dependencies** | None (grep, awk, sed) | Python 3.6+ |
 | **Progress Tracking** | 5 stages | 8 stages |
+| **Interactive Wizard** | ❌ | ✅ NEW |
+| **Configuration Profiles** | ❌ | ✅ NEW |
 | **Spec Generation** | ✅ | ✅ |
 | **Plan Generation** | ✅ | ✅ |
 | **Data Model** | ✅ | ✅ |
@@ -219,13 +221,13 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 | **Parallel Processing** | ❌ | ✅ NEW |
 | **Incremental Analysis** | ❌ | ✅ NEW |
 | **Large Codebase (1000+ files)** | ⚠️ Slow | ✅ Optimized |
-| **Test Coverage** | ❌ | ✅ 248 tests |
+| **Test Coverage** | ❌ | ✅ 275+ tests |
 | **Extensibility** | Limited | High |
 
 **Performance:** Python version includes optimizations for large codebases with **5-6x speedup** on repeated analysis through incremental processing and parallel file analysis.
 
 **Recommendation**: 
-- Use Python version for **large codebases (1000+ files)**, use case analysis, and business context extraction
+- Use Python version for **large codebases (1000+ files)**, use case analysis, business context extraction, and guided setup via interactive wizard
 - Use Bash version for quick spec/plan/data-model generation in Unix environments with small to medium codebases
 
 ## Project Structure
@@ -262,6 +264,25 @@ re-cue/
 
 **New to RE-cue?** Get started in 5 minutes:
 
+#### Option 1: Interactive Configuration Wizard (Recommended for First-Time Users)
+
+```bash
+# 1. Install Python version
+pip install -e reverse-engineer-python/
+
+# 2. Launch the interactive wizard
+recue --wizard
+
+# The wizard will guide you through:
+# - Project path selection
+# - Framework auto-detection
+# - Document generation options
+# - Output preferences
+# - Saving configuration as a reusable profile
+```
+
+#### Option 2: Command-Line Interface
+
 ```bash
 # 1. Install Python version
 pip install -e reverse-engineer-python/
@@ -279,6 +300,7 @@ ls -la re-my-spring-app/
 **That's it!** Your documentation is now in the `re-my-spring-app/` directory.
 
 **Next Steps:**
+- 🧙 Try the [Interactive Configuration Wizard](docs/features/configuration-wizard.md) for guided setup
 - 📖 Read the [Getting Started Guide](docs/user-guides/GETTING-STARTED.md) for detailed walkthrough
 - 📚 Explore the [Complete User Guide](docs/user-guides/USER-GUIDE.md) for all features
 - ✅ Review [Best Practices](docs/user-guides/BEST-PRACTICES.md) for production usage
@@ -458,6 +480,29 @@ The prompt provides context to GitHub Copilot for:
 - **Consistent documentation patterns** - Follows established documentation best practices
 
 ## Key Features
+
+### 🧙 **Interactive Configuration Wizard** (NEW)
+
+Guided setup experience for first-time users:
+
+- **Step-by-Step Configuration** - Interactive prompts guide you through all options
+- **Automatic Framework Detection** - Identifies your technology stack automatically
+- **Configuration Profiles** - Save and reuse configurations across projects
+- **Smart Defaults** - Sensible defaults based on detected project type
+- **Zero Learning Curve** - No need to memorize command-line flags
+
+```bash
+# Launch the wizard
+recue --wizard
+
+# Load a saved profile
+recue --load-profile spring-boot-full
+
+# List all saved profiles
+recue --list-profiles
+```
+
+See [Configuration Wizard Guide](docs/features/configuration-wizard.md) for complete documentation.
 
 ### 🎯 **Comprehensive Documentation Output**
 
