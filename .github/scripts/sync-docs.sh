@@ -9,6 +9,16 @@ NC='\033[0m' # No Color
 SOURCE_DIR="docs"
 TARGET_DIR="pages/content/docs"
 
+# Directories to exclude from sync
+BLACKLIST=(
+    "archive"
+    "generated"
+    "private"
+    "developer-guides"
+    "api"
+    "architecture"
+)
+
 echo -e "${BLUE}Starting documentation sync...${NC}"
 
 # Create target directory if it doesn't exist
@@ -181,9 +191,18 @@ sync_directory() {
         
         local dirname=$(basename "$dir")
         
-        # Skip certain directories
-        if [[ "$dirname" == "archive" ]] || [[ "$dirname" == "generated" ]] || [[ "$dirname" == "private" ]] || [[ "$dirname" == "developer-guides" ]]; then
-            echo -e "${BLUE}Skipping directory: $dirname${NC}"
+        # Check if directory is in blacklist
+        local skip=false
+        for blacklisted in "${BLACKLIST[@]}"; do
+            if [[ "$dirname" == "$blacklisted" ]]; then
+                echo -e "${BLUE}Skipping blacklisted directory: $dirname${NC}"
+                skip=true
+                break
+            fi
+        done
+        
+        # Skip if blacklisted
+        if [ "$skip" = true ]; then
             continue
         fi
         

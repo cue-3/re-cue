@@ -14,7 +14,7 @@ description: "Automatically generate comprehensive documentation from your exist
 {{% blocks/lead color="primary" %}}
 RE-cue is a powerful, multi-framework toolkit that automatically analyzes your applications to generate detailed documentation, helping you understand and maintain complex codebases across multiple technology stacks.
 
-**Supported Frameworks:** Java Spring Boot, Node.js (Express/NestJS), Python (Django/Flask/FastAPI), .NET (ASP.NET Core)
+**Supported Frameworks:** Java Spring Boot, Node.js (Express/NestJS), Python (Django/Flask/FastAPI), .NET (ASP.NET Core), Ruby on Rails
 {{% /blocks/lead %}}
 
 {{% blocks/section color="dark" type="row" %}}

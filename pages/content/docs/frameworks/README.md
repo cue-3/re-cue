@@ -19,7 +19,7 @@ RE-cue is a universal reverse engineering tool that supports multiple technology
 | **Flask** | Python | 2.x, 3.x | 🚧 In Development | [Python Guide](python-guide.md) |
 | **FastAPI** | Python | 0.95+ | 🚧 In Development | [Python Guide](python-guide.md) |
 | **ASP.NET Core** | C# | 6.0+ | 🚧 Planned | [.NET Guide](dotnet-guide.md) |
-| **Ruby on Rails** | Ruby | 6.x, 7.x | 🚧 Planned | Coming Soon |
+| **Ruby on Rails** | Ruby | 6.x, 7.x, 8.x | ✅ Full Support | [Ruby on Rails Guide](ruby-rails-guide.md) |
 
 ### 🔄 Planned Support
 
