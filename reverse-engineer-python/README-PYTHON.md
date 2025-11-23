@@ -45,22 +45,22 @@ The Python CLI tool has the same interface as the bash script:
 
 ```bash
 # Generate specification document
-reverse-engineer --spec --description "forecast sprint delivery"
+recue --spec --description "forecast sprint delivery"
 
 # Generate implementation plan
-reverse-engineer --plan
+recue --plan
 
 # Generate data model documentation
-reverse-engineer --data-model
+recue --data-model
 
 # Generate OpenAPI contract
-reverse-engineer --api-contract
+recue --api-contract
 
 # Analyze a project at a specific path
-reverse-engineer --spec --path /path/to/project --description "external project"
+recue --spec --path /path/to/project --description "external project"
 
 # Generate everything
-reverse-engineer --spec --plan --data-model --api-contract --description "project description"
+recue --spec --plan --data-model --api-contract --description "project description"
 ```
 
 ### Options
@@ -87,10 +87,10 @@ After generating use cases, you can interactively refine them:
 
 ```bash
 # Generate initial use cases
-reverse-engineer --use-cases /path/to/project
+recue --use-cases /path/to/project
 
 # Refine use cases interactively
-reverse-engineer --refine-use-cases re-myproject/phase4-use-cases.md
+recue --refine-use-cases re-myproject/phase4-use-cases.md
 ```
 
 Features:
@@ -143,19 +143,19 @@ For projects with 1000+ files, RE-cue offers several performance optimizations:
 
 ```bash
 # Analyze large codebase with all optimizations (default)
-reverse-engineer --spec --path ~/large-project
+recue --spec --path ~/large-project
 
 # Use 8 worker processes for faster analysis
-reverse-engineer --spec --max-workers 8 --path ~/large-project
+recue --spec --max-workers 8 --path ~/large-project
 
 # Force full re-analysis (disable incremental)
-reverse-engineer --spec --no-incremental --path ~/large-project
+recue --spec --no-incremental --path ~/large-project
 
 # Sequential processing for debugging
-reverse-engineer --spec --no-parallel --verbose --path ~/large-project
+recue --spec --no-parallel --verbose --path ~/large-project
 
 # Optimal for very large projects (1000+ files)
-reverse-engineer --spec --verbose --max-workers 16 --path ~/enterprise-app
+recue --spec --verbose --max-workers 16 --path ~/enterprise-app
 ```
 
 **Performance Benchmarks:**
@@ -169,19 +169,19 @@ reverse-engineer --spec --verbose --max-workers 16 --path ~/enterprise-app
 
 ```bash
 # Generate spec with custom output location
-reverse-engineer --spec --description "manage orders" --output docs/api-spec.md
+recue --spec --description "manage orders" --output docs/api-spec.md
 
 # Generate JSON format specification
-reverse-engineer --spec --description "track inventory" --format json
+recue --spec --description "track inventory" --format json
 
 # Analyze a project in a different directory
-reverse-engineer --spec --path ~/projects/my-app --description "external codebase"
+recue --spec --path ~/projects/my-app --description "external codebase"
 
 # Verbose mode for debugging
-reverse-engineer --spec --plan --verbose --description "process payments"
+recue --spec --plan --verbose --description "process payments"
 
 # Generate API contract for documentation
-reverse-engineer --api-contract --output api-docs/openapi.json
+recue --api-contract --output api-docs/openapi.json
 ```
 
 ## What Gets Generated
@@ -368,7 +368,7 @@ mypy reverse_engineer/
 
 **"Error: --description parameter is required"**
 - The `--spec` flag requires a description parameter
-- Use: `reverse-engineer --spec --description "your project description"`
+- Use: `recue --spec --description "your project description"`
 
 **No endpoints found**
 - Check that your project follows standard naming conventions

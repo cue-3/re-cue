@@ -603,10 +603,10 @@ channel.basic_publish(exchange='', routing_key='orders', body=message)
 
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/django-api
+recue --spec --use-cases --path ~/projects/django-api
 
 # Force Django framework
-reverse-engineer --spec --framework python_django --path ~/projects/django-api
+recue --spec --framework python_django --path ~/projects/django-api
 ```
 
 ### Generated Output
@@ -641,10 +641,10 @@ apps/
 
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/fastapi-app
+recue --spec --use-cases --path ~/projects/fastapi-app
 
 # Verbose output
-reverse-engineer --spec --path ~/projects/fastapi-app --verbose
+recue --spec --path ~/projects/fastapi-app --verbose
 ```
 
 ## Best Practices for Analysis
@@ -720,7 +720,7 @@ class Order(models.Model):
 
 ```bash
 # Django: Analyze specific apps
-reverse-engineer --spec --path ~/project/apps/users
+recue --spec --path ~/project/apps/users
 
 # Exclude migrations and tests
 echo "*/migrations/*" > .recueignore
@@ -728,7 +728,7 @@ echo "*/tests/*" >> .recueignore
 echo "*/test_*.py" >> .recueignore
 
 # FastAPI: Focus on routers
-reverse-engineer --spec --path ~/project/app/routers
+recue --spec --path ~/project/app/routers
 ```
 
 ## Additional Resources

@@ -1004,29 +1004,29 @@ RE-cue automatically detects your project's framework by analyzing:
 
 You can also manually specify a framework:
 ```bash
-reverse-engineer --spec --framework nodejs_express --path ~/projects/my-app
+recue --spec --framework nodejs_express --path ~/projects/my-app
 ```
 
 ### Framework-Specific Examples
 
 #### Java Spring Boot
 ```bash
-reverse-engineer --spec --use-cases --path ~/projects/spring-app
+recue --spec --use-cases --path ~/projects/spring-app
 ```
 
 #### Node.js Express
 ```bash
-reverse-engineer --spec --use-cases --path ~/projects/express-app
+recue --spec --use-cases --path ~/projects/express-app
 ```
 
 #### Python Django
 ```bash
-reverse-engineer --spec --use-cases --framework python_django --path ~/projects/django-app
+recue --spec --use-cases --framework python_django --path ~/projects/django-app
 ```
 
 #### .NET Core
 ```bash
-reverse-engineer --spec --use-cases --path ~/projects/dotnet-app
+recue --spec --use-cases --path ~/projects/dotnet-app
 ```
 ````
 
@@ -1101,10 +1101,10 @@ project/
 
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/my-express-app
+recue --spec --use-cases --path ~/projects/my-express-app
 
 # Force Express analyzer
-reverse-engineer --spec --framework nodejs_express --path ~/projects/app
+recue --spec --framework nodejs_express --path ~/projects/app
 ```
 
 ## Detected Patterns
@@ -1285,23 +1285,23 @@ class TestNodeJSAnalysis(unittest.TestCase):
 
 ```bash
 # Auto-detect framework (default behavior)
-reverse-engineer --spec --path ~/projects/my-app
+recue --spec --path ~/projects/my-app
 
 # List supported frameworks
-reverse-engineer --list-frameworks
+recue --list-frameworks
 
 # Show detected framework info
-reverse-engineer --detect --path ~/projects/my-app
+recue --detect --path ~/projects/my-app
 
 # Force specific framework
-reverse-engineer --spec --framework nodejs_express --path ~/projects/my-app
+recue --spec --framework nodejs_express --path ~/projects/my-app
 
 # Framework-specific options
-reverse-engineer --spec --framework python_django \
+recue --spec --framework python_django \
   --django-settings myapp.settings \
   --path ~/projects/django-app
 
-reverse-engineer --spec --framework nodejs_express \
+recue --spec --framework nodejs_express \
   --entry-point src/app.js \
   --path ~/projects/express-app
 ```
@@ -1309,7 +1309,7 @@ reverse-engineer --spec --framework nodejs_express \
 ### 8.2 CLI Output Examples
 
 ```bash
-$ reverse-engineer --list-frameworks
+$ recue --list-frameworks
 
 Supported Frameworks:
   java_spring        Java Spring Boot (2.x, 3.x)
@@ -1321,7 +1321,7 @@ Supported Frameworks:
   dotnet             ASP.NET Core (6.0+)
   ruby_rails         Ruby on Rails (6.x, 7.x)
 
-$ reverse-engineer --detect --path ~/projects/my-app
+$ recue --detect --path ~/projects/my-app
 
 Analyzing project structure...
 ✓ Detected framework: Node.js Express

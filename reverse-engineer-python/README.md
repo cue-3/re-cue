@@ -25,7 +25,7 @@ python3 -m reverse_engineer
 python3 -m reverse_engineer --spec --description "my project"
 
 # After pip install, use the command directly
-reverse-engineer --spec --description "my project"
+recue --spec --description "my project"
 ```
 
 ## Directory Structure
@@ -99,25 +99,25 @@ See `reverse_engineer/templates/README.md` for template documentation and custom
 ### Generate All Documents
 
 ```bash
-python3 -m reverse_engineer --spec --plan --data-model --api-contract --description "full analysis"
+recue --spec --plan --data-model --api-contract --description "full analysis"
 ```
 
 ### Analyze External Project
 
 ```bash
-python3 -m reverse_engineer --spec --path ~/projects/my-app --description "external codebase"
+recue --spec --path ~/projects/my-app --description "external codebase"
 ```
 
 ### JSON Output Format
 
 ```bash
-python3 -m reverse_engineer --spec --description "api docs" --format json --output api-spec.json
+recue --spec --description "api docs" --format json --output api-spec.json
 ```
 
 ### Verbose Mode
 
 ```bash
-python3 -m reverse_engineer --spec --plan --verbose --description "detailed progress"
+recue --spec --plan --verbose --description "detailed progress"
 ```
 
 ## Comparison with Bash Version

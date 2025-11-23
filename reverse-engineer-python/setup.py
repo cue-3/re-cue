@@ -32,6 +32,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
+            "recue=reverse_engineer.cli:main",
+            "re-cue=reverse_engineer.cli:main",
             "reverse-engineer=reverse_engineer.cli:main",
         ],
     },

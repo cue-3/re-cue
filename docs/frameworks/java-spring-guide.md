@@ -254,13 +254,13 @@ spring-ecommerce/
 
 ```bash
 # Auto-detect framework
-reverse-engineer --spec --use-cases --path ~/projects/spring-ecommerce
+recue --spec --use-cases --path ~/projects/spring-ecommerce
 
 # Force Spring framework
-reverse-engineer --spec --framework java_spring --path ~/projects/spring-ecommerce
+recue --spec --framework java_spring --path ~/projects/spring-ecommerce
 
 # Verbose output
-reverse-engineer --spec --use-cases --path ~/projects/spring-ecommerce --verbose
+recue --spec --use-cases --path ~/projects/spring-ecommerce --verbose
 ```
 
 ### Generated Output
@@ -589,7 +589,7 @@ public Order createOrder(@RequestBody OrderDTO orderDTO) { }
 **Solution**:
 ```bash
 # Run with verbose mode to see scanning details
-reverse-engineer --spec --path ~/project --verbose
+recue --spec --path ~/project --verbose
 
 # Check naming conventions
 # Rename Ctrl.java files to Controller.java
@@ -647,10 +647,10 @@ For large monolithic Spring applications:
 
 ```bash
 # Analyze specific modules
-reverse-engineer --spec --path ~/project/user-module
+recue --spec --path ~/project/user-module
 
 # Exclude test directories (done by default)
-reverse-engineer --spec --path ~/project --exclude-tests
+recue --spec --path ~/project --exclude-tests
 
 # Use .recueignore file
 echo "src/test/**" > .recueignore
@@ -661,10 +661,10 @@ echo "**/generated/**" >> .recueignore
 
 ```bash
 # Analyze parent project (includes all modules)
-reverse-engineer --spec --path ~/project
+recue --spec --path ~/project
 
 # Or analyze specific module
-reverse-engineer --spec --path ~/project/user-service
+recue --spec --path ~/project/user-service
 ```
 
 ## Integration with Spring Tools
@@ -687,22 +687,22 @@ RE-cue complements IDE tools by providing business-level documentation.
 
 ```bash
 # Analyze each microservice
-reverse-engineer --spec --path ~/project/user-service
-reverse-engineer --spec --path ~/project/order-service
-reverse-engineer --spec --path ~/project/payment-service
+recue --spec --path ~/project/user-service
+recue --spec --path ~/project/order-service
+recue --spec --path ~/project/payment-service
 
 # Generate combined documentation
-reverse-engineer --spec --path ~/project --include-all-modules
+recue --spec --path ~/project --include-all-modules
 ```
 
 ### Monolithic Application
 
 ```bash
 # Full analysis
-reverse-engineer --spec --use-cases --path ~/project/monolith
+recue --spec --use-cases --path ~/project/monolith
 
 # Focus on specific layers
-reverse-engineer --spec --path ~/project/monolith/src/main/java/controllers
+recue --spec --path ~/project/monolith/src/main/java/controllers
 ```
 
 ## Additional Resources

@@ -39,8 +39,8 @@ weight: 45
 
 **Implementation**:
 ```bash
-reverse-engineer --use-cases --templates ~/my-templates
-reverse-engineer --use-cases --templates /company/templates
+recue --use-cases --templates ~/my-templates
+recue --use-cases --templates /company/templates
 ```
 
 **Effort**: Small (1 day)  

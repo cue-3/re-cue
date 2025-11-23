@@ -26,7 +26,7 @@ The 4+1 architectural view model uses five concurrent views to describe software
 Generate the 4+1 architecture document along with phase documents:
 
 ```bash
-reverse-engineer --use-cases --fourplusone --path /path/to/project
+recue --use-cases --fourplusone --path /path/to/project
 ```
 
 ### Standalone Usage
@@ -34,7 +34,7 @@ reverse-engineer --use-cases --fourplusone --path /path/to/project
 Generate only the 4+1 architecture document (will run full analysis automatically):
 
 ```bash
-reverse-engineer --fourplusone --path /path/to/project
+recue --fourplusone --path /path/to/project
 ```
 
 ### With Other Documents
@@ -42,7 +42,7 @@ reverse-engineer --fourplusone --path /path/to/project
 Combine with other document generation:
 
 ```bash
-reverse-engineer --spec --plan --use-cases --fourplusone --path /path/to/project
+recue --spec --plan --use-cases --fourplusone --path /path/to/project
 ```
 
 ## Output

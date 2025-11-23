@@ -73,53 +73,53 @@ flowchart TD
 ### Java Spring Boot
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/spring-app
+recue --spec --use-cases --path ~/projects/spring-app
 
 # Force Spring analyzer
-reverse-engineer --spec --framework java_spring --path ~/projects/spring-app
+recue --spec --framework java_spring --path ~/projects/spring-app
 ```
 
 ### Node.js Express
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/express-app
+recue --spec --use-cases --path ~/projects/express-app
 
 # Force Express analyzer
-reverse-engineer --spec --framework nodejs_express --path ~/projects/express-app
+recue --spec --framework nodejs_express --path ~/projects/express-app
 ```
 
 ### Python Django
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/django-app
+recue --spec --use-cases --path ~/projects/django-app
 
 # Force Django analyzer
-reverse-engineer --spec --framework python_django --path ~/projects/django-app
+recue --spec --framework python_django --path ~/projects/django-app
 ```
 
 ### Python FastAPI
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/fastapi-app
+recue --spec --use-cases --path ~/projects/fastapi-app
 
 # Force FastAPI analyzer
-reverse-engineer --spec --framework python_fastapi --path ~/projects/fastapi-app
+recue --spec --framework python_fastapi --path ~/projects/fastapi-app
 ```
 
 ### .NET Core
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/dotnet-app
+recue --spec --use-cases --path ~/projects/dotnet-app
 
 # Force .NET analyzer
-reverse-engineer --spec --framework dotnet --path ~/projects/dotnet-app
+recue --spec --framework dotnet --path ~/projects/dotnet-app
 ```
 
 ## Common CLI Commands
 
 ### List Supported Frameworks
 ```bash
-reverse-engineer --list-frameworks
+recue --list-frameworks
 ```
 
 Output:
@@ -137,7 +137,7 @@ Supported Frameworks:
 
 ### Detect Framework
 ```bash
-reverse-engineer --detect --path ~/projects/my-app
+recue --detect --path ~/projects/my-app
 ```
 
 Output:
@@ -154,7 +154,7 @@ Analyzing project structure...
 ### Force Specific Framework
 ```bash
 # Use this if auto-detection fails or for edge cases
-reverse-engineer --spec --framework nodejs_express --path ~/projects/app
+recue --spec --framework nodejs_express --path ~/projects/app
 ```
 
 ## Framework-Specific Features
@@ -249,7 +249,7 @@ If RE-cue doesn't detect your framework:
 
 Example:
 ```bash
-reverse-engineer --detect --path ~/projects/my-app --verbose
+recue --detect --path ~/projects/my-app --verbose
 ```
 
 ### Incorrect Framework Detected
@@ -320,6 +320,6 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for details.
 
 **Next Steps:**
 - Choose your framework guide from the links above
-- Run `reverse-engineer --detect` on your project
+- Run `recue --detect` on your project
 - Review framework-specific examples
 - Start generating documentation!

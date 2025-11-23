@@ -155,7 +155,7 @@ RE-cue automatically detects and analyzes multiple technology stacks:
 
 **Manual Selection** - Override auto-detection when needed:
 ```bash
-reverse-engineer --spec --framework nodejs_express --path ~/projects/my-app
+recue --spec --framework nodejs_express --path ~/projects/my-app
 ```
 
 See [docs/frameworks/README.md](docs/frameworks/README.md) for complete framework support documentation.
@@ -341,7 +341,7 @@ pip install -e reverse-engineer-python/
 pip install re-cue
 
 # Run analysis
-re-cue --spec --plan --use-cases ~/projects/my-app
+recue --spec --plan --use-cases ~/projects/my-app
 ```
 
 ### Step 2: Analyze Your Codebase

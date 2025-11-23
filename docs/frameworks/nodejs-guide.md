@@ -463,10 +463,10 @@ export class OrdersController {
 
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/express-api
+recue --spec --use-cases --path ~/projects/express-api
 
 # Verbose output
-reverse-engineer --spec --path ~/projects/express-api --verbose
+recue --spec --path ~/projects/express-api --verbose
 ```
 
 ### Generated Output
@@ -581,10 +581,10 @@ src/
 
 ```bash
 # Auto-detect framework
-reverse-engineer --spec --use-cases --path ~/projects/nestjs-api
+recue --spec --use-cases --path ~/projects/nestjs-api
 
 # Force NestJS detection
-reverse-engineer --spec --framework nodejs_nestjs --path ~/projects/nestjs-api
+recue --spec --framework nodejs_nestjs --path ~/projects/nestjs-api
 ```
 
 ### Generated Output
@@ -690,7 +690,7 @@ export class UsersModule {}
 
 ```bash
 # Debug with verbose mode
-reverse-engineer --spec --path ~/project --verbose
+recue --spec --path ~/project --verbose
 ```
 
 ### Issue: NestJS Decorators Not Found
@@ -725,7 +725,7 @@ app.get('/api/profile', customCheck, getProfile);
 
 ```bash
 # Focus on specific route directories
-reverse-engineer --spec --path ~/project/src/routes/api
+recue --spec --path ~/project/src/routes/api
 
 # Use .recueignore
 echo "node_modules/**" > .recueignore
@@ -737,10 +737,10 @@ echo "dist/**" >> .recueignore
 
 ```bash
 # Analyze specific app in monorepo
-reverse-engineer --spec --path ~/project/apps/api
+recue --spec --path ~/project/apps/api
 
 # Or analyze all apps
-reverse-engineer --spec --path ~/project --include-all-modules
+recue --spec --path ~/project --include-all-modules
 ```
 
 ## TypeScript Support

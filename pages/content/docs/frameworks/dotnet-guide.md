@@ -467,13 +467,13 @@ builder.Services.AddHostedService<EmailQueueService>();
 
 ```bash
 # Auto-detect and analyze
-reverse-engineer --spec --use-cases --path ~/projects/MyWebApi
+recue --spec --use-cases --path ~/projects/MyWebApi
 
 # Force .NET framework
-reverse-engineer --spec --framework dotnet --path ~/projects/MyWebApi
+recue --spec --framework dotnet --path ~/projects/MyWebApi
 
 # Verbose output
-reverse-engineer --spec --path ~/projects/MyWebApi --verbose
+recue --spec --path ~/projects/MyWebApi --verbose
 ```
 
 ### Generated Output
@@ -589,7 +589,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 ```bash
 # Analyze specific project in solution
-reverse-engineer --spec --path ~/MySolution/MyWebApi
+recue --spec --path ~/MySolution/MyWebApi
 
 # Exclude test projects
 echo "**/Tests/**" > .recueignore
@@ -602,10 +602,10 @@ echo "**/bin/**" >> .recueignore
 
 ```bash
 # Analyze main API project
-reverse-engineer --spec --path ~/MySolution/MyWebApi
+recue --spec --path ~/MySolution/MyWebApi
 
 # Or analyze entire solution
-reverse-engineer --spec --path ~/MySolution --include-all-projects
+recue --spec --path ~/MySolution --include-all-projects
 ```
 
 ## Configuration Files

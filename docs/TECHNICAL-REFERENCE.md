@@ -798,22 +798,22 @@ See `docs/ENHANCEMENT-BACKLOG.md` for complete list.
 
 ```bash
 # List supported frameworks
-reverse-engineer --list-frameworks
+recue --list-frameworks
 
 # Detect project framework
-reverse-engineer --detect [--path /path/to/project]
+recue --detect [--path /path/to/project]
 
 # Generate specification
-reverse-engineer --spec [--path /path/to/project]
+recue --spec [--path /path/to/project]
 
 # Generate with use cases
-reverse-engineer --spec --use-cases
+recue --spec --use-cases
 
 # Generate specific phase
-reverse-engineer --phase 4
+recue --phase 4
 
 # Force specific framework
-reverse-engineer --framework nodejs_express --spec
+recue --framework nodejs_express --spec
 ```
 
 ### Python API

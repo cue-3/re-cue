@@ -39,6 +39,7 @@ Repository = "https://github.com/cue-3/re-cue"
 Changelog = "https://github.com/cue-3/re-cue/blob/main/docs/CHANGELOG.md"
 
 [project.scripts]
+recue = "reverse_engineer.cli:main"
 re-cue = "reverse_engineer.cli:main"
 reverse-engineer = "reverse_engineer.cli:main"
 
