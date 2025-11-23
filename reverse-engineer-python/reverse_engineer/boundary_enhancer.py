@@ -648,8 +648,9 @@ class MicroserviceBoundaryDetector:
                 artifact_pattern = r'<dependency>.*?<artifactId>([^<]+)</artifactId>.*?</dependency>'
                 artifacts = re.findall(artifact_pattern, content, re.DOTALL)
                 dependencies.extend(artifacts[:MAX_DEPENDENCIES_DISPLAY])  # Top dependencies
-            except Exception:
-                pass
+            except Exception as e:
+                # Failed to read or parse pom.xml; log and continue with remaining modules
+                log_info(f"Failed to parse dependencies from {pom_file}: {e}")
         
         return dependencies
     
