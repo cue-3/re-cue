@@ -43,3 +43,72 @@
     box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
   }
 }
+
+// Section index styles - Table layout
+.section-index {
+  .section-index-title {
+    color: var(--bs-body-color);
+  }
+
+  // Table styling
+  .section-index-table {
+    width: 100%;
+    margin-top: 1rem;
+    
+    thead {
+      th {
+        font-weight: 600;
+        color: var(--bs-body-color);
+        border-bottom: 2px solid var(--bs-border-color);
+        padding: 0.75rem;
+      }
+    }
+    
+    tbody {
+      tr {
+        border-bottom: 1px solid var(--bs-border-color);
+        
+        &:hover {
+          background-color: var(--bs-secondary-bg);
+        }
+        
+        td {
+          padding: 0.75rem;
+          vertical-align: top;
+          
+          &:first-child {
+            width: 30%;
+            font-weight: 500;
+          }
+          
+          &:last-child {
+            width: 70%;
+          }
+          
+          a {
+            color: var(--bs-link-color);
+            text-decoration: none;
+            
+            &:hover {
+              color: var(--bs-link-hover-color);
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Legacy entry styles (kept for backward compatibility)
+  .entry {
+    border-radius: var(--bs-border-radius);
+    padding-bottom: 0;
+    
+    h5 {
+      font-size: medium !important;
+      padding: 0;
+      color: var(--bs-body-color);
+      text-decoration: none !important;
+    }
+  }
+}
