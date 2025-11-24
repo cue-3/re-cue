@@ -315,7 +315,7 @@ class TestCachingIntegration(unittest.TestCase):
         self.assertEqual(stats1.total_entries, len(self.test_files))
         
         # Process same files with different analysis type
-        results2 = analyzer.process_files_optimized(
+        analyzer.process_files_optimized(
             self.test_files,
             simple_file_processor,
             desc="Models analysis",
