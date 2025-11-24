@@ -10,7 +10,6 @@ from pathlib import Path
 
 from reverse_engineer.cache_manager import (
     CacheManager,
-    CacheEntry,
     CacheStatistics
 )
 
