@@ -131,7 +131,7 @@ class TestCachingIntegration(unittest.TestCase):
         # Stats are cumulative and loaded from disk, including previous run's misses
         prev_misses = stats_before.misses
         
-        results2 = analyzer2.process_files_optimized(
+        analyzer2.process_files_optimized(
             self.test_files,
             simple_file_processor,
             desc="Second run"
