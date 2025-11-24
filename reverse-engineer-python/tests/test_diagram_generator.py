@@ -29,9 +29,9 @@ class MockEndpoint:
 
 @dataclass
 class MockModel:
-    """Mock model for testing."""
+    """Mock model for testing - matches actual Model class structure."""
     name: str
-    fields: int  # Changed from list to int to match actual Model class
+    fields: int  # Count of fields in the model
 
 
 class TestDiagramConfig(unittest.TestCase):

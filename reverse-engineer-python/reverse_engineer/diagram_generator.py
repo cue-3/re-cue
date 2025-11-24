@@ -442,15 +442,17 @@ class ERDiagramGenerator(BaseDiagramGenerator):
         for model in models[:self.config.max_entities_per_diagram]:
             model_name = model.name if hasattr(model, 'name') else str(model)
             
-            # Note: Model.fields is an int (count), not a list of fields
-            # We'll create a simplified entity definition
+            # Note: Model.fields is an int (field count), not a list of field details.
+            # This is a limitation of the current analyzer which only counts fields.
+            # Future enhancement: Extract detailed field information for better ER diagrams.
+            # We'll create a simplified entity definition showing field count.
             lines.append(f"    {model_name} {{")
             lines.append(f"        int id PK")
             
             # Check if we have detailed field information from file analysis
             if hasattr(model, 'file_path') and model.file_path:
-                # Try to extract field names from file if available
-                # For now, just show the count
+                # Known limitation: Analyzer only provides field count, not detailed structure.
+                # Future versions could parse Java/Python files to extract field names and types.
                 field_count = model.fields if hasattr(model, 'fields') else 0
                 if field_count > 1:
                     lines.append(f"        string attributes \"({field_count} fields)\"")

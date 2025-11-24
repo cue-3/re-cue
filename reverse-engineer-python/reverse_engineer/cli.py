@@ -596,7 +596,7 @@ def main():
         return
     
     # Check if at least one generation flag is provided
-    diagrams_flag = hasattr(args, 'diagrams') and args.diagrams
+    diagrams_flag = getattr(args, 'diagrams', False)
     if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, diagrams_flag]):
         print_help_banner()
         sys.exit(1)
@@ -793,13 +793,13 @@ def main():
         print(f"✅ 4+1 Architecture document generated: {fourplusone_file}", file=sys.stderr)
     
     # Generate diagrams if requested
-    if hasattr(args, 'diagrams') and args.diagrams:
+    if getattr(args, 'diagrams', False):
         from .generators import VisualizationGenerator
         
         diagrams_file = output_path.parent / "diagrams.md"
         print("\n📊 Generating visualization diagrams...", file=sys.stderr)
         
-        diagram_type = args.diagram_type if hasattr(args, 'diagram_type') else 'all'
+        diagram_type = getattr(args, 'diagram_type', 'all')
         viz_gen = VisualizationGenerator(analyzer)
         diagrams_content = viz_gen.generate(diagram_type)
         
@@ -824,7 +824,7 @@ def main():
     if args.api_contract:
         print(f"✅ API contract saved to: {output_path.parent / 'contracts' / 'api-spec.json'}", file=sys.stderr)
     
-    if hasattr(args, 'diagrams') and args.diagrams:
+    if getattr(args, 'diagrams', False):
         print(f"✅ Diagrams saved to: {output_path.parent / 'diagrams.md'}", file=sys.stderr)
     
     # Note: --use-cases output messages are shown immediately after generation
