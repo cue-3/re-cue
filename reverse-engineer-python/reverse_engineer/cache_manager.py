@@ -214,8 +214,9 @@ class CacheManager:
         try:
             if self.cache_file.exists():
                 self._stats.cache_size_bytes = self.cache_file.stat().st_size
-        except Exception:
-            pass
+        except Exception as e:
+            # Ignore exceptions in cache size calculation, just warn
+            print(f"Warning: Could not determine cache size: {e}")
     
     def get(self,
             file_path: Path,
