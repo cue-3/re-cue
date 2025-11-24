@@ -104,7 +104,7 @@ class TestCachingIntegration(unittest.TestCase):
         )
         
         # First run
-        results1 = analyzer.process_files_optimized(
+        analyzer.process_files_optimized(
             self.test_files,
             simple_file_processor,
             desc="First run"
