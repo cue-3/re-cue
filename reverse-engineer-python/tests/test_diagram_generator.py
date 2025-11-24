@@ -3,7 +3,7 @@ Tests for the diagram generator module.
 """
 
 import unittest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from pathlib import Path
 from dataclasses import dataclass
 
