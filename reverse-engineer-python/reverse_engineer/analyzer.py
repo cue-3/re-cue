@@ -1916,6 +1916,7 @@ class ProjectAnalyzer:
     def __init__(self, repo_root: Path, verbose: bool = False, 
                  enable_optimizations: bool = True,
                  enable_incremental: bool = True,
+                 enable_caching: bool = True,
                  max_workers: Optional[int] = None):
         """
         Initialize the analyzer.
@@ -1925,6 +1926,7 @@ class ProjectAnalyzer:
             verbose: Whether to show detailed progress
             enable_optimizations: Enable parallel processing and other optimizations
             enable_incremental: Enable incremental analysis (skip unchanged files)
+            enable_caching: Enable result caching for faster re-runs
             max_workers: Maximum number of worker processes for parallel processing
         """
         self.repo_root = repo_root
@@ -1966,6 +1968,7 @@ class ProjectAnalyzer:
                     output_dir=output_dir,
                     enable_incremental=enable_incremental,
                     enable_parallel=True,
+                    enable_caching=enable_caching,
                     max_workers=max_workers,
                     verbose=verbose
                 )

@@ -319,6 +319,19 @@ The script will:
     perf_group.add_argument('--max-workers', type=int, default=None,
                            help='Maximum number of worker processes (default: CPU count)')
     
+    # Cache management flags
+    cache_group = parser.add_argument_group('cache management')
+    cache_group.add_argument('--cache', action='store_true', default=True,
+                            help='Enable result caching for faster re-runs (default: enabled)')
+    cache_group.add_argument('--no-cache', dest='cache', action='store_false',
+                            help='Disable result caching')
+    cache_group.add_argument('--clear-cache', action='store_true',
+                            help='Clear all cached results before analysis')
+    cache_group.add_argument('--cache-stats', action='store_true',
+                            help='Display cache statistics and exit')
+    cache_group.add_argument('--cleanup-cache', action='store_true',
+                            help='Clean up expired and invalid cache entries')
+    
     parser.add_argument('--version', action='version', version='%(prog)s 1.1.0')
     
     return parser
@@ -442,6 +455,44 @@ def main():
         args = interactive_mode()
     else:
         args = parser.parse_args()
+    
+    # Handle cache management commands (these need project path)
+    if hasattr(args, 'cache_stats') and args.cache_stats:
+        project_path = args.project_path or args.path or '.'
+        repo_root = Path(project_path).resolve()
+        if not repo_root.exists() or not repo_root.is_dir():
+            print(f"Error: Invalid project path: {project_path}", file=sys.stderr)
+            sys.exit(1)
+        
+        from .optimized_analyzer import OptimizedAnalyzer
+        output_dir = repo_root / "specs" / "001-reverse"
+        analyzer = OptimizedAnalyzer(
+            repo_root=repo_root,
+            output_dir=output_dir,
+            enable_caching=True,
+            verbose=True
+        )
+        analyzer.print_cache_stats()
+        return
+    
+    if hasattr(args, 'cleanup_cache') and args.cleanup_cache:
+        project_path = args.project_path or args.path or '.'
+        repo_root = Path(project_path).resolve()
+        if not repo_root.exists() or not repo_root.is_dir():
+            print(f"Error: Invalid project path: {project_path}", file=sys.stderr)
+            sys.exit(1)
+        
+        from .optimized_analyzer import OptimizedAnalyzer
+        output_dir = repo_root / "specs" / "001-reverse"
+        analyzer = OptimizedAnalyzer(
+            repo_root=repo_root,
+            output_dir=output_dir,
+            enable_caching=True,
+            verbose=True
+        )
+        removed = analyzer.cleanup_cache()
+        print(f"Cleaned up {removed} cache entries")
+        return
     
     # Handle configuration profile commands
     if hasattr(args, 'list_profiles') and args.list_profiles:
@@ -588,11 +639,24 @@ def main():
     # Initialize analyzer
     log_section("RE-cue - Reverse Engineering")
     
+    # Handle --clear-cache flag
+    if hasattr(args, 'clear_cache') and args.clear_cache:
+        from .optimized_analyzer import OptimizedAnalyzer
+        temp_analyzer = OptimizedAnalyzer(
+            repo_root=repo_root,
+            output_dir=output_dir,
+            enable_caching=True,
+            verbose=args.verbose
+        )
+        temp_analyzer.clear_cache()
+        print("Cache cleared successfully", file=sys.stderr)
+    
     analyzer = ProjectAnalyzer(
         repo_root, 
         verbose=args.verbose,
         enable_optimizations=args.parallel,
         enable_incremental=args.incremental,
+        enable_caching=args.cache if hasattr(args, 'cache') else True,
         max_workers=args.max_workers
     )
     analyzer.analyze()
