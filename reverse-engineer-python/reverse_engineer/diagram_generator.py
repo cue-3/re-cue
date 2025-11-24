@@ -109,9 +109,20 @@ class FlowchartGenerator(BaseDiagramGenerator):
         
         return "\n\n".join(diagrams)
     
-    def _generate_use_case_flowchart(self, use_case: Dict, index: int) -> str:
+    def _generate_use_case_flowchart(self, use_case, index: int) -> str:
         """Generate a flowchart for a single use case."""
-        uc_name = use_case.get('name', f'Use Case {index}')
+        # Handle both dict and UseCase object
+        if hasattr(use_case, 'name'):
+            uc_name = use_case.name
+            preconditions = use_case.preconditions
+            main_scenario = use_case.main_scenario
+            extensions = use_case.extensions
+        else:
+            uc_name = use_case.get('name', f'Use Case {index}')
+            preconditions = use_case.get('preconditions', [])
+            main_scenario = use_case.get('main_scenario', [])
+            extensions = use_case.get('extensions', [])
+        
         uc_id = self._sanitize_id(uc_name)
         
         lines = [
@@ -125,7 +136,6 @@ class FlowchartGenerator(BaseDiagramGenerator):
         lines.append(f"    Start([Start: {self._sanitize_label(uc_name)}])")
         
         # Add preconditions as decision nodes
-        preconditions = use_case.get('preconditions', [])
         if preconditions:
             for i, precond in enumerate(preconditions[:3]):  # Limit to first 3
                 precond_id = f"Precond{i+1}_{uc_id}"
@@ -138,7 +148,6 @@ class FlowchartGenerator(BaseDiagramGenerator):
             lines.append(f"    Start --> Main{uc_id}")
         
         # Main scenario steps
-        main_scenario = use_case.get('main_scenario', [])
         if main_scenario:
             lines.append(f"    Main{uc_id}[Main Scenario]")
             prev_node = f"Main{uc_id}"
@@ -158,7 +167,6 @@ class FlowchartGenerator(BaseDiagramGenerator):
         lines.append(f"    Success([Success: Complete])")
         
         # Extension scenarios
-        extensions = use_case.get('extensions', [])
         if extensions and len(extensions) > 0:
             ext_text = extensions[0][:40] if isinstance(extensions[0], str) else "Alternative Path"
             ext_text = self._sanitize_label(ext_text)
@@ -200,13 +208,18 @@ class SequenceDiagramGenerator(BaseDiagramGenerator):
         
         return "\n\n".join(diagrams)
     
-    def _group_endpoints_by_actor(self, actors: List[Dict], endpoints: List) -> Dict[str, List]:
+    def _group_endpoints_by_actor(self, actors: List, endpoints: List) -> Dict[str, List]:
         """Group endpoints by actor based on security annotations."""
         actor_endpoints = {}
         
         for actor in actors:
-            actor_name = actor.get('name', 'Unknown')
-            roles = actor.get('roles', [])
+            # Handle both dict and Actor object
+            if hasattr(actor, 'name'):
+                actor_name = actor.name
+                roles = getattr(actor, 'roles', [])
+            else:
+                actor_name = actor.get('name', 'Unknown')
+                roles = actor.get('roles', [])
             
             # Find endpoints that require these roles
             matching_eps = []
@@ -352,7 +365,7 @@ class ComponentDiagramGenerator(BaseDiagramGenerator):
         
         return "\n".join(lines)
     
-    def _generate_boundary_component_diagram(self, boundaries: List[Dict]) -> str:
+    def _generate_boundary_component_diagram(self, boundaries: List) -> str:
         """Generate component diagram from detected boundaries."""
         lines = [
             "### Component Diagram: System Boundaries",
@@ -363,13 +376,19 @@ class ComponentDiagramGenerator(BaseDiagramGenerator):
         
         # Add each boundary as a subgraph
         for idx, boundary in enumerate(boundaries[:5]):
-            boundary_name = boundary.get('name', f'Boundary {idx+1}')
+            # Handle both dict and SystemBoundary object
+            if hasattr(boundary, 'name'):
+                boundary_name = boundary.name
+                components = boundary.components
+            else:
+                boundary_name = boundary.get('name', f'Boundary {idx+1}')
+                components = boundary.get('components', [])
+            
             boundary_id = self._sanitize_id(boundary_name)
             
             lines.append(f"    subgraph {boundary_id}[\"{boundary_name}\"]")
             
             # Add components within boundary
-            components = boundary.get('components', [])
             for comp_idx, comp in enumerate(components[:5]):
                 comp_name = comp if isinstance(comp, str) else comp.get('name', f'Component{comp_idx+1}')
                 comp_id = f"{boundary_id}_{self._sanitize_id(comp_name)}"
@@ -380,9 +399,16 @@ class ComponentDiagramGenerator(BaseDiagramGenerator):
         
         # Add connections between boundaries
         for i in range(len(boundaries[:4])):
-            curr_id = self._sanitize_id(boundaries[i].get('name', f'Boundary {i+1}'))
+            if hasattr(boundaries[i], 'name'):
+                curr_id = self._sanitize_id(boundaries[i].name)
+            else:
+                curr_id = self._sanitize_id(boundaries[i].get('name', f'Boundary {i+1}'))
+            
             if i < len(boundaries) - 1:
-                next_id = self._sanitize_id(boundaries[i+1].get('name', f'Boundary {i+2}'))
+                if hasattr(boundaries[i+1], 'name'):
+                    next_id = self._sanitize_id(boundaries[i+1].name)
+                else:
+                    next_id = self._sanitize_id(boundaries[i+1].get('name', f'Boundary {i+2}'))
                 lines.append(f"    {curr_id} --> {next_id}")
         
         lines.append("```")
@@ -415,32 +441,25 @@ class ERDiagramGenerator(BaseDiagramGenerator):
         # Add entities and their attributes
         for model in models[:self.config.max_entities_per_diagram]:
             model_name = model.name if hasattr(model, 'name') else str(model)
-            fields = model.fields if hasattr(model, 'fields') else []
             
-            if fields:
-                lines.append(f"    {model_name} {{")
-                for field in fields[:10]:  # Limit to 10 fields per entity
-                    field_name = field.get('name', 'unknown') if isinstance(field, dict) else str(field)
-                    field_type = field.get('type', 'string') if isinstance(field, dict) else 'string'
-                    lines.append(f"        {field_type} {field_name}")
-                lines.append("    }")
+            # Note: Model.fields is an int (count), not a list of fields
+            # We'll create a simplified entity definition
+            lines.append(f"    {model_name} {{")
+            lines.append(f"        int id PK")
+            
+            # Check if we have detailed field information from file analysis
+            if hasattr(model, 'file_path') and model.file_path:
+                # Try to extract field names from file if available
+                # For now, just show the count
+                field_count = model.fields if hasattr(model, 'fields') else 0
+                if field_count > 1:
+                    lines.append(f"        string attributes \"({field_count} fields)\"")
+            
+            lines.append("    }")
         
-        # Add relationships (basic heuristic based on field names)
-        for model in models[:self.config.max_entities_per_diagram]:
-            model_name = model.name if hasattr(model, 'name') else str(model)
-            fields = model.fields if hasattr(model, 'fields') else []
-            
-            for field in fields:
-                field_name = field.get('name', '') if isinstance(field, dict) else str(field)
-                field_type = field.get('type', '') if isinstance(field, dict) else ''
-                
-                # Look for foreign key patterns
-                if '_id' in field_name.lower():
-                    # Try to find referenced entity
-                    ref_name = field_name.replace('_id', '').replace('Id', '').capitalize()
-                    # Check if this entity exists
-                    if any(m.name if hasattr(m, 'name') else str(m) == ref_name for m in models):
-                        lines.append(f"    {model_name} ||--o{{ {ref_name} : has")
+        # Add relationships (basic heuristic based on naming patterns)
+        # Since we don't have detailed field info, we'll skip relationships
+        # in this basic version
         
         lines.append("```")
         lines.append("")
