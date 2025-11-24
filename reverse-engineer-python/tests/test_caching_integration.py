@@ -303,7 +303,7 @@ class TestCachingIntegration(unittest.TestCase):
         )
         
         # Process files with first analysis type
-        results1 = analyzer.process_files_optimized(
+        analyzer.process_files_optimized(
             self.test_files,
             simple_file_processor,
             desc="Endpoints analysis",
