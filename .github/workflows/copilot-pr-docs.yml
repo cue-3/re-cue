@@ -1,0 +1,320 @@
+name: Copilot PR Documentation Generator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - 'copilot-**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.title, 'ENH-') ||
+      contains(github.event.pull_request.head.ref, 'copilot-') ||
+      contains(github.event.pull_request.body, 'github-copilot')
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Extract Enhancement ID from PR
+        id: extract-enh
+        run: |
+          ENH_ID=$(echo "${{ github.event.pull_request.title }}" | grep -oE 'ENH-[A-Z]+-[0-9]+' | head -1)
+          
+          if [ -z "$ENH_ID" ]; then
+            ENH_ID=$(echo "${{ github.event.pull_request.body }}" | grep -oE 'ENH-[A-Z]+-[0-9]+' | head -1)
+          fi
+          
+          echo "enhancement_id=$ENH_ID" >> $GITHUB_OUTPUT
+          
+          if [ -n "$ENH_ID" ]; then
+            echo "Found enhancement ID: $ENH_ID"
+          else
+            echo "No enhancement ID found in PR"
+          fi
+
+      - name: Check if documentation exists
+        id: check-docs
+        if: steps.extract-enh.outputs.enhancement_id != ''
+        run: |
+          ENH_ID="${{ steps.extract-enh.outputs.enhancement_id }}"
+          ENH_ID_LOWER=$(echo "$ENH_ID" | tr '[:upper:]' '[:lower:]')
+          
+          DOC_FILE=$(find docs/features -name "${ENH_ID_LOWER}*.md" 2>/dev/null | head -1)
+          
+          if [ -n "$DOC_FILE" ]; then
+            echo "doc_exists=true" >> $GITHUB_OUTPUT
+            echo "doc_file=$DOC_FILE" >> $GITHUB_OUTPUT
+            echo "Found documentation: $DOC_FILE"
+          else
+            echo "doc_exists=false" >> $GITHUB_OUTPUT
+            echo "No documentation found for $ENH_ID"
+          fi
+
+      - name: Generate missing documentation
+        if: |
+          steps.extract-enh.outputs.enhancement_id != '' &&
+          steps.check-docs.outputs.doc_exists == 'false'
+        run: |
+          ENH_ID="${{ steps.extract-enh.outputs.enhancement_id }}"
+          ENH_ID_LOWER=$(echo "$ENH_ID" | tr '[:upper:]' '[:lower:]')
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          
+          TITLE=$(echo "$PR_TITLE" | sed "s/^${ENH_ID}:\s*//")
+          
+          SAFE_TITLE=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | cut -c1-40)
+          DOC_FILE="docs/features/${ENH_ID_LOWER}-${SAFE_TITLE}.md"
+          
+          echo "Creating documentation: $DOC_FILE"
+          
+          mkdir -p docs/features
+          
+          cat > "$DOC_FILE" << DOCEOF
+---
+title: "$TITLE"
+linkTitle: "$TITLE"
+weight: 50
+description: "Documentation for $ENH_ID"
+---
+
+# $TITLE
+
+**Status**: ✅ Implemented  
+**Enhancement ID**: $ENH_ID  
+**Pull Request**: #${{ github.event.pull_request.number }}
+
+## Overview
+
+<!-- Copilot/Developer: Add overview of what this feature does -->
+
+## Implementation
+
+This feature was implemented in PR #${{ github.event.pull_request.number }}.
+
+### Changes Made
+
+<!-- Copilot/Developer: Document the key changes made -->
+
+## Usage
+
+\`\`\`bash
+# Copilot/Developer: Add usage examples
+recue --help
+\`\`\`
+
+## Configuration
+
+<!-- Copilot/Developer: Add configuration details if applicable -->
+
+## Examples
+
+### Basic Example
+
+\`\`\`bash
+# Copilot/Developer: Add practical example
+\`\`\`
+
+## Testing
+
+<!-- Copilot/Developer: Document testing approach and test cases -->
+
+## References
+
+- Pull Request: #${{ github.event.pull_request.number }}
+- Enhancement ID: $ENH_ID
+
+---
+
+**Created**: $(date +%Y-%m-%d)  
+**Author**: ${{ github.event.pull_request.user.login }}
+DOCEOF
+          
+          echo "doc_file=$DOC_FILE" >> $GITHUB_ENV
+
+      - name: Update CHANGELOG
+        if: steps.extract-enh.outputs.enhancement_id != ''
+        run: |
+          ENH_ID="${{ steps.extract-enh.outputs.enhancement_id }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          CHANGELOG="docs/releases/CHANGELOG.md"
+          
+          TITLE=$(echo "$PR_TITLE" | sed "s/^${ENH_ID}:\s*//")
+          
+          if [ -f "$CHANGELOG" ]; then
+            if grep -q "$ENH_ID" "$CHANGELOG"; then
+              echo "CHANGELOG already contains $ENH_ID"
+            else
+              if grep -q "## \[Unreleased\]" "$CHANGELOG"; then
+                awk -v enh="$ENH_ID" -v title="$TITLE" -v pr="$PR_NUMBER" '
+                  /## \[Unreleased\]/ {
+                    print
+                    print ""
+                    print "### Added"
+                    print ""
+                    print "- **" enh "**: " title " (#" pr ")"
+                    next
+                  }
+                  {print}
+                ' "$CHANGELOG" > "${CHANGELOG}.tmp"
+                mv "${CHANGELOG}.tmp" "$CHANGELOG"
+                
+                echo "Updated CHANGELOG.md with $ENH_ID"
+              fi
+            fi
+          fi
+
+      - name: Sync documentation to Hugo
+        run: |
+          if [ -f .github/scripts/sync-docs.sh ]; then
+            bash .github/scripts/sync-docs.sh
+            echo "Documentation synced to Hugo"
+          fi
+
+      - name: Update features index
+        run: |
+          INDEX_FILE="docs/features/_index.md"
+          
+          if [ -d docs/features ]; then
+            cat > "$INDEX_FILE" << IDXEOF
+---
+title: "Features"
+linkTitle: "Features"
+weight: 50
+description: "RE-cue features and enhancements"
+---
+
+# Features
+
+This section documents RE-cue's features and enhancements.
+
+## Available Features
+
+IDXEOF
+            
+            for file in docs/features/*.md; do
+              if [ "$(basename "$file")" != "_index.md" ]; then
+                TITLE=$(grep '^title:' "$file" | head -1 | sed 's/title: "\(.*\)"/\1/')
+                FILENAME=$(basename "$file" .md)
+                if [ -n "$TITLE" ]; then
+                  echo "- [$TITLE]($FILENAME/)" >> "$INDEX_FILE"
+                fi
+              fi
+            done
+            
+            cat >> "$INDEX_FILE" << IDXEOF
+
+## Feature Backlog
+
+See [Enhancement Backlog](../developer-guides/enhancement-backlog/) for planned features.
+IDXEOF
+          fi
+
+      - name: Validate documentation
+        run: |
+          if [ -f .github/scripts/doc-validation-agent.sh ]; then
+            bash .github/scripts/doc-validation-agent.sh --auto-fix || true
+          fi
+
+      - name: Commit documentation changes
+        id: commit
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          git add docs/ pages/content/docs/ || true
+          
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No documentation changes to commit"
+          else
+            git commit -m "docs: auto-generate documentation for PR #${{ github.event.pull_request.number }}
+
+- Generated/updated feature documentation
+- Updated CHANGELOG.md
+- Synced documentation to Hugo site
+- Updated features index
+
+Co-authored-by: ${{ github.event.pull_request.user.login }} <${{ github.event.pull_request.user.id }}+${{ github.event.pull_request.user.login }}@users.noreply.github.com>"
+            
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            git push
+          fi
+
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const enhId = '${{ steps.extract-enh.outputs.enhancement_id }}';
+            const hasChanges = '${{ steps.commit.outputs.has_changes }}';
+            
+            let body = '## 📚 Documentation Auto-Generation\n\n';
+            
+            if (enhId) {
+              body += `**Enhancement ID**: ${enhId}\n\n`;
+              
+              if (hasChanges === 'true') {
+                body += '✅ **Documentation automatically generated and committed**\n\n';
+                body += '**What was created:**\n';
+                body += `- Feature documentation in \`docs/features/\`\n`;
+                body += `- CHANGELOG entry added\n`;
+                body += `- Documentation synced to Hugo site\n\n`;
+                body += '**Action Required:**\n';
+                body += '- [ ] Review the generated documentation\n';
+                body += '- [ ] Fill in the placeholder sections marked with TODO/Copilot comments\n';
+                body += '- [ ] Add detailed usage examples\n';
+                body += '- [ ] Add code snippets\n';
+                body += '- [ ] Update API references if needed\n';
+              } else {
+                body += 'ℹ️ Documentation already up to date or no changes needed.\n';
+              }
+            } else {
+              body += '⚠️ No enhancement ID found. If this implements a feature:\n';
+              body += '- Add ENH-XXX-NNN to the PR title\n';
+              body += '- The workflow will auto-generate documentation\n';
+            }
+            
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+            
+            const botComment = comments.data.find(c => 
+              c.user.login === 'github-actions[bot]' && 
+              c.body.includes('📚 Documentation Auto-Generation')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: body
+              });
+            }
