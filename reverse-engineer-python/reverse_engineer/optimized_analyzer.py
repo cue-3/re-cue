@@ -116,12 +116,21 @@ class OptimizedAnalyzer:
             
             files_to_process = files_needing_processing
             
-            if len(cached_results) > 0 and self.verbose:
+            if cached_results and self.verbose:
                 log_info(f"  Retrieved {len(cached_results)} results from cache", self.verbose)
         
         # Filter out unchanged files if incremental analysis is enabled
-        # Note: This only applies to files not already in cache
-        if self.enable_incremental and skip_unchanged and self.file_tracker and not (self.enable_caching and use_cache):
+        # Note: When caching is enabled, the cache already handles file change detection
+        # via content hash. Incremental analysis (mtime-based) is redundant with caching,
+        # so we only use it when caching is disabled.
+        should_use_incremental = (
+            self.enable_incremental and 
+            skip_unchanged and 
+            self.file_tracker and 
+            not (self.enable_caching and use_cache)
+        )
+        
+        if should_use_incremental:
             original_count = len(files_to_process)
             files_to_process = self.file_tracker.filter_changed_files(files_to_process)
             skipped_count = original_count - len(files_to_process)
@@ -130,7 +139,7 @@ class OptimizedAnalyzer:
                 log_info(f"  Skipping {skipped_count} unchanged files", self.verbose)
         
         if not files_to_process:
-            if self.verbose and len(cached_results) == 0:
+            if self.verbose and not cached_results:
                 log_info("  All files are up to date", self.verbose)
             return cached_results
         
