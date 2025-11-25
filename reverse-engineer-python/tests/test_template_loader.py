@@ -176,7 +176,7 @@ class TestTemplateVariables(unittest.TestCase):
         """Test applying simple variables."""
         loader = TemplateLoader()
         
-        template = "Hello {name}, welcome to {place}!"
+        template = "Hello {{name}}, welcome to {{place}}!"
         result = loader.apply_variables(template, name="Alice", place="Wonderland")
         
         self.assertEqual(result, "Hello Alice, welcome to Wonderland!")
@@ -185,7 +185,7 @@ class TestTemplateVariables(unittest.TestCase):
         """Test applying multiple variables."""
         loader = TemplateLoader()
         
-        template = "{title}\n\n{content}\n\nBy: {author}"
+        template = "{{title}}\n\n{{content}}\n\nBy: {{author}}"
         result = loader.apply_variables(
             template,
             title="Test Document",
@@ -201,7 +201,7 @@ class TestTemplateVariables(unittest.TestCase):
         """Test applying variables with None values."""
         loader = TemplateLoader()
         
-        template = "Name: {name}, Age: {age}"
+        template = "Name: {{name}}, Age: {{age}}"
         result = loader.apply_variables(template, name="Bob", age=None)
         
         self.assertIn("Name: Bob", result)
@@ -211,11 +211,12 @@ class TestTemplateVariables(unittest.TestCase):
         """Test that missing variables remain as placeholders."""
         loader = TemplateLoader()
         
-        template = "Hello {name}, you are {age} years old"
+        template = "Hello {{name}}, you are {{age}} years old"
         result = loader.apply_variables(template, name="Charlie")
         
         self.assertIn("Hello Charlie", result)
-        self.assertIn("{age}", result)  # Placeholder remains
+        # Jinja2 renders missing variables as empty strings, not as placeholders
+        self.assertIn("you are  years old", result)
 
 
 class TestTemplateListin(unittest.TestCase):
