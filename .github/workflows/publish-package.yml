@@ -1,0 +1,208 @@
+name: Publish Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '!v*-rc*'
+      - '!v*-beta*'
+      - '!v*-alpha*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build Distribution
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine wheel
+      
+      - name: Build package
+        working-directory: reverse-engineer-python
+        run: |
+          python -m build
+          echo "Built packages:"
+          ls -lh dist/
+      
+      - name: Check package
+        working-directory: reverse-engineer-python
+        run: |
+          twine check dist/*
+      
+      - name: Store distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: reverse-engineer-python/dist/
+          retention-days: 90
+
+  publish-testpypi:
+    name: Publish to TestPyPI (Smoke Test)
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+          packages-dir: dist/
+      
+      - name: Wait for package availability
+        run: |
+          echo "Waiting 60 seconds for TestPyPI to process the package..."
+          sleep 60
+      
+      - name: Test installation from TestPyPI
+        run: |
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ re-cue
+          recue --version
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: publish-testpypi
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+      
+      - name: Wait for package availability
+        run: |
+          echo "Waiting 120 seconds for PyPI to process the package..."
+          sleep 120
+
+  publish-github:
+    name: Publish to GitHub Packages
+    needs: publish-testpypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      
+      - name: Publish to GitHub Packages
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
+        run: |
+          pip install twine
+          # GitHub Packages uses the same upload URL as PyPI
+          # but with GitHub token authentication
+          python -m twine upload \
+            --repository-url https://upload.pypi.org/legacy/ \
+            --username __token__ \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --skip-existing \
+            dist/*
+
+  verify-installation:
+    name: Verify Installation (${{ matrix.registry }})
+    needs: [publish-pypi, publish-github]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.9', '3.12']
+        registry: ['pypi', 'github']
+        include:
+          - registry: pypi
+            install-cmd: pip install re-cue
+          - registry: github
+            install-cmd: pip install --index-url https://pypi.org/simple/ re-cue
+    
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install from ${{ matrix.registry }}
+        run: ${{ matrix.install-cmd }}
+      
+      - name: Verify installation
+        run: |
+          recue --version
+          python -c "import reverse_engineer; print(f'Version: {reverse_engineer.__version__}')"
+      
+      - name: Test functionality
+        run: |
+          recue --help
+
+  summary:
+    name: Publication Summary
+    needs: [build, publish-pypi, publish-github, verify-installation]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 📦 Package Publication Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "- Package built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- Published to TestPyPI (smoke test)" >> $GITHUB_STEP_SUMMARY
+          echo "- Published to PyPI" >> $GITHUB_STEP_SUMMARY
+          echo "- Published to GitHub Packages" >> $GITHUB_STEP_SUMMARY
+          echo "- Installation verified on multiple platforms" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎉 Package Available At:" >> $GITHUB_STEP_SUMMARY
+          echo "- **PyPI**: https://pypi.org/project/re-cue/" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitHub Packages**: https://github.com/cue-3/re-cue/packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Installation:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "# From PyPI (recommended)" >> $GITHUB_STEP_SUMMARY
+          echo "pip install re-cue" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,170 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changelog generation
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+      
+      - name: Build package
+        working-directory: reverse-engineer-python
+        run: |
+          python -m build
+      
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+      
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "${{ steps.version.outputs.tag }}" | head -n 1)
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "No previous tag found, using initial commit"
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          
+          echo "Generating changelog from $PREVIOUS_TAG to ${{ steps.version.outputs.tag }}"
+          
+          # Generate changelog
+          {
+            echo "## What's Changed"
+            echo ""
+            git log ${PREVIOUS_TAG}..${{ steps.version.outputs.tag }} \
+              --pretty=format:"* %s (%h)" \
+              --no-merges \
+              | grep -v "^* Merge" \
+              | grep -v "^* Bump version" \
+              || echo "* Initial release"
+            echo ""
+            echo ""
+            echo "## Installation"
+            echo ""
+            echo '```bash'
+            echo "pip install re-cue==${{ steps.version.outputs.version }}"
+            echo '```'
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${{ steps.version.outputs.tag }}"
+          } > CHANGELOG.md
+          
+          cat CHANGELOG.md
+      
+      - name: Create release notes
+        id: notes
+        run: |
+          {
+            echo "# RE-cue ${{ steps.version.outputs.version }}"
+            echo ""
+            cat CHANGELOG.md
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📦 Distribution"
+            echo ""
+            echo "### PyPI (Recommended)"
+            echo '```bash'
+            echo "pip install re-cue"
+            echo '```'
+            echo ""
+            echo "### GitHub Packages"
+            echo '```bash'
+            echo "pip install --index-url https://pypi.org/simple/ re-cue"
+            echo '```'
+            echo ""
+            echo "## 📚 Documentation"
+            echo ""
+            echo "- **User Guide**: https://cue-3.github.io/re-cue/docs/user-guides/"
+            echo "- **Getting Started**: https://cue-3.github.io/re-cue/docs/user-guides/getting-started/"
+            echo "- **API Documentation**: https://cue-3.github.io/re-cue/docs/api/"
+            echo ""
+            echo "## 🚀 Quick Start"
+            echo ""
+            echo '```bash'
+            echo "# Install"
+            echo "pip install re-cue"
+            echo ""
+            echo "# Run analysis"
+            echo "recue --spec --plan --use-cases /path/to/project"
+            echo '```'
+          } > RELEASE_NOTES.md
+          
+          cat RELEASE_NOTES.md
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: RE-cue ${{ steps.version.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.tag, '-rc') || contains(steps.version.outputs.tag, '-beta') || contains(steps.version.outputs.tag, '-alpha') }}
+          files: |
+            reverse-engineer-python/dist/*.tar.gz
+            reverse-engineer-python/dist/*.whl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Trigger publish workflow
+        if: ${{ !contains(steps.version.outputs.tag, '-rc') && !contains(steps.version.outputs.tag, '-beta') && !contains(steps.version.outputs.tag, '-alpha') }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'publish-package.yml',
+              ref: '${{ steps.version.outputs.tag }}',
+              inputs: {
+                version: '${{ steps.version.outputs.version }}'
+              }
+            });
+      
+      - name: Summary
+        run: |
+          echo "## 🎉 Release Created Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag**: ${{ steps.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Source distribution (.tar.gz)" >> $GITHUB_STEP_SUMMARY
+          echo "- Wheel distribution (.whl)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⏭️ Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- Release created at: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Package publishing workflow has been triggered" >> $GITHUB_STEP_SUMMARY
+          echo "- Check the 'Publish Package' workflow for publishing status" >> $GITHUB_STEP_SUMMARY
