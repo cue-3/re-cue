@@ -35,6 +35,7 @@ RE-cue is a comprehensive reverse engineering toolkit designed to help software 
 - **API Contracts** (api-spec.json) - OpenAPI 3.0 specifications for existing endpoints
 - **Use Case Analysis** (use-cases.md) - ✨ **NEW** Actor identification, system boundaries, and business process documentation with transaction/validation/workflow analysis
 - **Interactive Use Case Refinement** - ✨ **NEW** Edit and improve generated use cases through an interactive text-based interface
+- **Business Process Visualization** (diagrams.md) - ✨ **NEW** Mermaid.js diagrams: flowcharts, sequence diagrams, component diagrams, ER diagrams, and architecture overviews
 
 **Primary Use Cases:**
 - � **Legacy System Documentation** - Generate comprehensive docs for undocumented codebases
@@ -133,6 +134,70 @@ python3 -m reverse_engineer --refine-use-cases re-my-spring-app/phase4-use-cases
 
 See [docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md](docs/PHASE5-BUSINESS-CONTEXT-SUMMARY.md) for complete feature documentation and [docs/INTERACTIVE-USE-CASE-REFINEMENT.md](docs/INTERACTIVE-USE-CASE-REFINEMENT.md) for interactive refinement guide.
 
+## ✨ NEW: Business Process Visualization
+
+The Python version now includes comprehensive diagram generation using Mermaid.js syntax that automatically creates:
+
+### 📊 **Diagram Types**
+
+- **Flowcharts**: Visualize use case scenarios with decision points and alternative paths
+- **Sequence Diagrams**: Show actor-system interactions and message flows  
+- **Component Diagrams**: Display system architecture and component relationships
+- **Entity Relationship Diagrams**: Illustrate data model structures and relationships
+- **Architecture Diagrams**: Provide high-level system architecture overviews
+
+### 🔧 **Usage**
+
+Generate visualization diagrams:
+```bash
+# Generate all diagram types
+recue --diagrams ~/projects/my-spring-app
+
+# Generate specific diagram type
+recue --diagrams --diagram-type flowchart ~/projects/my-spring-app
+recue --diagrams --diagram-type sequence ~/projects/my-spring-app
+recue --diagrams --diagram-type component ~/projects/my-spring-app
+recue --diagrams --diagram-type er ~/projects/my-spring-app
+recue --diagrams --diagram-type architecture ~/projects/my-spring-app
+
+# Combined with use cases
+recue --use-cases --diagrams ~/projects/my-spring-app
+
+# Full documentation with diagrams
+recue --spec --plan --use-cases --diagrams --description "Project Analysis"
+```
+
+### 📋 **Example Output**
+
+Generated diagrams use Mermaid.js syntax that renders directly on GitHub:
+
+````markdown
+### Sequence Diagram: Admin Interactions
+
+```mermaid
+sequenceDiagram
+    participant Admin as Admin
+    participant API as API Layer
+    participant Service as Service Layer
+    participant DB as Database
+    Admin->>+API: POST /users
+    API->>+Service: Create Users
+    Service->>+DB: Update Data
+    DB-->>-Service: Confirm
+    Service-->>-API: Response
+    API-->>-Admin: Result
+```
+````
+
+### 👀 **Viewing Diagrams**
+
+- **GitHub**: Mermaid diagrams render automatically in GitHub Markdown files
+- **VS Code**: Use "Markdown Preview Mermaid Support" extension
+- **Online**: Copy/paste to https://mermaid.live/ for interactive editing
+- **Export**: Use Mermaid CLI to export as PNG/SVG/PDF
+
+See [docs/features/business-process-visualization.md](docs/features/business-process-visualization.md) for complete diagram documentation.
+
 ## Supported Frameworks
 
 RE-cue automatically detects and analyzes multiple technology stacks:
@@ -212,6 +277,7 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 | **API Contracts** | ✅ | ✅ |
 | **Use Cases** | ❌ | ✅ NEW |
 | **Business Context** | ❌ | ✅ NEW |
+| **Visual Diagrams** | ❌ | ✅ NEW |
 | **Actor Detection** | ❌ | ✅ NEW |
 | **Transaction Analysis** | ❌ | ✅ NEW |
 | **Validation Rules** | ❌ | ✅ NEW |
@@ -221,7 +287,7 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 | **Parallel Processing** | ❌ | ✅ NEW |
 | **Incremental Analysis** | ❌ | ✅ NEW |
 | **Large Codebase (1000+ files)** | ⚠️ Slow | ✅ Optimized |
-| **Test Coverage** | ❌ | ✅ 275+ tests |
+| **Test Coverage** | ❌ | ✅ 305+ tests |
 | **Extensibility** | Limited | High |
 
 **Performance:** Python version includes optimizations for large codebases with **5-6x speedup** on repeated analysis through incremental processing and parallel file analysis.
@@ -291,13 +357,13 @@ pip install -e reverse-engineer-python/
 cd ~/projects/my-spring-app
 
 # 3. Generate all documentation
-recue --spec --plan --data-model --api-contract --use-cases
+recue --spec --plan --data-model --api-contract --use-cases --diagrams
 
 # 4. Review generated files
 ls -la re-my-spring-app/
 ```
 
-**That's it!** Your documentation is now in the `re-my-spring-app/` directory.
+**That's it!** Your documentation (including visual diagrams) is now in the `re-my-spring-app/` directory.
 
 **Next Steps:**
 - 🧙 Try the [Interactive Configuration Wizard](docs/features/configuration-wizard.md) for guided setup
@@ -464,6 +530,7 @@ specs/001-reverse/
 ├── spec.md              # Feature specification with user stories
 ├── plan.md              # Technical implementation plan
 ├── data-model.md        # Data model documentation
+├── diagrams.md          # Visual diagrams (Mermaid.js) - NEW
 ├── use-cases.md         # Use case analysis with business context (Python version)
 └── contracts/
     └── api-spec.json    # OpenAPI 3.0 specification
@@ -511,6 +578,7 @@ Generated documentation covers all aspects of your codebase:
 - **spec.md** - Feature specification with user stories and acceptance criteria
 - **plan.md** - Technical implementation plan with architecture details
 - **data-model.md** - Complete data structure and relationship documentation
+- **diagrams.md** - Visual diagrams with Mermaid.js (flowcharts, sequence, ER, architecture) - NEW
 - **use-cases.md** - Use case analysis with business context (Python version)
 - **contracts/** - OpenAPI 3.0 specifications for API endpoints
 
@@ -518,7 +586,7 @@ Generated documentation covers all aspects of your codebase:
 
 Includes a specialized prompt (`prompts/recue.reverse.prompt.md`) that enables GitHub Copilot to:
 - **Automate reverse engineering workflows** - Use `/recue.reverse` to trigger automated analysis
-- **Generate comprehensive documentation** - Creates spec.md, plan.md, data-model.md, use-cases.md, and api-spec.json files
+- **Generate comprehensive documentation** - Creates spec.md, plan.md, data-model.md, diagrams.md, use-cases.md, and api-spec.json files
 - **Maintain documentation consistency** - Follows established documentation standards
 - **Enhance AI-assisted analysis** - Provides context for better AI understanding of reverse engineering tasks
 
