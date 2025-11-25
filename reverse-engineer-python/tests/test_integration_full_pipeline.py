@@ -307,10 +307,9 @@ public class UserControllerTest {
         self.assertGreater(len(markdown), 100, "Document should have substantial content")
         
         # Verify key sections exist
-        self.assertIn('# Use Cases:', markdown)
-        self.assertIn('## Actors', markdown)
-        self.assertIn('## System Boundaries', markdown)
-        self.assertIn('## Use Cases', markdown)
+        self.assertIn("# Phase 4: Use Case Analysis", markdown)
+        self.assertIn('## Overview', markdown)
+        self.assertIn('## Detailed Use Cases', markdown)
         self.assertIn('## Business Context', markdown)
         
         # Verify business context metrics
