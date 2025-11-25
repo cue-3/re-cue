@@ -56,6 +56,7 @@ jobs:
     name: Publish to TestPyPI (Smoke Test)
     needs: build
     runs-on: ubuntu-latest
+    environment: test-prod
     permissions:
       id-token: write
     
@@ -72,6 +73,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
           packages-dir: dist/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
       
       - name: Wait for package availability
         run: |
@@ -87,6 +89,7 @@ jobs:
     name: Publish to PyPI
     needs: publish-testpypi
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       id-token: write
     
@@ -101,6 +104,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
       
       - name: Wait for package availability
         run: |
