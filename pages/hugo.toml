@@ -5,6 +5,9 @@ theme = 'docsy'
 enableRobotsTXT = true
 enableGitInfo = true
 
+# Google Analytics
+googleAnalytics = 'G-97R1N6ZY60'
+
 [languages]
 [languages.en]
 languageCode = 'en-us'
