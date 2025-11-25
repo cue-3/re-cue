@@ -1,0 +1,28 @@
+# Development Dependencies for RE-cue Release Management
+#
+# Install with: pip install -r requirements-dev.txt
+
+# Version Management
+bump2version>=1.0.1
+
+# Build Tools
+build>=1.0.0
+twine>=4.0.0
+wheel>=0.41.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Code Quality
+black>=23.0.0
+flake8>=6.1.0
+mypy>=1.5.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx-rtd-theme>=1.3.0
+
+# Package dependencies (for reference)
+jinja2>=3.0.0
+pyyaml>=6.0

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "re-cue"
-version = "1.1.0"
+version = "1.0.0"
 description = "RE-cue: Universal reverse engineering toolkit for multi-framework codebases"
 readme = "README-PYTHON.md"
 authors = [
@@ -14,15 +14,22 @@ license = {text = "MIT"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development :: Documentation",
     "Topic :: Software Development :: Code Generators",
     "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Typing :: Typed",
 ]
 dependencies = [
     "jinja2>=3.0.0",
@@ -36,12 +43,13 @@ Homepage = "https://github.com/cue-3/re-cue"
 Documentation = "https://cue-3.github.io/re-cue/"
 Repository = "https://github.com/cue-3/re-cue"
 "Bug Tracker" = "https://github.com/cue-3/re-cue/issues"
-Changelog = "https://github.com/cue-3/re-cue/blob/main/docs/CHANGELOG.md"
+"Issue Tracker" = "https://github.com/cue-3/re-cue/issues"
+Changelog = "https://github.com/cue-3/re-cue/blob/main/docs/releases/CHANGELOG.md"
+"Source Code" = "https://github.com/cue-3/re-cue"
+Discussions = "https://github.com/cue-3/re-cue/discussions"
 
 [project.scripts]
 recue = "reverse_engineer.cli:main"
-re-cue = "reverse_engineer.cli:main"
-reverse-engineer = "reverse_engineer.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
