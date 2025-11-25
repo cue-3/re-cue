@@ -26,16 +26,6 @@ cd re-cue/reverse-engineer-python
 pip install -e .
 ```
 
-### Bash Script (Alternative)
-
-For systems without Python, you can use the standalone bash script:
-
-```bash
-git clone https://github.com/cue-3/re-cue.git
-cd re-cue/reverse-engineer-bash
-chmod +x reverse-engineer.sh
-```
-
 ## Verify Installation
 
 After installation, verify that RE-cue is working:
@@ -48,14 +38,8 @@ You should see version information displayed.
 
 ## Prerequisites
 
-### For Python Version
 - Python 3.8 or higher
 - pip package manager
-- Git (for cloning repositories to analyze)
-
-### For Bash Version
-- Bash 4.0 or higher
-- Standard Unix utilities (find, grep, sed)
 - Git (for cloning repositories to analyze)
 
 ## Supported Platforms
@@ -77,5 +61,5 @@ If you encounter issues during installation, check the [Troubleshooting Guide](/
 
 Common issues:
 - **Permission denied**: Use `pip install --user re-cue` instead
-- **Python version**: Ensure you're using Python 3.8+
+- **Python**: Ensure you're using Python 3.8+
 - **Missing dependencies**: Install build tools for your platform
