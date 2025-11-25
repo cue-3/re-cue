@@ -18,7 +18,7 @@ Requirements:
 import re
 import argparse
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 from github import Github, GithubException
