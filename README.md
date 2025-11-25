@@ -227,7 +227,7 @@ See [docs/frameworks/README.md](docs/frameworks/README.md) for complete framewor
 
 ## Available Versions
 
-RE-cue v1.0.0 is available in multiple distribution formats:
+RE-cue v1.0.1 is available in multiple distribution formats:
 
 ### 📦 **GitHub Action** (Recommended for CI/CD)
 ```yaml
@@ -851,7 +851,7 @@ Help improve RE-cue reverse engineering toolkit:
 
 ## Project Status
 
-**Current Version**: v1.0.0 (Released)  
+**Current Version**: v1.0.1 (Released)  
 **Release Date**: January 2025  
 **Distribution**: GitHub Action + PyPI Package (Ready) | Docker (Planned)  
 **Latest Feature**: Multi-framework reverse engineering with business context analysis  
@@ -860,7 +860,7 @@ Help improve RE-cue reverse engineering toolkit:
 
 ### Release Highlights
 
-**v1.0.0 - Universal Reverse Engineering Toolkit**
+**v1.0.1 - Universal Reverse Engineering Toolkit**
 - ✅ GitHub Composite Action for CI/CD workflows
 - ✅ PyPI-ready Python package with modern packaging (pyproject.toml)
 - ✅ Multi-framework support (Java Spring Boot, Node.js, Python, .NET, Ruby)
