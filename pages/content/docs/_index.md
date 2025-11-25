@@ -8,9 +8,9 @@ Comprehensive guides, technical references, and framework-specific documentation
 
 ## Getting Started
 
-- [Getting Started](user-guides/getting-started.md) - Version history and release notes
-- [Changelog](releases/changelog.md) - Version history and release notes
-- [Troubleshooting Guide](user-guides/TROUBLESHOOTING.md) - Common issues and solutions
+- [Changelog](changelog/) - Version history and release notes
+- [Troubleshooting Guide](troubleshooting/) - Common issues and solutions
+- [Technical Reference](technical-reference/) - Architecture, templates, and API reference
 
 ## Guides & Documentation
 
