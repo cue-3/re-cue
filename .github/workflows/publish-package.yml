@@ -111,9 +111,9 @@ jobs:
           echo "Waiting 120 seconds for PyPI to process the package..."
           sleep 120
 
-  publish-github:
-    name: Publish to GitHub Packages
-    needs: publish-testpypi
+  publish-docker:
+    name: Publish Docker Image to GHCR
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -123,47 +123,58 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       
-      - name: Download distributions
-        uses: actions/download-artifact@v4
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          name: python-package-distributions
-          path: dist/
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Publish to GitHub Packages
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-          TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./reverse-engineer-python
+          file: ./reverse-engineer-python/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+      
+      - name: Generate Docker usage summary
         run: |
-          pip install twine
-          # GitHub Packages uses the same upload URL as PyPI
-          # but with GitHub token authentication
-          python -m twine upload \
-            --repository-url https://upload.pypi.org/legacy/ \
-            --username __token__ \
-            --password ${{ secrets.GITHUB_TOKEN }} \
-            --skip-existing \
-            dist/*
+          echo "## 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pull and run:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/${{ github.repository }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker run --rm -v \$(pwd):/workspace ghcr.io/${{ github.repository }}:latest /workspace/your-project" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   verify-installation:
-    name: Verify Installation (${{ matrix.registry }})
-    needs: [publish-pypi, publish-github]
+    name: Verify Installation
+    needs: [publish-pypi]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.9', '3.12']
-        registry: ['pypi', 'github']
-        include:
-          - registry: pypi
-            install-cmd: pip install re-cue
-          - registry: github
-            install-cmd: pip install --index-url https://pypi.org/simple/ re-cue
     
     steps:
       - name: Set up Python ${{ matrix.python-version }}
@@ -171,8 +182,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       
-      - name: Install from ${{ matrix.registry }}
-        run: ${{ matrix.install-cmd }}
+      - name: Install from PyPI
+        run: pip install re-cue
       
       - name: Verify installation
         run: |
@@ -185,7 +196,7 @@ jobs:
 
   summary:
     name: Publication Summary
-    needs: [build, publish-pypi, publish-github, verify-installation]
+    needs: [build, publish-pypi, publish-docker, verify-installation]
     runs-on: ubuntu-latest
     if: always()
     
@@ -198,15 +209,18 @@ jobs:
           echo "- Package built successfully" >> $GITHUB_STEP_SUMMARY
           echo "- Published to TestPyPI (smoke test)" >> $GITHUB_STEP_SUMMARY
           echo "- Published to PyPI" >> $GITHUB_STEP_SUMMARY
-          echo "- Published to GitHub Packages" >> $GITHUB_STEP_SUMMARY
+          echo "- Published Docker image to GHCR" >> $GITHUB_STEP_SUMMARY
           echo "- Installation verified on multiple platforms" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🎉 Package Available At:" >> $GITHUB_STEP_SUMMARY
           echo "- **PyPI**: https://pypi.org/project/re-cue/" >> $GITHUB_STEP_SUMMARY
-          echo "- **GitHub Packages**: https://github.com/cue-3/re-cue/packages" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docker**: ghcr.io/${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📥 Installation:" >> $GITHUB_STEP_SUMMARY
           echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "# From PyPI (recommended)" >> $GITHUB_STEP_SUMMARY
+          echo "# Python package (recommended)" >> $GITHUB_STEP_SUMMARY
           echo "pip install re-cue" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Docker image" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/${{ github.repository }}:latest" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
