@@ -12,11 +12,55 @@ RE-cue is available in multiple formats to support different workflows and envir
 
 ### Python Package (Recommended)
 
-Install via pip from PyPI:
+RE-cue is published on the [Python Package Index (PyPI)](https://pypi.org/project/re-cue/), making it easy to install with pip.
+
+**Basic Installation:**
 
 ```bash
 pip install re-cue
 ```
+
+**Install Specific Version:**
+
+```bash
+# Install a specific version
+pip install re-cue==1.0.1
+
+# Install minimum version
+pip install "re-cue>=1.0.0"
+```
+
+**Upgrade to Latest:**
+
+```bash
+pip install --upgrade re-cue
+```
+
+**User Installation (no admin/sudo required):**
+
+```bash
+pip install --user re-cue
+```
+
+**Virtual Environment (Recommended for Development):**
+
+```bash
+# Create virtual environment
+python -m venv recue-env
+
+# Activate it
+source recue-env/bin/activate  # Linux/macOS
+# or
+recue-env\Scripts\activate  # Windows
+
+# Install RE-cue
+pip install re-cue
+```
+
+**View Package Details:**
+- PyPI Project Page: https://pypi.org/project/re-cue/
+- Release History: https://pypi.org/project/re-cue/#history
+- Download Statistics: https://pypistats.org/packages/re-cue
 
 ### Docker Image
 

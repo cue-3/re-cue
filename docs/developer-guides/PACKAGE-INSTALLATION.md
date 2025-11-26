@@ -21,7 +21,15 @@ This guide covers installation methods for users and the release process for mai
 
 ### PyPI (Recommended)
 
-The easiest way to install RE-cue is from PyPI:
+RE-cue is distributed through the [Python Package Index (PyPI)](https://pypi.org/project/re-cue/), the official third-party software repository for Python packages.
+
+**Quick Links:**
+- 📦 [PyPI Project Page](https://pypi.org/project/re-cue/)
+- 📊 [Download Statistics](https://pypistats.org/packages/re-cue)
+- 📝 [Release History](https://pypi.org/project/re-cue/#history)
+- 🔍 [Package Files](https://pypi.org/project/re-cue/#files)
+
+**Installation Options:**
 
 ```bash
 # Install latest stable version
@@ -30,14 +38,76 @@ pip install re-cue
 # Install specific version
 pip install re-cue==1.0.1
 
+# Install with version constraints
+pip install "re-cue>=1.0.0,<2.0.0"
+
 # Upgrade to latest version
 pip install --upgrade re-cue
+
+# Install for current user only (no admin rights needed)
+pip install --user re-cue
+
+# Install in editable mode from PyPI source
+pip install --editable re-cue
 ```
 
-**Verify installation:**
+**Using requirements.txt:**
 
 ```bash
+# Add to requirements.txt
+echo "re-cue>=1.0.0" >> requirements.txt
+
+# Install from requirements file
+pip install -r requirements.txt
+```
+
+**Using pyproject.toml (Poetry, PDM, Hatch):**
+
+```toml
+[project]
+dependencies = [
+    "re-cue>=1.0.0",
+]
+
+# Or with Poetry
+[tool.poetry.dependencies]
+re-cue = "^1.0.0"
+```
+
+**Verify Installation:**
+
+```bash
+# Check installed version
 recue --version
+
+# Show installation location and details
+pip show re-cue
+
+# List installed files
+pip show --files re-cue
+```
+
+**Python Version Compatibility:**
+
+RE-cue requires Python 3.9 or higher. Check your Python version:
+
+```bash
+python --version
+# or
+python3 --version
+```
+
+**Package Information:**
+
+```bash
+# View package metadata
+pip show re-cue
+
+# Check for updates
+pip list --outdated | grep re-cue
+
+# Uninstall if needed
+pip uninstall re-cue
 ```
 
 ### Docker Image
