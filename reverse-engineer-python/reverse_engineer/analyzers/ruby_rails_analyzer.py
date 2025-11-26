@@ -379,7 +379,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
         if jobs_path and jobs_path.exists() and any(jobs_path.glob("*.rb")):
             self.actors.append(Actor(
                 name="System",
-                type="internal_user",
+                type="external_system",
                 access_level="system",
                 identified_from=["jobs directory - background jobs"]
             ))
