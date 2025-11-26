@@ -5,7 +5,7 @@ Tests the complete workflow from project creation through use case generation,
 ensuring consistent behavior across all supported frameworks:
 - Java Spring Boot
 - Node.js Express
-- Ruby on Rails  
+- Ruby on Rails
 - Python Django
 - Python Flask
 - Python FastAPI
@@ -337,13 +337,24 @@ class UserService {
 module.exports = new UserService();
 ''')
         
+        # Create auth middleware that uses roles for testing
         (self.project_root / "auth.js").write_text('''
 const roles = {
     USER: 'user',
     ADMIN: 'admin'
 };
 
-module.exports = { roles };
+function authenticate(req, res, next) {
+    if (!req.user) return res.status(401).send();
+    next();
+}
+
+function requireAdmin(req, res, next) {
+    if (req.user.role !== roles.ADMIN) return res.status(403).send();
+    next();
+}
+
+module.exports = { roles, authenticate, requireAdmin };
 ''')
     
     def _get_analyzer(self):

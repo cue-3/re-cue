@@ -133,8 +133,9 @@ public class Entity{i} {{
         # Both should find the same endpoints
         self.assertEqual(parallel_endpoints, sequential_endpoints)
         
-        # Both should find endpoints
-        self.assertGreater(parallel_endpoints, 0, "Should discover endpoints")
+        # Both should find endpoints from Spring controllers
+        self.assertGreater(parallel_endpoints, 0, 
+                          "Should discover endpoints from Spring controllers")
         
         print(f"\nParallel: {parallel_time:.3f}s ({parallel_endpoints} endpoints)")
         print(f"Sequential: {sequential_time:.3f}s ({sequential_endpoints} endpoints)")
