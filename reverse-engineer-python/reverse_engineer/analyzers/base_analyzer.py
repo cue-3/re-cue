@@ -5,7 +5,7 @@ Base analyzer abstract class for framework-specific analyzers.
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Dict, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..utils import log_info
 
@@ -17,6 +17,10 @@ class Endpoint:
     path: str
     controller: str
     authenticated: bool = False
+    
+    def __str__(self):
+        auth = "🔒" if self.authenticated else "🌐"
+        return f"{auth} {self.method} {self.path}"
 
 
 @dataclass
@@ -24,60 +28,64 @@ class Model:
     """Represents a data model."""
     name: str
     fields: int
-    file: Optional[str] = None
+    file_path: Optional[Path] = None
 
 
 @dataclass
 class View:
     """Represents a UI view."""
     name: str
-    file: str
+    file_name: str
+    file_path: Optional[Path] = None
 
 
 @dataclass
 class Service:
     """Represents a backend service."""
     name: str
-    file: Optional[str] = None
+    file_path: Optional[Path] = None
 
 
 @dataclass
 class Actor:
-    """Represents an actor in the system."""
+    """Represents an actor in the system (user, external system, etc.)."""
     name: str
-    type: str  # end_user, internal_user, external_system, system
-    access_level: Optional[str] = None
-    description: Optional[str] = None
+    type: str  # end_user, internal_user, external_system
+    access_level: str  # public, authenticated, admin, api_integration
+    identified_from: List[str] = field(default_factory=list)
 
 
 @dataclass
 class SystemBoundary:
     """Represents a system or subsystem boundary."""
     name: str
-    type: str
-    components: List[str]
-    description: Optional[str] = None
+    components: List[str] = field(default_factory=list)
+    interfaces: List[str] = field(default_factory=list)
+    type: str = "subsystem"  # primary_system, subsystem, external_system
 
 
 @dataclass
 class Relationship:
-    """Represents a relationship between entities."""
+    """Represents a relationship between actors and systems or between systems."""
     from_entity: str
     to_entity: str
-    relationship_type: str
-    mechanism: Optional[str] = None
+    relationship_type: str  # service_call, initiates_payment, sends_notifications, etc.
+    mechanism: str = ""  # REST API call, async_message, method_invocation, etc.
+    identified_from: List[str] = field(default_factory=list)
 
 
 @dataclass
 class UseCase:
-    """Represents a use case."""
+    """Represents a use case with complete scenario definition."""
+    id: str
     name: str
-    actor: str
-    description: str
-    preconditions: List[str]
-    steps: List[str]
-    postconditions: List[str]
-    endpoints: List[str]
+    primary_actor: str
+    secondary_actors: List[str] = field(default_factory=list)
+    preconditions: List[str] = field(default_factory=list)
+    postconditions: List[str] = field(default_factory=list)
+    main_scenario: List[str] = field(default_factory=list)
+    extensions: List[str] = field(default_factory=list)
+    identified_from: List[str] = field(default_factory=list)
 
 
 class BaseAnalyzer(ABC):

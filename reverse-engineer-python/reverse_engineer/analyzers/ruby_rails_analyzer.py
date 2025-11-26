@@ -256,7 +256,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
             model = Model(
                 name=model_name,
                 fields=field_count if field_count > 0 else 1,
-                file=str(file_path.relative_to(self.repo_root))
+                file_path=file_path
             )
             
             self.models.append(model)
@@ -278,7 +278,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 
                 service = Service(
                     name=service_file.stem,
-                    file=str(service_file.relative_to(self.repo_root))
+                    file_path=service_file
                 )
                 self.services.append(service)
                 log_info(f"  Found service: {service_file.stem}", self.verbose)
@@ -292,7 +292,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 
                 service = Service(
                     name=job_file.stem,
-                    file=str(job_file.relative_to(self.repo_root))
+                    file_path=job_file
                 )
                 self.services.append(service)
                 log_info(f"  Found job: {job_file.stem}", self.verbose)
@@ -316,7 +316,8 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 
                 view = View(
                     name=view_file.stem,
-                    file=str(view_file.relative_to(self.repo_root))
+                    file_name=view_file.name,
+                    file_path=view_file
                 )
                 self.views.append(view)
         
@@ -333,14 +334,14 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 name="Guest",
                 type="end_user",
                 access_level="public",
-                description="Unauthenticated visitor"
+                identified_from=["devise/clearance gem - unauthenticated visitor"]
             ))
             
             self.actors.append(Actor(
                 name="User",
                 type="end_user",
                 access_level="authenticated",
-                description="Authenticated user"
+                identified_from=["devise/clearance gem - authenticated user"]
             ))
         
         # Check for admin functionality
@@ -355,7 +356,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                     name="Admin",
                     type="internal_user",
                     access_level="admin",
-                    description="Administrator with elevated privileges"
+                    identified_from=["admin controller - elevated privileges"]
                 ))
         
         # Check for API actors
@@ -370,7 +371,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 name="API Client",
                 type="external_system",
                 access_level="api",
-                description="External system accessing via API"
+                identified_from=["api directory - external system access"]
             ))
         
         # Add system actor for background jobs
@@ -378,9 +379,9 @@ class RubyRailsAnalyzer(BaseAnalyzer):
         if jobs_path and jobs_path.exists() and any(jobs_path.glob("*.rb")):
             self.actors.append(Actor(
                 name="System",
-                type="system",
+                type="external_system",
                 access_level="system",
-                description="Background jobs and scheduled tasks"
+                identified_from=["jobs directory - background jobs"]
             ))
         
         log_info(f"Found {self.actor_count} actors", self.verbose)
@@ -398,7 +399,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                     name="Rails Controllers",
                     type="external",
                     components=[f.stem for f in controller_files[:5]],  # Sample
-                    description="HTTP request handlers and API endpoints"
+                    interfaces=["HTTP", "API endpoints"]
                 ))
         
         # Models boundary
@@ -409,7 +410,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                     name="Rails Models",
                     type="data",
                     components=[f.stem for f in model_files[:5]],  # Sample
-                    description="ActiveRecord models and business logic"
+                    interfaces=["ActiveRecord", "Database"]
                 ))
         
         # Views boundary
@@ -418,7 +419,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 name="Rails Views",
                 type="presentation",
                 components=["templates"],
-                description="UI templates and rendering layer"
+                interfaces=["HTML", "Rendering"]
             ))
         
         # Background jobs boundary
@@ -428,7 +429,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 name="Background Jobs",
                 type="internal",
                 components=["ActiveJob", "Sidekiq"],
-                description="Asynchronous processing"
+                interfaces=["Async processing"]
             ))
         
         log_info(f"Found {self.boundary_count} system boundaries", self.verbose)
@@ -496,19 +497,21 @@ class RubyRailsAnalyzer(BaseAnalyzer):
                 if "admin" in controller_file.name.lower():
                     actor = "Admin"
                 
-                # Build use case
+                # Build use case with unique ID
+                use_case_id = f"UC{len(self.use_cases) + 1:02d}"
+                
                 use_case = UseCase(
+                    id=use_case_id,
                     name=use_case_name,
-                    actor=actor,
-                    description=f"{action.capitalize()} operation on {resource_name}",
+                    primary_actor=actor,
                     preconditions=["User must be authenticated"] if has_auth else [],
-                    steps=[
+                    main_scenario=[
                         f"User navigates to {resource_name} {action} page",
                         f"System processes {action} request",
                         f"System returns response"
                     ],
                     postconditions=[f"{resource_name} {action} completed successfully"],
-                    endpoints=[f"/{resource_name.lower()}/{action}"]
+                    identified_from=[f"/{resource_name.lower()}/{action}"]
                 )
                 
                 self.use_cases.append(use_case)

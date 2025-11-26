@@ -216,7 +216,7 @@ class NodeExpressAnalyzer(BaseAnalyzer):
         field_count += len(class_fields)
         
         if field_count > 0:
-            model = Model(name=model_name, fields=field_count, file=str(file_path.name))
+            model = Model(name=model_name, fields=field_count, file_path=file_path)
             self.models.append(model)
     
     def discover_services(self) -> List[Service]:
@@ -248,7 +248,7 @@ class NodeExpressAnalyzer(BaseAnalyzer):
                         continue
                     
                     service_name = service_file.stem
-                    service = Service(name=service_name, file=str(service_file.name))
+                    service = Service(name=service_name, file_path=service_file)
                     self.services.append(service)
         
         log_info(f"Found {self.service_count} services", self.verbose)
@@ -297,7 +297,7 @@ class NodeExpressAnalyzer(BaseAnalyzer):
         
         for name, actor_type, access_level in default_actors:
             if access_level.lower() in [r.lower() for r in roles_found] or not roles_found:
-                actor = Actor(name=name, type=actor_type, access_level=access_level)
+                actor = Actor(name=name, type=actor_type, access_level=access_level, identified_from=[f"Default {name} role"])
                 self.actors.append(actor)
         
         # Add discovered roles
@@ -306,7 +306,8 @@ class NodeExpressAnalyzer(BaseAnalyzer):
                 actor = Actor(
                     name=role.capitalize(),
                     type='internal_user',
-                    access_level=role
+                    access_level=role,
+                    identified_from=[f"Discovered role: {role}"]
                 )
                 self.actors.append(actor)
         
@@ -369,21 +370,21 @@ class NodeExpressAnalyzer(BaseAnalyzer):
                 resource = controller.replace('Controller', '').replace('Router', '')
                 use_case_name = f"{action} {resource}"
                 
-                # Generate description
-                description = f"{actor} {action.lower()}s {resource.lower()} via {endpoint.method} {endpoint.path}"
+                # Create use case with unique ID
+                use_case_id = f"UC{len(self.use_cases) + 1:02d}"
                 
                 use_case = UseCase(
+                    id=use_case_id,
                     name=use_case_name,
-                    actor=actor,
-                    description=description,
+                    primary_actor=actor,
                     preconditions=[f"{actor} is authenticated" if endpoint.authenticated else "None"],
-                    steps=[
+                    main_scenario=[
                         f"User sends {endpoint.method} request to {endpoint.path}",
                         f"System processes the request",
                         f"System returns response"
                     ],
                     postconditions=[f"{resource} is {action.lower()}ed"],
-                    endpoints=[f"{endpoint.method} {endpoint.path}"]
+                    identified_from=[f"{endpoint.method} {endpoint.path}"]
                 )
                 self.use_cases.append(use_case)
         

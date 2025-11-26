@@ -166,7 +166,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
         # Count private fields
         field_count = len(re.findall(r'^\s*private\s+', content, re.MULTILINE))
         
-        model = Model(name=model_name, fields=field_count, file=str(file_path.name))
+        model = Model(name=model_name, fields=field_count, file_path=file_path)
         self.models.append(model)
     
     def discover_services(self) -> List[Service]:
@@ -194,7 +194,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
                     continue
                 
                 service_name = java_file.stem
-                service = Service(name=service_name, file=str(java_file.name))
+                service = Service(name=service_name, file_path=java_file)
                 self.services.append(service)
         
         log_info(f"Found {self.service_count} services", self.verbose)
@@ -217,7 +217,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
             # Find Vue files
             for vue_file in view_dir.glob("*.vue"):
                 view_name = vue_file.stem.replace("View", "")
-                view = View(name=view_name, file=vue_file.name)
+                view = View(name=view_name, file_name=vue_file.name, file_path=vue_file)
                 self.views.append(view)
             
             # Find React/JSX files
@@ -228,7 +228,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
                         continue
                     
                     view_name = js_file.stem
-                    view = View(name=view_name, file=js_file.name)
+                    view = View(name=view_name, file_name=js_file.name, file_path=js_file)
                     self.views.append(view)
         
         log_info(f"Found {self.view_count} views", self.verbose)
@@ -281,7 +281,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
                 name=role_name,
                 type=actor_type,
                 access_level=role,
-                description=f"User with {role_name} privileges"
+                identified_from=[f"@PreAuthorize/@Secured with role {role}"]
             )
             self.actors.append(actor)
         
@@ -291,7 +291,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
                 name="User",
                 type="end_user",
                 access_level="authenticated",
-                description="Authenticated user"
+                identified_from=["Default authenticated user"]
             ))
         
         log_info(f"Found {self.actor_count} actors", self.verbose)
@@ -361,22 +361,22 @@ class JavaSpringAnalyzer(BaseAnalyzer):
                 if self.actors:
                     actor_name = self.actors[0].name
             
-            # Generate description
-            description = f"{endpoint.method} operation on {endpoint.path}"
+            # Create use case with unique ID
+            use_case_id = f"UC{len(self.use_cases) + 1:02d}"
             
             # Create use case
             use_case = UseCase(
+                id=use_case_id,
                 name=use_case_name,
-                actor=actor_name,
-                description=description,
+                primary_actor=actor_name,
                 preconditions=["System is running", "User is authenticated"] if endpoint.authenticated else ["System is running"],
-                steps=[
+                main_scenario=[
                     f"User sends {endpoint.method} request to {endpoint.path}",
                     "System processes request",
                     "System returns response"
                 ],
                 postconditions=["Request completed successfully"],
-                endpoints=[f"{endpoint.method} {endpoint.path}"]
+                identified_from=[f"{endpoint.method} {endpoint.path}"]
             )
             self.use_cases.append(use_case)
         
