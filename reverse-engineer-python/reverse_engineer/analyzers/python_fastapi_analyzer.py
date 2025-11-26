@@ -176,7 +176,7 @@ class FastAPIAnalyzer(BaseAnalyzer):
             # Look for pattern: field_name: type
             field_count = len(re.findall(r'^\s+\w+\s*:\s*\w+', content, re.MULTILINE))
             
-            model = Model(name=model_name, fields=field_count, file=str(file_path.name))
+            model = Model(name=model_name, fields=field_count, file_path=file_path)
             self.models.append(model)
     
     def discover_services(self) -> List[Service]:
@@ -195,7 +195,7 @@ class FastAPIAnalyzer(BaseAnalyzer):
                 
                 # Look for APIRouter definitions
                 if 'APIRouter(' in content:
-                    service = Service(name=py_file.stem, file=str(py_file.name))
+                    service = Service(name=py_file.stem, file_path=py_file)
                     self.services.append(service)
                 
                 # Look for service classes
@@ -204,7 +204,7 @@ class FastAPIAnalyzer(BaseAnalyzer):
                     content
                 )
                 for service_class in service_classes:
-                    service = Service(name=service_class, file=str(py_file.name))
+                    service = Service(name=service_class, file_path=py_file)
                     self.services.append(service)
             except Exception:
                 pass
@@ -224,7 +224,7 @@ class FastAPIAnalyzer(BaseAnalyzer):
         ]
         
         for name, actor_type, access_level in default_actors:
-            actor = Actor(name=name, type=actor_type, access_level=access_level)
+            actor = Actor(name=name, type=actor_type, access_level=access_level, identified_from=[f"Default FastAPI {name} role"])
             self.actors.append(actor)
         
         # Look for role/scope definitions
@@ -262,7 +262,8 @@ class FastAPIAnalyzer(BaseAnalyzer):
                 actor = Actor(
                     name=scope_name,
                     type='internal_user',
-                    access_level=scope
+                    access_level=scope,
+                    identified_from=[f"Discovered FastAPI scope: {scope}"]
                 )
                 self.actors.append(actor)
         
@@ -325,21 +326,21 @@ class FastAPIAnalyzer(BaseAnalyzer):
                 resource = controller.replace('_', ' ').title()
                 use_case_name = f"{action} {resource}"
                 
-                # Generate description
-                description = f"{actor} {action.lower()}s {resource.lower()} via {endpoint.method} {endpoint.path}"
+                # Create use case with unique ID
+                use_case_id = f"UC{len(self.use_cases) + 1:02d}"
                 
                 use_case = UseCase(
+                    id=use_case_id,
                     name=use_case_name,
-                    actor=actor,
-                    description=description,
+                    primary_actor=actor,
                     preconditions=[f"{actor} is authenticated" if endpoint.authenticated else "None"],
-                    steps=[
+                    main_scenario=[
                         f"User sends {endpoint.method} request to {endpoint.path}",
                         f"FastAPI endpoint processes the request with type validation",
                         f"System returns Pydantic-validated response"
                     ],
                     postconditions=[f"{resource} is {action.lower()}ed"],
-                    endpoints=[f"{endpoint.method} {endpoint.path}"]
+                    identified_from=[f"{endpoint.method} {endpoint.path}"]
                 )
                 self.use_cases.append(use_case)
         

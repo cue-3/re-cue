@@ -197,7 +197,7 @@ class DjangoAnalyzer(BaseAnalyzer):
             for pattern in field_patterns:
                 field_count += len(re.findall(pattern, content))
             
-            model = Model(name=model_name, fields=field_count, file=str(file_path.name))
+            model = Model(name=model_name, fields=field_count, file_path=file_path)
             self.models.append(model)
     
     def discover_services(self) -> List[Service]:
@@ -230,7 +230,7 @@ class DjangoAnalyzer(BaseAnalyzer):
                 )
                 
                 for view_class in view_classes:
-                    service = Service(name=view_class, file=str(service_file.name))
+                    service = Service(name=view_class, file_path=service_file)
                     self.services.append(service)
             except Exception as e:
                 log_info(f"  Error reading {service_file}: {e}", self.verbose)
@@ -284,7 +284,7 @@ class DjangoAnalyzer(BaseAnalyzer):
         ]
         
         for name, actor_type, access_level in default_actors:
-            actor = Actor(name=name, type=actor_type, access_level=access_level)
+            actor = Actor(name=name, type=actor_type, access_level=access_level, identified_from=[f"Default Django {name} role"])
             self.actors.append(actor)
         
         # Add discovered groups as actors
@@ -293,7 +293,8 @@ class DjangoAnalyzer(BaseAnalyzer):
                 actor = Actor(
                     name=group.replace('_', ' ').title(),
                     type='internal_user',
-                    access_level=group
+                    access_level=group,
+                    identified_from=[f"Discovered Django group: {group}"]
                 )
                 self.actors.append(actor)
         
@@ -357,21 +358,21 @@ class DjangoAnalyzer(BaseAnalyzer):
                 resource = controller.replace('View', '').replace('ViewSet', '')
                 use_case_name = f"{action} {resource}"
                 
-                # Generate description
-                description = f"{actor} {action.lower()}s {resource.lower()} via {endpoint.method} {endpoint.path}"
+                # Create use case with unique ID
+                use_case_id = f"UC{len(self.use_cases) + 1:02d}"
                 
                 use_case = UseCase(
+                    id=use_case_id,
                     name=use_case_name,
-                    actor=actor,
-                    description=description,
+                    primary_actor=actor,
                     preconditions=[f"{actor} is authenticated" if endpoint.authenticated else "None"],
-                    steps=[
+                    main_scenario=[
                         f"User sends {endpoint.method} request to {endpoint.path}",
                         f"Django view processes the request",
                         f"System returns response"
                     ],
                     postconditions=[f"{resource} is {action.lower()}ed"],
-                    endpoints=[f"{endpoint.method} {endpoint.path}"]
+                    identified_from=[f"{endpoint.method} {endpoint.path}"]
                 )
                 self.use_cases.append(use_case)
         
