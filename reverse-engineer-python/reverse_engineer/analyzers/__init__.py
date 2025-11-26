@@ -1,21 +1,31 @@
-"""Framework-specific analyzers."""
+"""
+Framework analyzers (deprecated).
 
-from .base_analyzer import (
+DEPRECATED: This module is maintained for backward compatibility only.
+New code should import from reverse_engineer.frameworks package directly.
+"""
+
+# Re-export from new frameworks package
+from ..frameworks import (
     BaseAnalyzer,
+    JavaSpringAnalyzer,
+    NodeExpressAnalyzer,
+    DjangoAnalyzer,
+    FlaskAnalyzer,
+    FastAPIAnalyzer,
+    RubyRailsAnalyzer,
+)
+
+# Re-export domain models for backward compatibility
+from ..domain import (
     Endpoint,
     Model,
     Service,
     View,
     Actor,
     SystemBoundary,
-    UseCase
+    UseCase,
 )
-from .java_spring_analyzer import JavaSpringAnalyzer
-from .nodejs_express_analyzer import NodeExpressAnalyzer
-from .python_django_analyzer import DjangoAnalyzer
-from .python_flask_analyzer import FlaskAnalyzer
-from .python_fastapi_analyzer import FastAPIAnalyzer
-from .ruby_rails_analyzer import RubyRailsAnalyzer
 
 __all__ = [
     'BaseAnalyzer',
