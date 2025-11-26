@@ -28,7 +28,7 @@ The easiest way to install RE-cue is from PyPI:
 pip install re-cue
 
 # Install specific version
-pip install re-cue==1.0.0
+pip install re-cue==1.0.1
 
 # Upgrade to latest version
 pip install --upgrade re-cue
@@ -40,55 +40,39 @@ pip install --upgrade re-cue
 recue --version
 ```
 
-### GitHub Packages
+### Docker Image
 
-RE-cue is also available from GitHub Packages as an alternative distribution method.
-
-#### Prerequisites
-
-1. Create a Personal Access Token (PAT) with `read:packages` scope:
-   - Go to GitHub Settings → Developer settings → Personal access tokens
-   - Generate new token (classic)
-   - Select `read:packages` scope
-   - Copy the token
-
-2. Configure pip to use GitHub Packages:
+RE-cue is available as a Docker image for containerized deployments:
 
 ```bash
-# Set GitHub token
-export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+# Pull the latest image
+docker pull ghcr.io/cue-3/re-cue:latest
 
-# Install from GitHub Packages
-pip install --index-url https://pypi.org/simple/ \
-            --extra-index-url https://$GITHUB_TOKEN@pypi.pkg.github.com/cue-3/simple \
-            re-cue
+# Run with your project
+docker run --rm -v $(pwd):/workspace ghcr.io/cue-3/re-cue:latest /workspace/your-project
+
+# Use specific options
+docker run --rm -v $(pwd):/workspace ghcr.io/cue-3/re-cue:latest --spec --plan /workspace/my-app
+
+# Run interactively
+docker run --rm -it -v $(pwd):/workspace ghcr.io/cue-3/re-cue:latest --help
 ```
 
-**Alternative: Use .pypirc configuration**
+**Available Docker tags:**
+- `latest` - Latest stable release
+- `1.0.1` - Specific version
+- `1.0` - Latest 1.0.x release
+- `1` - Latest 1.x.x release
 
-Create or edit `~/.pypirc`:
-
-```ini
-[distutils]
-index-servers =
-    pypi
-    github
-
-[pypi]
-repository = https://upload.pypi.org/legacy/
-username = __token__
-password = <your-pypi-token>
-
-[github]
-repository = https://pypi.pkg.github.com/cue-3
-username = <your-github-username>
-password = <your-github-token>
-```
-
-Then install:
+**Create an alias for convenience:**
 
 ```bash
-pip install --index-url https://pypi.pkg.github.com/cue-3/simple re-cue
+# Add to ~/.bashrc or ~/.zshrc
+alias recue='docker run --rm -v $(pwd):/workspace ghcr.io/cue-3/re-cue:latest'
+
+# Then use like a regular command
+recue --version
+recue /workspace/my-project
 ```
 
 ### From Source
@@ -446,7 +430,7 @@ Solution:
 |---------|-----|----------|----------------|
 | **PyPI** | https://pypi.org/project/re-cue/ | Primary distribution, easiest for users | None for users, token for publishing |
 | **TestPyPI** | https://test.pypi.org/project/re-cue/ | Pre-release testing | None for users, token for publishing |
-| **GitHub Packages** | https://github.com/cue-3/re-cue/packages | Alternative distribution | GitHub PAT required |
+| **Docker (GHCR)** | ghcr.io/cue-3/re-cue | Containerized deployment | None (public image) |
 | **GitHub Releases** | https://github.com/cue-3/re-cue/releases | Download artifacts directly | None |
 
 ---
@@ -456,8 +440,12 @@ Solution:
 ### User Installation
 
 ```bash
-# Recommended
+# Python package (recommended)
 pip install re-cue
+
+# Docker image
+docker pull ghcr.io/cue-3/re-cue:latest
+docker run --rm -v $(pwd):/workspace ghcr.io/cue-3/re-cue:latest /workspace/your-project
 ```
 
 ### Maintainer Release

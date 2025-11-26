@@ -12,13 +12,31 @@ RE-cue is available in multiple formats to support different workflows and envir
 
 ### Python Package (Recommended)
 
-Install the Python version using pip:
+Install via pip from PyPI:
 
 ```bash
 pip install re-cue
 ```
 
-Or install from source:
+### Docker Image
+
+Use the containerized version for isolated environments:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/cue-3/re-cue:latest
+
+# Run RE-cue in a container
+docker run --rm -v $(pwd):/workspace ghcr.io/cue-3/re-cue:latest /workspace/your-project
+
+# Or create an alias for easy use
+alias recue='docker run --rm -v $(pwd):/workspace ghcr.io/cue-3/re-cue:latest'
+recue --version
+```
+
+### From Source
+
+Install from source for development:
 
 ```bash
 git clone https://github.com/cue-3/re-cue.git
@@ -38,9 +56,20 @@ You should see version information displayed.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+### For Python Package
+- Python 3.9 or higher
 - pip package manager
 - Git (for cloning repositories to analyze)
+
+### For Docker
+- Docker Engine 20.10 or higher
+- Docker Compose (optional, for advanced setups)
+
+## Distribution Channels
+
+- **PyPI**: https://pypi.org/project/re-cue/ (Primary distribution)
+- **Docker**: ghcr.io/cue-3/re-cue (Containerized version)
+- **GitHub**: https://github.com/cue-3/re-cue (Source code)
 
 ## Supported Platforms
 
