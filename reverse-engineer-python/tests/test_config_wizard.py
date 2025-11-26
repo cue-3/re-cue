@@ -291,7 +291,7 @@ class TestWizardFunctions(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.profile_manager = ConfigProfile(config_dir=self.temp_dir)
     
-    @patch('reverse_engineer.config_wizard.ConfigProfile')
+    @patch('reverse_engineer.workflow.config_wizard.ConfigProfile')
     @patch('builtins.print')
     def test_list_profiles_empty(self, mock_print, mock_profile_class):
         """Test listing profiles when none exist."""
@@ -302,7 +302,7 @@ class TestWizardFunctions(unittest.TestCase):
         list_profiles()
         mock_print.assert_called()
     
-    @patch('reverse_engineer.config_wizard.ConfigProfile')
+    @patch('reverse_engineer.workflow.config_wizard.ConfigProfile')
     @patch('builtins.print')
     def test_list_profiles_with_data(self, mock_print, mock_profile_class):
         """Test listing profiles with saved profiles."""
@@ -315,7 +315,7 @@ class TestWizardFunctions(unittest.TestCase):
         list_profiles()
         mock_print.assert_called()
     
-    @patch('reverse_engineer.config_wizard.ConfigProfile')
+    @patch('reverse_engineer.workflow.config_wizard.ConfigProfile')
     @patch('builtins.print')
     def test_load_profile_success(self, mock_print, mock_profile_class):
         """Test loading a profile successfully."""
@@ -328,7 +328,7 @@ class TestWizardFunctions(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertEqual(result.framework, "java_spring")
     
-    @patch('reverse_engineer.config_wizard.ConfigProfile')
+    @patch('reverse_engineer.workflow.config_wizard.ConfigProfile')
     @patch('builtins.print')
     def test_load_profile_not_found(self, mock_print, mock_profile_class):
         """Test loading a profile that doesn't exist."""
@@ -339,7 +339,7 @@ class TestWizardFunctions(unittest.TestCase):
         result = load_profile("nonexistent")
         self.assertIsNone(result)
     
-    @patch('reverse_engineer.config_wizard.ConfigProfile')
+    @patch('reverse_engineer.workflow.config_wizard.ConfigProfile')
     @patch('builtins.print')
     def test_delete_profile_success(self, mock_print, mock_profile_class):
         """Test deleting a profile successfully."""
@@ -350,7 +350,7 @@ class TestWizardFunctions(unittest.TestCase):
         result = delete_profile("test-profile")
         self.assertTrue(result)
     
-    @patch('reverse_engineer.config_wizard.ConfigProfile')
+    @patch('reverse_engineer.workflow.config_wizard.ConfigProfile')
     @patch('builtins.print')
     def test_delete_profile_not_found(self, mock_print, mock_profile_class):
         """Test deleting a profile that doesn't exist."""
