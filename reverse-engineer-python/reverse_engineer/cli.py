@@ -348,7 +348,7 @@ The script will:
     cache_group.add_argument('--cleanup-cache', action='store_true',
                             help='Clean up expired and invalid cache entries')
     
-    parser.add_argument('--version', action='version', version='%(prog)s 1.1.0')
+    parser.add_argument('--version', action='version', version='%(prog)s 1.0.5')
     
     return parser
 
