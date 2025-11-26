@@ -4,7 +4,7 @@ RE-cue Reverse Engineering - Python CLI Tool
 Reverse-engineers documentation from existing codebases across multiple frameworks.
 """
 
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 __author__ = "RE-cue Reverse Engineering"
 
 from .cli import main
