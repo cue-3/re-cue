@@ -8,6 +8,7 @@
  * - Navigate to definitions
  * - Inline documentation preview
  * - Auto-update on save
+ * - Direct source code parsing for hover and CodeLens
  */
 
 import * as vscode from 'vscode';
@@ -20,8 +21,11 @@ import { EndpointsTreeProvider } from './providers/endpointsTreeProvider';
 import { HoverProvider } from './providers/hoverProvider';
 import { CodeLensProvider } from './providers/codeLensProvider';
 import { DocumentLinkProvider } from './providers/documentLinkProvider';
+import { CodeIndexManager } from './parser/codeIndexManager';
+import { CodeElement } from './parser/types';
 
 let analysisManager: AnalysisManager;
+let codeIndexManager: CodeIndexManager;
 let outputChannel: vscode.OutputChannel;
 
 /**
@@ -33,6 +37,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
     // Initialize analysis manager
     analysisManager = new AnalysisManager(context, outputChannel);
+
+    // Initialize code index manager for direct parsing
+    codeIndexManager = new CodeIndexManager(outputChannel);
+    context.subscriptions.push({ dispose: () => codeIndexManager.dispose() });
 
     // Initialize tree view providers
     const resultsProvider = new ResultsTreeProvider(analysisManager);
@@ -52,8 +60,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
     // Register hover provider for supported languages
     const supportedLanguages = ['java', 'python', 'typescript', 'javascript', 'ruby', 'csharp'];
-    const hoverProvider = new HoverProvider(analysisManager);
-    const codeLensProvider = new CodeLensProvider(analysisManager);
+    const hoverProvider = new HoverProvider(analysisManager, codeIndexManager);
+    const codeLensProvider = new CodeLensProvider(analysisManager, codeIndexManager);
     const documentLinkProvider = new DocumentLinkProvider(analysisManager);
 
     for (const language of supportedLanguages) {
@@ -65,7 +73,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     // Register commands
-    registerCommands(context, resultsProvider, useCasesProvider, actorsProvider, boundariesProvider, endpointsProvider);
+    registerCommands(context, resultsProvider, useCasesProvider, actorsProvider, boundariesProvider, endpointsProvider, codeLensProvider);
 
     // Register file save watcher for auto-update
     context.subscriptions.push(
@@ -77,10 +85,47 @@ export function activate(context: vscode.ExtensionContext): void {
         })
     );
 
+    // Initialize code index in background if enabled
+    const config = vscode.workspace.getConfiguration('recue');
+    if (config.get<boolean>('enableDirectParsing', true)) {
+        initializeCodeIndex(context);
+    }
+
     // Store output channel for disposal
     context.subscriptions.push(outputChannel);
 
     outputChannel.appendLine('RE-cue extension ready');
+}
+
+/**
+ * Initialize code index in background
+ */
+async function initializeCodeIndex(_context: vscode.ExtensionContext): Promise<void> {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
+        return;
+    }
+
+    const config = vscode.workspace.getConfiguration('recue');
+    if (!config.get<boolean>('backgroundIndexing', true)) {
+        return;
+    }
+
+    outputChannel.appendLine('Starting background code indexing...');
+    
+    try {
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Window,
+            title: 'RE-cue: Indexing source files...',
+            cancellable: false
+        }, async () => {
+            await codeIndexManager.initialize(workspaceFolder.uri.fsPath);
+            const stats = codeIndexManager.getStats();
+            outputChannel.appendLine(`Code index ready: ${stats.endpoints} endpoints, ${stats.services} services, ${stats.models} models`);
+        });
+    } catch (error) {
+        outputChannel.appendLine(`Error initializing code index: ${error}`);
+    }
 }
 
 /**
@@ -92,7 +137,8 @@ function registerCommands(
     useCasesProvider: UseCasesTreeProvider,
     actorsProvider: ActorsTreeProvider,
     boundariesProvider: BoundariesTreeProvider,
-    endpointsProvider: EndpointsTreeProvider
+    endpointsProvider: EndpointsTreeProvider,
+    codeLensProvider: CodeLensProvider
 ): void {
     // Analyze file command
     context.subscriptions.push(
@@ -328,6 +374,101 @@ function registerCommands(
                     editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
                 }
             }
+        })
+    );
+
+    // Navigate to code command (for code elements from parser)
+    context.subscriptions.push(
+        vscode.commands.registerCommand('recue.navigateToCode', async (element: CodeElement) => {
+            if (element && element.filePath) {
+                const uri = vscode.Uri.file(element.filePath);
+                try {
+                    const document = await vscode.workspace.openTextDocument(uri);
+                    const editor = await vscode.window.showTextDocument(document);
+                    const position = new vscode.Position(element.startLine - 1, 0);
+                    editor.selection = new vscode.Selection(position, position);
+                    editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+                } catch (error) {
+                    vscode.window.showErrorMessage(`Failed to open file: ${element.filePath}`);
+                }
+            }
+        })
+    );
+
+    // Show element details command
+    context.subscriptions.push(
+        vscode.commands.registerCommand('recue.showElementDetails', async (element: CodeElement, useCases: unknown[], actors: unknown[]) => {
+            // Show quick pick with details
+            const items: vscode.QuickPickItem[] = [];
+            
+            items.push({
+                label: `$(symbol-${element.type === 'endpoint' ? 'method' : element.type}) ${element.name}`,
+                description: element.type,
+                detail: element.documentation || `${element.type} at ${element.filePath}:${element.startLine}`
+            });
+            
+            if (useCases && useCases.length > 0) {
+                items.push({
+                    label: '$(list-unordered) Related Use Cases',
+                    description: `${useCases.length} use case(s)`,
+                    kind: vscode.QuickPickItemKind.Separator
+                });
+                // Add use cases as items (type-safe access)
+                for (const uc of useCases) {
+                    const ucObj = uc as { id?: string; name?: string };
+                    items.push({
+                        label: `$(symbol-event) ${ucObj.id || 'Unknown'}: ${ucObj.name || 'Unknown'}`,
+                        description: 'Use Case'
+                    });
+                }
+            }
+            
+            if (actors && actors.length > 0) {
+                items.push({
+                    label: '$(person) Related Actors',
+                    description: `${actors.length} actor(s)`,
+                    kind: vscode.QuickPickItemKind.Separator
+                });
+                // Add actors as items (type-safe access)
+                for (const actor of actors) {
+                    const actorObj = actor as { name?: string; type?: string };
+                    items.push({
+                        label: `$(person) ${actorObj.name || 'Unknown'}`,
+                        description: actorObj.type || 'unknown'
+                    });
+                }
+            }
+            
+            await vscode.window.showQuickPick(items, {
+                title: `Details: ${element.name}`,
+                placeHolder: 'View element details and related use cases/actors'
+            });
+        })
+    );
+
+    // Rebuild code index command
+    context.subscriptions.push(
+        vscode.commands.registerCommand('recue.rebuildCodeIndex', async () => {
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+            if (!workspaceFolder) {
+                vscode.window.showErrorMessage('No workspace folder open');
+                return;
+            }
+            
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'RE-cue: Rebuilding code index...',
+                cancellable: false
+            }, async () => {
+                await codeIndexManager.initialize(workspaceFolder.uri.fsPath);
+                const stats = codeIndexManager.getStats();
+                vscode.window.showInformationMessage(
+                    `Code index rebuilt: ${stats.endpoints} endpoints, ${stats.services} services, ${stats.models} models`
+                );
+            });
+            
+            // Refresh CodeLens
+            codeLensProvider.refresh();
         })
     );
 }
