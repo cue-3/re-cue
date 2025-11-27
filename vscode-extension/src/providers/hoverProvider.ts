@@ -8,6 +8,12 @@ import * as vscode from 'vscode';
 import { AnalysisManager } from '../analysisManager';
 
 /**
+ * Maximum line distance for matching hover targets.
+ * Allows matching elements that are within a few lines of the hover position.
+ */
+const LINE_PROXIMITY_THRESHOLD = 2;
+
+/**
  * Provides hover information for code elements
  */
 export class HoverProvider implements vscode.HoverProvider {
@@ -40,7 +46,7 @@ export class HoverProvider implements vscode.HoverProvider {
         // Check for endpoint at this position
         const endpoint = result.endpoints.find(ep => 
             ep.filePath === filePath && 
-            Math.abs(ep.line - line) <= 2 &&
+            Math.abs(ep.line - line) <= LINE_PROXIMITY_THRESHOLD &&
             (ep.handler.includes(word) || ep.path.includes(word))
         );
 
@@ -51,7 +57,7 @@ export class HoverProvider implements vscode.HoverProvider {
         // Check for model at this position
         const model = result.models.find(m => 
             m.filePath === filePath && 
-            Math.abs(m.line - line) <= 2 &&
+            Math.abs(m.line - line) <= LINE_PROXIMITY_THRESHOLD &&
             m.name === word
         );
 
@@ -82,7 +88,7 @@ export class HoverProvider implements vscode.HoverProvider {
         // Check for service at this position
         const service = result.services.find(s => 
             s.filePath === filePath && 
-            Math.abs(s.line - line) <= 2 &&
+            Math.abs(s.line - line) <= LINE_PROXIMITY_THRESHOLD &&
             s.name === word
         );
 

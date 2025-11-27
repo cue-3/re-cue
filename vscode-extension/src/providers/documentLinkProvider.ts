@@ -8,6 +8,12 @@ import * as vscode from 'vscode';
 import { AnalysisManager } from '../analysisManager';
 
 /**
+ * Maximum line distance for determining if a reference is at the definition site.
+ * Used to avoid creating links at the definition itself.
+ */
+const DEFINITION_PROXIMITY_THRESHOLD = 2;
+
+/**
  * Provides document links for navigation to definitions
  */
 export class DocumentLinkProvider implements vscode.DocumentLinkProvider {
@@ -58,9 +64,9 @@ export class DocumentLinkProvider implements vscode.DocumentLinkProvider {
                 const endPos = document.positionAt(match.index + match[0].length);
                 const range = new vscode.Range(startPos, endPos);
 
-                // Don't create link if we're at the model definition itself
+                // Don't create link if we're near the model definition itself
                 if (filePath === model.filePath && 
-                    startPos.line === model.line - 1) {
+                    Math.abs(startPos.line - (model.line - 1)) <= DEFINITION_PROXIMITY_THRESHOLD) {
                     continue;
                 }
 
@@ -86,9 +92,9 @@ export class DocumentLinkProvider implements vscode.DocumentLinkProvider {
                 const endPos = document.positionAt(match.index + match[0].length);
                 const range = new vscode.Range(startPos, endPos);
 
-                // Don't create link if we're at the service definition itself
+                // Don't create link if we're near the service definition itself
                 if (filePath === service.filePath && 
-                    startPos.line === service.line - 1) {
+                    Math.abs(startPos.line - (service.line - 1)) <= DEFINITION_PROXIMITY_THRESHOLD) {
                     continue;
                 }
 

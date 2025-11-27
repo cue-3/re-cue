@@ -387,6 +387,11 @@ export class AnalysisManager {
 
     /**
      * Parse Phase 2 actors file
+     * 
+     * Expected format:
+     * ### ActorName
+     * **Type**: human|system|external
+     * **Description**: Actor description
      */
     private async parsePhase2Actors(outputDir: string): Promise<void> {
         const filePath = path.join(outputDir, 'phase2-actors.md');
@@ -395,14 +400,30 @@ export class AnalysisManager {
         }
 
         const content = fs.readFileSync(filePath, 'utf-8');
-        const actorMatches = content.matchAll(/### (\w+)\s*\n(?:.*?\n)*?(?:\*\*Type\*\*:\s*(\w+))?(?:.*?\n)*?(?:\*\*Description\*\*:\s*(.+?)(?:\n|$))?/gi);
-
-        for (const match of actorMatches) {
+        
+        // Split content into sections by ### headers
+        const sections = content.split(/^### /gm).slice(1);
+        
+        for (const section of sections) {
+            const lines = section.split('\n');
+            const name = lines[0]?.trim() || '';
+            if (!name) {
+                continue;
+            }
+            
+            // Extract type from **Type**: value
+            const typeMatch = section.match(/\*\*Type\*\*:\s*(\w+)/i);
+            const type = (typeMatch?.[1]?.toLowerCase() as 'human' | 'system' | 'external') || 'human';
+            
+            // Extract description from **Description**: value
+            const descMatch = section.match(/\*\*Description\*\*:\s*(.+?)(?:\n|$)/i);
+            const description = descMatch?.[1]?.trim();
+            
             this.currentResult?.actors.push({
-                id: match[1]?.toLowerCase().replace(/\s+/g, '-') || '',
-                name: match[1] || '',
-                type: (match[2]?.toLowerCase() as 'human' | 'system' | 'external') || 'human',
-                description: match[3],
+                id: name.toLowerCase().replace(/\s+/g, '-'),
+                name,
+                type,
+                description,
                 roles: [],
                 identifiedFrom: 'phase2-actors.md'
             });
@@ -411,6 +432,10 @@ export class AnalysisManager {
 
     /**
      * Parse Phase 3 boundaries file
+     * 
+     * Expected format:
+     * ### BoundaryName
+     * **Type**: type value
      */
     private async parsePhase3Boundaries(outputDir: string): Promise<void> {
         const filePath = path.join(outputDir, 'phase3-boundaries.md');
@@ -419,12 +444,24 @@ export class AnalysisManager {
         }
 
         const content = fs.readFileSync(filePath, 'utf-8');
-        const boundaryMatches = content.matchAll(/### (.+?)\s*\n(?:.*?\n)*?(?:\*\*Type\*\*:\s*(.+?)(?:\n|$))?/gi);
-
-        for (const match of boundaryMatches) {
+        
+        // Split content into sections by ### headers
+        const sections = content.split(/^### /gm).slice(1);
+        
+        for (const section of sections) {
+            const lines = section.split('\n');
+            const name = lines[0]?.trim() || '';
+            if (!name) {
+                continue;
+            }
+            
+            // Extract type from **Type**: value
+            const typeMatch = section.match(/\*\*Type\*\*:\s*(.+?)(?:\n|$)/i);
+            const type = typeMatch?.[1]?.trim() || 'unknown';
+            
             this.currentResult?.boundaries.push({
-                name: match[1] || '',
-                type: match[2] || 'unknown',
+                name,
+                type,
                 components: [],
                 interfaces: []
             });
@@ -433,6 +470,10 @@ export class AnalysisManager {
 
     /**
      * Parse Phase 4 use cases file
+     * 
+     * Expected format:
+     * ### UC-XXX: Use Case Name
+     * **Primary Actor**: ActorName
      */
     private async parsePhase4UseCases(outputDir: string): Promise<void> {
         const filePath = path.join(outputDir, 'phase4-use-cases.md');
@@ -441,20 +482,34 @@ export class AnalysisManager {
         }
 
         const content = fs.readFileSync(filePath, 'utf-8');
-
-        // Parse use cases with format ### UC-XXX: Name
-        const useCaseMatches = content.matchAll(/### (UC-\d+):\s*(.+?)(?:\n|$)(?:.*?\n)*?(?:\*\*Primary Actor\*\*:\s*(.+?)(?:\n|$))?/gi);
-
-        for (const match of useCaseMatches) {
+        
+        // Split content into sections by ### UC- headers to isolate each use case
+        const sections = content.split(/^### (UC-\d+):\s*/gm);
+        
+        // Process pairs: [prefix, id, content, id, content, ...]
+        for (let i = 1; i < sections.length; i += 2) {
+            const id = sections[i] || '';
+            const sectionContent = sections[i + 1] || '';
+            
+            const lines = sectionContent.split('\n');
+            const name = lines[0]?.trim() || '';
+            if (!name) {
+                continue;
+            }
+            
+            // Extract primary actor from **Primary Actor**: value
+            const actorMatch = sectionContent.match(/\*\*Primary Actor\*\*:\s*(.+?)(?:\n|$)/i);
+            const primaryActor = actorMatch?.[1]?.trim() || '';
+            
             this.currentResult?.useCases.push({
-                id: match[1] || '',
-                name: match[2] || '',
-                primaryActor: match[3] || '',
+                id,
+                name,
+                primaryActor,
                 preconditions: [],
                 mainScenario: [],
                 postconditions: [],
                 extensions: [],
-                filePath: filePath
+                filePath
             });
         }
     }
