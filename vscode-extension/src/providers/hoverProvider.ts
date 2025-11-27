@@ -2,10 +2,13 @@
  * Hover Provider
  * 
  * Provides inline documentation preview on hover for analyzed code elements.
+ * Enhanced with direct code parsing support.
  */
 
 import * as vscode from 'vscode';
 import { AnalysisManager } from '../analysisManager';
+import { CodeIndexManager } from '../parser/codeIndexManager';
+import { CodeElement, EndpointElement, ServiceElement, ModelElement } from '../parser/types';
 
 /**
  * Maximum line distance for matching hover targets.
@@ -17,7 +20,10 @@ const LINE_PROXIMITY_THRESHOLD = 2;
  * Provides hover information for code elements
  */
 export class HoverProvider implements vscode.HoverProvider {
-    constructor(private analysisManager: AnalysisManager) {}
+    constructor(
+        private analysisManager: AnalysisManager,
+        private codeIndex?: CodeIndexManager
+    ) {}
 
     provideHover(
         document: vscode.TextDocument,
@@ -29,11 +35,6 @@ export class HoverProvider implements vscode.HoverProvider {
             return null;
         }
 
-        const result = this.analysisManager.getResult();
-        if (!result) {
-            return null;
-        }
-
         const wordRange = document.getWordRangeAtPosition(position);
         if (!wordRange) {
             return null;
@@ -42,6 +43,20 @@ export class HoverProvider implements vscode.HoverProvider {
         const word = document.getText(wordRange);
         const line = position.line + 1;
         const filePath = document.uri.fsPath;
+
+        // First try direct code parsing if enabled
+        if (config.get<boolean>('enableDirectParsing', true) && this.codeIndex) {
+            const codeElement = this.codeIndex.getElementAt(filePath, line);
+            if (codeElement) {
+                return new vscode.Hover(this.createCodeElementHover(codeElement), wordRange);
+            }
+        }
+
+        // Fall back to analysis manager results
+        const result = this.analysisManager.getResult();
+        if (!result) {
+            return null;
+        }
 
         // Check for endpoint at this position
         const endpoint = result.endpoints.find(ep => 
@@ -97,6 +112,189 @@ export class HoverProvider implements vscode.HoverProvider {
         }
 
         return null;
+    }
+
+    /**
+     * Create hover content for a parsed code element
+     */
+    private createCodeElementHover(element: CodeElement): vscode.MarkdownString {
+        switch (element.type) {
+            case 'endpoint':
+                return this.createParsedEndpointHover(element as EndpointElement);
+            case 'service':
+                return this.createParsedServiceHover(element as ServiceElement);
+            case 'model':
+                return this.createParsedModelHover(element as ModelElement);
+            default:
+                return this.createGenericElementHover(element);
+        }
+    }
+
+    /**
+     * Create hover for parsed endpoint element
+     */
+    private createParsedEndpointHover(endpoint: EndpointElement): vscode.MarkdownString {
+        const md = new vscode.MarkdownString();
+        md.isTrusted = true;
+
+        md.appendMarkdown(`### 🌐 API Endpoint\n\n`);
+        md.appendMarkdown(`**${endpoint.httpMethod}** \`${endpoint.path}\`\n\n`);
+        md.appendMarkdown(`**Name:** ${endpoint.name}\n\n`);
+
+        if (endpoint.documentation) {
+            md.appendMarkdown(`**Description:** ${endpoint.documentation}\n\n`);
+        }
+
+        if (endpoint.parameters && endpoint.parameters.length > 0) {
+            md.appendMarkdown(`**Parameters:**\n`);
+            endpoint.parameters.forEach(p => {
+                const required = p.required ? ' (required)' : '';
+                md.appendMarkdown(`- \`${p.name}\`: ${p.type}${required}\n`);
+            });
+            md.appendMarkdown(`\n`);
+        }
+
+        if (endpoint.returnType) {
+            md.appendMarkdown(`**Returns:** \`${endpoint.returnType}\`\n\n`);
+        }
+
+        if (endpoint.annotations && endpoint.annotations.length > 0) {
+            md.appendMarkdown(`**Annotations:** ${endpoint.annotations.join(', ')}\n\n`);
+        }
+
+        // Add related use cases if available
+        if (this.codeIndex) {
+            const result = this.analysisManager.getResult();
+            if (result && result.useCases.length > 0) {
+                const relatedUseCases = this.codeIndex.getRelatedUseCases(endpoint, result.useCases);
+                if (relatedUseCases.length > 0) {
+                    md.appendMarkdown(`**Related Use Cases:**\n`);
+                    relatedUseCases.slice(0, 3).forEach(uc => {
+                        md.appendMarkdown(`- ${uc.id}: ${uc.name}\n`);
+                    });
+                    if (relatedUseCases.length > 3) {
+                        md.appendMarkdown(`- ... and ${relatedUseCases.length - 3} more\n`);
+                    }
+                    md.appendMarkdown(`\n`);
+                }
+            }
+        }
+
+        md.appendMarkdown(`\n---\n*Discovered by RE-cue Direct Parser*`);
+
+        return md;
+    }
+
+    /**
+     * Create hover for parsed service element
+     */
+    private createParsedServiceHover(service: ServiceElement): vscode.MarkdownString {
+        const md = new vscode.MarkdownString();
+        md.isTrusted = true;
+
+        md.appendMarkdown(`### ⚙️ Service\n\n`);
+        md.appendMarkdown(`**${service.name}**\n\n`);
+
+        if (service.documentation) {
+            md.appendMarkdown(`**Description:** ${service.documentation}\n\n`);
+        }
+
+        if (service.methods.length > 0) {
+            md.appendMarkdown(`**Methods:**\n`);
+            service.methods.slice(0, 5).forEach(m => md.appendMarkdown(`- \`${m}\`\n`));
+            if (service.methods.length > 5) {
+                md.appendMarkdown(`- ... and ${service.methods.length - 5} more\n`);
+            }
+            md.appendMarkdown(`\n`);
+        }
+
+        if (service.dependencies.length > 0) {
+            md.appendMarkdown(`**Dependencies:**\n`);
+            service.dependencies.forEach(d => md.appendMarkdown(`- ${d}\n`));
+            md.appendMarkdown(`\n`);
+        }
+
+        if (service.annotations && service.annotations.length > 0) {
+            md.appendMarkdown(`**Annotations:** ${service.annotations.join(', ')}\n\n`);
+        }
+
+        md.appendMarkdown(`\n---\n*Discovered by RE-cue Direct Parser*`);
+
+        return md;
+    }
+
+    /**
+     * Create hover for parsed model element
+     */
+    private createParsedModelHover(model: ModelElement): vscode.MarkdownString {
+        const md = new vscode.MarkdownString();
+        md.isTrusted = true;
+
+        md.appendMarkdown(`### 📦 Data Model\n\n`);
+        md.appendMarkdown(`**${model.name}**\n\n`);
+
+        if (model.documentation) {
+            md.appendMarkdown(`**Description:** ${model.documentation}\n\n`);
+        }
+
+        if (model.fields.length > 0) {
+            md.appendMarkdown(`**Fields:**\n`);
+            model.fields.slice(0, 10).forEach(f => {
+                md.appendMarkdown(`- \`${f.name}\`: ${f.type}`);
+                if (f.annotations && f.annotations.length > 0) {
+                    md.appendMarkdown(` (${f.annotations.join(', ')})`);
+                }
+                md.appendMarkdown(`\n`);
+            });
+            if (model.fields.length > 10) {
+                md.appendMarkdown(`- ... and ${model.fields.length - 10} more fields\n`);
+            }
+            md.appendMarkdown(`\n`);
+        }
+
+        if (model.relationships.length > 0) {
+            md.appendMarkdown(`**Relationships:**\n`);
+            model.relationships.forEach(r => md.appendMarkdown(`- ${r}\n`));
+            md.appendMarkdown(`\n`);
+        }
+
+        if (model.annotations && model.annotations.length > 0) {
+            md.appendMarkdown(`**Annotations:** ${model.annotations.join(', ')}\n\n`);
+        }
+
+        md.appendMarkdown(`\n---\n*Discovered by RE-cue Direct Parser*`);
+
+        return md;
+    }
+
+    /**
+     * Create generic hover for any code element
+     */
+    private createGenericElementHover(element: CodeElement): vscode.MarkdownString {
+        const md = new vscode.MarkdownString();
+        md.isTrusted = true;
+
+        const icon = element.type === 'controller' ? '🎮' : 
+                     element.type === 'method' ? '🔧' :
+                     element.type === 'class' ? '📦' :
+                     element.type === 'function' ? '⚡' : '📄';
+
+        md.appendMarkdown(`### ${icon} ${element.type.charAt(0).toUpperCase() + element.type.slice(1)}\n\n`);
+        md.appendMarkdown(`**${element.name}**\n\n`);
+
+        if (element.documentation) {
+            md.appendMarkdown(`**Description:** ${element.documentation}\n\n`);
+        }
+
+        if (element.annotations && element.annotations.length > 0) {
+            md.appendMarkdown(`**Annotations:** ${element.annotations.join(', ')}\n\n`);
+        }
+
+        md.appendMarkdown(`**Location:** Line ${element.startLine}-${element.endLine}\n\n`);
+
+        md.appendMarkdown(`\n---\n*Discovered by RE-cue Direct Parser*`);
+
+        return md;
     }
 
     private createEndpointHover(endpoint: {

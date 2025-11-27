@@ -99,6 +99,19 @@
       {
         "command": "recue.showQuickPick",
         "title": "RE-cue: Quick Actions"
+      },
+      {
+        "command": "recue.rebuildCodeIndex",
+        "title": "RE-cue: Rebuild Code Index",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "recue.navigateToCode",
+        "title": "RE-cue: Navigate to Code"
+      },
+      {
+        "command": "recue.showElementDetails",
+        "title": "RE-cue: Show Element Details"
       }
     ],
     "menus": {
@@ -307,6 +320,31 @@
           "type": "boolean",
           "default": true,
           "description": "Enable parallel processing for large codebases"
+        },
+        "recue.enableDirectParsing": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable direct source code parsing for hover and CodeLens (without running Python analysis)"
+        },
+        "recue.parsingLanguages": {
+          "type": "array",
+          "default": ["java", "typescript", "javascript", "python"],
+          "description": "Languages to parse directly for code indexing"
+        },
+        "recue.parsingExclude": {
+          "type": "array",
+          "default": ["**/node_modules/**", "**/target/**", "**/build/**", "**/dist/**", "**/.git/**", "**/venv/**", "**/__pycache__/**"],
+          "description": "Glob patterns to exclude from direct parsing"
+        },
+        "recue.backgroundIndexing": {
+          "type": "boolean",
+          "default": true,
+          "description": "Build code index in background on startup"
+        },
+        "recue.cacheParseResults": {
+          "type": "boolean",
+          "default": true,
+          "description": "Cache parsed results for better performance"
         }
       }
     },
