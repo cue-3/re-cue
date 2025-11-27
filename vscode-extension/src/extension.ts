@@ -209,9 +209,30 @@ function registerCommands(
 
     // Refresh results command
     context.subscriptions.push(
-        vscode.commands.registerCommand('recue.refreshResults', () => {
-            refreshAllProviders(resultsProvider, useCasesProvider, actorsProvider, boundariesProvider, endpointsProvider);
-            vscode.window.showInformationMessage('RE-cue results refreshed');
+        vscode.commands.registerCommand('recue.refreshResults', async () => {
+            try {
+                const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+                if (!workspaceFolder) {
+                    vscode.window.showErrorMessage('No workspace folder open');
+                    return;
+                }
+                
+                outputChannel.show(); // Show output channel
+                outputChannel.appendLine('\n=== REFRESH COMMAND TRIGGERED ===');
+                outputChannel.appendLine(`Workspace: ${workspaceFolder.uri.fsPath}`);
+                
+                await analysisManager.parseExistingFiles(workspaceFolder.uri.fsPath);
+                
+                outputChannel.appendLine('Refreshing tree providers...');
+                refreshAllProviders(resultsProvider, useCasesProvider, actorsProvider, boundariesProvider, endpointsProvider);
+                
+                vscode.window.showInformationMessage('RE-cue results refreshed');
+                outputChannel.appendLine('=== REFRESH COMPLETE ===\n');
+            } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
+                outputChannel.appendLine(`ERROR: ${errorMsg}`);
+                vscode.window.showErrorMessage(`Refresh failed: ${errorMsg}`);
+            }
         })
     );
 
