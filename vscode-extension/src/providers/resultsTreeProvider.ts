@@ -38,6 +38,15 @@ export class ResultTreeItem extends vscode.TreeItem {
 
         // Set icon based on category
         switch (category) {
+            case 'actor':
+                this.iconPath = new vscode.ThemeIcon('account');
+                break;
+            case 'useCase':
+                this.iconPath = new vscode.ThemeIcon('symbol-event');
+                break;
+            case 'boundary':
+                this.iconPath = new vscode.ThemeIcon('symbol-namespace');
+                break;
             case 'endpoint':
                 this.iconPath = new vscode.ThemeIcon('symbol-method');
                 break;
@@ -99,6 +108,37 @@ export class ResultsTreeProvider implements vscode.TreeDataProvider<ResultTreeIt
     private getRootCategories(result: AnalysisResult): ResultTreeItem[] {
         const items: ResultTreeItem[] = [];
 
+        // Show actors
+        if (result.actors.length > 0) {
+            items.push(new ResultTreeItem(
+                `Actors (${result.actors.length})`,
+                vscode.TreeItemCollapsibleState.Collapsed,
+                'category',
+                { description: 'Discovered system actors' }
+            ));
+        }
+
+        // Show use cases
+        if (result.useCases.length > 0) {
+            items.push(new ResultTreeItem(
+                `Use Cases (${result.useCases.length})`,
+                vscode.TreeItemCollapsibleState.Collapsed,
+                'category',
+                { description: 'Extracted use cases' }
+            ));
+        }
+
+        // Show boundaries
+        if (result.boundaries.length > 0) {
+            items.push(new ResultTreeItem(
+                `System Boundaries (${result.boundaries.length})`,
+                vscode.TreeItemCollapsibleState.Collapsed,
+                'category',
+                { description: 'Identified system boundaries' }
+            ));
+        }
+
+        // Show API endpoints (from code analysis)
         if (result.endpoints.length > 0) {
             items.push(new ResultTreeItem(
                 `API Endpoints (${result.endpoints.length})`,
@@ -108,6 +148,7 @@ export class ResultsTreeProvider implements vscode.TreeDataProvider<ResultTreeIt
             ));
         }
 
+        // Show data models (from code analysis)
         if (result.models.length > 0) {
             items.push(new ResultTreeItem(
                 `Data Models (${result.models.length})`,
@@ -117,6 +158,7 @@ export class ResultsTreeProvider implements vscode.TreeDataProvider<ResultTreeIt
             ));
         }
 
+        // Show services (from code analysis)
         if (result.services.length > 0) {
             items.push(new ResultTreeItem(
                 `Services (${result.services.length})`,
@@ -126,6 +168,7 @@ export class ResultsTreeProvider implements vscode.TreeDataProvider<ResultTreeIt
             ));
         }
 
+        // Show views (from code analysis)
         if (result.views.length > 0) {
             items.push(new ResultTreeItem(
                 `Views (${result.views.length})`,
@@ -137,7 +180,7 @@ export class ResultsTreeProvider implements vscode.TreeDataProvider<ResultTreeIt
 
         if (items.length === 0) {
             items.push(new ResultTreeItem(
-                'Analysis complete - no items found',
+                'No analysis results yet',
                 vscode.TreeItemCollapsibleState.None
             ));
         }
@@ -147,6 +190,47 @@ export class ResultsTreeProvider implements vscode.TreeDataProvider<ResultTreeIt
 
     private getCategoryItems(element: ResultTreeItem, result: AnalysisResult): ResultTreeItem[] {
         const label = element.label as string;
+
+        if (label.startsWith('Actors')) {
+            return result.actors.map(actor =>
+                new ResultTreeItem(
+                    actor.name,
+                    vscode.TreeItemCollapsibleState.None,
+                    'actor',
+                    {
+                        description: actor.type
+                    }
+                )
+            );
+        }
+
+        if (label.startsWith('Use Cases')) {
+            return result.useCases.map(useCase =>
+                new ResultTreeItem(
+                    `${useCase.id}: ${useCase.name}`,
+                    vscode.TreeItemCollapsibleState.None,
+                    'useCase',
+                    {
+                        filePath: useCase.filePath,
+                        line: useCase.line,
+                        description: useCase.primaryActor
+                    }
+                )
+            );
+        }
+
+        if (label.startsWith('System Boundaries')) {
+            return result.boundaries.map(boundary =>
+                new ResultTreeItem(
+                    boundary.name,
+                    vscode.TreeItemCollapsibleState.None,
+                    'boundary',
+                    {
+                        description: boundary.type
+                    }
+                )
+            );
+        }
 
         if (label.startsWith('API Endpoints')) {
             return result.endpoints.map(endpoint => 
