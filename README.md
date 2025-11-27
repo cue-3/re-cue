@@ -239,6 +239,15 @@ RE-cue v1.0.1 is available in multiple distribution formats:
 ```
 See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usage guide.
 
+### 💻 **VS Code Extension** (Recommended for Development)
+- Right-click context menu to analyze files/folders
+- View results in dedicated side panel
+- Navigate to definitions with click
+- Inline documentation preview on hover
+- Auto-update on save
+- Install from `vscode-extension/` directory
+- See [docs/features/vscode-extension.md](docs/features/vscode-extension.md) for details
+
 ### 🐚 **Bash Script** (Original)
 - Fast, zero-dependency single script
 - Perfect for local analysis and Unix environments
@@ -264,36 +273,42 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 
 ### Feature Comparison
 
-| Feature | Bash Version | Python Version |
-|---------|-------------|----------------|
-| **Platforms** | Unix/Linux/macOS | Windows/macOS/Linux |
-| **Dependencies** | None (grep, awk, sed) | Python 3.6+ |
-| **Progress Tracking** | 5 stages | 8 stages |
-| **Interactive Wizard** | ❌ | ✅ NEW |
-| **Configuration Profiles** | ❌ | ✅ NEW |
-| **Spec Generation** | ✅ | ✅ |
-| **Plan Generation** | ✅ | ✅ |
-| **Data Model** | ✅ | ✅ |
-| **API Contracts** | ✅ | ✅ |
-| **Use Cases** | ❌ | ✅ NEW |
-| **Business Context** | ❌ | ✅ NEW |
-| **Visual Diagrams** | ❌ | ✅ NEW |
-| **Actor Detection** | ❌ | ✅ NEW |
-| **Transaction Analysis** | ❌ | ✅ NEW |
-| **Validation Rules** | ❌ | ✅ NEW |
-| **Workflow Patterns** | ❌ | ✅ NEW |
-| **Phased Analysis** | ❌ | ✅ NEW |
-| **State Persistence** | ❌ | ✅ NEW |
-| **Parallel Processing** | ❌ | ✅ NEW |
-| **Incremental Analysis** | ❌ | ✅ NEW |
-| **Large Codebase (1000+ files)** | ⚠️ Slow | ✅ Optimized |
-| **Test Coverage** | ❌ | ✅ 305+ tests |
-| **Extensibility** | Limited | High |
+| Feature | Bash Version | Python Version | VS Code Extension |
+|---------|-------------|----------------|-------------------|
+| **Platforms** | Unix/Linux/macOS | Windows/macOS/Linux | All (with VS Code) |
+| **Dependencies** | None (grep, awk, sed) | Python 3.6+ | Python 3.6+, VS Code |
+| **Progress Tracking** | 5 stages | 8 stages | Real-time status bar |
+| **Interactive Wizard** | ❌ | ✅ | ✅ Quick pick menu |
+| **Configuration Profiles** | ❌ | ✅ | ✅ VS Code settings |
+| **Spec Generation** | ✅ | ✅ | ✅ |
+| **Plan Generation** | ✅ | ✅ | ✅ |
+| **Data Model** | ✅ | ✅ | ✅ |
+| **API Contracts** | ✅ | ✅ | ✅ |
+| **Use Cases** | ❌ | ✅ | ✅ |
+| **Business Context** | ❌ | ✅ | ✅ |
+| **Visual Diagrams** | ❌ | ✅ | ✅ |
+| **Actor Detection** | ❌ | ✅ | ✅ |
+| **Transaction Analysis** | ❌ | ✅ | ✅ |
+| **Validation Rules** | ❌ | ✅ | ✅ |
+| **Workflow Patterns** | ❌ | ✅ | ✅ |
+| **Phased Analysis** | ❌ | ✅ | ✅ |
+| **State Persistence** | ❌ | ✅ | ✅ |
+| **Parallel Processing** | ❌ | ✅ | ✅ |
+| **Incremental Analysis** | ❌ | ✅ | ✅ |
+| **Large Codebase (1000+ files)** | ⚠️ Slow | ✅ Optimized | ✅ Optimized |
+| **Test Coverage** | ❌ | ✅ 305+ tests | TypeScript tests |
+| **Extensibility** | Limited | High | High |
+| **Right-Click Analysis** | ❌ | ❌ | ✅ NEW |
+| **Side Panel Results** | ❌ | ❌ | ✅ NEW |
+| **Inline Hover Docs** | ❌ | ❌ | ✅ NEW |
+| **Navigate to Definition** | ❌ | ❌ | ✅ NEW |
+| **Auto-Update on Save** | ❌ | ❌ | ✅ NEW |
 
 **Performance:** Python version includes optimizations for large codebases with **5-6x speedup** on repeated analysis through incremental processing and parallel file analysis.
 
 **Recommendation**: 
-- Use Python version for **large codebases (1000+ files)**, use case analysis, business context extraction, and guided setup via interactive wizard
+- Use **VS Code Extension** for seamless in-editor analysis with right-click support and inline documentation
+- Use Python CLI for **large codebases (1000+ files)**, scripting, and CI/CD integration
 - Use Bash version for quick spec/plan/data-model generation in Unix environments with small to medium codebases
 
 ## Project Structure
@@ -313,6 +328,13 @@ re-cue/
 │   │   └── test_business_process_identifier.py  # Unit tests
 │   ├── setup.py                  # Package configuration
 │   └── README-PYTHON.md          # Python version docs
+├── vscode-extension/             # VS Code extension (NEW)
+│   ├── src/                      # TypeScript source
+│   │   ├── extension.ts          # Extension entry point
+│   │   ├── analysisManager.ts    # Analysis coordination
+│   │   └── providers/            # Tree view, hover, CodeLens providers
+│   ├── package.json              # Extension manifest
+│   └── README.md                 # Extension documentation
 ├── prompts/
 │   └── recue.reverse.prompt.md # GitHub Copilot integration
 ├── install.sh                    # Bash version installer

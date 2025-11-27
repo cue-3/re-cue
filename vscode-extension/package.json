@@ -1,0 +1,349 @@
+{
+  "name": "re-cue",
+  "displayName": "RE-cue",
+  "description": "Reverse engineering toolkit for code analysis and documentation - in-editor analysis with right-click support, side panel results, and inline documentation preview",
+  "version": "1.0.0",
+  "publisher": "cue-3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cue-3/re-cue"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "reverse engineering",
+    "documentation",
+    "analysis",
+    "use cases",
+    "architecture"
+  ],
+  "activationEvents": [
+    "onLanguage:java",
+    "onLanguage:python",
+    "onLanguage:typescript",
+    "onLanguage:javascript",
+    "onLanguage:ruby",
+    "onLanguage:csharp",
+    "workspaceContains:**/pom.xml",
+    "workspaceContains:**/package.json",
+    "workspaceContains:**/requirements.txt",
+    "workspaceContains:**/Gemfile"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "recue.analyzeFile",
+        "title": "RE-cue: Analyze File",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "recue.analyzeFolder",
+        "title": "RE-cue: Analyze Folder",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "recue.analyzeWorkspace",
+        "title": "RE-cue: Analyze Workspace",
+        "icon": "$(root-folder)"
+      },
+      {
+        "command": "recue.generateSpec",
+        "title": "RE-cue: Generate Specification"
+      },
+      {
+        "command": "recue.generatePlan",
+        "title": "RE-cue: Generate Implementation Plan"
+      },
+      {
+        "command": "recue.generateUseCases",
+        "title": "RE-cue: Generate Use Cases"
+      },
+      {
+        "command": "recue.generateDataModel",
+        "title": "RE-cue: Generate Data Model"
+      },
+      {
+        "command": "recue.generateApiContract",
+        "title": "RE-cue: Generate API Contract"
+      },
+      {
+        "command": "recue.generateDiagrams",
+        "title": "RE-cue: Generate Diagrams"
+      },
+      {
+        "command": "recue.generateAll",
+        "title": "RE-cue: Generate All Documentation"
+      },
+      {
+        "command": "recue.refreshResults",
+        "title": "RE-cue: Refresh Analysis Results",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "recue.clearResults",
+        "title": "RE-cue: Clear Analysis Results",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "recue.openSettings",
+        "title": "RE-cue: Open Settings",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "recue.showQuickPick",
+        "title": "RE-cue: Quick Actions"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "recue.analyzeFile",
+          "when": "resourceLangId == java || resourceLangId == python || resourceLangId == typescript || resourceLangId == javascript || resourceLangId == ruby || resourceLangId == csharp",
+          "group": "recue@1"
+        },
+        {
+          "command": "recue.analyzeFolder",
+          "when": "explorerResourceIsFolder",
+          "group": "recue@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "recue.analyzeFile",
+          "when": "editorLangId == java || editorLangId == python || editorLangId == typescript || editorLangId == javascript || editorLangId == ruby || editorLangId == csharp",
+          "group": "recue@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "recue.analyzeFile",
+          "when": "editorLangId == java || editorLangId == python || editorLangId == typescript || editorLangId == javascript || editorLangId == ruby || editorLangId == csharp",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "recue.refreshResults",
+          "when": "view == recueResultsView",
+          "group": "navigation"
+        },
+        {
+          "command": "recue.clearResults",
+          "when": "view == recueResultsView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "recue.analyzeFile",
+          "when": "view == recueResultsView && viewItem == file",
+          "group": "recue@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "recue.analyzeFile",
+          "when": "editorIsOpen"
+        },
+        {
+          "command": "recue.analyzeFolder"
+        },
+        {
+          "command": "recue.analyzeWorkspace"
+        },
+        {
+          "command": "recue.generateSpec"
+        },
+        {
+          "command": "recue.generatePlan"
+        },
+        {
+          "command": "recue.generateUseCases"
+        },
+        {
+          "command": "recue.generateDataModel"
+        },
+        {
+          "command": "recue.generateApiContract"
+        },
+        {
+          "command": "recue.generateDiagrams"
+        },
+        {
+          "command": "recue.generateAll"
+        },
+        {
+          "command": "recue.showQuickPick"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "recue-explorer",
+          "title": "RE-cue",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "recue-explorer": [
+        {
+          "id": "recueResultsView",
+          "name": "Analysis Results",
+          "contextualTitle": "RE-cue Analysis Results"
+        },
+        {
+          "id": "recueUseCasesView",
+          "name": "Use Cases",
+          "contextualTitle": "RE-cue Use Cases"
+        },
+        {
+          "id": "recueActorsView",
+          "name": "Actors",
+          "contextualTitle": "RE-cue Actors"
+        },
+        {
+          "id": "recueBoundariesView",
+          "name": "System Boundaries",
+          "contextualTitle": "RE-cue System Boundaries"
+        },
+        {
+          "id": "recueEndpointsView",
+          "name": "API Endpoints",
+          "contextualTitle": "RE-cue API Endpoints"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "recueResultsView",
+        "contents": "No analysis results yet.\n[Analyze Workspace](command:recue.analyzeWorkspace)\nRight-click on files or folders to analyze them individually."
+      },
+      {
+        "view": "recueUseCasesView",
+        "contents": "No use cases detected.\n[Generate Use Cases](command:recue.generateUseCases)"
+      },
+      {
+        "view": "recueActorsView",
+        "contents": "No actors detected.\nRun an analysis to discover system actors."
+      },
+      {
+        "view": "recueBoundariesView",
+        "contents": "No system boundaries detected.\nRun an analysis to discover system boundaries."
+      },
+      {
+        "view": "recueEndpointsView",
+        "contents": "No API endpoints detected.\nRun an analysis to discover API endpoints."
+      }
+    ],
+    "configuration": {
+      "title": "RE-cue",
+      "properties": {
+        "recue.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "Path to Python executable for running RE-cue analysis"
+        },
+        "recue.autoAnalyzeOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically analyze files when saved"
+        },
+        "recue.outputDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Custom output directory for generated documentation (leave empty for default)"
+        },
+        "recue.defaultFramework": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "java_spring",
+            "nodejs_express",
+            "nodejs_nestjs",
+            "python_django",
+            "python_flask",
+            "python_fastapi",
+            "ruby_rails",
+            "dotnet"
+          ],
+          "default": "auto",
+          "description": "Default framework to use for analysis (auto for automatic detection)"
+        },
+        "recue.enableDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show analysis issues as VS Code diagnostics"
+        },
+        "recue.enableHover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline documentation on hover"
+        },
+        "recue.enableCodeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show use case and actor references as CodeLens"
+        },
+        "recue.verboseOutput": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable verbose output in the output channel"
+        },
+        "recue.enableCache": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable caching for faster repeated analysis"
+        },
+        "recue.enableParallelProcessing": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable parallel processing for large codebases"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "recue-results",
+        "aliases": [
+          "RE-cue Results"
+        ],
+        "extensions": [
+          ".recue"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^18.x",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^8.56.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}
