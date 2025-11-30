@@ -2,6 +2,7 @@
 
 // Override navbar background to match body in light and dark modes
 .td-navbar {
+  height: fit-content;
   background: var(--bs-body-bg) !important;
   border-bottom: 1px solid var(--bs-border-color);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
