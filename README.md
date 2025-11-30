@@ -237,24 +237,9 @@ RE-cue v1.0.1 is available in multiple distribution formats:
     generate-spec: true
     generate-plan: true
 ```
-See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usage guide.
+See [docs/developer-guides/GITHUB-ACTION-GUIDE.md](docs/developer-guides/GITHUB-ACTION-GUIDE.md) for complete usage guide.
 
-### 💻 **VS Code Extension** (Recommended for Development)
-- Right-click context menu to analyze files/folders
-- View results in dedicated side panel
-- Navigate to definitions with click
-- Inline documentation preview on hover
-- Auto-update on save
-- Install from `vscode-extension/` directory
-- See [docs/features/vscode-extension.md](docs/features/vscode-extension.md) for details
-
-### 🐚 **Bash Script** (Original)
-- Fast, zero-dependency single script
-- Perfect for local analysis and Unix environments
-- Interactive progress with 5 analysis stages
-- Located in `reverse-engineer-bash/reverse-engineer.sh`
-
-### 🐍 **Python Package** (Full-Featured)
+### 🐍 **Python Package** (Recommended for Scripting & CLI)
 - Cross-platform (Windows, macOS, Linux)
 - Modular and extensible
 - Interactive progress with 8 analysis stages
@@ -263,6 +248,27 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 - Multi-framework support (Java Spring, Node.js, Python, .NET)
 - Install via pip: `pip install -e reverse-engineer-python/`
 - See [reverse-engineer-python/README-PYTHON.md](reverse-engineer-python/README-PYTHON.md) for details
+
+### 💻 **VS Code Extension** v1.0.1 (Recommended for IDE Integration)
+- **⚠️ Requires Python Package** - Extension wraps Python CLI for analysis
+- Right-click context menu to analyze files/folders/workspace
+- View results in dedicated side panels (5 organized views)
+- Navigate to definitions with click-through
+- Inline documentation preview on hover (endpoints, models, services, actors)
+- CodeLens integration showing use case/actor references
+- Auto-update on save with real-time status bar
+- Direct source code parsing (Java, TypeScript, JavaScript, Python)
+- Background code indexing with file watchers
+- Quick Actions menu for common workflows
+- Install: `cd vscode-extension && npm install && npm run compile`
+- See [docs/user-guides/VSCODE-EXTENSION.md](docs/user-guides/VSCODE-EXTENSION.md) for comprehensive guide
+
+### 🐚 **Bash Script** (Original - Legacy)
+- Fast, zero-dependency single script
+- Perfect for local analysis and Unix environments
+- Interactive progress with 5 analysis stages
+- Located in `reverse-engineer-bash/reverse-engineer.sh`
+- Limited to spec, plan, data-model, and API contract generation
 
 ### 🐳 **Docker Container** (Coming Soon)
 - Isolated execution environment
@@ -273,43 +279,49 @@ See [docs/GITHUB-ACTION-GUIDE.md](docs/GITHUB-ACTION-GUIDE.md) for complete usag
 
 ### Feature Comparison
 
-| Feature | Bash Version | Python Version | VS Code Extension |
-|---------|-------------|----------------|-------------------|
-| **Platforms** | Unix/Linux/macOS | Windows/macOS/Linux | All (with VS Code) |
-| **Dependencies** | None (grep, awk, sed) | Python 3.6+ | Python 3.6+, VS Code |
-| **Progress Tracking** | 5 stages | 8 stages | Real-time status bar |
-| **Interactive Wizard** | ❌ | ✅ | ✅ Quick pick menu |
-| **Configuration Profiles** | ❌ | ✅ | ✅ VS Code settings |
-| **Spec Generation** | ✅ | ✅ | ✅ |
-| **Plan Generation** | ✅ | ✅ | ✅ |
-| **Data Model** | ✅ | ✅ | ✅ |
-| **API Contracts** | ✅ | ✅ | ✅ |
-| **Use Cases** | ❌ | ✅ | ✅ |
-| **Business Context** | ❌ | ✅ | ✅ |
-| **Visual Diagrams** | ❌ | ✅ | ✅ |
-| **Actor Detection** | ❌ | ✅ | ✅ |
-| **Transaction Analysis** | ❌ | ✅ | ✅ |
-| **Validation Rules** | ❌ | ✅ | ✅ |
-| **Workflow Patterns** | ❌ | ✅ | ✅ |
-| **Phased Analysis** | ❌ | ✅ | ✅ |
-| **State Persistence** | ❌ | ✅ | ✅ |
-| **Parallel Processing** | ❌ | ✅ | ✅ |
-| **Incremental Analysis** | ❌ | ✅ | ✅ |
-| **Large Codebase (1000+ files)** | ⚠️ Slow | ✅ Optimized | ✅ Optimized |
-| **Test Coverage** | ❌ | ✅ 305+ tests | TypeScript tests |
-| **Extensibility** | Limited | High | High |
-| **Right-Click Analysis** | ❌ | ❌ | ✅ NEW |
-| **Side Panel Results** | ❌ | ❌ | ✅ NEW |
-| **Inline Hover Docs** | ❌ | ❌ | ✅ NEW |
-| **Navigate to Definition** | ❌ | ❌ | ✅ NEW |
-| **Auto-Update on Save** | ❌ | ❌ | ✅ NEW |
+| Feature | Bash | Python CLI | VS Code Extension | GitHub Action |
+|---------|------|------------|-------------------|---------------|
+| **Platforms** | Unix/Linux/macOS | All | All (with VS Code) | GitHub-hosted |
+| **Dependencies** | None | Python 3.6+ | **Python 3.6+ + VS Code** | Python 3.6+ |
+| **Progress Tracking** | 5 stages | 8 stages | Real-time status bar | GitHub Actions logs |
+| **Interactive Wizard** | ❌ | ✅ | ✅ Quick pick menu | ❌ |
+| **Configuration Profiles** | ❌ | ✅ | ✅ VS Code settings | ✅ Workflow YAML |
+| **Spec Generation** | ✅ | ✅ | ✅ | ✅ |
+| **Plan Generation** | ✅ | ✅ | ✅ | ✅ |
+| **Data Model** | ✅ | ✅ | ✅ | ✅ |
+| **API Contracts** | ✅ | ✅ | ✅ | ✅ |
+| **Use Cases** | ❌ | ✅ | ✅ | ✅ |
+| **Business Context** | ❌ | ✅ | ✅ | ✅ |
+| **Visual Diagrams** | ❌ | ✅ | ✅ | ✅ |
+| **Actor Detection** | ❌ | ✅ | ✅ | ✅ |
+| **Transaction Analysis** | ❌ | ✅ | ✅ | ✅ |
+| **Validation Rules** | ❌ | ✅ | ✅ | ✅ |
+| **Workflow Patterns** | ❌ | ✅ | ✅ | ✅ |
+| **Phased Analysis** | ❌ | ✅ | ✅ | ✅ |
+| **State Persistence** | ❌ | ✅ | ✅ | ✅ |
+| **Parallel Processing** | ❌ | ✅ | ✅ | ✅ |
+| **Incremental Analysis** | ❌ | ✅ | ✅ | ✅ |
+| **Large Codebase (1000+ files)** | ⚠️ Slow | ✅ Optimized | ✅ Optimized | ✅ Optimized |
+| **Test Coverage** | ❌ | ✅ 305+ tests | TypeScript tests | ✅ |
+| **Extensibility** | Limited | High | High | Medium |
+| **Right-Click Analysis** | ❌ | ❌ | ✅ | ❌ |
+| **Side Panel Results** | ❌ | ❌ | ✅ (5 views) | ❌ |
+| **Inline Hover Docs** | ❌ | ❌ | ✅ | ❌ |
+| **CodeLens References** | ❌ | ❌ | ✅ | ❌ |
+| **Navigate to Definition** | ❌ | ❌ | ✅ | ❌ |
+| **Auto-Update on Save** | ❌ | ❌ | ✅ | ❌ |
+| **Background Indexing** | ❌ | ❌ | ✅ | ❌ |
+| **File Watchers** | ❌ | ❌ | ✅ | ❌ |
+| **Direct Code Parsing** | ❌ | ❌ | ✅ (no Python exec) | ❌ |
+| **Quick Actions Menu** | ❌ | ❌ | ✅ | ❌ |
 
-**Performance:** Python version includes optimizations for large codebases with **5-6x speedup** on repeated analysis through incremental processing and parallel file analysis.
+**Performance:** Python CLI and VS Code Extension include optimizations for large codebases with **5-6x speedup** on repeated analysis through incremental processing and parallel file analysis.
 
 **Recommendation**: 
-- Use **VS Code Extension** for seamless in-editor analysis with right-click support and inline documentation
-- Use Python CLI for **large codebases (1000+ files)**, scripting, and CI/CD integration
-- Use Bash version for quick spec/plan/data-model generation in Unix environments with small to medium codebases
+- Use **VS Code Extension** for seamless in-editor analysis with right-click support, inline documentation, and interactive navigation (requires Python CLI installed)
+- Use **Python CLI** for scripting, automation, **large batch processing**, and non-IDE workflows
+- Use **GitHub Action** for automated documentation in CI/CD pipelines
+- Use **Bash** for quick one-off analysis on Unix systems without Python
 
 ## Project Structure
 

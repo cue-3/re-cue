@@ -201,6 +201,7 @@ export class AnalysisManager {
             '--api-contract',
             '--use-cases',
             '--diagrams',
+            '--output-dir', '.',  // Save files in project root
             '--description', description
         ];
 
@@ -229,7 +230,7 @@ export class AnalysisManager {
      * Build command arguments for a specific document type
      */
     private buildArgs(type: string, projectPath: string, description?: string): string[] {
-        const args = ['-m', 'reverse_engineer'];
+        const args = ['-m', 'reverse_engineer', '--output-dir', '.'];
 
         switch (type) {
             case 'spec':
@@ -285,7 +286,8 @@ export class AnalysisManager {
             const config = vscode.workspace.getConfiguration('recue');
             const args = [
                 '-m', 'reverse_engineer',
-                '--use-cases'  // Run full analysis including use cases
+                '--use-cases',  // Run full analysis including use cases
+                '--output-dir', '.'  // Save files in project root
             ];
 
             if (config.get<boolean>('verboseOutput')) {
@@ -374,7 +376,8 @@ export class AnalysisManager {
      */
     private async parseGeneratedFiles(projectPath: string): Promise<void> {
         const projectName = path.basename(projectPath);
-        const outputDir = path.join(projectPath, `re-${projectName}`);
+        // Look for files in the project root
+        const outputDir = projectPath;
 
         this.outputChannel.appendLine(`\n=== Parsing Generated Files ===`);
         this.outputChannel.appendLine(`Project path: ${projectPath}`);

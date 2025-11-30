@@ -330,16 +330,17 @@ export class CodeIndexManager {
             return null;
         }
         
-        // Find element that contains this line
+        // Only match elements where the hover is on or very near the declaration line
+        // This prevents triggering within the method body
         for (const element of elements) {
-            if (line >= element.startLine && line <= element.endLine) {
+            if (line === element.startLine) {
                 return element;
             }
         }
         
-        // Check for elements within a few lines
+        // Allow 1 line tolerance for multi-line declarations
         for (const element of elements) {
-            if (Math.abs(element.startLine - line) <= 2) {
+            if (Math.abs(element.startLine - line) <= 1) {
                 return element;
             }
         }

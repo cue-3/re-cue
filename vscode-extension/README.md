@@ -2,6 +2,27 @@
 
 VS Code extension for in-editor reverse engineering analysis using RE-cue.
 
+## ⚠️ Important: Dependencies
+
+**The VS Code extension requires the RE-cue Python package to be installed.** The extension provides IDE integration features (hover, CodeLens, tree views, navigation) but relies on the Python CLI for code analysis.
+
+### Installation Requirements
+
+1. **Python 3.6+** must be installed and accessible
+2. **RE-cue Python Package** must be installed:
+   ```bash
+   cd reverse-engineer-python
+   pip install -e .
+   ```
+3. **Verify installation**:
+   ```bash
+   python3 -c "import reverse_engineer; print('RE-cue installed')"
+   ```
+
+Without the Python package, the extension cannot perform analysis. See [Installation](#installation) section below for complete setup instructions.
+
+---
+
 ## Features
 
 ### 🖱️ Right-Click Context Menu
