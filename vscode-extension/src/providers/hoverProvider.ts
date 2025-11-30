@@ -12,9 +12,9 @@ import { CodeElement, EndpointElement, ServiceElement, ModelElement } from '../p
 
 /**
  * Maximum line distance for matching hover targets.
- * Allows matching elements that are within a few lines of the hover position.
+ * Set to 0 to only match exact declaration lines.
  */
-const LINE_PROXIMITY_THRESHOLD = 2;
+const LINE_PROXIMITY_THRESHOLD = 0;
 
 /**
  * Provides hover information for code elements
@@ -81,10 +81,22 @@ export class HoverProvider implements vscode.HoverProvider {
         }
 
         // Check for use case reference
-        const useCase = result.useCases.find(uc => 
-            uc.name.toLowerCase().includes(word.toLowerCase()) ||
-            uc.primaryActor.toLowerCase() === word.toLowerCase()
-        );
+        const useCase = result.useCases.find(uc => {
+            // First check if there's file/line information for proximity matching
+            if (uc.filePath && uc.line !== undefined) {
+                const matchesLocation = uc.filePath === filePath && 
+                    Math.abs(uc.line - line) <= LINE_PROXIMITY_THRESHOLD;
+                if (matchesLocation) {
+                    return uc.name.toLowerCase().includes(word.toLowerCase()) ||
+                           uc.primaryActor.toLowerCase() === word.toLowerCase();
+                }
+                // If location doesn't match, don't show hover even if name matches
+                return false;
+            }
+            // Fall back to name-only matching for use cases without location info
+            return uc.name.toLowerCase().includes(word.toLowerCase()) ||
+                   uc.primaryActor.toLowerCase() === word.toLowerCase();
+        });
 
         if (useCase) {
             return new vscode.Hover(this.createUseCaseHover(useCase), wordRange);

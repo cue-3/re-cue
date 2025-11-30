@@ -2,13 +2,14 @@
   "name": "re-cue",
   "displayName": "RE-cue",
   "description": "Reverse engineering toolkit for code analysis and documentation - in-editor analysis with right-click support, side panel results, and inline documentation preview",
-  "version": "1.0.0",
+  "version": "0.0.9",
   "publisher": "cue-3",
   "repository": {
     "type": "git",
     "url": "https://github.com/cue-3/re-cue"
   },
   "license": "MIT",
+  "icon": "resources/icon.png",
   "engines": {
     "vscode": "^1.80.0"
   },

@@ -40,11 +40,35 @@ The RE-cue VS Code extension provides:
 
 ### Prerequisites
 
+**⚠️ CRITICAL DEPENDENCY: The extension requires the RE-cue Python CLI to be installed.**
+
+The VS Code extension provides IDE integration features (hover tooltips, CodeLens, tree views, navigation) but depends on the Python package for all analysis operations.
+
 Before installing the extension, ensure you have:
 
 1. **VS Code**: Version 1.80.0 or higher
 2. **Python**: Version 3.6 or higher installed and accessible
-3. **RE-cue Package**: The Python package must be installed
+3. **RE-cue Python Package**: **MUST be installed** (extension will not work without it)
+
+#### Why Python CLI is Required
+
+The extension architecture:
+- **IDE Integration Layer** (TypeScript): Provides VS Code UI, hover, CodeLens, tree views
+- **Analysis Engine** (Python): Performs actual code analysis, pattern detection, documentation generation
+- **Direct Parser** (TypeScript): Parses code for hover/CodeLens without Python (limited features)
+
+**What works without Python analysis:**
+- Basic hover information from direct parsing (Java, TypeScript, JavaScript, Python)
+- Code navigation
+- File watching
+
+**What requires Python CLI:**
+- Complete analysis results
+- Use case generation
+- Actor detection
+- Business context analysis
+- Documentation generation
+- All advanced features
 
 #### Installing RE-cue Python Package
 
@@ -53,7 +77,7 @@ Before installing the extension, ensure you have:
 cd reverse-engineer-python
 pip install -e .
 
-# Or using pip directly
+# Or using pip directly from GitHub
 pip install git+https://github.com/cue-3/re-cue.git#subdirectory=reverse-engineer-python
 ```
 
@@ -61,6 +85,7 @@ Verify installation:
 
 ```bash
 python3 -c "import reverse_engineer; print('RE-cue installed successfully')"
+recue --version
 ```
 
 ### Installing the Extension
@@ -92,7 +117,7 @@ npm run compile
 1. Download the latest `.vsix` file from releases
 2. Install via command line:
 ```bash
-code --install-extension re-cue-1.0.0.vsix
+code --install-extension re-cue-1.0.1.vsix
 ```
 
 3. Or install via VS Code:
@@ -125,6 +150,49 @@ Or add to your `settings.json`:
   "recue.pythonPath": "/usr/local/bin/python3"
 }
 ```
+
+### Framework Support & Limitations
+
+The extension inherits framework support from the Python CLI:
+
+| Framework | Analysis Support | Direct Parsing | Hover/CodeLens |
+|-----------|------------------|----------------|----------------|
+| **Java Spring Boot** | ✅ Full | ✅ Yes | ✅ Full |
+| **TypeScript (NestJS/Express)** | 🚧 In Development | ✅ Yes | ✅ Full |
+| **JavaScript (Express/Node)** | 🚧 In Development | ✅ Yes | ✅ Full |
+| **Python (Django/Flask/FastAPI)** | 🚧 In Development | ✅ Yes | ✅ Full |
+| **Ruby on Rails** | ✅ Full | ❌ No | ⚠️ Python CLI only |
+| **C# ASP.NET Core** | 🚧 Planned | ❌ No | ⚠️ Python CLI only |
+
+**Direct Parsing vs Python CLI:**
+- **Direct Parsing**: Fast, TypeScript-based, works for hover/CodeLens without running Python
+- **Python CLI**: Complete analysis, all features, slower but comprehensive
+
+**Limitations:**
+
+1. **Not Standalone**: Extension cannot work without Python CLI installed
+2. **Direct Parsing Languages**: Only Java, TypeScript, JavaScript, Python
+3. **Ruby/C# Hover**: Falls back to Python CLI (slower, requires analysis run)
+4. **Framework Detection**: Same limitations as Python CLI
+5. **Large Codebases**: Background indexing may take time on first load
+6. **Memory Usage**: Parsing large projects increases memory usage
+
+### Performance Considerations
+
+**First Analysis:**
+- Background indexing builds code index (one-time, can take 30-60s for large projects)
+- Python CLI analysis runs (time varies by project size)
+
+**Subsequent Operations:**
+- Hover/CodeLens: Instant (uses cached index)
+- Auto-update on save: Incremental (fast)
+- Re-analysis: Benefits from caching (5-6x faster)
+
+**Optimization Tips:**
+- Use `recue.parsingExclude` to skip `node_modules`, `target`, `build` directories
+- Disable `recue.backgroundIndexing` if not using hover/CodeLens
+- Enable `recue.enableCache` for faster repeated analysis
+- Use `recue.enableParallelProcessing` for large codebases
 
 ## Getting Started
 

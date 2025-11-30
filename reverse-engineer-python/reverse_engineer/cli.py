@@ -311,6 +311,8 @@ The script will:
                         help='Describe project intent (e.g., "forecast sprint delivery")')
     parser.add_argument('-o', '--output', type=str,
                         help='Output file path (default: <project-root>/re-<project-name>/spec.md)')
+    parser.add_argument('--output-dir', type=str,
+                        help='Output directory for generated files (default: <project-root>/re-<project-name>/, use "." for project root)')
     parser.add_argument('-p', '--path', type=str,
                         help='Path to project directory to analyze (alternative to positional arg)')
     parser.add_argument('-f', '--format', choices=['markdown', 'json'], default='markdown',
@@ -380,9 +382,18 @@ def run_phased_analysis(args):
             print("Tip: Use --path to specify the project directory.", file=sys.stderr)
             sys.exit(1)
     
-    # Setup output directory - save to re-<project_name> in project root
-    project_name = repo_root.name
-    output_dir = repo_root / f"re-{project_name}"
+    # Setup output directory
+    if args.output_dir:
+        # Use specified output directory
+        if args.output_dir == ".":
+            output_dir = repo_root
+        else:
+            output_dir = Path(args.output_dir).resolve()
+    else:
+        # Default: save to re-<project_name> in project root
+        project_name = repo_root.name
+        output_dir = repo_root / f"re-{project_name}"
+    
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Initialize phase manager

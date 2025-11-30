@@ -69,6 +69,26 @@ Best for: Quick analysis on Unix systems without dependencies
 
 [→ Jump to Bash installation](#bash-installation)
 
+### Option 4: VS Code Extension v1.0.1 (Recommended for IDE Integration)
+
+Best for: In-editor analysis with right-click support, inline documentation, and interactive navigation
+
+**Setup Time**: 5 minutes  
+**Requires**: Python 3.6+, RE-cue Python package, VS Code 1.80+  
+**⚠️ Dependency**: Extension requires Python CLI to be installed first
+
+**Unique Features:**
+- Right-click analysis in editor and file explorer
+- 5 dedicated side panel views (Results, Use Cases, Actors, Boundaries, Endpoints)
+- Inline hover documentation on code elements
+- CodeLens showing use case/actor references
+- Navigate to definition with click-through
+- Auto-update on save
+- Background code indexing
+- Quick Actions menu
+
+[→ Jump to VS Code Extension installation](#vs-code-extension-installation)
+
 ## Quick Start Guide
 
 ### 5-Minute Quick Start (Python)
@@ -168,6 +188,100 @@ ls -la re-my-app/
 # - plan.md                (Implementation plan)
 # - data-model.md          (Data structures)
 ```
+
+## VS Code Extension Installation
+
+### Step 1: Install Prerequisites
+
+The extension requires the Python CLI to be installed first.
+
+```bash
+# Install Python package
+cd reverse-engineer-python
+pip install -e .
+
+# Verify installation
+python3 -c "import reverse_engineer; print('Ready for VS Code extension')"
+```
+
+### Step 2: Install the Extension
+
+#### Using the Install Script (Recommended)
+
+```bash
+cd vscode-extension
+./install.sh
+```
+
+The script will:
+- Check Python and RE-cue package installation
+- Install extension dependencies
+- Compile the extension
+- Optionally package and install into VS Code
+
+#### Manual Installation
+
+```bash
+# Install dependencies
+cd vscode-extension
+npm install
+
+# Compile
+npm run compile
+
+# Package
+npm run package
+
+# Install
+code --install-extension re-cue-1.0.1.vsix
+```
+
+### Step 3: Configure Python Path
+
+1. Open VS Code Settings (`Cmd+,` or `Ctrl+,`)
+2. Search for "RE-cue"
+3. Set **Recue: Python Path** to your Python executable:
+   - macOS/Linux: `/usr/local/bin/python3`
+   - Windows: `C:\Python39\python.exe`
+
+Or add to `settings.json`:
+```json
+{
+  "recue.pythonPath": "/usr/local/bin/python3",
+  "recue.enableHover": true,
+  "recue.enableCodeLens": true,
+  "recue.enableDirectParsing": true
+}
+```
+
+### Step 4: Run Your First Analysis
+
+```bash
+# Open a project in VS Code
+code ~/projects/my-spring-app
+
+# In VS Code:
+# 1. Press Ctrl+Shift+P (Cmd+Shift+P on macOS)
+# 2. Type "RE-cue: Analyze Workspace"
+# 3. Press Enter
+# 4. View results in RE-cue side panel (click icon in Activity Bar)
+```
+
+Or right-click any file/folder and select "RE-cue: Analyze File/Folder".
+
+### Verify Installation
+
+1. Open a supported file (`.java`, `.py`, `.ts`, `.js`, `.rb`, `.cs`)
+2. Hover over a class, method, or endpoint
+3. You should see RE-cue inline documentation
+4. Check the RE-cue icon in the Activity Bar (left sidebar)
+
+**Troubleshooting:** If hover doesn't work, check:
+- Python package is installed: `python3 -c "import reverse_engineer"`
+- Python path in settings is correct
+- "Recue: Enable Direct Parsing" is enabled in settings
+
+See [VS Code Extension Guide](./VSCODE-EXTENSION.md) for complete documentation.
 
 ## Bash Installation
 
