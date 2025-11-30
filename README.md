@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="vscode-extension/resources/icon.svg" alt="RE-cue" width="128" height="128">
+  <img src="vscode-extension/resources/icon-sm.svg" alt="RE-cue" width="128" height="128">
 </p>
 
 # RE-cue
