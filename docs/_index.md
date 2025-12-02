@@ -35,8 +35,9 @@ Comprehensive guides, technical references, and framework-specific documentation
 
 ## Developer Guides
 
+- [CI/CD Integration Guide](developer-guides/cicd-integration-guide/) - Comprehensive guide for GitHub Actions, GitLab CI, Jenkins, and Azure DevOps
 - [Documentation Sync](developer-guides/documentation-sync/) - Automated documentation synchronization
-- [GitHub Actions Guide](developer-guides/github-action-guide/) - CI/CD workflow setup
+- [GitHub Actions Guide](developer-guides/github-action-guide/) - GitHub Actions specific setup
 - [Jinja2 Template Guide](developer-guides/jinja2-template-guide/) - Template development guide
 - [Sync Implementation Summary](developer-guides/sync-implementation-summary/) - Technical implementation details
 
