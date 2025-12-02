@@ -87,7 +87,7 @@ jobs:
 | `generate-plan` | Generate plan.md | No | `true` |
 | `generate-data-model` | Generate data-model.md | No | `true` |
 | `generate-api-contract` | Generate api-spec.json | No | `true` |
-| `generate-use-cases` | Generate phase1-4.md | No | `true` |
+| `generate-use-cases` | Generate phase1-structure.md through phase4-use-cases.md | No | `true` |
 | `generate-fourplusone` | Generate fourplusone-architecture.md | No | `true` |
 | `generate-all` | Generate all docs (overrides flags) | No | `false` |
 | `output-dir` | Output directory | No | `docs/generated` |
@@ -383,9 +383,9 @@ generate-docs:
     paths:
       - docs/generated/
     expire_in: 1 week
-  only:
-    - main
-    - merge_requests
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 ```
 
 ### GitLab CI Examples
@@ -474,8 +474,8 @@ cache:
     paths:
       - docs/
     expire_in: 1 week
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 analyze-user-service:
   extends: .analyze-service
@@ -511,8 +511,8 @@ combine-docs:
     paths:
       - docs/
     expire_in: 1 month
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 ```
 
 #### Example 3: Documentation with GitLab Pages Deployment
@@ -544,8 +544,8 @@ generate-docs:
     paths:
       - public/
     expire_in: 1 week
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 build-site:
   stage: build
@@ -569,8 +569,8 @@ build-site:
     paths:
       - public/
     expire_in: 1 week
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 pages:
   stage: deploy
@@ -581,8 +581,8 @@ pages:
   artifacts:
     paths:
       - public/
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 ```
 
 #### Example 4: Scheduled Documentation with Cache Optimization
