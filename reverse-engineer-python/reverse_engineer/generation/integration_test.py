@@ -561,7 +561,7 @@ Use this data for validation testing:
         "username": "",
         "password": "short",
         "firstName": null,
-        "lastName": "A".repeat(256)
+        "lastName": "AAAAAAAAAA... (256 characters)"
     },
     "entity": {
         "id": -1,
@@ -580,7 +580,7 @@ Use this data for boundary condition testing:
     "numeric_min": 0,
     "numeric_max": 2147483647,
     "string_empty": "",
-    "string_max": "A".repeat(255),
+    "string_max": "AAAAAAAAAA... (255 characters)",
     "date_min": "1970-01-01T00:00:00Z",
     "date_max": "2099-12-31T23:59:59Z"
 }
