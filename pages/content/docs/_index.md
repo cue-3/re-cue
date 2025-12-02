@@ -34,10 +34,11 @@ Comprehensive guides, technical references, and framework-specific documentation
 
 ## Developer Guides
 
-- [Documentation Sync](developer-guides/documentation-sync/) - Automated documentation synchronization
-- [GitHub Actions Guide](developer-guides/github-action-guide/) - CI/CD workflow setup
-- [Jinja2 Template Guide](developer-guides/jinja2-template-guide/) - Template development guide
-- [Sync Implementation Summary](developer-guides/sync-implementation-summary/) - Technical implementation details
+- [CI/CD Integration Guide](developer-guides/CICD-INTEGRATION-GUIDE.md) - Comprehensive guide for GitHub Actions, GitLab CI, Jenkins, and Azure DevOps
+- [Documentation Sync](developer-guides/DOCUMENTATION-SYNC.md) - Automated documentation synchronization
+- [GitHub Actions Guide](developer-guides/GITHUB-ACTION-GUIDE.md) - GitHub Actions specific setup
+- [Jinja2 Template Guide](developer-guides/JINJA2-TEMPLATE-GUIDE.md) - Template development guide
+- [Sync Implementation Summary](developer-guides/SYNC-IMPLEMENTATION-SUMMARY.md) - Technical implementation details
 
 ## Features
 
