@@ -18,6 +18,14 @@ from .entities import (
 from .tech_stack import TechStack
 from .analysis_result import AnalysisResult
 from .use_case_model import EditableUseCase
+from .test_scenario import (
+    TestData,
+    TestStep,
+    ApiTestCase,
+    TestScenario,
+    CoverageMapping,
+    IntegrationTestSuite,
+)
 
 __all__ = [
     # Core entities
@@ -35,4 +43,11 @@ __all__ = [
     'AnalysisResult',
     # Use case models
     'EditableUseCase',
+    # Test scenario models
+    'TestData',
+    'TestStep',
+    'ApiTestCase',
+    'TestScenario',
+    'CoverageMapping',
+    'IntegrationTestSuite',
 ]

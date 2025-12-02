@@ -16,6 +16,7 @@ from .actor import ActorDocGenerator
 from .boundary import BoundaryDocGenerator
 from .fourplusone import FourPlusOneDocGenerator
 from .visualization import VisualizationGenerator
+from .integration_test import IntegrationTestGenerator
 
 __all__ = [
     'BaseGenerator',
@@ -29,4 +30,5 @@ __all__ = [
     'BoundaryDocGenerator',
     'FourPlusOneDocGenerator',
     'VisualizationGenerator',
+    'IntegrationTestGenerator',
 ]
