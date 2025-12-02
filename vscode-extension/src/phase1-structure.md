@@ -1,7 +1,7 @@
 # Phase 1: Project Structure Analysis
-## controller
+## src
 
-**Generated**: 2025-11-29 20:36:29
+**Generated**: 2025-12-01 19:46:23
 **Analysis Phase**: 1 of 4 - Project Structure
 
 ---
@@ -66,7 +66,7 @@ After reviewing this structure analysis:
 
 2. **Command to continue**:
    ```bash
-   python3 -m reverse_engineer --phase 2 --path /Users/squick/workspace/cue-3/re-cue/sample-apps/spring-boot-demo/src/main/java/com/example/bookstore/controller
+   python3 -m reverse_engineer --phase 2 --path /Users/squick/workspace/cue-3/re-cue/vscode-extension/src
    ```
 
 ---

@@ -203,7 +203,7 @@
         {
           "id": "recue-explorer",
           "title": "RE-cue",
-          "icon": "resources/icon.svg"
+          "icon": "resources/activity-bar-icon.svg"
         }
       ]
     },

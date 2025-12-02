@@ -1,7 +1,7 @@
 # Phase 2: Actor Discovery
-## spring-boot-demo
+## re-cue
 
-**Generated**: 2025-12-01 19:36:44
+**Generated**: 2025-12-01 20:15:20
 **Analysis Phase**: 2 of 4 - Actor Discovery
 
 ---
@@ -11,9 +11,9 @@
 This document contains the results of Phase 2 analysis: identifying actors who interact
 with the system, including users, roles, external systems, and third-party services.
 
-- **Total Actors**: 2
+- **Total Actors**: 6
 - **Internal Users**: 0
-- **End Users**: 0
+- **End Users**: 4
 - **External Systems**: 2
 
 ---
@@ -24,11 +24,16 @@ with the system, including users, roles, external systems, and third-party servi
 |-------|------|--------------|----------|
 | Apache Service | External System | api_integration | Configuration in pom.xml |
 | W3 Service | External System | api_integration | Configuration in pom.xml |
+| User | End User | authenticated | UI react pattern in main.js |
+| Moderator | End User | authenticated | UI react pattern in workbench.desktop.main.js |
+| Isuserignoredrecommendation | End User | authenticated | UI react pattern in workbench.desktop.main.js |
+| Staff | End User | authenticated | UI react pattern in extension.js |
 
 ---
 
 ## Access Levels
 
+- **authenticated**: 4 actor(s)
 - **api_integration**: 2 actor(s)
 
 ---
@@ -56,7 +61,7 @@ After reviewing the actor analysis:
 
 2. **Command to continue**:
    ```bash
-   python3 -m reverse_engineer --phase 3 --path /Users/squick/workspace/cue-3/re-cue/sample-apps/spring-boot-demo
+   python3 -m reverse_engineer --phase 3 --path /Users/squick/workspace/cue-3/re-cue
    ```
 
 ---
