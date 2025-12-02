@@ -1,7 +1,7 @@
 # Phase 4: Use Case Analysis
-## re-cue
+## Bookstore API
 
-**Generated**: 2025-11-29 21:01:01
+**Generated**: 2025-12-01 19:36:44
 **Analysis Phase**: 4 of 4 - Use Case Extraction
 
 ---
@@ -11,7 +11,7 @@
 This document contains the results of Phase 4 analysis: extracting use cases from the
 identified actors, system boundaries, and business processes.
 
-The Re Cue system involves 6 identified actors
+The Bookstore Api system involves 2 identified actors
 interacting through 18 use cases across
 5 system boundaries.
 

@@ -1,7 +1,7 @@
 # Phase 3: System Boundary Mapping
-## spring-boot-demo
+## re-cue
 
-**Generated**: 2025-12-01 19:36:44
+**Generated**: 2025-12-01 20:15:20
 **Analysis Phase**: 3 of 4 - System Boundary Mapping
 
 ---
@@ -75,7 +75,7 @@ After reviewing the boundary mapping:
 
 2. **Command to continue**:
    ```bash
-   python3 -m reverse_engineer --phase 4 --path /Users/squick/workspace/cue-3/re-cue/sample-apps/spring-boot-demo
+   python3 -m reverse_engineer --phase 4 --path /Users/squick/workspace/cue-3/re-cue
    ```
 
 ---

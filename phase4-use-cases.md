@@ -1,7 +1,7 @@
 # Phase 4: Use Case Analysis
-## controller
+## re-cue
 
-**Generated**: 2025-11-29 20:36:29
+**Generated**: 2025-12-01 20:15:20
 **Analysis Phase**: 4 of 4 - Use Case Extraction
 
 ---
@@ -11,9 +11,9 @@
 This document contains the results of Phase 4 analysis: extracting use cases from the
 identified actors, system boundaries, and business processes.
 
-The Controller system involves 0 identified actors
+The Re Cue system involves 6 identified actors
 interacting through 18 use cases across
-2 system boundaries.
+5 system boundaries.
 
 *Note: For detailed actor information, see phase2-actors.md. For system boundary details, see phase3-boundaries.md.*
 
@@ -25,7 +25,10 @@ The analysis identified the following business patterns and constraints:
 
 | Category | Count | Details |
 |----------|-------|---------|
-| Business Workflows | 2 patterns | Service Orchestration: 2 |
+| Transaction Boundaries | 9 total | Write: 7, Read-Only: 2 |
+| Validation Rules | 15 constraints | Not Blank: 6, Not Null: 5, Size: 2, Email: 1, Pattern: 1 |
+| Business Workflows | 4 patterns | Service Orchestration: 4 |
+| Business Rules | 5 derived | Required Fields: 3, Contact Validation: 1, Data Constraints: 1 |
 
 ---
 
@@ -42,15 +45,24 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view order
 2. System retrieves order data
 3. System displays order information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -61,15 +73,24 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view order
 2. System retrieves order data
 3. System displays order information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -80,15 +101,24 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view order
 2. System retrieves order data
 3. System displays order information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -99,15 +129,24 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view order
 2. System retrieves order data
 3. System displays order information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -118,15 +157,24 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view order
 2. System retrieves order data
 3. System displays order information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -136,10 +184,14 @@ Total: 18 use cases
 
 **Preconditions**:
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - New entity is created in the system
 - User receives confirmation
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User navigates to order creation page
@@ -147,6 +199,11 @@ Total: 18 use cases
 3. System validates input data
 4. System creates new order
 5. System confirms successful creation
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -157,10 +214,14 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - Entity data is updated in the system
 - User receives confirmation
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User selects order to update
@@ -168,6 +229,11 @@ Total: 18 use cases
 3. System validates changes
 4. System updates order data
 5. System confirms successful update
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -177,15 +243,24 @@ Total: 18 use cases
 
 **Preconditions**:
 - User must have appropriate permissions
+- All required fields must be provided
+- Email address must be valid
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User initiates order operation
 2. System processes request
 3. System returns result
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1c. Email format invalid: System shows email validation error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -196,15 +271,25 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view book
 2. System retrieves book data
 3. System displays book information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -215,15 +300,25 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view book
 2. System retrieves book data
 3. System displays book information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -234,15 +329,25 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view book
 2. System retrieves book data
 3. System displays book information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -252,15 +357,25 @@ Total: 18 use cases
 
 **Preconditions**:
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User initiates book operation
 2. System processes request
 3. System returns result
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -271,15 +386,25 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User requests to view book
 2. System retrieves book data
 3. System displays book information
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -289,10 +414,14 @@ Total: 18 use cases
 
 **Preconditions**:
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - New entity is created in the system
 - User receives confirmation
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User navigates to book creation page
@@ -300,6 +429,12 @@ Total: 18 use cases
 3. System validates input data
 4. System creates new book
 5. System confirms successful creation
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -310,10 +445,14 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Entity data is updated in the system
 - User receives confirmation
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User selects book to update
@@ -321,6 +460,12 @@ Total: 18 use cases
 3. System validates changes
 4. System updates book data
 5. System confirms successful update
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -331,10 +476,14 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Entity data is updated in the system
 - User receives confirmation
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User selects book to update
@@ -342,6 +491,12 @@ Total: 18 use cases
 3. System validates changes
 4. System updates book data
 5. System confirms successful update
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -352,10 +507,14 @@ Total: 18 use cases
 **Preconditions**:
 - Entity must exist in the system
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Entity is removed from the system
 - User receives confirmation
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User selects book to delete
@@ -363,6 +522,12 @@ Total: 18 use cases
 3. User confirms deletion
 4. System removes book
 5. System confirms successful deletion
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 
@@ -372,15 +537,25 @@ Total: 18 use cases
 
 **Preconditions**:
 - User must have appropriate permissions
+- All required fields must be provided
+- Input data must meet size constraints
+- Database connection must be available
 
 **Postconditions**:
 - Operation completes successfully
 - User receives appropriate response
+- Changes are persisted to database
 
 **Main Scenario**:
 1. User initiates book operation
 2. System processes request
 3. System returns result
+
+**Extensions**:
+- 1a. Required field missing: System shows validation error
+- 1b. Input size invalid: System shows size constraint error
+- 1d. Format invalid: System shows pattern matching error
+- 2a. Database error: System rolls back transaction and shows error
 
 ---
 

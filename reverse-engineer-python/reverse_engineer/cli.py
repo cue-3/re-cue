@@ -383,16 +383,26 @@ def run_phased_analysis(args):
             sys.exit(1)
     
     # Setup output directory
+    print(f"\n=== DEBUG: Output Directory Setup ===", file=sys.stderr)
+    print(f"args.output_dir = {args.output_dir!r}", file=sys.stderr)
+    print(f"repo_root = {repo_root}", file=sys.stderr)
+    
     if args.output_dir:
         # Use specified output directory
         if args.output_dir == ".":
             output_dir = repo_root
+            print(f"Using repo_root as output_dir (output_dir='.')", file=sys.stderr)
         else:
             output_dir = Path(args.output_dir).resolve()
+            print(f"Using resolved output_dir: {output_dir}", file=sys.stderr)
     else:
         # Default: save to re-<project_name> in project root
         project_name = repo_root.name
         output_dir = repo_root / f"re-{project_name}"
+        print(f"No --output-dir specified, using default: {output_dir}", file=sys.stderr)
+    
+    print(f"Final output_dir = {output_dir}", file=sys.stderr)
+    print(f"=====================================\n", file=sys.stderr)
     
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -641,7 +651,16 @@ def main():
     project_name = repo_root.name
     
     # Set default output file - save to re-<project_name> directory
-    if args.output:
+    # First check if --output-dir was specified
+    if args.output_dir:
+        if args.output_dir == ".":
+            output_dir = repo_root
+            print(f"Using repo_root as output_dir (--output-dir='.'): {output_dir}", file=sys.stderr)
+        else:
+            output_dir = Path(args.output_dir).resolve()
+            print(f"Using specified output_dir: {output_dir}", file=sys.stderr)
+        output_path = output_dir / "spec.md"
+    elif args.output:
         output_path = Path(args.output)
         # Treat as directory if: it exists as a dir, ends with /, or has no file extension
         is_directory = (

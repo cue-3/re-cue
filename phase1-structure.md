@@ -1,7 +1,7 @@
 # Phase 1: Project Structure Analysis
-## spring-boot-demo
+## re-cue
 
-**Generated**: 2025-11-29 20:33:37
+**Generated**: 2025-12-01 20:15:20
 **Analysis Phase**: 1 of 4 - Project Structure
 
 ---
@@ -15,7 +15,7 @@ structure of the project including endpoints, models, views, services, and featu
 - **Data Models**: 3
 - **UI Views**: 0
 - **Backend Services**: 2
-- **Features**: 8
+- **Features**: 0
 
 ---
 
@@ -48,9 +48,9 @@ structure of the project including endpoints, models, views, services, and featu
 
 | Model | Fields | Location |
 |-------|--------|----------|
-| Order | 9 | `src/main/java/com/example/bookstore/model/Order.java` |
-| OrderItem | 5 | `src/main/java/com/example/bookstore/model/OrderItem.java` |
-| Book | 11 | `src/main/java/com/example/bookstore/model/Book.java` |
+| Order | 9 | `sample-apps/spring-boot-demo/src/main/java/com/example/bookstore/model/Order.java` |
+| OrderItem | 5 | `sample-apps/spring-boot-demo/src/main/java/com/example/bookstore/model/OrderItem.java` |
+| Book | 11 | `sample-apps/spring-boot-demo/src/main/java/com/example/bookstore/model/Book.java` |
 
 ---
 
@@ -71,16 +71,7 @@ structure of the project including endpoints, models, views, services, and featu
 
 ## Features
 
-| # | Name | Description |
-|---|------|-------------|
-| 1 | General | **RESTful API** for book and order management |
-| 2 | General | **Spring Data JPA** with H2 in-memory database |
-| 3 | General | **Bean Validation** for request validation |
-| 4 | General | **Lombok** for reducing boilerplate code |
-| 5 | General | **Comprehensive documentation** with JavaDoc comments |
-| 6 | General | **Service layer** with business logic |
-| 7 | General | **Repository layer** with custom queries |
-| 8 | General | **Entity relationships** (One-to-Many, Many-to-One) |
+*No features were identified during analysis. Features may be documented in README files or project documentation.*
 
 ---
 
@@ -95,7 +86,7 @@ After reviewing this structure analysis:
 
 2. **Command to continue**:
    ```bash
-   python3 -m reverse_engineer --phase 2 --path /Users/squick/workspace/cue-3/re-cue/sample-apps/spring-boot-demo
+   python3 -m reverse_engineer --phase 2 --path /Users/squick/workspace/cue-3/re-cue
    ```
 
 ---

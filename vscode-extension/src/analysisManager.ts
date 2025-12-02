@@ -154,9 +154,14 @@ export class AnalysisManager {
         const filePath = uri.fsPath;
         this.outputChannel.appendLine(`Analyzing file: ${filePath}`);
 
-        // For single file analysis, we analyze the containing folder
-        const folderPath = path.dirname(filePath);
-        await this.runAnalysis(folderPath);
+        // Get workspace root for analysis
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+        if (!workspaceFolder) {
+            vscode.window.showErrorMessage('File is not in a workspace folder');
+            return;
+        }
+        
+        await this.runAnalysis(workspaceFolder.uri.fsPath);
     }
 
     /**
@@ -165,7 +170,16 @@ export class AnalysisManager {
     public async analyzeFolder(uri: vscode.Uri): Promise<void> {
         const folderPath = uri.fsPath;
         this.outputChannel.appendLine(`Analyzing folder: ${folderPath}`);
-        await this.runAnalysis(folderPath);
+        
+        // Get workspace root for analysis
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+        if (!workspaceFolder) {
+            // If no workspace folder found, assume this IS the workspace root
+            await this.runAnalysis(folderPath);
+            return;
+        }
+        
+        await this.runAnalysis(workspaceFolder.uri.fsPath);
     }
 
     /**
@@ -308,10 +322,26 @@ export class AnalysisManager {
 
             args.push(projectPath);
 
+            this.outputChannel.appendLine(`\n=== Command Details ===`);
+            this.outputChannel.appendLine(`Project Path (analysis target): ${projectPath}`);
+            this.outputChannel.appendLine(`Working Directory (cwd): ${projectPath}`);
+            this.outputChannel.appendLine(`Output Dir Argument: .`);
+            this.outputChannel.appendLine(`Expected output location: ${projectPath}/`);
+            this.outputChannel.appendLine(`Full command: python3 ${args.join(' ')}`);
+            this.outputChannel.appendLine(`======================\n`);
+
+            // Always run from workspace root so --output-dir . resolves correctly
+            // projectPath is passed as the analysis target argument
             await this.runPythonCommand(args, projectPath);
+
+            // Give file system a moment to sync after Python command completes
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             // After analysis, try to parse generated files
             await this.parseGeneratedFiles(projectPath);
+
+            // Auto-open the generated use cases file
+            await this.openGeneratedFiles(projectPath);
 
             vscode.window.showInformationMessage('RE-cue analysis complete');
         } catch (error) {
@@ -451,6 +481,38 @@ export class AnalysisManager {
     }
 
     /**
+     * Open generated files in the editor
+     */
+    private async openGeneratedFiles(projectPath: string): Promise<void> {
+        const uri = vscode.Uri.file(projectPath);
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+        if (!workspaceFolder) {
+            this.outputChannel.appendLine('No workspace root found for opening files');
+            return;
+        }
+
+        const workspaceRoot = workspaceFolder.uri.fsPath;
+
+        // Try to open the use cases file (most likely to be useful)
+        const useCasesFile = path.join(workspaceRoot, 'phase4-use-cases.md');
+        
+        if (fs.existsSync(useCasesFile)) {
+            try {
+                const document = await vscode.workspace.openTextDocument(useCasesFile);
+                await vscode.window.showTextDocument(document, {
+                    preview: false,
+                    viewColumn: vscode.ViewColumn.One
+                });
+                this.outputChannel.appendLine(`Opened: ${useCasesFile}`);
+            } catch (error) {
+                this.outputChannel.appendLine(`Could not open file: ${error}`);
+            }
+        } else {
+            this.outputChannel.appendLine('Use cases file not found, skipping auto-open');
+        }
+    }
+
+    /**
      * Parse Phase 1 structure file for API endpoints
      * 
      * Expected format (table):
@@ -463,7 +525,7 @@ export class AnalysisManager {
         this.outputChannel.appendLine(`\nParsing structure from: ${filePath}`);
         
         if (!fs.existsSync(filePath)) {
-            this.outputChannel.appendLine('ERROR: phase1-structure.md not found');
+            this.outputChannel.appendLine('INFO: phase1-structure.md not found (skipping)');
             return;
         }
 
@@ -540,7 +602,7 @@ export class AnalysisManager {
         this.outputChannel.appendLine(`\nParsing actors from: ${filePath}`);
         
         if (!fs.existsSync(filePath)) {
-            this.outputChannel.appendLine('ERROR: phase2-actors.md not found');
+            this.outputChannel.appendLine('INFO: phase2-actors.md not found (skipping)');
             return;
         }
 
@@ -623,7 +685,7 @@ export class AnalysisManager {
         this.outputChannel.appendLine(`\nParsing boundaries from: ${filePath}`);
         
         if (!fs.existsSync(filePath)) {
-            this.outputChannel.appendLine('ERROR: phase3-boundaries.md not found');
+            this.outputChannel.appendLine('INFO: phase3-boundaries.md not found (skipping)');
             return;
         }
 
@@ -709,7 +771,7 @@ export class AnalysisManager {
         this.outputChannel.appendLine(`\nParsing use cases from: ${filePath}`);
         
         if (!fs.existsSync(filePath)) {
-            this.outputChannel.appendLine('ERROR: phase4-use-cases.md not found');
+            this.outputChannel.appendLine('INFO: phase4-use-cases.md not found (skipping)');
             return;
         }
 

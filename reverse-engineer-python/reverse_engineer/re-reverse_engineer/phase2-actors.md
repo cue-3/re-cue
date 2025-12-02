@@ -1,7 +1,7 @@
 # Phase 2: Actor Discovery
-## controller
+## reverse_engineer
 
-**Generated**: 2025-11-29 20:36:29
+**Generated**: 2025-12-01 19:31:26
 **Analysis Phase**: 2 of 4 - Actor Discovery
 
 ---
@@ -55,7 +55,7 @@ After reviewing the actor analysis:
 
 2. **Command to continue**:
    ```bash
-   python3 -m reverse_engineer --phase 3 --path /Users/squick/workspace/cue-3/re-cue/sample-apps/spring-boot-demo/src/main/java/com/example/bookstore/controller
+   python3 -m reverse_engineer --phase 3 --path /Users/squick/workspace/cue-3/re-cue/reverse-engineer-python/reverse_engineer
    ```
 
 ---
