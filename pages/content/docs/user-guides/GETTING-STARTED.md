@@ -443,7 +443,7 @@ Now that you've completed your first analysis:
 - [Complete User Guide](./USER-GUIDE.md) - Comprehensive feature documentation
 - [Framework Support](../frameworks/README.md) - Framework-specific guides
 - [Troubleshooting](../TROUBLESHOOTING.md) - Common issues and solutions
-- [GitHub Action Guide](../developer-guides/GITHUB-ACTION-GUIDE.md) - CI/CD integration
+- [CI/CD Integration Guide](../developer-guides/CICD-INTEGRATION-GUIDE.md) - GitHub Actions, GitLab CI, Jenkins, Azure DevOps
 
 ## Common First-Time Questions
 
@@ -473,7 +473,7 @@ Use `--phased` for very large projects to enable incremental analysis.
 
 ### Q: Can I use this in CI/CD?
 
-**A**: Absolutely! The GitHub Action is designed specifically for CI/CD workflows. See the [GitHub Action Guide](../developer-guides/GITHUB-ACTION-GUIDE.md) for examples.
+**A**: Absolutely! RE-cue integrates with all major CI/CD platforms. See the [CI/CD Integration Guide](../developer-guides/CICD-INTEGRATION-GUIDE.md) for comprehensive examples including GitHub Actions, GitLab CI, Jenkins, and Azure DevOps.
 
 ## Legal Notice
 
