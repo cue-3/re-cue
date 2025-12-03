@@ -18,6 +18,7 @@ from .generation import (
     BoundaryDocGenerator,
     FourPlusOneDocGenerator,
     VisualizationGenerator,
+    IntegrationTestGenerator,
 )
 
 __all__ = [
@@ -32,4 +33,5 @@ __all__ = [
     'BoundaryDocGenerator',
     'FourPlusOneDocGenerator',
     'VisualizationGenerator',
+    'IntegrationTestGenerator',
 ]
