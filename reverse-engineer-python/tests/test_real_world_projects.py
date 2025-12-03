@@ -1528,8 +1528,10 @@ class TestEdgeCases(RealWorldProjectTestBase):
     
     def test_deeply_nested_structure(self):
         """Test handling of deeply nested directory structures."""
-        # Create deeply nested structure following Java conventions
-        # The analyzer expects src/**/controller/ pattern
+        # Create deeply nested structure following Java Spring Boot conventions.
+        # The analyzer looks for controllers in src/**/controller/ directories,
+        # following the Maven/Gradle standard layout for Java projects.
+        # This tests that the analyzer can find endpoints regardless of nesting depth.
         deep_path = self.project_root / "src" / "main" / "java"
         for i in range(5):
             deep_path = deep_path / f"level{i}"
