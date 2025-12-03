@@ -485,11 +485,6 @@ class TestComprehensiveMapping(unittest.TestCase):
         results = self.mapper.map_all_relationships()
         
         # Count individual relationship types
-        individual_count = (
-            len(results['actor_boundary_relationships']) +
-            len(results['actor_communications']) +
-            len(results['system_integrations'])
-        )
         # Note: data_flows and dependency_chains are converted to relationships
         
         # all_relationships should have at least these
