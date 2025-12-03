@@ -26,6 +26,13 @@ from ..domain import (
 from ..analysis import TraceabilityAnalyzer
 
 
+# Display formatting constants
+MAX_USE_CASE_NAME_LENGTH = 30  # Maximum characters for use case name in table
+MAX_ACTOR_NAME_LENGTH = 15  # Maximum characters for actor name in table  
+MAX_FILE_PATH_LENGTH = 40  # Maximum characters for file path in display
+CONFIDENCE_DOTS = 5  # Number of dots to show for confidence visualization (5 = 0.0-1.0 scale)
+
+
 class TraceabilityGenerator(BaseGenerator):
     """Generator for requirements traceability documentation."""
     
@@ -224,9 +231,12 @@ This document provides comprehensive requirements traceability, linking use case
         
         for entry in self.matrix.entries:
             status_icon = self._get_status_icon(entry.verification_status)
+            uc_name = entry.use_case_name[:MAX_USE_CASE_NAME_LENGTH]
+            uc_name_ellipsis = '...' if len(entry.use_case_name) > MAX_USE_CASE_NAME_LENGTH else ''
+            actor_name = entry.primary_actor[:MAX_ACTOR_NAME_LENGTH]
             lines.append(
-                f"| {entry.use_case_id} | {entry.use_case_name[:30]}{'...' if len(entry.use_case_name) > 30 else ''} | "
-                f"{entry.primary_actor[:15]} | {len(entry.code_links)} | {len(entry.test_links)} | "
+                f"| {entry.use_case_id} | {uc_name}{uc_name_ellipsis} | "
+                f"{actor_name} | {len(entry.code_links)} | {len(entry.test_links)} | "
                 f"{entry.implementation_coverage:.0f}% | {entry.test_coverage:.0f}% | {status_icon} |"
             )
         
@@ -253,10 +263,12 @@ This document provides comprehensive requirements traceability, linking use case
                 lines.append("| Component | Type | File | Confidence | Link Type |")
                 lines.append("|-----------|------|------|------------|-----------|")
                 for link in entry.code_links:
-                    conf_bar = "●" * int(link.confidence * 5) + "○" * (5 - int(link.confidence * 5))
+                    conf_bar = "●" * int(link.confidence * CONFIDENCE_DOTS) + "○" * (CONFIDENCE_DOTS - int(link.confidence * CONFIDENCE_DOTS))
+                    file_display = link.file_path[:MAX_FILE_PATH_LENGTH]
+                    file_ellipsis = '...' if len(link.file_path) > MAX_FILE_PATH_LENGTH else ''
                     lines.append(
                         f"| {link.component_name} | {link.component_type} | "
-                        f"`{link.file_path[:40]}{'...' if len(link.file_path) > 40 else ''}` | "
+                        f"`{file_display}{file_ellipsis}` | "
                         f"{conf_bar} | {link.link_type} |"
                     )
             else:
@@ -268,9 +280,11 @@ This document provides comprehensive requirements traceability, linking use case
                 lines.append("| Test | Type | Scenario | File |")
                 lines.append("|------|------|----------|------|")
                 for link in entry.test_links:
+                    file_display = link.file_path[:MAX_FILE_PATH_LENGTH]
+                    file_ellipsis = '...' if len(link.file_path) > MAX_FILE_PATH_LENGTH else ''
                     lines.append(
                         f"| {link.test_name} | {link.test_type} | {link.covers_scenario} | "
-                        f"`{link.file_path[:40]}{'...' if len(link.file_path) > 40 else ''}` |"
+                        f"`{file_display}{file_ellipsis}` |"
                     )
             else:
                 lines.append("\n⚠️ *No tests linked to this use case.*")
@@ -360,7 +374,8 @@ This document provides comprehensive requirements traceability, linking use case
             lines.append("| Use Case | Implementation | Testing |")
             lines.append("|----------|----------------|---------|")
             for entry in low_coverage_with_links[:10]:
-                lines.append(f"| {entry.use_case_id}: {entry.use_case_name[:30]} | {entry.implementation_coverage:.0f}% | {entry.test_coverage:.0f}% |")
+                uc_name = entry.use_case_name[:MAX_USE_CASE_NAME_LENGTH]
+                lines.append(f"| {entry.use_case_id}: {uc_name} | {entry.implementation_coverage:.0f}% | {entry.test_coverage:.0f}% |")
         else:
             lines.append("✅ All linked use cases have coverage above 50%.")
         
@@ -431,8 +446,16 @@ This will show which use cases and tests may be affected by the change.""")
         }
         return icons.get(status, '❓')
     
-    def _generate_impact_section(self, analysis: ImpactAnalysis) -> str:
-        """Generate impact analysis section for a specific file change."""
+    def generate_impact_section(self, analysis: ImpactAnalysis) -> str:
+        """
+        Generate impact analysis section for a specific file change.
+        
+        Args:
+            analysis: ImpactAnalysis object with impact data
+            
+        Returns:
+            Markdown formatted impact analysis section
+        """
         lines = ["## Impact Analysis"]
         
         lines.append(f"\n**Changed File**: `{analysis.changed_file}`  ")

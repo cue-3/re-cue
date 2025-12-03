@@ -181,7 +181,7 @@ class TestImpactSectionGeneration(unittest.TestCase):
             recommendations=["Run tests", "Review use case"]
         )
         
-        result = self.generator._generate_impact_section(analysis)
+        result = self.generator.generate_impact_section(analysis)
         
         self.assertIn("## Impact Analysis", result)
         self.assertIn("src/UserController.java", result)
@@ -196,7 +196,7 @@ class TestImpactSectionGeneration(unittest.TestCase):
             component_type="utility"
         )
         
-        result = self.generator._generate_impact_section(analysis)
+        result = self.generator.generate_impact_section(analysis)
         
         self.assertIn("No use cases directly impacted", result)
 

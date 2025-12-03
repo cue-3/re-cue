@@ -27,6 +27,15 @@ from ...utils import log_info
 MIN_CONFIDENCE_THRESHOLD = 0.3  # Minimum confidence for including a link
 MAX_KEYWORD_VARIANTS = 5  # Maximum keyword variants to generate
 
+# Compiled regex pattern for test path detection
+TEST_PATH_PATTERN = re.compile(
+    r'(/test/|/tests/|/testing/|/__tests__/|/spec/|/specs/|'
+    r'test_[^/]*\.|_test\.|\.test\.|\.spec\.|'
+    r'test\.py$|test\.js$|test\.ts$|test\.java$|'
+    r'spec\.py$|spec\.js$|spec\.ts$)',
+    re.IGNORECASE
+)
+
 
 @dataclass
 class CodeComponent:
@@ -315,9 +324,10 @@ class TraceabilityAnalyzer:
                             line_number=0,
                             keywords=self._extract_keywords(file_path.stem)
                         ))
-        except (PermissionError, OSError):
-            # Handle permission errors gracefully
-            pass
+        except (PermissionError, OSError) as e:
+            # Log permission errors when in verbose mode
+            if self.verbose:
+                log_info(f"  Warning: Could not scan some directories: {e}")
     
     def _discover_test_files(self):
         """Discover all test files in the repository."""
@@ -334,8 +344,10 @@ class TraceabilityAnalyzer:
                     continue
                 if self._is_test_path(file_path):
                     self._test_files.append(file_path)
-        except (PermissionError, OSError):
-            pass
+        except (PermissionError, OSError) as e:
+            # Log permission errors when in verbose mode
+            if self.verbose:
+                log_info(f"  Warning: Could not scan some test directories: {e}")
     
     def _build_keyword_index(self):
         """Build keyword index for faster component lookup."""
@@ -492,21 +504,9 @@ class TraceabilityAnalyzer:
         return keywords | variants
     
     def _is_test_path(self, file_path: Path) -> bool:
-        """Check if a path is a test file."""
-        path_str = str(file_path).lower()
-        name = file_path.name.lower()
-        
-        test_indicators = [
-            '/test/', '/tests/', '/testing/', '/__tests__/',
-            '/spec/', '/specs/',
-            'test_', '_test.', '.test.', '.spec.',
-            'test.py', 'test.js', 'test.ts', 'test.java',
-            'spec.py', 'spec.js', 'spec.ts',
-        ]
-        
-        return any(indicator in path_str or name.startswith(indicator.strip('/')) 
-                   or name.endswith(indicator.strip('/'))
-                   for indicator in test_indicators)
+        """Check if a path is a test file using compiled regex for performance."""
+        path_str = str(file_path)
+        return bool(TEST_PATH_PATTERN.search(path_str))
     
     def _infer_component_type(self, file_path: Path) -> str:
         """Infer component type from file path."""

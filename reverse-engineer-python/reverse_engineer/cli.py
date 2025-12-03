@@ -902,7 +902,7 @@ def main():
             impact_analysis = trace_gen.analyze_impact(impact_file)
             # Include impact analysis in the output
             traceability_content = trace_gen.generate()
-            traceability_content += "\n\n" + trace_gen._generate_impact_section(impact_analysis)
+            traceability_content += "\n\n" + trace_gen.generate_impact_section(impact_analysis)
         else:
             traceability_content = trace_gen.generate()
         
