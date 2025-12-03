@@ -18,6 +18,7 @@ from reverse_engineer.analysis.relationships import RelationshipMapper
 from reverse_engineer.analysis.relationships.relationship_mapper import (
     DataFlow, DependencyChain, ActorCommunication
 )
+from reverse_engineer.boundary_enhancer import BoundaryLayer
 from reverse_engineer.domain import Actor, SystemBoundary, Endpoint, Relationship
 
 
@@ -301,8 +302,6 @@ class TestDataFlows(unittest.TestCase):
     
     def test_map_data_flows_with_layers(self):
         """Test data flow mapping with layer analysis."""
-        from reverse_engineer.boundary_enhancer import BoundaryLayer
-        
         enhanced_analysis = {
             'layers': {
                 'presentation': BoundaryLayer(

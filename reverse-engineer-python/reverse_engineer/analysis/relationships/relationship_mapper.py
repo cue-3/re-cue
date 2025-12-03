@@ -21,6 +21,11 @@ from ...domain import (
 from ...utils import log_info
 
 
+# Configuration constants for performance tuning
+MAX_BOUNDARY_COMPONENTS = 20  # Maximum components to analyze per boundary for performance
+MAX_CHAIN_BRANCHES = 3  # Maximum branches to follow when tracing dependency chains
+
+
 @dataclass
 class DataFlow:
     """Represents a data flow between boundaries."""
@@ -703,7 +708,8 @@ class RelationshipMapper:
                             components=[dto],
                             identified_from=[f"DTO/Entity in {java_file.name}"]
                         ))
-            except Exception:
+            except (OSError, IOError, UnicodeDecodeError):
+                # Skip files that cannot be read or decoded
                 continue
         
         return flows
@@ -718,17 +724,19 @@ class RelationshipMapper:
         
         # Add boundary dependencies
         for boundary in self.system_boundaries:
-            # Use components as nodes
-            for component in boundary.components[:20]:  # Limit for performance
+            # Use components as nodes, limit for performance
+            for component in boundary.components[:MAX_BOUNDARY_COMPONENTS]:
                 # Add boundary as a dependency target
                 graph[component].add(boundary.name)
         
         # Add enhanced boundary dependencies
         if enhanced_boundary_analysis:
-            for boundary in enhanced_boundary_analysis.get('all_boundaries', []):
-                if hasattr(boundary, 'dependencies'):
+            all_boundaries = enhanced_boundary_analysis.get('all_boundaries', [])
+            for boundary in all_boundaries:
+                # Safely check for dependencies attribute and ensure it's iterable
+                if hasattr(boundary, 'dependencies') and isinstance(boundary.dependencies, (list, tuple, set)):
                     for dep in boundary.dependencies:
-                        graph[boundary.name].add(dep)
+                        graph[boundary.name].add(str(dep))
         
         # Analyze Java files for service dependencies
         if java_files:
@@ -743,7 +751,8 @@ class RelationshipMapper:
                     services = service_pattern.findall(content)
                     for service in services:
                         graph[class_name].add(service)
-                except Exception:
+                except (OSError, IOError, UnicodeDecodeError):
+                    # Skip files that cannot be read or decoded
                     continue
         
         return dict(graph)
@@ -762,7 +771,8 @@ class RelationshipMapper:
         chain = [node]
         
         if node in graph:
-            for dep in list(graph[node])[:3]:  # Limit branching
+            # Limit branching to prevent exponential growth in large graphs
+            for dep in list(graph[node])[:MAX_CHAIN_BRANCHES]:
                 sub_chain = self._trace_dependency_chain(dep, graph, visited.copy())
                 if sub_chain:
                     chain.extend(sub_chain)

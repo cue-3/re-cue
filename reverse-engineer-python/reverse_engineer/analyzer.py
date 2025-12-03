@@ -112,6 +112,9 @@ class ProjectAnalyzer:
         # Enhanced boundary analysis results
         self.enhanced_boundary_analysis: Dict = {}
         
+        # Relationship mapping results from RelationshipMapper
+        self.relationship_mapping_results: Dict = {}
+        
         # Initialize optimized analyzer if optimizations are enabled
         self.optimized_analyzer = None
         if enable_optimizations:
