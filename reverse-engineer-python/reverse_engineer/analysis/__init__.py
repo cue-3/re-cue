@@ -12,6 +12,7 @@ from .structure import PackageStructureAnalyzer
 from .communication import CommunicationPatternDetector
 from .actors import ActorSystemMapper
 from .business_process import BusinessProcessIdentifier
+from .relationships import RelationshipMapper
 
 __all__ = [
     'SecurityPatternAnalyzer',
@@ -22,4 +23,5 @@ __all__ = [
     'CommunicationPatternDetector',
     'ActorSystemMapper',
     'BusinessProcessIdentifier',
+    'RelationshipMapper',
 ]

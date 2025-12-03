@@ -37,6 +37,7 @@ from .analysis import (
     ActorSystemMapper,
     SystemSystemMapper,
     BusinessProcessIdentifier,
+    RelationshipMapper,
 )
 
 # Import utilities
@@ -110,6 +111,9 @@ class ProjectAnalyzer:
         
         # Enhanced boundary analysis results
         self.enhanced_boundary_analysis: Dict = {}
+        
+        # Relationship mapping results from RelationshipMapper
+        self.relationship_mapping_results: Dict = {}
         
         # Initialize optimized analyzer if optimizations are enabled
         self.optimized_analyzer = None
@@ -810,19 +814,65 @@ class ProjectAnalyzer:
         log_info(f"Found {self.system_boundary_count} system boundaries", self.verbose)
 
     def map_relationships(self):
-        """Map relationships between actors and systems."""
+        """Map relationships between actors and systems with enhanced relationship mapping."""
         log_info("Mapping relationships...", self.verbose)
         
         # Clear existing relationships
         self.relationships.clear()
         
-        # Map actor-to-system relationships
+        # Use enhanced relationship mapping
+        self._map_enhanced_relationships()
+        
+        # Also use existing mappers for completeness
         self._map_actor_system_relationships()
         
         # Map system-to-system relationships
         self._map_system_system_relationships()
         
         log_info(f"Found {self.relationship_count} relationships", self.verbose)
+    
+    def _map_enhanced_relationships(self):
+        """Use the RelationshipMapper for comprehensive relationship mapping."""
+        # Get all Java files (excluding tests)
+        all_java_files = list(self.repo_root.rglob("**/*.java"))
+        java_files = [f for f in all_java_files if not self._is_test_file(f)]
+        
+        # Initialize the relationship mapper
+        mapper = RelationshipMapper(
+            actors=self.actors,
+            system_boundaries=self.system_boundaries,
+            endpoints=self.endpoints,
+            verbose=self.verbose
+        )
+        
+        # Perform comprehensive relationship mapping
+        mapping_results = mapper.map_all_relationships(
+            java_files=java_files,
+            enhanced_boundary_analysis=self.enhanced_boundary_analysis
+        )
+        
+        # Store the mapping results for later use
+        self.relationship_mapping_results = mapping_results
+        
+        # Add all relationships to the main collection
+        for relationship in mapping_results.get('all_relationships', []):
+            # Avoid duplicates
+            existing = any(
+                r.from_entity == relationship.from_entity and
+                r.to_entity == relationship.to_entity and
+                r.relationship_type == relationship.relationship_type
+                for r in self.relationships
+            )
+            if not existing:
+                self.relationships.append(relationship)
+        
+        if self.verbose:
+            log_info(f"  Enhanced mapping added {len(mapping_results.get('all_relationships', []))} relationships", self.verbose)
+            log_info(f"  - Actor-boundary: {len(mapping_results.get('actor_boundary_relationships', []))}", self.verbose)
+            log_info(f"  - Actor communications: {len(mapping_results.get('actor_communications', []))}", self.verbose)
+            log_info(f"  - System integrations: {len(mapping_results.get('system_integrations', []))}", self.verbose)
+            log_info(f"  - Data flows: {len(mapping_results.get('data_flows', []))}", self.verbose)
+            log_info(f"  - Dependency chains: {len(mapping_results.get('dependency_chains', []))}", self.verbose)
 
     def extract_use_cases(self):
         """Extract use cases from discovered patterns."""
