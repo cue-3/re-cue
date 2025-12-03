@@ -195,6 +195,19 @@ No generation flags specified. Please provide at least one flag:
                   • End-to-end test flows
                   • Coverage mapping between use cases and tests
 
+  --traceability  Generate requirements traceability matrix (traceability.md)
+                  • Use case to code component mapping
+                  • Test coverage by use case
+                  • Impact analysis for code changes
+                  • Requirement verification status
+                  • Gap analysis for missing implementations
+
+  --impact-file FILE
+                  Analyze impact of changes to FILE (use with --traceability)
+                  • Shows affected use cases
+                  • Lists impacted tests
+                  • Risk assessment
+
   --refine-use-cases FILE
                   Interactively refine existing use cases from FILE
                   • Edit use case names and descriptions
@@ -222,6 +235,8 @@ Examples:
   reverse-engineer --api-contract
   reverse-engineer --use-cases
   reverse-engineer --use-cases --integration-tests
+  reverse-engineer --use-cases --traceability
+  reverse-engineer --traceability --impact-file src/controllers/UserController.java
   reverse-engineer --use-cases --fourplusone
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --refine-use-cases use-cases.md
@@ -305,6 +320,10 @@ The script will:
                         help='Generate 4+1 architecture view document (fourplusone-architecture.md) - requires --use-cases data')
     parser.add_argument('--integration-tests', action='store_true',
                         help='Generate integration testing guidance (integration-tests.md) - derives test scenarios from use cases')
+    parser.add_argument('--traceability', action='store_true',
+                        help='Generate requirements traceability matrix (traceability.md) - links use cases to code and tests')
+    parser.add_argument('--impact-file', type=str, metavar='FILE',
+                        help='Analyze impact of changes to FILE (use with --traceability)')
     parser.add_argument('--refine-use-cases', type=str, metavar='FILE',
                         help='Interactively refine existing use cases from FILE (e.g., use-cases.md or phase4-use-cases.md)')
     
@@ -866,6 +885,39 @@ def main():
         
         print(f"✅ Integration testing guidance generated: {integration_tests_file}", file=sys.stderr)
     
+    # Generate traceability matrix if requested
+    if getattr(args, 'traceability', False):
+        from .generation import TraceabilityGenerator
+        
+        traceability_file = output_path.parent / "traceability.md"
+        print("\n🔗 Generating requirements traceability matrix...", file=sys.stderr)
+        
+        framework_id = getattr(analyzer, 'framework_id', None)
+        trace_gen = TraceabilityGenerator(analyzer, framework_id)
+        
+        # Check if impact analysis is requested
+        impact_file = getattr(args, 'impact_file', None)
+        if impact_file:
+            print(f"   Analyzing impact of: {impact_file}", file=sys.stderr)
+            impact_analysis = trace_gen.analyze_impact(impact_file)
+            # Include impact analysis in the output
+            traceability_content = trace_gen.generate()
+            traceability_content += "\n\n" + trace_gen.generate_impact_section(impact_analysis)
+        else:
+            traceability_content = trace_gen.generate()
+        
+        with open(traceability_file, 'w') as f:
+            f.write(traceability_content)
+        
+        # Also generate JSON output for programmatic use
+        traceability_json_file = output_path.parent / "traceability.json"
+        traceability_json = trace_gen.generate(output_format="json")
+        with open(traceability_json_file, 'w') as f:
+            f.write(traceability_json)
+        
+        print(f"✅ Traceability matrix generated: {traceability_file}", file=sys.stderr)
+        print(f"✅ Traceability JSON generated: {traceability_json_file}", file=sys.stderr)
+    
     # Display results
     log_section("Generation Complete")
     print()
@@ -887,6 +939,10 @@ def main():
     
     if getattr(args, 'integration_tests', False):
         print(f"✅ Integration tests saved to: {output_path.parent / 'integration-tests.md'}", file=sys.stderr)
+    
+    if getattr(args, 'traceability', False):
+        print(f"✅ Traceability matrix saved to: {output_path.parent / 'traceability.md'}", file=sys.stderr)
+        print(f"✅ Traceability JSON saved to: {output_path.parent / 'traceability.json'}", file=sys.stderr)
     
     # Note: --use-cases output messages are shown immediately after generation
     

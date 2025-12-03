@@ -13,6 +13,7 @@ from .communication import CommunicationPatternDetector
 from .actors import ActorSystemMapper
 from .business_process import BusinessProcessIdentifier
 from .relationships import RelationshipMapper
+from .traceability import TraceabilityAnalyzer
 
 __all__ = [
     'SecurityPatternAnalyzer',
@@ -24,4 +25,5 @@ __all__ = [
     'ActorSystemMapper',
     'BusinessProcessIdentifier',
     'RelationshipMapper',
+    'TraceabilityAnalyzer',
 ]
