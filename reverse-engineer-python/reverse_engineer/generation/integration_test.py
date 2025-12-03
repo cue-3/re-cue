@@ -6,7 +6,6 @@ end-to-end test flows, and coverage mappings based on analyzed use cases.
 """
 
 import re
-from datetime import datetime
 from typing import TYPE_CHECKING, Optional, List, Dict
 
 if TYPE_CHECKING:
