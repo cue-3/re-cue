@@ -187,6 +187,14 @@ No generation flags specified. Please provide at least one flag:
                   • System boundary mapping
                   • Use case extraction and documentation
 
+  --integration-tests
+                  Generate integration testing guidance (integration-tests.md)
+                  • Test case templates from use cases
+                  • Test data generation scenarios
+                  • API test scripts for endpoints
+                  • End-to-end test flows
+                  • Coverage mapping between use cases and tests
+
   --refine-use-cases FILE
                   Interactively refine existing use cases from FILE
                   • Edit use case names and descriptions
@@ -213,6 +221,7 @@ Examples:
   reverse-engineer --data-model
   reverse-engineer --api-contract
   reverse-engineer --use-cases
+  reverse-engineer --use-cases --integration-tests
   reverse-engineer --use-cases --fourplusone
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --refine-use-cases use-cases.md
@@ -294,6 +303,8 @@ The script will:
                         help='Generate phased analysis (phase1-structure.md, phase2-actors.md, phase3-boundaries.md, phase4-use-cases.md)')
     parser.add_argument('--fourplusone', action='store_true',
                         help='Generate 4+1 architecture view document (fourplusone-architecture.md) - requires --use-cases data')
+    parser.add_argument('--integration-tests', action='store_true',
+                        help='Generate integration testing guidance (integration-tests.md) - derives test scenarios from use cases')
     parser.add_argument('--refine-use-cases', type=str, metavar='FILE',
                         help='Interactively refine existing use cases from FILE (e.g., use-cases.md or phase4-use-cases.md)')
     
@@ -618,7 +629,8 @@ def main():
     
     # Check if at least one generation flag is provided
     diagrams_flag = getattr(args, 'diagrams', False)
-    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, diagrams_flag]):
+    integration_tests_flag = getattr(args, 'integration_tests', False)
+    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, diagrams_flag, integration_tests_flag]):
         print_help_banner()
         sys.exit(1)
     
@@ -838,6 +850,22 @@ def main():
         
         print(f"✅ Visualization diagrams generated: {diagrams_file}", file=sys.stderr)
     
+    # Generate integration test guidance if requested
+    if getattr(args, 'integration_tests', False):
+        from .generators import IntegrationTestGenerator
+        
+        integration_tests_file = output_path.parent / "integration-tests.md"
+        print("\n🧪 Generating integration testing guidance...", file=sys.stderr)
+        
+        framework_id = getattr(analyzer, 'framework_id', None)
+        int_test_gen = IntegrationTestGenerator(analyzer, framework_id)
+        integration_tests_content = int_test_gen.generate()
+        
+        with open(integration_tests_file, 'w') as f:
+            f.write(integration_tests_content)
+        
+        print(f"✅ Integration testing guidance generated: {integration_tests_file}", file=sys.stderr)
+    
     # Display results
     log_section("Generation Complete")
     print()
@@ -856,6 +884,9 @@ def main():
     
     if getattr(args, 'diagrams', False):
         print(f"✅ Diagrams saved to: {output_path.parent / 'diagrams.md'}", file=sys.stderr)
+    
+    if getattr(args, 'integration_tests', False):
+        print(f"✅ Integration tests saved to: {output_path.parent / 'integration-tests.md'}", file=sys.stderr)
     
     # Note: --use-cases output messages are shown immediately after generation
     
