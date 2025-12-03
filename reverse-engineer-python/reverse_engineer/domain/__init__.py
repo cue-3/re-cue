@@ -26,6 +26,14 @@ from .test_scenario import (
     CoverageMapping,
     IntegrationTestSuite,
 )
+from .traceability import (
+    CodeLink,
+    TestLink,
+    TraceabilityEntry,
+    ImpactedItem,
+    ImpactAnalysis,
+    TraceabilityMatrix,
+)
 
 __all__ = [
     # Core entities
@@ -50,4 +58,11 @@ __all__ = [
     'TestScenario',
     'CoverageMapping',
     'IntegrationTestSuite',
+    # Traceability models
+    'CodeLink',
+    'TestLink',
+    'TraceabilityEntry',
+    'ImpactedItem',
+    'ImpactAnalysis',
+    'TraceabilityMatrix',
 ]

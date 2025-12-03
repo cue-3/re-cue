@@ -17,6 +17,7 @@ from .boundary import BoundaryDocGenerator
 from .fourplusone import FourPlusOneDocGenerator
 from .visualization import VisualizationGenerator
 from .integration_test import IntegrationTestGenerator
+from .traceability import TraceabilityGenerator
 
 __all__ = [
     'BaseGenerator',
@@ -31,4 +32,5 @@ __all__ = [
     'FourPlusOneDocGenerator',
     'VisualizationGenerator',
     'IntegrationTestGenerator',
+    'TraceabilityGenerator',
 ]
