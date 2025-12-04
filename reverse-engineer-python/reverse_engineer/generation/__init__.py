@@ -18,6 +18,7 @@ from .fourplusone import FourPlusOneDocGenerator
 from .visualization import VisualizationGenerator
 from .integration_test import IntegrationTestGenerator
 from .traceability import TraceabilityGenerator
+from .journey import JourneyGenerator
 
 __all__ = [
     'BaseGenerator',
@@ -33,4 +34,5 @@ __all__ = [
     'VisualizationGenerator',
     'IntegrationTestGenerator',
     'TraceabilityGenerator',
+    'JourneyGenerator',
 ]

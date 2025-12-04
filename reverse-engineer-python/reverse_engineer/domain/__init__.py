@@ -34,6 +34,14 @@ from .traceability import (
     ImpactAnalysis,
     TraceabilityMatrix,
 )
+from .journey import (
+    Touchpoint,
+    JourneyStage,
+    UserJourney,
+    UserStory,
+    Epic,
+    JourneyMap,
+)
 
 __all__ = [
     # Core entities
@@ -65,4 +73,11 @@ __all__ = [
     'ImpactedItem',
     'ImpactAnalysis',
     'TraceabilityMatrix',
+    # Journey models
+    'Touchpoint',
+    'JourneyStage',
+    'UserJourney',
+    'UserStory',
+    'Epic',
+    'JourneyMap',
 ]

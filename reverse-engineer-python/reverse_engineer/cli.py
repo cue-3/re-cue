@@ -228,6 +228,13 @@ No generation flags specified. Please provide at least one flag:
                   • Entity relationship diagrams
                   • Architecture overview diagrams
 
+  --journey       Generate user journey mapping (journey-map.md)
+                  • End-to-end journey visualization
+                  • Touchpoint identification
+                  • Cross-boundary flows
+                  • Epic generation from journeys
+                  • User story mapping
+
 Examples:
   reverse-engineer --spec
   reverse-engineer --plan
@@ -238,6 +245,7 @@ Examples:
   reverse-engineer --use-cases --traceability
   reverse-engineer --traceability --impact-file src/controllers/UserController.java
   reverse-engineer --use-cases --fourplusone
+  reverse-engineer --use-cases --journey
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --refine-use-cases use-cases.md
 
@@ -326,6 +334,8 @@ The script will:
                         help='Analyze impact of changes to FILE (use with --traceability)')
     parser.add_argument('--refine-use-cases', type=str, metavar='FILE',
                         help='Interactively refine existing use cases from FILE (e.g., use-cases.md or phase4-use-cases.md)')
+    parser.add_argument('--journey', action='store_true',
+                        help='Generate user journey mapping (journey-map.md) - combines use cases into end-to-end journeys')
     
     # Visualization flags
     viz_group = parser.add_argument_group('visualization diagrams')
@@ -649,7 +659,9 @@ def main():
     # Check if at least one generation flag is provided
     diagrams_flag = getattr(args, 'diagrams', False)
     integration_tests_flag = getattr(args, 'integration_tests', False)
-    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, diagrams_flag, integration_tests_flag]):
+    journey_flag = getattr(args, 'journey', False)
+    traceability_flag = getattr(args, 'traceability', False)
+    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, diagrams_flag, integration_tests_flag, journey_flag, traceability_flag]):
         print_help_banner()
         sys.exit(1)
     
@@ -918,6 +930,29 @@ def main():
         print(f"✅ Traceability matrix generated: {traceability_file}", file=sys.stderr)
         print(f"✅ Traceability JSON generated: {traceability_json_file}", file=sys.stderr)
     
+    # Generate user journey mapping if requested
+    if getattr(args, 'journey', False):
+        from .generation import JourneyGenerator
+        
+        journey_file = output_path.parent / "journey-map.md"
+        print("\n🗺️  Generating user journey mapping...", file=sys.stderr)
+        
+        framework_id = getattr(analyzer, 'framework_id', None)
+        journey_gen = JourneyGenerator(analyzer, framework_id)
+        journey_content = journey_gen.generate()
+        
+        with open(journey_file, 'w') as f:
+            f.write(journey_content)
+        
+        # Also generate JSON output for programmatic use
+        journey_json_file = output_path.parent / "journey-map.json"
+        journey_json = journey_gen.generate(output_format="json")
+        with open(journey_json_file, 'w') as f:
+            f.write(journey_json)
+        
+        print(f"✅ User journey mapping generated: {journey_file}", file=sys.stderr)
+        print(f"✅ Journey JSON generated: {journey_json_file}", file=sys.stderr)
+    
     # Display results
     log_section("Generation Complete")
     print()
@@ -943,6 +978,10 @@ def main():
     if getattr(args, 'traceability', False):
         print(f"✅ Traceability matrix saved to: {output_path.parent / 'traceability.md'}", file=sys.stderr)
         print(f"✅ Traceability JSON saved to: {output_path.parent / 'traceability.json'}", file=sys.stderr)
+    
+    if getattr(args, 'journey', False):
+        print(f"✅ User journey mapping saved to: {output_path.parent / 'journey-map.md'}", file=sys.stderr)
+        print(f"✅ Journey JSON saved to: {output_path.parent / 'journey-map.json'}", file=sys.stderr)
     
     # Note: --use-cases output messages are shown immediately after generation
     
