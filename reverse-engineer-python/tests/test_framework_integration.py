@@ -9,6 +9,7 @@ ensuring consistent behavior across all supported frameworks:
 - Python Django
 - Python Flask
 - Python FastAPI
+- .NET/ASP.NET Core
 """
 
 import unittest
@@ -23,7 +24,8 @@ from reverse_engineer.analyzers import (
     RubyRailsAnalyzer,
     DjangoAnalyzer,
     FlaskAnalyzer,
-    FastAPIAnalyzer
+    FastAPIAnalyzer,
+    DotNetAspNetCoreAnalyzer
 )
 from reverse_engineer.generators import UseCaseMarkdownGenerator
 from reverse_engineer.analyzer import ProjectAnalyzer
@@ -755,6 +757,170 @@ async def list_items():
         authenticated = [e for e in endpoints if e.authenticated]
         self.assertGreater(len(authenticated), 0, 
                           "Should detect Depends-based authentication")
+
+
+class TestDotNetAspNetCoreIntegration(BaseFrameworkIntegrationTest, unittest.TestCase):
+    """Integration tests for .NET/ASP.NET Core analyzer."""
+    
+    def _create_project_structure(self):
+        """Create .NET ASP.NET Core project structure."""
+        # Create Controllers directory
+        controller_dir = self.project_root / "Controllers"
+        controller_dir.mkdir(parents=True)
+        
+        # Create Models directory
+        model_dir = self.project_root / "Models"
+        model_dir.mkdir(parents=True)
+        
+        # Create Services directory
+        services_dir = self.project_root / "Services"
+        services_dir.mkdir(parents=True)
+        
+        # Create .csproj file
+        (self.project_root / "TestApp.csproj").write_text('''<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+  </ItemGroup>
+</Project>
+''')
+        
+        # Create controller
+        (controller_dir / "UsersController.cs").write_text('''using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+namespace TestApp.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class UsersController : ControllerBase
+    {
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            return Ok();
+        }
+        
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            return Ok();
+        }
+        
+        [HttpPost]
+        [Authorize]
+        public IActionResult Create([FromBody] User user)
+        {
+            return Created("", user);
+        }
+        
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(int id)
+        {
+            return NoContent();
+        }
+    }
+}
+''')
+        
+        # Create model
+        (model_dir / "User.cs").write_text('''using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TestApp.Models
+{
+    [Table("Users")]
+    public class User
+    {
+        [Key]
+        public int Id { get; set; }
+        
+        [Required]
+        public string Username { get; set; }
+        
+        [Required]
+        public string Email { get; set; }
+    }
+}
+''')
+        
+        # Create service
+        (services_dir / "UserService.cs").write_text('''namespace TestApp.Services
+{
+    public interface IUserService
+    {
+        Task<User> GetByIdAsync(int id);
+    }
+    
+    public class UserService : IUserService
+    {
+        public async Task<User> GetByIdAsync(int id)
+        {
+            return null;
+        }
+    }
+}
+''')
+    
+    def _get_analyzer(self):
+        return DotNetAspNetCoreAnalyzer(self.project_root, verbose=False)
+    
+    def test_aspnetcore_controller_detection(self):
+        """Test detection of ASP.NET Core controllers."""
+        analyzer = self._get_analyzer()
+        endpoints = analyzer.discover_endpoints()
+        
+        self.assertGreater(len(endpoints), 0, "Should detect ASP.NET Core controller endpoints")
+        
+        methods = [e.method for e in endpoints]
+        self.assertIn("GET", methods)
+        self.assertIn("POST", methods)
+        self.assertIn("DELETE", methods)
+    
+    def test_authorize_attribute_detection(self):
+        """Test detection of [Authorize] attributes."""
+        analyzer = self._get_analyzer()
+        endpoints = analyzer.discover_endpoints()
+        
+        authenticated = [e for e in endpoints if e.authenticated]
+        self.assertGreater(len(authenticated), 0, 
+                          "Should detect [Authorize] attribute")
+        
+        # Check that Admin role is detected
+        actors = analyzer.discover_actors()
+        actor_names = [a.name for a in actors]
+        self.assertTrue(any("Admin" in name for name in actor_names),
+                       "Should detect Admin role")
+    
+    def test_entity_framework_model_detection(self):
+        """Test detection of Entity Framework models."""
+        analyzer = self._get_analyzer()
+        models = analyzer.discover_models()
+        
+        self.assertGreater(len(models), 0, "Should detect Entity Framework models")
+        model_names = [m.name for m in models]
+        self.assertIn("User", model_names)
+    
+    def test_service_detection(self):
+        """Test detection of services."""
+        analyzer = self._get_analyzer()
+        services = analyzer.discover_services()
+        
+        self.assertGreater(len(services), 0, "Should detect services")
+        service_names = [s.name for s in services]
+        self.assertIn("UserService", service_names)
+    
+    def test_nuget_package_detection(self):
+        """Test detection of NuGet packages."""
+        analyzer = self._get_analyzer()
+        packages = analyzer.get_nuget_packages()
+        
+        self.assertIn("Microsoft.EntityFrameworkCore", packages)
+        self.assertIn("Microsoft.AspNetCore.Identity.EntityFrameworkCore", packages)
 
 
 class TestCrossFrameworkConsistency(unittest.TestCase):

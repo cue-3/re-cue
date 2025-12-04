@@ -32,6 +32,7 @@ def create_analyzer(repo_root: Path, verbose: bool = False,
         from .nodejs import NodeExpressAnalyzer
         from .python import DjangoAnalyzer, FlaskAnalyzer, FastAPIAnalyzer
         from .ruby import RubyRailsAnalyzer
+        from .dotnet import DotNetAspNetCoreAnalyzer
         
         # Detect technology stack
         tech_stack = TechDetector(repo_root, verbose).detect()
@@ -52,6 +53,8 @@ def create_analyzer(repo_root: Path, verbose: bool = False,
             return FastAPIAnalyzer(repo_root, verbose)
         elif tech_stack.framework_id == "ruby_rails":
             return RubyRailsAnalyzer(repo_root, verbose)
+        elif tech_stack.framework_id in ["dotnet", "dotnet_aspnetcore"]:
+            return DotNetAspNetCoreAnalyzer(repo_root, verbose)
         else:
             if verbose:
                 print(f"Using legacy analyzer for {tech_stack.name}")

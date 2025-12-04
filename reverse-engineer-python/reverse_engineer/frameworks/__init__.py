@@ -14,6 +14,7 @@ from .java_spring import JavaSpringAnalyzer
 from .python import DjangoAnalyzer, FlaskAnalyzer, FastAPIAnalyzer
 from .nodejs import NodeExpressAnalyzer
 from .ruby import RubyRailsAnalyzer
+from .dotnet import DotNetAspNetCoreAnalyzer
 
 __all__ = [
     'BaseAnalyzer',
@@ -25,4 +26,5 @@ __all__ = [
     'FastAPIAnalyzer',
     'NodeExpressAnalyzer',
     'RubyRailsAnalyzer',
+    'DotNetAspNetCoreAnalyzer',
 ]
