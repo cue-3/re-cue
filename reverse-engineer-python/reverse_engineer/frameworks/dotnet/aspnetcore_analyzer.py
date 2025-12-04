@@ -16,7 +16,7 @@ Features:
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Set
 
 from ..base import (
     BaseAnalyzer, Endpoint, Model, Service, Actor,
