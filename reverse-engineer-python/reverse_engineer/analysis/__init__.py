@@ -14,6 +14,7 @@ from .actors import ActorSystemMapper
 from .business_process import BusinessProcessIdentifier
 from .relationships import RelationshipMapper
 from .traceability import TraceabilityAnalyzer
+from .journey import JourneyAnalyzer
 
 __all__ = [
     'SecurityPatternAnalyzer',
@@ -26,4 +27,5 @@ __all__ = [
     'BusinessProcessIdentifier',
     'RelationshipMapper',
     'TraceabilityAnalyzer',
+    'JourneyAnalyzer',
 ]
