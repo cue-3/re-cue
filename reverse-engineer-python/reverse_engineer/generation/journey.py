@@ -32,6 +32,9 @@ from ..analysis import JourneyAnalyzer
 # Display formatting constants
 MAX_NAME_LENGTH = 40  # Maximum characters for names in tables
 MAX_DESC_LENGTH = 60  # Maximum characters for descriptions
+MAX_TOUCHPOINTS_IN_FLOWCHART = 5  # Maximum touchpoints shown per stage in flowchart
+MAX_BOUNDARIES_IN_SEQUENCE = 5  # Maximum boundaries shown in sequence diagrams
+MAX_TOUCHPOINTS_IN_SEQUENCE = 10  # Maximum touchpoints shown in sequence diagrams
 
 
 class JourneyGenerator(BaseGenerator):
@@ -295,7 +298,7 @@ This document maps end-to-end user journeys by combining multiple use cases into
             return "".join(c if c.isalnum() else "_" for c in text)
         
         def sanitize_label(text: str) -> str:
-            return text.replace('"', "'").replace('[', '(').replace(']', ')')[:40]
+            return text.replace('"', "'").replace('[', '(').replace(']', ')')[:MAX_NAME_LENGTH]
         
         # Start node
         lines.append(f'    Start(["{journey.primary_actor} begins journey"])')
@@ -311,7 +314,7 @@ This document maps end-to-end user journeys by combining multiple use cases into
             
             # Add touchpoints in stage
             stage_touchpoint_ids = []
-            for i, tp in enumerate(stage.touchpoints[:5]):  # Limit touchpoints shown
+            for i, tp in enumerate(stage.touchpoints[:MAX_TOUCHPOINTS_IN_FLOWCHART]):
                 tp_id = sanitize_id(tp.id)
                 tp_label = sanitize_label(tp.name)
                 lines.append(f'        {tp_id}["{tp_label}"]')
@@ -349,12 +352,12 @@ This document maps end-to-end user journeys by combining multiple use cases into
         
         # Add unique boundaries as participants
         boundaries = list(set(tp.boundary for tp in journey.touchpoints if tp.boundary))
-        for boundary in boundaries[:5]:  # Limit boundaries shown
+        for boundary in boundaries[:MAX_BOUNDARIES_IN_SEQUENCE]:
             boundary_id = "".join(c if c.isalnum() else "_" for c in boundary)
             lines.append(f"    participant {boundary_id} as {boundary}")
         
         # Add interactions
-        for tp in journey.touchpoints[:10]:  # Limit touchpoints shown
+        for tp in journey.touchpoints[:MAX_TOUCHPOINTS_IN_SEQUENCE]:
             if tp.boundary:
                 boundary_id = "".join(c if c.isalnum() else "_" for c in tp.boundary)
                 action = tp.name[:30].replace('"', "'")

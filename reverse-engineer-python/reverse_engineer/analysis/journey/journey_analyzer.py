@@ -34,6 +34,8 @@ from ...utils import log_info
 MAX_STAGES_PER_JOURNEY = 8  # Maximum stages to keep journeys manageable
 MAX_TOUCHPOINTS_PER_STAGE = 10  # Maximum touchpoints per stage
 MAX_USE_CASES_PER_JOURNEY = 15  # Maximum use cases to combine
+MAX_TOUCHPOINTS_PER_USE_CASE = 3  # Maximum touchpoints to create per use case
+MIN_CONDITION_OVERLAP_WORDS = 2  # Minimum word overlap for condition matching
 DEFAULT_STAGE_NAMES = [
     "Discovery",
     "Onboarding",
@@ -335,7 +337,7 @@ class JourneyAnalyzer:
         
         # Check for significant overlap
         overlap = post_words & pre_words
-        return len(overlap) >= 2
+        return len(overlap) >= MIN_CONDITION_OVERLAP_WORDS
     
     def _determine_complexity(self, use_cases: List[UseCase]) -> str:
         """Determine journey complexity based on use case count and nature."""
@@ -411,7 +413,7 @@ class JourneyAnalyzer:
             related_endpoints = self._find_endpoints_for_use_case(uc)
             
             # Create touchpoint for each related endpoint
-            for endpoint in related_endpoints[:3]:  # Limit touchpoints per use case
+            for endpoint in related_endpoints[:MAX_TOUCHPOINTS_PER_USE_CASE]:
                 boundary = self._find_boundary_for_endpoint(endpoint)
                 
                 touchpoint = Touchpoint(
