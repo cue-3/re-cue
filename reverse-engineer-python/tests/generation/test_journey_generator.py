@@ -4,7 +4,7 @@ Tests for the JourneyGenerator module.
 
 import unittest
 import json
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from pathlib import Path
 
 from reverse_engineer.domain import UseCase, Actor, SystemBoundary, Endpoint
