@@ -8,9 +8,6 @@ from unittest.mock import Mock, MagicMock
 from pathlib import Path
 
 from reverse_engineer.domain import UseCase, Actor, SystemBoundary, Endpoint
-from reverse_engineer.domain.journey import (
-    Touchpoint, JourneyStage, UserJourney, UserStory, Epic, JourneyMap
-)
 from reverse_engineer.generation.journey import JourneyGenerator
 
 
