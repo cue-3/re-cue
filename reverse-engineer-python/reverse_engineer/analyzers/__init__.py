@@ -14,6 +14,7 @@ from ..frameworks import (
     FlaskAnalyzer,
     FastAPIAnalyzer,
     RubyRailsAnalyzer,
+    DotNetAspNetCoreAnalyzer,
 )
 
 # Re-export domain models for backward compatibility
@@ -42,4 +43,5 @@ __all__ = [
     'FlaskAnalyzer',
     'FastAPIAnalyzer',
     'RubyRailsAnalyzer',
+    'DotNetAspNetCoreAnalyzer',
 ]
