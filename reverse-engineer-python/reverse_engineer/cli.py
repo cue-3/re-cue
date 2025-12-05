@@ -388,6 +388,17 @@ The script will:
     parser.add_argument('--phase', type=str, choices=['1', '2', '3', '4', 'all'],
                         help='Run specific phase: 1=structure, 2=actors, 3=boundaries, 4=use-cases, all=run all')
     
+    # Use case naming options
+    naming_group = parser.add_argument_group('use case naming')
+    naming_group.add_argument('--naming-style', type=str,
+                             choices=['business', 'technical', 'concise', 'verbose', 'user_centric'],
+                             default='business',
+                             help='Style for use case naming (default: business)')
+    naming_group.add_argument('--naming-alternatives', action='store_true', default=True,
+                             help='Generate alternative name suggestions (default: enabled)')
+    naming_group.add_argument('--no-naming-alternatives', dest='naming_alternatives', action='store_false',
+                             help='Disable alternative name suggestions')
+    
     # Performance optimization flags
     perf_group = parser.add_argument_group('performance optimizations (for large codebases)')
     perf_group.add_argument('--parallel', action='store_true', default=True,
@@ -490,6 +501,9 @@ def run_phased_analysis(args):
     # Initialize phase manager
     phase_manager = PhaseManager(repo_root, output_dir)
     
+    # Get naming style from args
+    naming_style = getattr(args, 'naming_style', 'business')
+    
     # Initialize analyzer
     log_section("RE-cue - Phased Reverse Engineering")
     analyzer = ProjectAnalyzer(
@@ -497,7 +511,8 @@ def run_phased_analysis(args):
         verbose=args.verbose,
         enable_optimizations=args.parallel,
         enable_incremental=args.incremental,
-        max_workers=args.max_workers
+        max_workers=args.max_workers,
+        naming_style=naming_style
     )
     
     # Determine which phase to run
@@ -880,13 +895,17 @@ def main():
         temp_analyzer.clear_cache()
         print("Cache cleared successfully", file=sys.stderr)
     
+    # Get naming style from args
+    naming_style = getattr(args, 'naming_style', 'business')
+    
     analyzer = ProjectAnalyzer(
         repo_root, 
         verbose=args.verbose,
         enable_optimizations=args.parallel,
         enable_incremental=args.incremental,
         enable_caching=args.cache if hasattr(args, 'cache') else True,
-        max_workers=args.max_workers
+        max_workers=args.max_workers,
+        naming_style=naming_style
     )
     analyzer.analyze()
     
