@@ -10,7 +10,7 @@ Tests cover:
 
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 import tempfile
 import os
 
