@@ -8,7 +8,7 @@ and project structure.
 
 import re
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Set
 
 from .base_analyzer import (
     BaseAnalyzer, Endpoint, Model, Service, Actor,
@@ -35,7 +35,7 @@ class RubyRailsAnalyzer(BaseAnalyzer):
         self.gemfile = self.repo_root / "Gemfile"
         
         # Authentication/Authorization gems detection
-        self.auth_gems = set()
+        self.auth_gems: Set[str] = set()
         self._detect_auth_gems()
     
     def _detect_auth_gems(self):
@@ -86,9 +86,9 @@ class RubyRailsAnalyzer(BaseAnalyzer):
         log_info(f"Found {self.endpoint_count} endpoints", self.verbose)
         return self.endpoints
     
-    def _parse_routes(self) -> List[Dict]:
+    def _parse_routes(self) -> List[Dict[str, str]]:
         """Parse config/routes.rb for route definitions."""
-        routes = []
+        routes: List[Dict[str, str]] = []
         
         if not self.routes_file.exists():
             log_info("  No routes.rb found", self.verbose)

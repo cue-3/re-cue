@@ -176,7 +176,7 @@ class ProgressReporter:
         self.desc = desc
         self.verbose = verbose
         self.start_time = datetime.now()
-        self.errors = []
+        self.errors: List[str] = []
         
     def update(self, n: int = 1):
         """Update progress by n items."""

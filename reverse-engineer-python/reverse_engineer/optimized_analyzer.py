@@ -65,7 +65,7 @@ class OptimizedAnalyzer:
         if enable_incremental:
             self.output_dir.mkdir(parents=True, exist_ok=True)
             state_file = self.output_dir / ".file_tracker_state.json"
-            self.file_tracker = FileTracker(state_file)
+            self.file_tracker: Optional[FileTracker] = FileTracker(state_file)
         else:
             self.file_tracker = None
         
@@ -73,7 +73,7 @@ class OptimizedAnalyzer:
         if enable_caching:
             self.output_dir.mkdir(parents=True, exist_ok=True)
             cache_dir = self.output_dir / ".cache"
-            self.cache_manager = CacheManager(cache_dir)
+            self.cache_manager: Optional[CacheManager] = CacheManager(cache_dir)
         else:
             self.cache_manager = None
     

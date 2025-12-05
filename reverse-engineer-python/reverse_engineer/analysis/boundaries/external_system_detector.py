@@ -4,7 +4,7 @@ ExternalSystemDetector - Analysis component.
 
 import re
 from pathlib import Path
-from typing import List, Set, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 from ...domain import (
     Endpoint, Model, View, Service,
@@ -44,7 +44,9 @@ class ExternalSystemDetector:
             'google': re.compile(r'googleapis\.com', re.IGNORECASE),
         }
     
-    def detect_external_systems(self, java_files: List[Path], config_files: List[Path] = None) -> List[Dict]:
+    def detect_external_systems(
+        self, java_files: List[Path], config_files: Optional[List[Path]] = None
+    ) -> List[Dict[str, Any]]:
         """Detect external systems from Java files and configuration."""
         external_systems = []
         
@@ -90,7 +92,9 @@ class ExternalSystemDetector:
         
         return unique_systems
     
-    def _analyze_java_file(self, content: str, java_file: Path) -> List[Dict]:
+    def _analyze_java_file(
+        self, content: str, java_file: Path
+    ) -> List[Dict[str, Any]]:
         """Analyze Java file for external system integrations."""
         systems = []
         
@@ -160,7 +164,9 @@ class ExternalSystemDetector:
         
         return systems
     
-    def _analyze_config_file(self, content: str, config_file: Path) -> List[Dict]:
+    def _analyze_config_file(
+        self, content: str, config_file: Path
+    ) -> List[Dict[str, Any]]:
         """Analyze configuration files for external system references."""
         systems = []
         

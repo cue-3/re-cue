@@ -5,7 +5,7 @@ ActorDocGenerator - Document generator.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict
 
 if TYPE_CHECKING:
     from ..analyzer import ProjectAnalyzer
@@ -52,7 +52,7 @@ class ActorDocGenerator(BaseGenerator):
         if not self.analyzer.actors:
             return "*No access levels defined*"
         
-        access_levels = {}
+        access_levels: Dict[str, int] = {}
         for actor in self.analyzer.actors:
             level = actor.access_level
             access_levels[level] = access_levels.get(level, 0) + 1

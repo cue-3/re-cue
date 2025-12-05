@@ -5,7 +5,7 @@ UseCaseMarkdownGenerator - Document generator.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict, Any, List
 
 if TYPE_CHECKING:
     from ..analyzer import ProjectAnalyzer
@@ -76,7 +76,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
         
         # Validation rules
         if context.get('validations'):
-            validation_types = {}
+            validation_types: Dict[str, int] = {}
             for v in context['validations']:
                 vtype = v.get('type', 'unknown')
                 validation_types[vtype] = validation_types.get(vtype, 0) + 1
@@ -87,7 +87,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
         
         # Business workflows
         if context.get('workflows'):
-            workflow_types = {}
+            workflow_types: Dict[str, int] = {}
             for w in context['workflows']:
                 wtype = w.get('type', 'unknown')
                 workflow_types[wtype] = workflow_types.get(wtype, 0) + 1
@@ -98,7 +98,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
         
         # Business rules
         if context.get('business_rules'):
-            rule_types = {}
+            rule_types: Dict[str, int] = {}
             for r in context['business_rules']:
                 rtype = r.get('rule_type', 'unknown')
                 rule_types[rtype] = rule_types.get(rtype, 0) + 1
@@ -117,7 +117,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
         lines = []
         
         # Group use cases by actor
-        use_cases_by_actor = {}
+        use_cases_by_actor: Dict[str, List[Any]] = {}
         for use_case in self.analyzer.use_cases:
             actor = use_case.primary_actor or "System"
             if actor not in use_cases_by_actor:

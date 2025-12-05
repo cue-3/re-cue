@@ -75,6 +75,8 @@ class TraceabilityGenerator(BaseGenerator):
         if not self._traceability_analyzer:
             self._run_analysis()
         
+        # Type guard: _traceability_analyzer is always set after _run_analysis
+        assert self._traceability_analyzer is not None
         return self._traceability_analyzer.analyze_impact(changed_file)
     
     def _run_analysis(self):
@@ -110,6 +112,9 @@ class TraceabilityGenerator(BaseGenerator):
     
     def _generate_json(self) -> str:
         """Generate JSON traceability output."""
+        # Type guard: matrix is always set after _run_analysis
+        assert self.matrix is not None
+        
         data = {
             "project_name": self.matrix.project_name,
             "generated_at": self.datetime,
@@ -184,6 +189,9 @@ This document provides comprehensive requirements traceability, linking use case
 
     def _generate_summary(self) -> str:
         """Generate summary section."""
+        # Type guard: matrix is always set after _run_analysis
+        assert self.matrix is not None
+        
         # Calculate percentages
         impl_pct = (self.matrix.implemented_use_cases / max(1, self.matrix.total_use_cases)) * 100
         test_pct = (self.matrix.tested_use_cases / max(1, self.matrix.total_use_cases)) * 100
@@ -244,6 +252,9 @@ This document provides comprehensive requirements traceability, linking use case
     
     def _generate_detailed_entries(self) -> str:
         """Generate detailed entries for each use case."""
+        # Type guard: matrix is always set after _run_analysis
+        assert self.matrix is not None
+        
         lines = ["## Detailed Traceability"]
         
         if not self.matrix.entries:
@@ -308,6 +319,9 @@ This document provides comprehensive requirements traceability, linking use case
     
     def _generate_coverage_analysis(self) -> str:
         """Generate coverage analysis section."""
+        # Type guard: matrix is always set after _run_analysis
+        assert self.matrix is not None
+        
         lines = ["## Coverage Analysis"]
         
         # Implementation coverage distribution
@@ -344,6 +358,9 @@ This document provides comprehensive requirements traceability, linking use case
     
     def _generate_gap_analysis(self) -> str:
         """Generate gap analysis section."""
+        # Type guard: matrix is always set after _run_analysis
+        assert self.matrix is not None
+        
         lines = ["## Gap Analysis"]
         
         unimplemented = self.matrix.get_unimplemented_use_cases()
@@ -383,6 +400,9 @@ This document provides comprehensive requirements traceability, linking use case
     
     def _generate_recommendations(self) -> str:
         """Generate recommendations section."""
+        # Type guard: matrix is always set after _run_analysis
+        assert self.matrix is not None
+        
         lines = ["## Recommendations"]
         
         lines.append("\n### Priority Actions\n")

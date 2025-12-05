@@ -137,7 +137,7 @@ class FlaskAnalyzer(BaseAnalyzer):
         log_info("Discovering SQLAlchemy models...", self.verbose)
         
         # Find models in common locations
-        model_files = []
+        model_files: List[Path] = []
         model_files.extend(self.repo_root.rglob("**/models.py"))
         model_files.extend(self.repo_root.rglob("**/models/*.py"))
         

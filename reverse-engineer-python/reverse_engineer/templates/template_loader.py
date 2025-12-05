@@ -1,7 +1,7 @@
 """Template loading system with framework-specific override support."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, List
 import re
 from jinja2 import Environment, FileSystemLoader, select_autoescape, Template
 
@@ -46,7 +46,7 @@ class TemplateLoader:
                 # java_spring -> java_spring
                 self.framework_dir = self.template_dir / "frameworks" / framework_id
         else:
-            self.framework_dir = None
+            self.framework_dir: Optional[Path] = None
         
         # Initialize Jinja2 environment
         # Add both framework-specific and common directories to the loader search path
@@ -157,7 +157,7 @@ class TemplateLoader:
         Returns:
             Dict with 'common' and 'framework' keys containing lists of template names
         """
-        result = {'common': [], 'framework': []}
+        result: Dict[str, List[str]] = {'common': [], 'framework': []}
         
         if include_common and self.common_dir.exists():
             result['common'] = [

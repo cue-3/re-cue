@@ -394,6 +394,9 @@ This document provides comprehensive integration testing guidance derived from t
 
     def _generate_overview(self) -> str:
         """Generate overview section with statistics."""
+        # Type guard: test_suite is always set after _build_test_suite
+        assert self.test_suite is not None
+        
         return f"""## Test Suite Overview
 
 | Metric | Count |
@@ -442,6 +445,9 @@ This document provides comprehensive integration testing guidance derived from t
 
     def _generate_test_scenarios_section(self) -> str:
         """Generate detailed test scenarios section."""
+        # Type guard: test_suite is always set after _build_test_suite
+        assert self.test_suite is not None
+        
         lines = ["## Test Scenarios"]
         
         # Group by test type
@@ -486,6 +492,9 @@ This document provides comprehensive integration testing guidance derived from t
 
     def _generate_api_tests_section(self) -> str:
         """Generate API tests section."""
+        # Type guard: test_suite is always set after _build_test_suite
+        assert self.test_suite is not None
+        
         lines = ["## API Test Cases"]
         
         if not self.test_suite.api_tests:
@@ -589,6 +598,9 @@ Use this data for boundary condition testing:
 
     def _generate_e2e_flows_section(self) -> str:
         """Generate end-to-end flows section."""
+        # Type guard: test_suite is always set after _build_test_suite
+        assert self.test_suite is not None
+        
         lines = ["## End-to-End Test Flows"]
         
         if not self.test_suite.e2e_flows:
@@ -613,6 +625,9 @@ Use this data for boundary condition testing:
 
     def _generate_coverage_section(self) -> str:
         """Generate coverage mapping section."""
+        # Type guard: test_suite is always set after _build_test_suite
+        assert self.test_suite is not None
+        
         lines = ["## Test Coverage Mapping"]
         
         if not self.test_suite.coverage_mappings:
@@ -628,7 +643,7 @@ Use this data for boundary condition testing:
             lines.append(f"| {mapping.use_case_name} | {scenario_count} | {coverage_bar} {mapping.coverage_percentage:.0f}% |")
         
         # Uncovered aspects
-        all_uncovered = []
+        all_uncovered: List[str] = []
         for mapping in self.test_suite.coverage_mappings:
             all_uncovered.extend(mapping.uncovered_aspects)
         
@@ -726,6 +741,9 @@ class TestIntegration:
 
     def _generate_recommendations(self) -> str:
         """Generate recommendations section."""
+        # Type guard: test_suite is always set after _build_test_suite
+        assert self.test_suite is not None
+        
         recommendations = ["## Recommendations"]
         
         # Analyze test suite for recommendations
