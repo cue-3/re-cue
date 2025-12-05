@@ -53,6 +53,15 @@ from .traceability import (
     TraceabilityEntry,
     TraceabilityMatrix,
 )
+from .transaction import (
+    NestedTransaction,
+    RollbackRule,
+    TransactionAnalysisResult,
+    TransactionBoundary,
+    TransactionIsolation,
+    TransactionPattern,
+    TransactionPropagation,
+)
 from .use_case_model import EditableUseCase
 
 __all__ = [
@@ -103,4 +112,12 @@ __all__ = [
     "ChangelogEntry",
     "Changelog",
     "GitAnalysisResult",
+    # Transaction models
+    "TransactionPropagation",
+    "TransactionIsolation",
+    "RollbackRule",
+    "TransactionBoundary",
+    "NestedTransaction",
+    "TransactionPattern",
+    "TransactionAnalysisResult",
 ]
