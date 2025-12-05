@@ -15,6 +15,7 @@ from .business_process import BusinessProcessIdentifier
 from .relationships import RelationshipMapper
 from .traceability import TraceabilityAnalyzer
 from .journey import JourneyAnalyzer
+from .git import GitAnalyzer, ChangelogGenerator
 
 __all__ = [
     'SecurityPatternAnalyzer',
@@ -28,4 +29,6 @@ __all__ = [
     'RelationshipMapper',
     'TraceabilityAnalyzer',
     'JourneyAnalyzer',
+    'GitAnalyzer',
+    'ChangelogGenerator',
 ]
