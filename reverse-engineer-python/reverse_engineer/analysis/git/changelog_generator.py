@@ -270,9 +270,17 @@ class ChangelogGenerator:
             parts = version.split('.')
             
             try:
-                major = int(parts[0]) if len(parts) > 0 else 0
-                minor = int(parts[1]) if len(parts) > 1 else 0
-                patch = int(re.split(r'[^0-9]', parts[2])[0]) if len(parts) > 2 else 0
+                major = int(parts[0]) if len(parts) > 0 and parts[0].isdigit() else 0
+                minor = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0
+                
+                # Handle patch version with optional suffix (e.g., '3-beta', '3alpha')
+                patch = 0
+                if len(parts) > 2:
+                    # Extract leading digits from patch version
+                    patch_match = re.match(r'^(\d+)', parts[2])
+                    if patch_match:
+                        patch = int(patch_match.group(1))
+                
                 return (-major, -minor, -patch, tag.name)  # Negative for descending sort
             except (ValueError, IndexError):
                 # Fall back to string comparison

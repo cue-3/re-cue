@@ -115,17 +115,21 @@ class GitAnalyzer:
             
         Returns:
             List of ChangedFile objects
+            
+        Note:
+            When comparing refs, uses two-dot (..) notation for direct
+            comparison between from_ref and to_ref.
         """
         if staged_only:
             # Show staged changes
             stdout, _, code = self._run_git_command(
-                ["diff", "--cached", "--name-status", "--numstat"]
+                ["diff", "--cached", "--name-status"]
             )
         elif from_ref:
-            # Compare between refs
+            # Compare between refs using two-dot notation for direct comparison
             to_ref = to_ref or "HEAD"
             stdout, _, code = self._run_git_command(
-                ["diff", "--name-status", f"{from_ref}...{to_ref}"]
+                ["diff", "--name-status", f"{from_ref}..{to_ref}"]
             )
         else:
             # Show uncommitted changes
@@ -159,7 +163,7 @@ class GitAnalyzer:
         if from_ref:
             to_ref = to_ref or "HEAD"
             stat_stdout, _, _ = self._run_git_command(
-                ["diff", "--numstat", f"{from_ref}...{to_ref}"]
+                ["diff", "--numstat", f"{from_ref}..{to_ref}"]
             )
         elif staged_only:
             stat_stdout, _, _ = self._run_git_command(
@@ -171,25 +175,28 @@ class GitAnalyzer:
             )
         
         # Parse numstat output for line counts
-        stat_map: Dict[str, Tuple[int, int]] = {}
+        # Note: Git shows '-' for binary files in numstat
+        stat_map: Dict[str, Tuple[int, int, bool]] = {}  # (additions, deletions, is_binary)
         for line in stat_stdout.strip().split('\n'):
             if not line:
                 continue
             parts = line.split('\t')
             if len(parts) >= 3:
+                path = parts[2]
+                # Binary files show '-' for additions and deletions
+                is_binary = parts[0] == '-' and parts[1] == '-'
                 try:
                     additions = int(parts[0]) if parts[0] != '-' else 0
                     deletions = int(parts[1]) if parts[1] != '-' else 0
-                    path = parts[2]
-                    stat_map[path] = (additions, deletions)
+                    stat_map[path] = (additions, deletions, is_binary)
                 except ValueError:
-                    continue
+                    # If conversion fails, mark as binary
+                    stat_map[path] = (0, 0, True)
         
         # Update changed files with stats
         for cf in changed_files:
             if cf.path in stat_map:
-                cf.additions, cf.deletions = stat_map[cf.path]
-                cf.is_binary = stat_map[cf.path] == (0, 0)
+                cf.additions, cf.deletions, cf.is_binary = stat_map[cf.path]
         
         # Include untracked files if requested
         if include_untracked and not from_ref and not staged_only:

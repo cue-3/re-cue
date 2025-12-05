@@ -43,12 +43,14 @@ class GitTestHelper:
         subprocess.run(
             ["git", "config", "user.email", "test@example.com"],
             cwd=repo_path,
-            capture_output=True
+            capture_output=True,
+            check=True
         )
         subprocess.run(
             ["git", "config", "user.name", "Test User"],
             cwd=repo_path,
-            capture_output=True
+            capture_output=True,
+            check=True
         )
         
         return repo_path
@@ -63,12 +65,14 @@ class GitTestHelper:
         subprocess.run(
             ["git", "add", filename],
             cwd=repo_path,
-            capture_output=True
+            capture_output=True,
+            check=True
         )
         subprocess.run(
             ["git", "commit", "-m", message],
             cwd=repo_path,
-            capture_output=True
+            capture_output=True,
+            check=True
         )
     
     @staticmethod
@@ -78,13 +82,15 @@ class GitTestHelper:
             subprocess.run(
                 ["git", "tag", "-a", tag_name, "-m", message],
                 cwd=repo_path,
-                capture_output=True
+                capture_output=True,
+                check=True
             )
         else:
             subprocess.run(
                 ["git", "tag", tag_name],
                 cwd=repo_path,
-                capture_output=True
+                capture_output=True,
+                check=True
             )
     
     @staticmethod
@@ -93,7 +99,8 @@ class GitTestHelper:
         subprocess.run(
             ["git", "checkout", "-b", branch_name],
             cwd=repo_path,
-            capture_output=True
+            capture_output=True,
+            check=True
         )
 
 

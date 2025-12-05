@@ -10,7 +10,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from .base import BaseGenerator
 from ..analysis.git import GitAnalyzer, ChangelogGenerator
 from ..domain.git import (
     ChangedFile,
@@ -20,7 +19,7 @@ from ..domain.git import (
 )
 
 
-class GitChangesGenerator(BaseGenerator):
+class GitChangesGenerator:
     """
     Generator for Git change analysis documentation.
     
@@ -28,6 +27,9 @@ class GitChangesGenerator(BaseGenerator):
     - Summary of changed files
     - Impact analysis based on changes
     - Contributors list
+    
+    Note: This class does not inherit from BaseGenerator as it uses
+    GitAnalyzer instead of ProjectAnalyzer.
     """
     
     def __init__(self, git_analyzer: GitAnalyzer, verbose: bool = False):
@@ -40,6 +42,8 @@ class GitChangesGenerator(BaseGenerator):
         """
         self.git_analyzer = git_analyzer
         self.verbose = verbose
+        self.date = datetime.now().strftime("%Y-%m-%d")
+        self.datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     def generate(
         self,
@@ -285,9 +289,12 @@ class GitChangesGenerator(BaseGenerator):
         return json.dumps(data, indent=2)
 
 
-class GitChangelogDocGenerator(BaseGenerator):
+class GitChangelogDocGenerator:
     """
     Generator for changelog documentation from Git history.
+    
+    Note: This class does not inherit from BaseGenerator as it uses
+    GitAnalyzer instead of ProjectAnalyzer.
     """
     
     def __init__(self, git_analyzer: GitAnalyzer, verbose: bool = False):
@@ -301,6 +308,8 @@ class GitChangelogDocGenerator(BaseGenerator):
         self.git_analyzer = git_analyzer
         self.changelog_generator = ChangelogGenerator(git_analyzer, verbose)
         self.verbose = verbose
+        self.date = datetime.now().strftime("%Y-%m-%d")
+        self.datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     def generate(
         self,

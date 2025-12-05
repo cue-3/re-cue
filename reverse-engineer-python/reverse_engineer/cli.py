@@ -749,11 +749,12 @@ def main():
         if git_changes_flag:
             from_ref = getattr(args, 'git_from', None)
             to_ref = getattr(args, 'git_to', 'HEAD')
+            output_format = getattr(args, 'format', 'markdown')
             
-            changes_gen = GitChangesGenerator(git_analyzer, verbose=args.verbose if hasattr(args, 'verbose') else False)
-            changes_content = changes_gen.generate(from_ref, to_ref, output_format=args.format if hasattr(args, 'format') else 'markdown')
+            changes_gen = GitChangesGenerator(git_analyzer, verbose=getattr(args, 'verbose', False))
+            changes_content = changes_gen.generate(from_ref, to_ref, output_format=output_format)
             
-            if args.format == 'json':
+            if output_format == 'json':
                 changes_file = output_dir / "git-changes.json"
             else:
                 changes_file = output_dir / "git-changes.md"
@@ -767,11 +768,12 @@ def main():
         if changelog_flag:
             from_ref = getattr(args, 'git_from', None)
             to_ref = getattr(args, 'git_to', 'HEAD')
+            output_format = getattr(args, 'format', 'markdown')
             
-            changelog_gen = GitChangelogDocGenerator(git_analyzer, verbose=args.verbose if hasattr(args, 'verbose') else False)
-            changelog_content = changelog_gen.generate(from_ref, to_ref, output_format=args.format if hasattr(args, 'format') else 'markdown')
+            changelog_gen = GitChangelogDocGenerator(git_analyzer, verbose=getattr(args, 'verbose', False))
+            changelog_content = changelog_gen.generate(from_ref, to_ref, output_format=output_format)
             
-            if args.format == 'json':
+            if output_format == 'json':
                 changelog_file = output_dir / "changelog.json"
             else:
                 changelog_file = output_dir / "changelog.md"
