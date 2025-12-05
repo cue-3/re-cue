@@ -23,10 +23,12 @@ import { CodeLensProvider } from './providers/codeLensProvider';
 import { DocumentLinkProvider } from './providers/documentLinkProvider';
 import { CodeIndexManager } from './parser/codeIndexManager';
 import { CodeElement } from './parser/types';
+import { TyLanguageClient } from './languageServer/tyClient';
 
 let analysisManager: AnalysisManager;
 let codeIndexManager: CodeIndexManager;
 let outputChannel: vscode.OutputChannel;
+let tyClient: TyLanguageClient | undefined;
 
 /**
  * Extension activation entry point
@@ -93,6 +95,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
     // Store output channel for disposal
     context.subscriptions.push(outputChannel);
+
+    // Initialize ty language server for Python type checking
+    initializeTyLanguageServer(context);
 
     outputChannel.appendLine('RE-cue extension ready');
 }
@@ -491,9 +496,34 @@ function refreshAllProviders(
 }
 
 /**
+ * Initialize ty language server for Python type checking
+ */
+async function initializeTyLanguageServer(context: vscode.ExtensionContext): Promise<void> {
+    try {
+        tyClient = new TyLanguageClient(context);
+        await tyClient.start();
+        
+        // Register restart command
+        context.subscriptions.push(
+            vscode.commands.registerCommand('recue.restartTyServer', async () => {
+                if (tyClient) {
+                    await tyClient.restart();
+                    vscode.window.showInformationMessage('ty language server restarted');
+                }
+            })
+        );
+    } catch (error) {
+        outputChannel.appendLine(`Failed to initialize ty language server: ${error}`);
+    }
+}
+
+/**
  * Extension deactivation
  */
-export function deactivate(): void {
+export async function deactivate(): Promise<void> {
+    if (tyClient) {
+        await tyClient.stop();
+    }
     if (outputChannel) {
         outputChannel.appendLine('RE-cue extension deactivated');
         outputChannel.dispose();

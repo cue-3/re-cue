@@ -1,7 +1,7 @@
 # Phase 3: System Boundary Mapping
-## developer-guides
+## re-cue
 
-**Generated**: 2025-12-01 19:48:54
+**Generated**: 2025-12-04 23:32:44
 **Analysis Phase**: 3 of 4 - System Boundary Mapping
 
 ---
@@ -11,10 +11,10 @@
 This document contains the results of Phase 3 analysis: mapping system boundaries,
 subsystems, layers, and component interactions.
 
-- **System Boundaries**: 0
+- **System Boundaries**: 5
 - **Subsystems**: 0
-- **Layers**: 0
-- **Components**: 0
+- **Layers**: 3
+- **Components**: 20
 
 ---
 
@@ -22,7 +22,11 @@ subsystems, layers, and component interactions.
 
 | System Boundary | Type | Component Count | Key Components |
 |-----------------|------|-----------------|----------------|
-*No system boundaries discovered*
+| Bookstore Api Service | Microservice | 0 | N/A |
+| Example Domain | Domain | 10 | Book, BookController, BookRepository, BookService, BookstoreApplication, Order, OrderController, OrderItem, OrderRepository, OrderService |
+| Data Layer | Layer | 6 | BookstoreApplication, OrderRepository, BookRepository, Order, OrderItem, Book |
+| Presentation Layer | Layer | 2 | OrderController, BookController |
+| Business Layer | Layer | 2 | OrderService, BookService |
 
 ---
 
@@ -36,7 +40,9 @@ subsystems, layers, and component interactions.
 
 ## Layer Organization
 
-*No layers identified*
+- **Data Layer**: 6 component(s)
+- **Presentation Layer**: 2 component(s)
+- **Business Layer**: 2 component(s)
 
 ---
 
@@ -69,7 +75,7 @@ After reviewing the boundary mapping:
 
 2. **Command to continue**:
    ```bash
-   python3 -m reverse_engineer --phase 4 --path /Users/squick/workspace/cue-3/re-cue/docs/developer-guides
+   python3 -m reverse_engineer --phase 4 --path /Users/squick/workspace/cue-3/re-cue
    ```
 
 ---

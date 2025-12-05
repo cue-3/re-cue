@@ -113,6 +113,11 @@
       {
         "command": "recue.showElementDetails",
         "title": "RE-cue: Show Element Details"
+      },
+      {
+        "command": "recue.restartTyServer",
+        "title": "RE-cue: Restart ty Type Checker",
+        "icon": "$(debug-restart)"
       }
     ],
     "menus": {
@@ -329,12 +334,25 @@
         },
         "recue.parsingLanguages": {
           "type": "array",
-          "default": ["java", "typescript", "javascript", "python"],
+          "default": [
+            "java",
+            "typescript",
+            "javascript",
+            "python"
+          ],
           "description": "Languages to parse directly for code indexing"
         },
         "recue.parsingExclude": {
           "type": "array",
-          "default": ["**/node_modules/**", "**/target/**", "**/build/**", "**/dist/**", "**/.git/**", "**/venv/**", "**/__pycache__/**"],
+          "default": [
+            "**/node_modules/**",
+            "**/target/**",
+            "**/build/**",
+            "**/dist/**",
+            "**/.git/**",
+            "**/venv/**",
+            "**/__pycache__/**"
+          ],
           "description": "Glob patterns to exclude from direct parsing"
         },
         "recue.backgroundIndexing": {
@@ -346,6 +364,16 @@
           "type": "boolean",
           "default": true,
           "description": "Cache parsed results for better performance"
+        },
+        "re-cue.ty.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable ty type checker language server for Python files"
+        },
+        "re-cue.ty.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to ty executable (auto-detected if empty)"
         }
       }
     },
@@ -384,5 +412,7 @@
     "mocha": "^10.2.0",
     "typescript": "^5.3.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
 }
