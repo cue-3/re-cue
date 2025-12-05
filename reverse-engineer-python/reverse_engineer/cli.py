@@ -4,6 +4,7 @@ Command-line interface for reverse engineering specifications.
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -273,6 +274,29 @@ Examples:
   reverse-engineer --git-from main --git-changes
   reverse-engineer --changelog
 
+Confluence Export:
+  --confluence          Export generated documentation to Confluence wiki
+                        • Automatically converts Markdown to Confluence format
+                        • Creates or updates pages in specified space
+
+  --confluence-url URL  Confluence base URL
+                        • Example: https://your-domain.atlassian.net/wiki
+
+  --confluence-space KEY
+                        Confluence space key where pages will be created
+
+  --confluence-user USER
+                        Username or email for authentication
+
+  --confluence-token TOKEN
+                        API token for authentication
+                        • Can also use CONFLUENCE_API_TOKEN environment variable
+
+Examples:
+  reverse-engineer --use-cases --confluence \\
+    --confluence-url https://company.atlassian.net/wiki \\
+    --confluence-space DOC --confluence-user user@example.com
+
 Use --help for more options.
     """)
 
@@ -441,6 +465,23 @@ The script will:
                           help='Generate changelog from Git history (changelog.md)')
     git_group.add_argument('--blame', type=str, metavar='FILE',
                           help='Show blame analysis for a specific file')
+    
+    # Confluence export flags
+    confluence_group = parser.add_argument_group('confluence export')
+    confluence_group.add_argument('--confluence', action='store_true',
+                                 help='Export generated documentation to Confluence wiki')
+    confluence_group.add_argument('--confluence-url', type=str, metavar='URL',
+                                 help='Confluence base URL (e.g., https://your-domain.atlassian.net/wiki)')
+    confluence_group.add_argument('--confluence-user', type=str, metavar='USER',
+                                 help='Confluence username or email')
+    confluence_group.add_argument('--confluence-token', type=str, metavar='TOKEN',
+                                 help='Confluence API token (or use CONFLUENCE_API_TOKEN env var)')
+    confluence_group.add_argument('--confluence-space', type=str, metavar='KEY',
+                                 help='Confluence space key (or use CONFLUENCE_SPACE_KEY env var)')
+    confluence_group.add_argument('--confluence-parent', type=str, metavar='ID',
+                                 help='Parent page ID for creating child pages')
+    confluence_group.add_argument('--confluence-prefix', type=str, default='',
+                                 help='Prefix for all page titles (e.g., "RE-cue: ")')
     
     parser.add_argument('--version', action='version', version='%(prog)s 1.0.7')
     
@@ -1110,6 +1151,115 @@ def main():
         
         print(f"✅ User journey mapping generated: {journey_file}", file=sys.stderr)
         print(f"✅ Journey JSON generated: {journey_json_file}", file=sys.stderr)
+    
+    # Export to Confluence if requested
+    if getattr(args, 'confluence', False):
+        from .exporters import ConfluenceExporter, ConfluenceConfig
+        
+        print("\n☁️  Exporting to Confluence...", file=sys.stderr)
+        
+        # Get Confluence configuration from args or environment
+        confluence_url = getattr(args, 'confluence_url', None) or os.environ.get('CONFLUENCE_URL')
+        confluence_user = getattr(args, 'confluence_user', None) or os.environ.get('CONFLUENCE_USER')
+        confluence_token = getattr(args, 'confluence_token', None) or os.environ.get('CONFLUENCE_API_TOKEN')
+        confluence_space = getattr(args, 'confluence_space', None) or os.environ.get('CONFLUENCE_SPACE_KEY')
+        confluence_parent = getattr(args, 'confluence_parent', None) or os.environ.get('CONFLUENCE_PARENT_ID')
+        confluence_prefix = getattr(args, 'confluence_prefix', '')
+        
+        # Validate required Confluence configuration
+        if not confluence_url:
+            print("❌ Error: --confluence-url or CONFLUENCE_URL environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        if not confluence_user:
+            print("❌ Error: --confluence-user or CONFLUENCE_USER environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        if not confluence_token:
+            print("❌ Error: --confluence-token or CONFLUENCE_API_TOKEN environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        if not confluence_space:
+            print("❌ Error: --confluence-space or CONFLUENCE_SPACE_KEY environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        
+        try:
+            config = ConfluenceConfig(
+                base_url=confluence_url,
+                username=confluence_user,
+                api_token=confluence_token,
+                space_key=confluence_space,
+                parent_page_id=confluence_parent,
+                page_title_prefix=confluence_prefix,
+            )
+            
+            exporter = ConfluenceExporter(config)
+            
+            # Test connection first
+            print("   Testing connection...", file=sys.stderr)
+            if not exporter.test_connection():
+                print("❌ Error: Could not connect to Confluence. Please check your credentials and URL.", file=sys.stderr)
+                sys.exit(1)
+            print("   ✓ Connection successful", file=sys.stderr)
+            
+            # Collect all generated markdown files
+            files_to_export = []
+            
+            if args.spec:
+                files_to_export.append(output_path)
+            if args.plan:
+                files_to_export.append(output_path.parent / "plan.md")
+            if args.data_model:
+                files_to_export.append(output_path.parent / "data-model.md")
+            if args.use_cases:
+                files_to_export.extend([
+                    output_path.parent / "phase1-structure.md",
+                    output_path.parent / "phase2-actors.md",
+                    output_path.parent / "phase3-boundaries.md",
+                    output_path.parent / "phase4-use-cases.md",
+                ])
+            if getattr(args, 'fourplusone', False):
+                files_to_export.append(output_path.parent / "fourplusone-architecture.md")
+            if getattr(args, 'diagrams', False):
+                files_to_export.append(output_path.parent / "diagrams.md")
+            if getattr(args, 'integration_tests', False):
+                files_to_export.append(output_path.parent / "integration-tests.md")
+            if getattr(args, 'traceability', False):
+                files_to_export.append(output_path.parent / "traceability.md")
+            if getattr(args, 'journey', False):
+                files_to_export.append(output_path.parent / "journey-map.md")
+            
+            # Filter to only existing files
+            files_to_export = [f for f in files_to_export if f.exists()]
+            
+            if not files_to_export:
+                print("⚠️  No files to export to Confluence", file=sys.stderr)
+            else:
+                print(f"   Exporting {len(files_to_export)} document(s)...", file=sys.stderr)
+                
+                # Export with project name as parent
+                project_info = analyzer.get_project_info()
+                project_name = project_info.get("name", "Documentation")
+                
+                results = exporter.export_multiple_files(
+                    files_to_export,
+                    parent_title=f"{project_name} Documentation"
+                )
+                
+                # Report results
+                success_count = sum(1 for r in results if r.success)
+                fail_count = len(results) - success_count
+                
+                for result in results:
+                    if result.success:
+                        print(f"   ✓ {result.action.capitalize()}: {result.title}", file=sys.stderr)
+                        if result.page_url:
+                            print(f"     URL: {result.page_url}", file=sys.stderr)
+                    else:
+                        print(f"   ✗ Failed: {result.title} - {result.error_message}", file=sys.stderr)
+                
+                print(f"\n✅ Confluence export complete: {success_count} succeeded, {fail_count} failed", file=sys.stderr)
+        
+        except Exception as e:
+            print(f"❌ Confluence export error: {e}", file=sys.stderr)
+            sys.exit(1)
     
     # Display results
     log_section("Generation Complete")
