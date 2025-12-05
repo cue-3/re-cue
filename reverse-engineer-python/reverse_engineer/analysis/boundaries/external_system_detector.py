@@ -4,7 +4,7 @@ ExternalSystemDetector - Analysis component.
 
 import re
 from pathlib import Path
-from typing import List, Set, Dict, Optional, Any
+from typing import List, Dict, Optional, Any
 
 from ...domain import (
     Endpoint, Model, View, Service,
