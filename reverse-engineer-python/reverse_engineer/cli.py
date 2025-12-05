@@ -235,6 +235,27 @@ No generation flags specified. Please provide at least one flag:
                   • Epic generation from journeys
                   • User story mapping
 
+Git Integration:
+  --git           Analyze only files changed in Git
+                  • Focus analysis on uncommitted changes
+                  • Combine with --git-from to compare branches/commits
+                  • Efficient analysis for large codebases
+
+  --git-from REF  Compare changes from REF (branch, commit, tag)
+                  • Example: --git-from main
+                  • Example: --git-from v1.0.0
+                  • Use with --git-to for custom range
+
+  --git-changes   Generate Git change analysis (git-changes.md)
+                  • Summary of changed files
+                  • Impact analysis
+                  • Contributor information
+
+  --changelog     Generate changelog from Git history (changelog.md)
+                  • Conventional commits support
+                  • Version grouping from tags
+                  • Breaking changes detection
+
 Examples:
   reverse-engineer --spec
   reverse-engineer --plan
@@ -248,6 +269,9 @@ Examples:
   reverse-engineer --use-cases --journey
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --refine-use-cases use-cases.md
+  reverse-engineer --git --use-cases
+  reverse-engineer --git-from main --git-changes
+  reverse-engineer --changelog
 
 Use --help for more options.
     """)
@@ -389,6 +413,23 @@ The script will:
                             help='Display cache statistics and exit')
     cache_group.add_argument('--cleanup-cache', action='store_true',
                             help='Clean up expired and invalid cache entries')
+    
+    # Git integration flags
+    git_group = parser.add_argument_group('git integration')
+    git_group.add_argument('--git', action='store_true',
+                          help='Analyze only files changed in Git (uncommitted changes by default)')
+    git_group.add_argument('--git-from', type=str, metavar='REF',
+                          help='Git reference to compare from (commit SHA, branch, tag)')
+    git_group.add_argument('--git-to', type=str, metavar='REF', default='HEAD',
+                          help='Git reference to compare to (default: HEAD)')
+    git_group.add_argument('--git-staged', action='store_true',
+                          help='Only analyze staged changes')
+    git_group.add_argument('--git-changes', action='store_true',
+                          help='Generate Git change analysis document (git-changes.md)')
+    git_group.add_argument('--changelog', action='store_true',
+                          help='Generate changelog from Git history (changelog.md)')
+    git_group.add_argument('--blame', type=str, metavar='FILE',
+                          help='Show blame analysis for a specific file')
     
     parser.add_argument('--version', action='version', version='%(prog)s 1.0.7')
     
@@ -656,12 +697,110 @@ def main():
         run_phased_analysis(args)
         return
     
+    # Handle Git-only commands early (--blame, --git-changes, --changelog)
+    git_changes_flag = getattr(args, 'git_changes', False)
+    changelog_flag = getattr(args, 'changelog', False)
+    blame_flag = getattr(args, 'blame', None)
+    
+    if git_changes_flag or changelog_flag or blame_flag:
+        # Find repository root first
+        project_path = args.project_path or getattr(args, 'path', None)
+        if project_path:
+            repo_root = Path(project_path).resolve()
+        else:
+            repo_root = find_repo_root(Path.cwd())
+        
+        if not repo_root:
+            print("Error: Could not determine repository root.", file=sys.stderr)
+            sys.exit(1)
+        
+        # Setup output directory
+        if hasattr(args, 'output_dir') and args.output_dir:
+            if args.output_dir == ".":
+                output_dir = repo_root
+            else:
+                output_dir = Path(args.output_dir).resolve()
+        else:
+            project_name = repo_root.name
+            output_dir = repo_root / f"re-{project_name}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        from .analysis.git import GitAnalyzer
+        from .generation.git import GitChangesGenerator, GitChangelogDocGenerator
+        
+        try:
+            git_analyzer = GitAnalyzer(repo_root, verbose=args.verbose if hasattr(args, 'verbose') else False)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+        
+        # Handle --blame
+        if blame_flag:
+            blame_result = git_analyzer.get_blame(blame_flag)
+            print(f"\n📋 Blame Analysis: {blame_flag}\n")
+            print(f"Contributors: {', '.join(blame_result.contributors)}")
+            primary = blame_result.get_primary_author()
+            if primary:
+                print(f"Primary Author: {primary}")
+            print(f"\nBlame Entries: {len(blame_result.entries)}")
+            return
+        
+        # Handle --git-changes
+        if git_changes_flag:
+            from_ref = getattr(args, 'git_from', None)
+            to_ref = getattr(args, 'git_to', 'HEAD')
+            output_format = getattr(args, 'format', 'markdown')
+            
+            changes_gen = GitChangesGenerator(git_analyzer, verbose=getattr(args, 'verbose', False))
+            changes_content = changes_gen.generate(from_ref, to_ref, output_format=output_format)
+            
+            if output_format == 'json':
+                changes_file = output_dir / "git-changes.json"
+            else:
+                changes_file = output_dir / "git-changes.md"
+            
+            with open(changes_file, 'w') as f:
+                f.write(changes_content)
+            
+            print(f"✅ Git change analysis generated: {changes_file}", file=sys.stderr)
+        
+        # Handle --changelog
+        if changelog_flag:
+            from_ref = getattr(args, 'git_from', None)
+            to_ref = getattr(args, 'git_to', 'HEAD')
+            output_format = getattr(args, 'format', 'markdown')
+            
+            changelog_gen = GitChangelogDocGenerator(git_analyzer, verbose=getattr(args, 'verbose', False))
+            changelog_content = changelog_gen.generate(from_ref, to_ref, output_format=output_format)
+            
+            if output_format == 'json':
+                changelog_file = output_dir / "changelog.json"
+            else:
+                changelog_file = output_dir / "changelog.md"
+            
+            with open(changelog_file, 'w') as f:
+                f.write(changelog_content)
+            
+            print(f"✅ Changelog generated: {changelog_file}", file=sys.stderr)
+        
+        # If only Git commands were requested, we're done
+        if not any([getattr(args, 'spec', False), getattr(args, 'plan', False), 
+                   getattr(args, 'data_model', False), getattr(args, 'api_contract', False),
+                   getattr(args, 'use_cases', False), getattr(args, 'diagrams', False),
+                   getattr(args, 'integration_tests', False), getattr(args, 'journey', False),
+                   getattr(args, 'traceability', False)]):
+            return
+    
     # Check if at least one generation flag is provided
     diagrams_flag = getattr(args, 'diagrams', False)
     integration_tests_flag = getattr(args, 'integration_tests', False)
     journey_flag = getattr(args, 'journey', False)
     traceability_flag = getattr(args, 'traceability', False)
-    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, diagrams_flag, integration_tests_flag, journey_flag, traceability_flag]):
+    git_changes_flag = getattr(args, 'git_changes', False)
+    changelog_flag = getattr(args, 'changelog', False)
+    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, 
+                diagrams_flag, integration_tests_flag, journey_flag, traceability_flag,
+                git_changes_flag, changelog_flag]):
         print_help_banner()
         sys.exit(1)
     

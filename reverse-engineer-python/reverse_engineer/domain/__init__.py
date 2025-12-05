@@ -42,6 +42,18 @@ from .journey import (
     Epic,
     JourneyMap,
 )
+from .git import (
+    FileChangeType,
+    ChangedFile,
+    CommitInfo,
+    BlameEntry,
+    BlameResult,
+    BranchInfo,
+    TagInfo,
+    ChangelogEntry,
+    Changelog,
+    GitAnalysisResult,
+)
 
 __all__ = [
     # Core entities
@@ -80,4 +92,15 @@ __all__ = [
     'UserStory',
     'Epic',
     'JourneyMap',
+    # Git models
+    'FileChangeType',
+    'ChangedFile',
+    'CommitInfo',
+    'BlameEntry',
+    'BlameResult',
+    'BranchInfo',
+    'TagInfo',
+    'ChangelogEntry',
+    'Changelog',
+    'GitAnalysisResult',
 ]
