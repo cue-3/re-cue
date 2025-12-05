@@ -16,6 +16,7 @@ from .relationships import RelationshipMapper
 from .security import SecurityPatternAnalyzer
 from .structure import PackageStructureAnalyzer
 from .traceability import TraceabilityAnalyzer
+from .transaction import TransactionAnalyzer
 from .ui_patterns import UIPatternAnalyzer
 
 __all__ = [
@@ -29,6 +30,7 @@ __all__ = [
     "BusinessProcessIdentifier",
     "RelationshipMapper",
     "TraceabilityAnalyzer",
+    "TransactionAnalyzer",
     "JourneyAnalyzer",
     "GitAnalyzer",
     "ChangelogGenerator",
