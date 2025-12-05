@@ -20,6 +20,7 @@ import urllib.request
 import urllib.error
 import base64
 import ssl
+import logging
 
 
 @dataclass
@@ -482,8 +483,9 @@ class ConfluenceExporter:
             results = result.get("results", [])
             if results:
                 return results[0]
-        except Exception:
-            pass
+        except Exception as e:
+            # Suppress errors as failure means page not found; log for debugging.
+            logging.warning(f"Error finding page by title '{title}': {e}")
         
         return None
     
