@@ -205,7 +205,7 @@ class DjangoAnalyzer(BaseAnalyzer):
         log_info("Discovering Django services...", self.verbose)
         
         # Find views.py and viewsets
-        service_files = []
+        service_files: List[Path] = []
         service_files.extend(self.repo_root.rglob("**/views.py"))
         service_files.extend(self.repo_root.rglob("**/views/*.py"))
         service_files.extend(self.repo_root.rglob("**/viewsets.py"))
@@ -243,7 +243,7 @@ class DjangoAnalyzer(BaseAnalyzer):
         log_info("Identifying actors...", self.verbose)
         
         # Look for permission/auth related files
-        auth_files = []
+        auth_files: List[Path] = []
         auth_files.extend(self.repo_root.rglob("**/permissions.py"))
         auth_files.extend(self.repo_root.rglob("**/auth.py"))
         auth_files.extend(self.repo_root.rglob("**/models.py"))

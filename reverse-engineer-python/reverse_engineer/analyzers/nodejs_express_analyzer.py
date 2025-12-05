@@ -50,7 +50,7 @@ class NodeExpressAnalyzer(BaseAnalyzer):
         
         # Find route files
         route_patterns = ['routes', 'controllers', 'api']
-        route_dirs = []
+        route_dirs: List[Path] = []
         
         for pattern in route_patterns:
             route_dirs.extend(self.repo_root.rglob(f"**/{pattern}/"))
@@ -167,7 +167,7 @@ class NodeExpressAnalyzer(BaseAnalyzer):
         
         # Find model directories
         model_patterns = ['models', 'entities', 'schemas']
-        model_dirs = []
+        model_dirs: List[Path] = []
         
         for pattern in model_patterns:
             model_dirs.extend(self.repo_root.rglob(f"**/{pattern}/"))
@@ -225,7 +225,7 @@ class NodeExpressAnalyzer(BaseAnalyzer):
         
         # Find service directories
         service_patterns = ['services', 'service', 'providers']
-        service_dirs = []
+        service_dirs: List[Path] = []
         
         for pattern in service_patterns:
             service_dirs.extend(self.repo_root.rglob(f"**/{pattern}/"))
@@ -259,7 +259,7 @@ class NodeExpressAnalyzer(BaseAnalyzer):
         log_info("Identifying actors...", self.verbose)
         
         # Look for auth/user related files
-        auth_files = []
+        auth_files: List[Path] = []
         for ext in self.extensions:
             auth_files.extend(self.repo_root.rglob(f"**/auth*{ext}"))
             auth_files.extend(self.repo_root.rglob(f"**/user*{ext}"))

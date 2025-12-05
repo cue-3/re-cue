@@ -190,7 +190,7 @@ class DotNetAspNetCoreAnalyzer(BaseAnalyzer):
         log_info("Discovering API endpoints...", self.verbose)
         
         # Find controller files
-        controller_files = []
+        controller_files: List[Path] = []
         controller_files.extend(self.repo_root.rglob("**/*Controller.cs"))
         controller_files.extend(self.repo_root.rglob("**/Controllers/*.cs"))
         
@@ -314,7 +314,7 @@ class DotNetAspNetCoreAnalyzer(BaseAnalyzer):
         log_info("Discovering data models...", self.verbose)
         
         # Find model directories
-        model_dirs = []
+        model_dirs: List[Path] = []
         for pattern in ["Models", "Entities", "Domain", "Data"]:
             model_dirs.extend(self.repo_root.rglob(f"**/{pattern}/"))
         

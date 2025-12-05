@@ -5,7 +5,7 @@ ApiContractGenerator - Document generator.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict, Any, List
 
 if TYPE_CHECKING:
     from ..analyzer import ProjectAnalyzer
@@ -176,9 +176,9 @@ class ApiContractGenerator(BaseGenerator):
         
         return type_map.get(java_type, "object")
     
-    def _generate_paths(self) -> dict:
+    def _generate_paths(self) -> Dict[str, Dict[str, Any]]:
         """Generate API paths from endpoints."""
-        paths = {}
+        paths: Dict[str, Dict[str, Any]] = {}
         
         for endpoint in self.analyzer.endpoints:
             path = endpoint.path or "/"

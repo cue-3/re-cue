@@ -4,7 +4,7 @@ BusinessProcessIdentifier - Analysis component.
 
 import re
 from pathlib import Path
-from typing import List, Set, Dict, Optional
+from typing import List, Set, Dict, Optional, Any, Match
 
 from ...domain import (
     Endpoint, Model, View, Service,
@@ -57,7 +57,9 @@ class BusinessProcessIdentifier:
             'retry': re.compile(r'@Retryable', re.IGNORECASE),
         }
     
-    def analyze_business_context(self, java_files: List[Path], endpoints: List) -> Dict:
+    def analyze_business_context(
+        self, java_files: List[Path], endpoints: List[Endpoint]
+    ) -> Dict[str, List[Dict[str, Any]]]:
         """Analyze business context from Java files.
         
         Args:
@@ -67,7 +69,7 @@ class BusinessProcessIdentifier:
         Returns:
             Dictionary containing transaction info, validation rules, and workflows
         """
-        business_context = {
+        business_context: Dict[str, List[Dict[str, Any]]] = {
             'transactions': [],
             'validations': [],
             'workflows': [],
@@ -108,7 +110,9 @@ class BusinessProcessIdentifier:
         
         return business_context
     
-    def _extract_transactions(self, content: str, java_file: Path) -> List[Dict]:
+    def _extract_transactions(
+        self, content: str, java_file: Path
+    ) -> List[Dict[str, Any]]:
         """Extract transaction boundary information from file content.
         
         Args:
@@ -165,7 +169,9 @@ class BusinessProcessIdentifier:
         
         return transactions
     
-    def _extract_validations(self, content: str, java_file: Path) -> List[Dict]:
+    def _extract_validations(
+        self, content: str, java_file: Path
+    ) -> List[Dict[str, Any]]:
         """Extract validation annotations and rules from file content.
         
         Args:
@@ -261,8 +267,14 @@ class BusinessProcessIdentifier:
         
         return validations
     
-    def _create_validation_rule(self, rule_type: str, description: str, 
-                                content: str, match, java_file: Path) -> Optional[Dict]:
+    def _create_validation_rule(
+        self,
+        rule_type: str,
+        description: str,
+        content: str,
+        match: Match[str],
+        java_file: Path,
+    ) -> Optional[Dict[str, Any]]:
         """Create a validation rule dictionary with field information.
         
         Args:
@@ -291,7 +303,9 @@ class BusinessProcessIdentifier:
         
         return validation
     
-    def _extract_workflows(self, content: str, java_file: Path) -> List[Dict]:
+    def _extract_workflows(
+        self, content: str, java_file: Path
+    ) -> List[Dict[str, Any]]:
         """Extract multi-step workflow patterns from file content.
         
         Args:
@@ -355,7 +369,9 @@ class BusinessProcessIdentifier:
         
         return workflows
     
-    def _derive_business_rules(self, validations: List[Dict]) -> List[Dict]:
+    def _derive_business_rules(
+        self, validations: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Derive high-level business rules from validation annotations.
         
         Args:
@@ -364,10 +380,10 @@ class BusinessProcessIdentifier:
         Returns:
             List of derived business rules
         """
-        business_rules = []
+        business_rules: List[Dict[str, Any]] = []
         
         # Group validations by file to identify business entities
-        by_file = {}
+        by_file: Dict[str, List[Dict[str, Any]]] = {}
         for validation in validations:
             file_name = validation['file']
             if file_name not in by_file:
@@ -419,8 +435,9 @@ class BusinessProcessIdentifier:
         
         return business_rules
     
-    def enhance_use_case_preconditions(self, use_case: Dict, 
-                                       business_context: Dict) -> List[str]:
+    def enhance_use_case_preconditions(
+        self, use_case: Dict[str, Any], business_context: Dict[str, List[Dict[str, Any]]]
+    ) -> List[str]:
         """Enhance use case preconditions with business context.
         
         Args:
@@ -463,8 +480,9 @@ class BusinessProcessIdentifier:
         
         return preconditions
     
-    def enhance_use_case_postconditions(self, use_case: Dict, 
-                                        business_context: Dict) -> List[str]:
+    def enhance_use_case_postconditions(
+        self, use_case: Dict[str, Any], business_context: Dict[str, List[Dict[str, Any]]]
+    ) -> List[str]:
         """Enhance use case postconditions with business context.
         
         Args:
@@ -500,8 +518,9 @@ class BusinessProcessIdentifier:
         
         return postconditions
     
-    def generate_extension_scenarios(self, use_case: Dict, 
-                                     business_context: Dict) -> List[str]:
+    def generate_extension_scenarios(
+        self, use_case: Dict[str, Any], business_context: Dict[str, List[Dict[str, Any]]]
+    ) -> List[str]:
         """Generate extension scenarios based on business context.
         
         Args:
@@ -552,7 +571,9 @@ class BusinessProcessIdentifier:
         
         return extensions
     
-    def _is_relevant_to_use_case(self, item: Dict, use_case: Dict) -> bool:
+    def _is_relevant_to_use_case(
+        self, item: Dict[str, Any], use_case: Dict[str, Any]
+    ) -> bool:
         """Check if a business context item is relevant to a use case.
         
         Args:

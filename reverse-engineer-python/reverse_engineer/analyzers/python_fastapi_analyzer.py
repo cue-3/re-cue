@@ -141,7 +141,7 @@ class FastAPIAnalyzer(BaseAnalyzer):
         log_info("Discovering Pydantic models...", self.verbose)
         
         # Find schema/model files
-        model_files = []
+        model_files: List[Path] = []
         model_files.extend(self.repo_root.rglob("**/models.py"))
         model_files.extend(self.repo_root.rglob("**/schemas.py"))
         model_files.extend(self.repo_root.rglob("**/models/*.py"))

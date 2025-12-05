@@ -70,6 +70,9 @@ class JourneyGenerator(BaseGenerator):
         # Run journey analysis
         self._run_analysis()
         
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         # Set project name
         project_info = self.analyzer.get_project_info()
         self.journey_map.project_name = project_info.get("name", "Unknown")
@@ -114,6 +117,9 @@ class JourneyGenerator(BaseGenerator):
     
     def _generate_json(self) -> str:
         """Generate JSON journey mapping output."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         data = {
             "project_name": self.journey_map.project_name,
             "generated_at": self.datetime,
@@ -213,6 +219,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
 
     def _generate_summary(self) -> str:
         """Generate summary section."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## Summary"]
         
         lines.append("")
@@ -242,6 +251,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
     
     def _generate_journey_overview(self) -> str:
         """Generate journey overview table."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## Journey Overview"]
         
         if not self.journey_map.journeys:
@@ -269,6 +281,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
     
     def _generate_journey_visualizations(self) -> str:
         """Generate Mermaid visualizations for journeys."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## Journey Visualizations"]
         
         if not self.journey_map.journeys:
@@ -370,6 +385,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
     
     def _generate_journey_details(self) -> str:
         """Generate detailed journey documentation."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## Journey Details"]
         
         for journey in self.journey_map.journeys:
@@ -436,6 +454,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
     
     def _generate_epics_section(self) -> str:
         """Generate epics section."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## Generated Epics"]
         
         if not self.journey_map.epics:
@@ -478,6 +499,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
     
     def _generate_user_stories_section(self) -> str:
         """Generate user stories section."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## User Story Map"]
         
         if not self.journey_map.user_stories:
@@ -524,6 +548,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
     
     def _generate_cross_boundary_flows(self) -> str:
         """Generate cross-boundary flows section."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## Cross-Boundary Flows"]
         
         lines.append("")
@@ -585,6 +612,9 @@ This document maps end-to-end user journeys by combining multiple use cases into
     
     def _generate_recommendations(self) -> str:
         """Generate recommendations section."""
+        # Type guard: journey_map is always set after _run_analysis
+        assert self.journey_map is not None
+        
         lines = ["## Recommendations"]
         
         lines.append("")

@@ -57,7 +57,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
         log_info("Discovering API endpoints...", self.verbose)
         
         # Find controller directories
-        controller_dirs = []
+        controller_dirs: List[Path] = []
         for pattern in ["controller", "controllers", "api"]:
             controller_dirs.extend(self.repo_root.rglob(f"src/**/{pattern}/"))
         
@@ -135,7 +135,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
         log_info("Discovering data models...", self.verbose)
         
         # Find model directories
-        model_dirs = []
+        model_dirs: List[Path] = []
         for pattern in ["model", "models", "entity", "entities", "domain"]:
             model_dirs.extend(self.repo_root.rglob(f"src/**/{pattern}/"))
         
@@ -174,7 +174,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
         log_info("Discovering services...", self.verbose)
         
         # Find service directories
-        service_dirs = []
+        service_dirs: List[Path] = []
         for pattern in ["service", "services"]:
             service_dirs.extend(self.repo_root.rglob(f"src/**/{pattern}/"))
         
@@ -205,7 +205,7 @@ class JavaSpringAnalyzer(BaseAnalyzer):
         log_info("Discovering UI views...", self.verbose)
         
         # Find view directories
-        view_dirs = []
+        view_dirs: List[Path] = []
         for pattern in ["views", "pages", "screens", "components"]:
             view_dirs.extend(self.repo_root.rglob(f"src/**/{pattern}/"))
         
