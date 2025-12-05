@@ -2,4 +2,4 @@
 
 from .pattern_detector import CommunicationPatternDetector
 
-__all__ = ['CommunicationPatternDetector']
+__all__ = ["CommunicationPatternDetector"]

@@ -8,4 +8,4 @@ This file is kept for backward compatibility only.
 # Re-export from new location for backward compatibility
 from .workflow.phase_manager import PhaseManager
 
-__all__ = ['PhaseManager']
+__all__ = ["PhaseManager"]

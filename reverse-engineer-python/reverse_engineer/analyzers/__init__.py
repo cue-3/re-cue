@@ -6,42 +6,41 @@ New code should import from reverse_engineer.frameworks package directly.
 """
 
 # Re-export from new frameworks package
-from ..frameworks import (
-    BaseAnalyzer,
-    JavaSpringAnalyzer,
-    NodeExpressAnalyzer,
-    DjangoAnalyzer,
-    FlaskAnalyzer,
-    FastAPIAnalyzer,
-    RubyRailsAnalyzer,
-    DotNetAspNetCoreAnalyzer,
-)
-
 # Re-export domain models for backward compatibility
 from ..domain import (
+    Actor,
     Endpoint,
     Model,
     Service,
-    View,
-    Actor,
     SystemBoundary,
     UseCase,
+    View,
+)
+from ..frameworks import (
+    BaseAnalyzer,
+    DjangoAnalyzer,
+    DotNetAspNetCoreAnalyzer,
+    FastAPIAnalyzer,
+    FlaskAnalyzer,
+    JavaSpringAnalyzer,
+    NodeExpressAnalyzer,
+    RubyRailsAnalyzer,
 )
 
 __all__ = [
-    'BaseAnalyzer',
-    'Endpoint',
-    'Model',
-    'Service',
-    'View',
-    'Actor',
-    'SystemBoundary',
-    'UseCase',
-    'JavaSpringAnalyzer',
-    'NodeExpressAnalyzer',
-    'DjangoAnalyzer',
-    'FlaskAnalyzer',
-    'FastAPIAnalyzer',
-    'RubyRailsAnalyzer',
-    'DotNetAspNetCoreAnalyzer',
+    "BaseAnalyzer",
+    "Endpoint",
+    "Model",
+    "Service",
+    "View",
+    "Actor",
+    "SystemBoundary",
+    "UseCase",
+    "JavaSpringAnalyzer",
+    "NodeExpressAnalyzer",
+    "DjangoAnalyzer",
+    "FlaskAnalyzer",
+    "FastAPIAnalyzer",
+    "RubyRailsAnalyzer",
+    "DotNetAspNetCoreAnalyzer",
 ]

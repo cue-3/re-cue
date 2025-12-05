@@ -8,10 +8,10 @@ This module provides Git-based analysis capabilities including:
 - Branch and tag analysis
 """
 
-from .git_analyzer import GitAnalyzer
 from .changelog_generator import ChangelogGenerator
+from .git_analyzer import GitAnalyzer
 
 __all__ = [
-    'GitAnalyzer',
-    'ChangelogGenerator',
+    "GitAnalyzer",
+    "ChangelogGenerator",
 ]

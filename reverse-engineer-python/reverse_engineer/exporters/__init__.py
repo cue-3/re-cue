@@ -5,9 +5,9 @@ This package provides exporters for publishing generated documentation
 to external platforms like Confluence, Jira, etc.
 """
 
-from .confluence import ConfluenceExporter, ConfluenceConfig
+from .confluence import ConfluenceConfig, ConfluenceExporter
 
 __all__ = [
-    'ConfluenceExporter',
-    'ConfluenceConfig',
+    "ConfluenceExporter",
+    "ConfluenceConfig",
 ]

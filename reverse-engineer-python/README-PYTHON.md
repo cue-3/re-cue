@@ -369,20 +369,26 @@ pytest tests/
 pytest --cov=reverse_engineer tests/
 ```
 
-### Code Style
+### Code Quality (Astral Toolchain)
 
 ```bash
 # Install development tools
-pip install black flake8 mypy
+pip install ruff ty
 
 # Format code
-black reverse_engineer/
+ruff format reverse_engineer/
 
-# Lint
-flake8 reverse_engineer/
+# Check formatting
+ruff format --check reverse_engineer/
+
+# Lint with auto-fix
+ruff check --fix reverse_engineer/
+
+# Lint without auto-fix
+ruff check reverse_engineer/
 
 # Type check
-mypy reverse_engineer/
+ty check reverse_engineer/
 ```
 
 ## Troubleshooting

@@ -10,4 +10,4 @@ This module provides comprehensive traceability analysis capabilities including:
 
 from .traceability_analyzer import TraceabilityAnalyzer
 
-__all__ = ['TraceabilityAnalyzer']
+__all__ = ["TraceabilityAnalyzer"]

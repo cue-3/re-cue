@@ -2,4 +2,4 @@
 
 from .security_analyzer import SecurityPatternAnalyzer
 
-__all__ = ['SecurityPatternAnalyzer']
+__all__ = ["SecurityPatternAnalyzer"]

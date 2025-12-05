@@ -63,9 +63,22 @@ reverse_engineer = [
     "templates/**/*.yml",
 ]
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ["py39"]
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C90"]
+extend-select = []  # Phase 3: Consider adding more rules
+ignore = ["E501"]  # Ignore line-too-long for now (many in generated docs)
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+# ty configuration - using command line options instead of config
+# Run: ty check --python 3.9 reverse_engineer/
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -2,4 +2,4 @@
 
 from .rails_analyzer import RubyRailsAnalyzer
 
-__all__ = ['RubyRailsAnalyzer']
+__all__ = ["RubyRailsAnalyzer"]

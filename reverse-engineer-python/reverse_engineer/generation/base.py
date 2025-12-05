@@ -11,22 +11,22 @@ if TYPE_CHECKING:
 
 class BaseGenerator:
     """Base class for all generators."""
-    
-    def __init__(self, analyzer: 'ProjectAnalyzer'):
+
+    def __init__(self, analyzer: "ProjectAnalyzer"):
         """
         Initialize the generator.
-        
+
         Args:
             analyzer: ProjectAnalyzer instance with discovered components
         """
         self.analyzer = analyzer
         self.date = datetime.now().strftime("%Y-%m-%d")
         self.datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
     def generate(self, *args, **kwargs) -> str:
         """
         Generate the document.
-        
+
         Returns:
             Generated document as string
         """

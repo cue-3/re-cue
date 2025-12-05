@@ -2,4 +2,4 @@
 
 from .express_analyzer import NodeExpressAnalyzer
 
-__all__ = ['NodeExpressAnalyzer']
+__all__ = ["NodeExpressAnalyzer"]

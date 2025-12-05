@@ -8,11 +8,12 @@ commit analysis, blame tracking, and changelog generation.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional, Dict, Any
+from typing import Any, Optional
 
 
 class FileChangeType(Enum):
     """Types of file changes in Git."""
+
     ADDED = "A"
     MODIFIED = "M"
     DELETED = "D"
@@ -26,6 +27,7 @@ class FileChangeType(Enum):
 @dataclass
 class ChangedFile:
     """Represents a file that has changed between commits or branches."""
+
     path: str
     change_type: FileChangeType
     old_path: Optional[str] = None  # For renames/copies
@@ -37,6 +39,7 @@ class ChangedFile:
 @dataclass
 class CommitInfo:
     """Information about a single Git commit."""
+
     sha: str
     short_sha: str
     author_name: str
@@ -44,7 +47,7 @@ class CommitInfo:
     timestamp: datetime
     subject: str
     body: str = ""
-    files_changed: List[ChangedFile] = field(default_factory=list)
+    files_changed: list[ChangedFile] = field(default_factory=list)
     insertions: int = 0
     deletions: int = 0
     files_count: int = 0
@@ -53,6 +56,7 @@ class CommitInfo:
 @dataclass
 class BlameEntry:
     """A single blame entry showing who modified a section of code."""
+
     commit_sha: str
     author_name: str
     author_email: str
@@ -65,20 +69,21 @@ class BlameEntry:
 @dataclass
 class BlameResult:
     """Complete blame analysis for a file."""
+
     file_path: str
-    entries: List[BlameEntry] = field(default_factory=list)
-    contributors: List[str] = field(default_factory=list)
-    
+    entries: list[BlameEntry] = field(default_factory=list)
+    contributors: list[str] = field(default_factory=list)
+
     def get_primary_author(self) -> Optional[str]:
         """Get the author responsible for most of the file content."""
         if not self.entries:
             return None
-        
-        author_lines: Dict[str, int] = {}
+
+        author_lines: dict[str, int] = {}
         for entry in self.entries:
             lines = entry.line_end - entry.line_start + 1
             author_lines[entry.author_name] = author_lines.get(entry.author_name, 0) + lines
-        
+
         if author_lines:
             return max(author_lines, key=author_lines.get)
         return None
@@ -87,6 +92,7 @@ class BlameResult:
 @dataclass
 class BranchInfo:
     """Information about a Git branch."""
+
     name: str
     is_current: bool = False
     is_remote: bool = False
@@ -95,9 +101,10 @@ class BranchInfo:
     behind_count: int = 0
 
 
-@dataclass 
+@dataclass
 class TagInfo:
     """Information about a Git tag."""
+
     name: str
     commit_sha: str
     tagger: Optional[str] = None
@@ -109,55 +116,58 @@ class TagInfo:
 @dataclass
 class ChangelogEntry:
     """A single entry in the changelog."""
+
     version: Optional[str]
     date: datetime
-    commits: List[CommitInfo] = field(default_factory=list)
+    commits: list[CommitInfo] = field(default_factory=list)
     summary: str = ""
-    breaking_changes: List[str] = field(default_factory=list)
-    features: List[str] = field(default_factory=list)
-    fixes: List[str] = field(default_factory=list)
-    other: List[str] = field(default_factory=list)
+    breaking_changes: list[str] = field(default_factory=list)
+    features: list[str] = field(default_factory=list)
+    fixes: list[str] = field(default_factory=list)
+    other: list[str] = field(default_factory=list)
 
 
 @dataclass
 class Changelog:
     """Complete changelog with multiple versions."""
+
     repo_name: str
-    entries: List[ChangelogEntry] = field(default_factory=list)
+    entries: list[ChangelogEntry] = field(default_factory=list)
     generated_at: datetime = field(default_factory=datetime.now)
 
 
 @dataclass
 class GitAnalysisResult:
     """Results of Git-based analysis."""
+
     repo_root: str
     current_branch: str
     from_ref: Optional[str] = None
     to_ref: Optional[str] = None
-    changed_files: List[ChangedFile] = field(default_factory=list)
-    commits: List[CommitInfo] = field(default_factory=list)
-    summary: Dict[str, Any] = field(default_factory=dict)
-    
+    changed_files: list[ChangedFile] = field(default_factory=list)
+    commits: list[CommitInfo] = field(default_factory=list)
+    summary: dict[str, Any] = field(default_factory=dict)
+
     @property
-    def files_added(self) -> List[ChangedFile]:
+    def files_added(self) -> list[ChangedFile]:
         """Get list of added files."""
         return [f for f in self.changed_files if f.change_type == FileChangeType.ADDED]
-    
+
     @property
-    def files_modified(self) -> List[ChangedFile]:
+    def files_modified(self) -> list[ChangedFile]:
         """Get list of modified files."""
         return [f for f in self.changed_files if f.change_type == FileChangeType.MODIFIED]
-    
+
     @property
-    def files_deleted(self) -> List[ChangedFile]:
+    def files_deleted(self) -> list[ChangedFile]:
         """Get list of deleted files."""
         return [f for f in self.changed_files if f.change_type == FileChangeType.DELETED]
-    
+
     @property
     def total_additions(self) -> int:
         """Get total line additions."""
         return sum(f.additions for f in self.changed_files)
-    
+
     @property
     def total_deletions(self) -> int:
         """Get total line deletions."""

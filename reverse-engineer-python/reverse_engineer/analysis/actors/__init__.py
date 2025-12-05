@@ -2,4 +2,4 @@
 
 from .actor_mapper import ActorSystemMapper
 
-__all__ = ['ActorSystemMapper']
+__all__ = ["ActorSystemMapper"]

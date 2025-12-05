@@ -2,4 +2,4 @@
 
 from .ui_analyzer import UIPatternAnalyzer
 
-__all__ = ['UIPatternAnalyzer']
+__all__ = ["UIPatternAnalyzer"]

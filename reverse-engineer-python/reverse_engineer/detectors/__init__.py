@@ -6,7 +6,7 @@ New code should import from reverse_engineer.frameworks package directly.
 """
 
 # Re-export from new frameworks package
-from ..frameworks import TechDetector
 from ..domain import TechStack
+from ..frameworks import TechDetector
 
-__all__ = ['TechDetector', 'TechStack']
+__all__ = ["TechDetector", "TechStack"]

@@ -65,13 +65,14 @@ python3 -m unittest tests.test_integration_full_pipeline -v
 python3 -m unittest tests.test_framework_integration -v
 python3 -m unittest tests.test_cache_manager -v
 
-# Linting
-black --check reverse_engineer/
-flake8 reverse_engineer/
-mypy reverse_engineer/
+# Code Quality (Astral Toolchain)
+ruff check reverse_engineer/
+ruff format --check reverse_engineer/
+ty check reverse_engineer/
 
-# Format code
-black reverse_engineer/
+# Format code and apply auto-fixes
+ruff format reverse_engineer/
+ruff check --fix reverse_engineer/
 ```
 
 ### VS Code Extension (`vscode-extension/`)
@@ -103,7 +104,9 @@ npm run package
 
 - **Python Version**: 3.9+ required
 - **Line Length**: 100 characters (configured in pyproject.toml)
-- **Formatter**: Black for code formatting
+- **Formatter**: Ruff for code formatting (Black-compatible)
+- **Linter**: Ruff for code quality checks
+- **Type Checker**: ty for type checking
 - **Type Hints**: Use type annotations for function parameters and return values
 - **Docstrings**: Use docstrings for all public functions and classes
 - **Dataclasses**: Use `@dataclass` for domain models in `domain/` directory

@@ -7,21 +7,21 @@ This file is kept for backward compatibility only.
 
 # Re-export from new location for backward compatibility
 from .workflow.config_wizard import (
+    ConfigProfile,
     ConfigurationWizard,
     WizardConfig,
-    ConfigProfile,
-    run_wizard,
+    delete_profile,
     list_profiles,
     load_profile,
-    delete_profile,
+    run_wizard,
 )
 
 __all__ = [
-    'ConfigurationWizard',
-    'WizardConfig',
-    'ConfigProfile',
-    'run_wizard',
-    'list_profiles',
-    'load_profile',
-    'delete_profile',
+    "ConfigurationWizard",
+    "WizardConfig",
+    "ConfigProfile",
+    "run_wizard",
+    "list_profiles",
+    "load_profile",
+    "delete_profile",
 ]

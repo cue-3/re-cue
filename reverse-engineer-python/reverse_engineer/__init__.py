@@ -11,15 +11,15 @@ from .cli import main
 
 # Re-export core domain models for backward compatibility
 from .domain import (
-    Endpoint,
-    Model,
     Actor,
-    SystemBoundary,
-    Relationship,
-    UseCase,
-    TechStack,
     AnalysisResult,
     EditableUseCase,
+    Endpoint,
+    Model,
+    Relationship,
+    SystemBoundary,
+    TechStack,
+    UseCase,
 )
 
 __all__ = [

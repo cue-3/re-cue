@@ -6,11 +6,11 @@ supporting multiple naming styles, business terminology, and
 context-aware suggestions.
 """
 
-from .use_case_namer import UseCaseNamer, NamingStyle, NamingConfig, NameSuggestion
+from .use_case_namer import NameSuggestion, NamingConfig, NamingStyle, UseCaseNamer
 
 __all__ = [
-    'UseCaseNamer',
-    'NamingStyle',
-    'NamingConfig',
-    'NameSuggestion',
+    "UseCaseNamer",
+    "NamingStyle",
+    "NamingConfig",
+    "NameSuggestion",
 ]

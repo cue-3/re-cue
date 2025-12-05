@@ -2,4 +2,4 @@
 
 from .process_identifier import BusinessProcessIdentifier
 
-__all__ = ['BusinessProcessIdentifier']
+__all__ = ["BusinessProcessIdentifier"]

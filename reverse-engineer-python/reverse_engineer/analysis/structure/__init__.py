@@ -2,4 +2,4 @@
 
 from .package_analyzer import PackageStructureAnalyzer
 
-__all__ = ['PackageStructureAnalyzer']
+__all__ = ["PackageStructureAnalyzer"]

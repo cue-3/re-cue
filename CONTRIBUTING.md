@@ -72,6 +72,51 @@ chmod +x reverse-engineer-bash/*.sh
 chmod +x install.sh
 ```
 
+### Python Development Setup
+
+For Python package development:
+
+```bash
+# Install development dependencies
+cd reverse-engineer-python
+pip install -e .
+pip install -r requirements-dev.txt
+
+# Set up pre-commit hooks (required for code quality)
+pip install pre-commit
+pre-commit install
+
+# Verify pre-commit setup
+pre-commit run --all-files
+```
+
+#### Pre-commit Hooks
+
+We use pre-commit hooks to ensure code quality. The hooks automatically run:
+
+- **Ruff Linter**: Checks code style and catches common errors (`ruff check --fix`)
+- **Ruff Formatter**: Formats code consistently (`ruff format`)
+- **ty Type Checker**: Validates type annotations (`ty check`)
+
+**Manual execution:**
+```bash
+# Run all hooks
+pre-commit run --all-files
+
+# Run specific hook
+pre-commit run ruff --all-files
+pre-commit run ty --all-files
+
+# Skip hooks (not recommended)
+git commit --no-verify
+```
+
+**Troubleshooting:**
+- If hooks fail, review the error messages and fix the issues
+- Run `ruff check --fix reverse_engineer/` to auto-fix many issues
+- For type errors, review `ty check` output and update type annotations
+- Update hook versions: `pre-commit autoupdate`
+
 ### Testing Your Changes
 
 Before submitting a pull request, test your changes:

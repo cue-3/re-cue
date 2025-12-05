@@ -1691,8 +1691,8 @@ reverse_engineer/
 
 1. **Type Hints Enhancement**
    - Add comprehensive type hints to all modules
-   - Use `mypy` for strict type checking
-   - Benefit: Better IDE support, fewer bugs
+   - Use `ty check` for strict type checking with Astral's ty
+   - Benefit: Better IDE support, fewer bugs, faster type checking
 
 2. **Async/Await Analysis**
    - Consider async file I/O for large codebases

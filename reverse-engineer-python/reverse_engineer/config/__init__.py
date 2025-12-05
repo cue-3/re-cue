@@ -2,4 +2,4 @@
 
 from .framework_config import FrameworkConfig
 
-__all__ = ['FrameworkConfig']
+__all__ = ["FrameworkConfig"]

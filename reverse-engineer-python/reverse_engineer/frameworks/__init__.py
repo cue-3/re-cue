@@ -7,24 +7,24 @@ detectors, and factory functions for creating framework-specific instances.
 
 from .base import BaseAnalyzer
 from .detector import TechDetector
+from .dotnet import DotNetAspNetCoreAnalyzer
 from .factory import create_analyzer
 
 # Import framework-specific analyzers for convenience
 from .java_spring import JavaSpringAnalyzer
-from .python import DjangoAnalyzer, FlaskAnalyzer, FastAPIAnalyzer
 from .nodejs import NodeExpressAnalyzer
+from .python import DjangoAnalyzer, FastAPIAnalyzer, FlaskAnalyzer
 from .ruby import RubyRailsAnalyzer
-from .dotnet import DotNetAspNetCoreAnalyzer
 
 __all__ = [
-    'BaseAnalyzer',
-    'TechDetector',
-    'create_analyzer',
-    'JavaSpringAnalyzer',
-    'DjangoAnalyzer',
-    'FlaskAnalyzer',
-    'FastAPIAnalyzer',
-    'NodeExpressAnalyzer',
-    'RubyRailsAnalyzer',
-    'DotNetAspNetCoreAnalyzer',
+    "BaseAnalyzer",
+    "TechDetector",
+    "create_analyzer",
+    "JavaSpringAnalyzer",
+    "DjangoAnalyzer",
+    "FlaskAnalyzer",
+    "FastAPIAnalyzer",
+    "NodeExpressAnalyzer",
+    "RubyRailsAnalyzer",
+    "DotNetAspNetCoreAnalyzer",
 ]

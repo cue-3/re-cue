@@ -2,4 +2,4 @@
 
 from .aspnetcore_analyzer import DotNetAspNetCoreAnalyzer
 
-__all__ = ['DotNetAspNetCoreAnalyzer']
+__all__ = ["DotNetAspNetCoreAnalyzer"]

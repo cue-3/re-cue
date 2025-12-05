@@ -6,6 +6,6 @@ This file is kept for backward compatibility only.
 """
 
 # Re-export from new location for backward compatibility
-from .performance.cache_manager import CacheManager, CacheEntry, CacheStatistics
+from .performance.cache_manager import CacheEntry, CacheManager, CacheStatistics
 
-__all__ = ['CacheManager', 'CacheEntry', 'CacheStatistics']
+__all__ = ["CacheManager", "CacheEntry", "CacheStatistics"]

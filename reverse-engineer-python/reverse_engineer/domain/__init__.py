@@ -5,102 +5,102 @@ This package contains pure domain models with no dependencies on other
 reverse_engineer modules, following domain-driven design principles.
 """
 
+from .analysis_result import AnalysisResult
 from .entities import (
+    Actor,
     Endpoint,
     Model,
-    View,
-    Service,
-    Actor,
-    SystemBoundary,
     Relationship,
+    Service,
+    SystemBoundary,
     UseCase,
-)
-from .tech_stack import TechStack
-from .analysis_result import AnalysisResult
-from .use_case_model import EditableUseCase
-from .test_scenario import (
-    TestData,
-    TestStep,
-    ApiTestCase,
-    TestScenario,
-    CoverageMapping,
-    IntegrationTestSuite,
-)
-from .traceability import (
-    CodeLink,
-    TestLink,
-    TraceabilityEntry,
-    ImpactedItem,
-    ImpactAnalysis,
-    TraceabilityMatrix,
-)
-from .journey import (
-    Touchpoint,
-    JourneyStage,
-    UserJourney,
-    UserStory,
-    Epic,
-    JourneyMap,
+    View,
 )
 from .git import (
-    FileChangeType,
-    ChangedFile,
-    CommitInfo,
     BlameEntry,
     BlameResult,
     BranchInfo,
-    TagInfo,
-    ChangelogEntry,
+    ChangedFile,
     Changelog,
+    ChangelogEntry,
+    CommitInfo,
+    FileChangeType,
     GitAnalysisResult,
+    TagInfo,
 )
+from .journey import (
+    Epic,
+    JourneyMap,
+    JourneyStage,
+    Touchpoint,
+    UserJourney,
+    UserStory,
+)
+from .tech_stack import TechStack
+from .test_scenario import (
+    ApiTestCase,
+    CoverageMapping,
+    IntegrationTestSuite,
+    TestData,
+    TestScenario,
+    TestStep,
+)
+from .traceability import (
+    CodeLink,
+    ImpactAnalysis,
+    ImpactedItem,
+    TestLink,
+    TraceabilityEntry,
+    TraceabilityMatrix,
+)
+from .use_case_model import EditableUseCase
 
 __all__ = [
     # Core entities
-    'Endpoint',
-    'Model',
-    'View',
-    'Service',
-    'Actor',
-    'SystemBoundary',
-    'Relationship',
-    'UseCase',
+    "Endpoint",
+    "Model",
+    "View",
+    "Service",
+    "Actor",
+    "SystemBoundary",
+    "Relationship",
+    "UseCase",
     # Tech stack
-    'TechStack',
+    "TechStack",
     # Containers
-    'AnalysisResult',
+    "AnalysisResult",
     # Use case models
-    'EditableUseCase',
+    "EditableUseCase",
     # Test scenario models
-    'TestData',
-    'TestStep',
-    'ApiTestCase',
-    'TestScenario',
-    'CoverageMapping',
-    'IntegrationTestSuite',
+    "TestData",
+    "TestStep",
+    "ApiTestCase",
+    "TestScenario",
+    "CoverageMapping",
+    "IntegrationTestSuite",
     # Traceability models
-    'CodeLink',
-    'TestLink',
-    'TraceabilityEntry',
-    'ImpactedItem',
-    'ImpactAnalysis',
-    'TraceabilityMatrix',
+    "CodeLink",
+    "TestLink",
+    "TraceabilityEntry",
+    "ImpactedItem",
+    "ImpactAnalysis",
+    "TraceabilityMatrix",
     # Journey models
-    'Touchpoint',
-    'JourneyStage',
-    'UserJourney',
-    'UserStory',
-    'Epic',
-    'JourneyMap',
+    "Touchpoint",
+    "JourneyStage",
+    "UserJourney",
+    "UserStory",
+    "Epic",
+    "JourneyMap",
     # Git models
-    'FileChangeType',
-    'ChangedFile',
-    'CommitInfo',
-    'BlameEntry',
-    'BlameResult',
-    'BranchInfo',
-    'TagInfo',
-    'ChangelogEntry',
-    'Changelog',
-    'GitAnalysisResult',
+    "FileChangeType",
+    "ChangedFile",
+    "CommitInfo",
+    "BlameEntry",
+    "BlameResult",
+    "BranchInfo",
+    "TagInfo",
+    "ChangelogEntry",
+    "Changelog",
+    "GitAnalysisResult",
 ]

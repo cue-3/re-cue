@@ -6,16 +6,16 @@ This file is kept for backward compatibility only.
 """
 
 # Re-export from new location for backward compatibility
+from .domain import EditableUseCase
 from .workflow.interactive_editor import (
-    UseCaseParser,
     InteractiveUseCaseEditor,
+    UseCaseParser,
     run_interactive_editor,
 )
-from .domain import EditableUseCase
 
 __all__ = [
-    'UseCaseParser',
-    'InteractiveUseCaseEditor',
-    'run_interactive_editor',
-    'EditableUseCase',
+    "UseCaseParser",
+    "InteractiveUseCaseEditor",
+    "run_interactive_editor",
+    "EditableUseCase",
 ]
