@@ -85,20 +85,17 @@ class TransactionAnalyzer:
         Returns:
             TransactionAnalysisResult with all detected boundaries
         """
-        if self.verbose:
-            log_info("Starting transaction boundary analysis...")
+        log_info("Starting transaction boundary analysis...", self.verbose)
 
         # Find all Java files
         java_files = self._find_java_files()
-        if self.verbose:
-            log_info(f"  Found {len(java_files)} Java files to analyze")
+        log_info(f"  Found {len(java_files)} Java files to analyze", self.verbose)
 
         # Analyze each file for transaction boundaries
         for java_file in java_files:
             self._analyze_file(java_file)
 
-        if self.verbose:
-            log_info(f"  Detected {len(self._boundaries)} transaction boundaries")
+        log_info(f"  Detected {len(self._boundaries)} transaction boundaries", self.verbose)
 
         # Detect nested transactions
         self._detect_nested_transactions()
@@ -115,13 +112,13 @@ class TransactionAnalyzer:
         )
         result.compute_statistics()
 
-        if self.verbose:
-            log_info(
-                f"Transaction analysis complete: "
-                f"{result.read_only_count} read-only, "
-                f"{result.write_count} write, "
-                f"{result.nested_count} nested"
-            )
+        log_info(
+            f"Transaction analysis complete: "
+            f"{result.read_only_count} read-only, "
+            f"{result.write_count} write, "
+            f"{result.nested_count} nested",
+            self.verbose,
+        )
 
         return result
 
@@ -141,8 +138,7 @@ class TransactionAnalyzer:
                     continue
                 java_files.append(file_path)
         except (PermissionError, OSError) as e:
-            if self.verbose:
-                log_info(f"  Warning: Could not scan some directories: {e}")
+            log_info(f"  Warning: Could not scan some directories: {e}", self.verbose)
         return java_files
 
     def _is_test_file(self, file_path: Path) -> bool:
@@ -156,8 +152,7 @@ class TransactionAnalyzer:
         try:
             content = file_path.read_text(encoding="utf-8")
         except Exception as e:
-            if self.verbose:
-                log_info(f"  Warning: Could not read {file_path}: {e}")
+            log_info(f"  Warning: Could not read {file_path}: {e}", self.verbose)
             return
 
         # Extract class name
