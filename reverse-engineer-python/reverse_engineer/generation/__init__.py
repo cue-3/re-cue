@@ -19,6 +19,7 @@ from .visualization import VisualizationGenerator
 from .integration_test import IntegrationTestGenerator
 from .traceability import TraceabilityGenerator
 from .journey import JourneyGenerator
+from .git import GitChangesGenerator, GitChangelogDocGenerator
 
 __all__ = [
     'BaseGenerator',
@@ -35,4 +36,6 @@ __all__ = [
     'IntegrationTestGenerator',
     'TraceabilityGenerator',
     'JourneyGenerator',
+    'GitChangesGenerator',
+    'GitChangelogDocGenerator',
 ]

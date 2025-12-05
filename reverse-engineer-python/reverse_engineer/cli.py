@@ -4,6 +4,7 @@ Command-line interface for reverse engineering specifications.
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -235,6 +236,27 @@ No generation flags specified. Please provide at least one flag:
                   • Epic generation from journeys
                   • User story mapping
 
+Git Integration:
+  --git           Analyze only files changed in Git
+                  • Focus analysis on uncommitted changes
+                  • Combine with --git-from to compare branches/commits
+                  • Efficient analysis for large codebases
+
+  --git-from REF  Compare changes from REF (branch, commit, tag)
+                  • Example: --git-from main
+                  • Example: --git-from v1.0.0
+                  • Use with --git-to for custom range
+
+  --git-changes   Generate Git change analysis (git-changes.md)
+                  • Summary of changed files
+                  • Impact analysis
+                  • Contributor information
+
+  --changelog     Generate changelog from Git history (changelog.md)
+                  • Conventional commits support
+                  • Version grouping from tags
+                  • Breaking changes detection
+
 Examples:
   reverse-engineer --spec
   reverse-engineer --plan
@@ -248,6 +270,32 @@ Examples:
   reverse-engineer --use-cases --journey
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --refine-use-cases use-cases.md
+  reverse-engineer --git --use-cases
+  reverse-engineer --git-from main --git-changes
+  reverse-engineer --changelog
+
+Confluence Export:
+  --confluence          Export generated documentation to Confluence wiki
+                        • Automatically converts Markdown to Confluence format
+                        • Creates or updates pages in specified space
+
+  --confluence-url URL  Confluence base URL
+                        • Example: https://your-domain.atlassian.net/wiki
+
+  --confluence-space KEY
+                        Confluence space key where pages will be created
+
+  --confluence-user USER
+                        Username or email for authentication
+
+  --confluence-token TOKEN
+                        API token for authentication
+                        • Can also use CONFLUENCE_API_TOKEN environment variable
+
+Examples:
+  reverse-engineer --use-cases --confluence \\
+    --confluence-url https://company.atlassian.net/wiki \\
+    --confluence-space DOC --confluence-user user@example.com
 
 Use --help for more options.
     """)
@@ -364,6 +412,17 @@ The script will:
     parser.add_argument('--phase', type=str, choices=['1', '2', '3', '4', 'all'],
                         help='Run specific phase: 1=structure, 2=actors, 3=boundaries, 4=use-cases, all=run all')
     
+    # Use case naming options
+    naming_group = parser.add_argument_group('use case naming')
+    naming_group.add_argument('--naming-style', type=str,
+                             choices=['business', 'technical', 'concise', 'verbose', 'user_centric'],
+                             default='business',
+                             help='Style for use case naming (default: business)')
+    naming_group.add_argument('--naming-alternatives', action='store_true', default=True,
+                             help='Generate alternative name suggestions (default: enabled)')
+    naming_group.add_argument('--no-naming-alternatives', dest='naming_alternatives', action='store_false',
+                             help='Disable alternative name suggestions')
+    
     # Performance optimization flags
     perf_group = parser.add_argument_group('performance optimizations (for large codebases)')
     perf_group.add_argument('--parallel', action='store_true', default=True,
@@ -389,6 +448,40 @@ The script will:
                             help='Display cache statistics and exit')
     cache_group.add_argument('--cleanup-cache', action='store_true',
                             help='Clean up expired and invalid cache entries')
+    
+    # Git integration flags
+    git_group = parser.add_argument_group('git integration')
+    git_group.add_argument('--git', action='store_true',
+                          help='Analyze only files changed in Git (uncommitted changes by default)')
+    git_group.add_argument('--git-from', type=str, metavar='REF',
+                          help='Git reference to compare from (commit SHA, branch, tag)')
+    git_group.add_argument('--git-to', type=str, metavar='REF', default='HEAD',
+                          help='Git reference to compare to (default: HEAD)')
+    git_group.add_argument('--git-staged', action='store_true',
+                          help='Only analyze staged changes')
+    git_group.add_argument('--git-changes', action='store_true',
+                          help='Generate Git change analysis document (git-changes.md)')
+    git_group.add_argument('--changelog', action='store_true',
+                          help='Generate changelog from Git history (changelog.md)')
+    git_group.add_argument('--blame', type=str, metavar='FILE',
+                          help='Show blame analysis for a specific file')
+    
+    # Confluence export flags
+    confluence_group = parser.add_argument_group('confluence export')
+    confluence_group.add_argument('--confluence', action='store_true',
+                                 help='Export generated documentation to Confluence wiki')
+    confluence_group.add_argument('--confluence-url', type=str, metavar='URL',
+                                 help='Confluence base URL (e.g., https://your-domain.atlassian.net/wiki)')
+    confluence_group.add_argument('--confluence-user', type=str, metavar='USER',
+                                 help='Confluence username or email')
+    confluence_group.add_argument('--confluence-token', type=str, metavar='TOKEN',
+                                 help='Confluence API token (or use CONFLUENCE_API_TOKEN env var)')
+    confluence_group.add_argument('--confluence-space', type=str, metavar='KEY',
+                                 help='Confluence space key (or use CONFLUENCE_SPACE_KEY env var)')
+    confluence_group.add_argument('--confluence-parent', type=str, metavar='ID',
+                                 help='Parent page ID for creating child pages')
+    confluence_group.add_argument('--confluence-prefix', type=str, default='',
+                                 help='Prefix for all page titles (e.g., "RE-cue: ")')
     
     parser.add_argument('--version', action='version', version='%(prog)s 1.0.7')
     
@@ -449,6 +542,9 @@ def run_phased_analysis(args):
     # Initialize phase manager
     phase_manager = PhaseManager(repo_root, output_dir)
     
+    # Get naming style from args
+    naming_style = getattr(args, 'naming_style', 'business')
+    
     # Initialize analyzer
     log_section("RE-cue - Phased Reverse Engineering")
     analyzer = ProjectAnalyzer(
@@ -456,7 +552,8 @@ def run_phased_analysis(args):
         verbose=args.verbose,
         enable_optimizations=args.parallel,
         enable_incremental=args.incremental,
-        max_workers=args.max_workers
+        max_workers=args.max_workers,
+        naming_style=naming_style
     )
     
     # Determine which phase to run
@@ -656,12 +753,110 @@ def main():
         run_phased_analysis(args)
         return
     
+    # Handle Git-only commands early (--blame, --git-changes, --changelog)
+    git_changes_flag = getattr(args, 'git_changes', False)
+    changelog_flag = getattr(args, 'changelog', False)
+    blame_flag = getattr(args, 'blame', None)
+    
+    if git_changes_flag or changelog_flag or blame_flag:
+        # Find repository root first
+        project_path = args.project_path or getattr(args, 'path', None)
+        if project_path:
+            repo_root = Path(project_path).resolve()
+        else:
+            repo_root = find_repo_root(Path.cwd())
+        
+        if not repo_root:
+            print("Error: Could not determine repository root.", file=sys.stderr)
+            sys.exit(1)
+        
+        # Setup output directory
+        if hasattr(args, 'output_dir') and args.output_dir:
+            if args.output_dir == ".":
+                output_dir = repo_root
+            else:
+                output_dir = Path(args.output_dir).resolve()
+        else:
+            project_name = repo_root.name
+            output_dir = repo_root / f"re-{project_name}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        from .analysis.git import GitAnalyzer
+        from .generation.git import GitChangesGenerator, GitChangelogDocGenerator
+        
+        try:
+            git_analyzer = GitAnalyzer(repo_root, verbose=args.verbose if hasattr(args, 'verbose') else False)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+        
+        # Handle --blame
+        if blame_flag:
+            blame_result = git_analyzer.get_blame(blame_flag)
+            print(f"\n📋 Blame Analysis: {blame_flag}\n")
+            print(f"Contributors: {', '.join(blame_result.contributors)}")
+            primary = blame_result.get_primary_author()
+            if primary:
+                print(f"Primary Author: {primary}")
+            print(f"\nBlame Entries: {len(blame_result.entries)}")
+            return
+        
+        # Handle --git-changes
+        if git_changes_flag:
+            from_ref = getattr(args, 'git_from', None)
+            to_ref = getattr(args, 'git_to', 'HEAD')
+            output_format = getattr(args, 'format', 'markdown')
+            
+            changes_gen = GitChangesGenerator(git_analyzer, verbose=getattr(args, 'verbose', False))
+            changes_content = changes_gen.generate(from_ref, to_ref, output_format=output_format)
+            
+            if output_format == 'json':
+                changes_file = output_dir / "git-changes.json"
+            else:
+                changes_file = output_dir / "git-changes.md"
+            
+            with open(changes_file, 'w') as f:
+                f.write(changes_content)
+            
+            print(f"✅ Git change analysis generated: {changes_file}", file=sys.stderr)
+        
+        # Handle --changelog
+        if changelog_flag:
+            from_ref = getattr(args, 'git_from', None)
+            to_ref = getattr(args, 'git_to', 'HEAD')
+            output_format = getattr(args, 'format', 'markdown')
+            
+            changelog_gen = GitChangelogDocGenerator(git_analyzer, verbose=getattr(args, 'verbose', False))
+            changelog_content = changelog_gen.generate(from_ref, to_ref, output_format=output_format)
+            
+            if output_format == 'json':
+                changelog_file = output_dir / "changelog.json"
+            else:
+                changelog_file = output_dir / "changelog.md"
+            
+            with open(changelog_file, 'w') as f:
+                f.write(changelog_content)
+            
+            print(f"✅ Changelog generated: {changelog_file}", file=sys.stderr)
+        
+        # If only Git commands were requested, we're done
+        if not any([getattr(args, 'spec', False), getattr(args, 'plan', False), 
+                   getattr(args, 'data_model', False), getattr(args, 'api_contract', False),
+                   getattr(args, 'use_cases', False), getattr(args, 'diagrams', False),
+                   getattr(args, 'integration_tests', False), getattr(args, 'journey', False),
+                   getattr(args, 'traceability', False)]):
+            return
+    
     # Check if at least one generation flag is provided
     diagrams_flag = getattr(args, 'diagrams', False)
     integration_tests_flag = getattr(args, 'integration_tests', False)
     journey_flag = getattr(args, 'journey', False)
     traceability_flag = getattr(args, 'traceability', False)
-    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, diagrams_flag, integration_tests_flag, journey_flag, traceability_flag]):
+    git_changes_flag = getattr(args, 'git_changes', False)
+    changelog_flag = getattr(args, 'changelog', False)
+    if not any([args.spec, args.plan, args.data_model, args.api_contract, args.use_cases, 
+                diagrams_flag, integration_tests_flag, journey_flag, traceability_flag,
+                git_changes_flag, changelog_flag]):
         print_help_banner()
         sys.exit(1)
     
@@ -741,13 +936,17 @@ def main():
         temp_analyzer.clear_cache()
         print("Cache cleared successfully", file=sys.stderr)
     
+    # Get naming style from args
+    naming_style = getattr(args, 'naming_style', 'business')
+    
     analyzer = ProjectAnalyzer(
         repo_root, 
         verbose=args.verbose,
         enable_optimizations=args.parallel,
         enable_incremental=args.incremental,
         enable_caching=args.cache if hasattr(args, 'cache') else True,
-        max_workers=args.max_workers
+        max_workers=args.max_workers,
+        naming_style=naming_style
     )
     analyzer.analyze()
     
@@ -952,6 +1151,115 @@ def main():
         
         print(f"✅ User journey mapping generated: {journey_file}", file=sys.stderr)
         print(f"✅ Journey JSON generated: {journey_json_file}", file=sys.stderr)
+    
+    # Export to Confluence if requested
+    if getattr(args, 'confluence', False):
+        from .exporters import ConfluenceExporter, ConfluenceConfig
+        
+        print("\n☁️  Exporting to Confluence...", file=sys.stderr)
+        
+        # Get Confluence configuration from args or environment
+        confluence_url = getattr(args, 'confluence_url', None) or os.environ.get('CONFLUENCE_URL')
+        confluence_user = getattr(args, 'confluence_user', None) or os.environ.get('CONFLUENCE_USER')
+        confluence_token = getattr(args, 'confluence_token', None) or os.environ.get('CONFLUENCE_API_TOKEN')
+        confluence_space = getattr(args, 'confluence_space', None) or os.environ.get('CONFLUENCE_SPACE_KEY')
+        confluence_parent = getattr(args, 'confluence_parent', None) or os.environ.get('CONFLUENCE_PARENT_ID')
+        confluence_prefix = getattr(args, 'confluence_prefix', '')
+        
+        # Validate required Confluence configuration
+        if not confluence_url:
+            print("❌ Error: --confluence-url or CONFLUENCE_URL environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        if not confluence_user:
+            print("❌ Error: --confluence-user or CONFLUENCE_USER environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        if not confluence_token:
+            print("❌ Error: --confluence-token or CONFLUENCE_API_TOKEN environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        if not confluence_space:
+            print("❌ Error: --confluence-space or CONFLUENCE_SPACE_KEY environment variable is required", file=sys.stderr)
+            sys.exit(1)
+        
+        try:
+            config = ConfluenceConfig(
+                base_url=confluence_url,
+                username=confluence_user,
+                api_token=confluence_token,
+                space_key=confluence_space,
+                parent_page_id=confluence_parent,
+                page_title_prefix=confluence_prefix,
+            )
+            
+            exporter = ConfluenceExporter(config)
+            
+            # Test connection first
+            print("   Testing connection...", file=sys.stderr)
+            if not exporter.test_connection():
+                print("❌ Error: Could not connect to Confluence. Please check your credentials and URL.", file=sys.stderr)
+                sys.exit(1)
+            print("   ✓ Connection successful", file=sys.stderr)
+            
+            # Collect all generated markdown files
+            files_to_export = []
+            
+            if args.spec:
+                files_to_export.append(output_path)
+            if args.plan:
+                files_to_export.append(output_path.parent / "plan.md")
+            if args.data_model:
+                files_to_export.append(output_path.parent / "data-model.md")
+            if args.use_cases:
+                files_to_export.extend([
+                    output_path.parent / "phase1-structure.md",
+                    output_path.parent / "phase2-actors.md",
+                    output_path.parent / "phase3-boundaries.md",
+                    output_path.parent / "phase4-use-cases.md",
+                ])
+            if getattr(args, 'fourplusone', False):
+                files_to_export.append(output_path.parent / "fourplusone-architecture.md")
+            if getattr(args, 'diagrams', False):
+                files_to_export.append(output_path.parent / "diagrams.md")
+            if getattr(args, 'integration_tests', False):
+                files_to_export.append(output_path.parent / "integration-tests.md")
+            if getattr(args, 'traceability', False):
+                files_to_export.append(output_path.parent / "traceability.md")
+            if getattr(args, 'journey', False):
+                files_to_export.append(output_path.parent / "journey-map.md")
+            
+            # Filter to only existing files
+            files_to_export = [f for f in files_to_export if f.exists()]
+            
+            if not files_to_export:
+                print("⚠️  No files to export to Confluence", file=sys.stderr)
+            else:
+                print(f"   Exporting {len(files_to_export)} document(s)...", file=sys.stderr)
+                
+                # Export with project name as parent
+                project_info = analyzer.get_project_info()
+                project_name = project_info.get("name", "Documentation")
+                
+                results = exporter.export_multiple_files(
+                    files_to_export,
+                    parent_title=f"{project_name} Documentation"
+                )
+                
+                # Report results
+                success_count = sum(1 for r in results if r.success)
+                fail_count = len(results) - success_count
+                
+                for result in results:
+                    if result.success:
+                        print(f"   ✓ {result.action.capitalize()}: {result.title}", file=sys.stderr)
+                        if result.page_url:
+                            print(f"     URL: {result.page_url}", file=sys.stderr)
+                    else:
+                        print(f"   ✗ Failed: {result.title} - {result.error_message}", file=sys.stderr)
+                
+                print(f"\n✅ Confluence export complete: {success_count} succeeded, {fail_count} failed", file=sys.stderr)
+        
+        except Exception as e:
+            print(f"❌ Confluence export error: {e}", file=sys.stderr)
+            sys.exit(1)
     
     # Display results
     log_section("Generation Complete")
