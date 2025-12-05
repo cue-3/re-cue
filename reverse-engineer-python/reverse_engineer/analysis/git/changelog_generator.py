@@ -7,7 +7,6 @@ history, following conventional commit patterns and semantic versioning.
 
 import re
 from datetime import datetime
-from pathlib import Path
 from typing import List, Optional, Dict, Any, Tuple
 
 from ...domain.git import (
