@@ -614,8 +614,12 @@ class UseCaseNamer:
         
         Returns:
             Configured UseCaseNamer instance
+        
+        Raises:
+            FileNotFoundError: If configuration file does not exist
+            ImportError: If PyYAML is not installed and YAML file is provided
+            ValueError: If unsupported file format is provided
         """
-        import yaml
         import json
         
         if not config_path.exists():
@@ -624,6 +628,13 @@ class UseCaseNamer:
         content = config_path.read_text()
         
         if config_path.suffix in [".yaml", ".yml"]:
+            try:
+                import yaml
+            except ImportError:
+                raise ImportError(
+                    "PyYAML is required to load YAML configuration files. "
+                    "Install it with: pip install pyyaml"
+                )
             data = yaml.safe_load(content)
         elif config_path.suffix == ".json":
             data = json.loads(content)

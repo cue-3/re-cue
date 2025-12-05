@@ -9,7 +9,13 @@ import unittest
 from pathlib import Path
 import tempfile
 import json
-import yaml
+
+# PyYAML is a dependency of the project, but handle import gracefully
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
 
 from reverse_engineer.analysis.naming import (
     UseCaseNamer,
@@ -452,6 +458,7 @@ class TestUseCaseNamerEnhancement(unittest.TestCase):
 class TestUseCaseNamerConfigFile(unittest.TestCase):
     """Test configuration file loading."""
     
+    @unittest.skipUnless(HAS_YAML, "PyYAML not installed")
     def test_load_from_yaml(self):
         """Test loading configuration from YAML file."""
         config_content = """
@@ -463,19 +470,16 @@ naming:
     business_terms:
         purchase: Acquire
 """
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
-            f.write(config_content)
-            config_path = Path(f.name)
-        
-        try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.yaml"
+            config_path.write_text(config_content)
+            
             namer = UseCaseNamer.from_config_file(config_path)
             
             self.assertEqual(namer.config.style, NamingStyle.TECHNICAL)
             self.assertFalse(namer.config.generate_alternatives)
             self.assertEqual(namer.config.num_alternatives, 2)
             self.assertEqual(namer.config.capitalize_style, "sentence")
-        finally:
-            config_path.unlink()
     
     def test_load_from_json(self):
         """Test loading configuration from JSON file."""
@@ -487,18 +491,15 @@ naming:
             }
         }
         
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            json.dump(config_data, f)
-            config_path = Path(f.name)
-        
-        try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.json"
+            config_path.write_text(json.dumps(config_data))
+            
             namer = UseCaseNamer.from_config_file(config_path)
             
             self.assertEqual(namer.config.style, NamingStyle.CONCISE)
             self.assertTrue(namer.config.generate_alternatives)
             self.assertEqual(namer.config.num_alternatives, 4)
-        finally:
-            config_path.unlink()
     
     def test_file_not_found_error(self):
         """Test error handling for missing config file."""
