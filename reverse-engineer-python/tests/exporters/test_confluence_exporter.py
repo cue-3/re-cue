@@ -9,7 +9,6 @@ Tests cover:
 """
 
 import unittest
-import json
 from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch
 import tempfile
