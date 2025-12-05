@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 import urllib.request
 import urllib.error
 import base64
@@ -105,8 +105,8 @@ class MarkdownToConfluenceConverter:
     
     def _preserve_code_blocks(self, text: str, storage: Dict[str, str]) -> str:
         """Preserve code blocks by replacing with placeholders."""
-        # Fenced code blocks with language
-        pattern = r'```(\w*)\n(.*?)```'
+        # Fenced code blocks with optional language and optional newline after fence
+        pattern = r'```(\w*)\n?(.*?)```'
         
         def replace_block(match):
             lang = match.group(1) or 'none'
@@ -469,9 +469,7 @@ class ConfluenceExporter:
         Returns:
             Page data dict if found, None otherwise
         """
-        import urllib.parse
-        
-        encoded_title = urllib.parse.quote(title)
+        encoded_title = quote(title)
         endpoint = (
             f"rest/api/content"
             f"?spaceKey={self.config.space_key}"

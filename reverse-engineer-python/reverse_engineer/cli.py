@@ -4,6 +4,7 @@ Command-line interface for reverse engineering specifications.
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -1153,7 +1154,6 @@ def main():
     
     # Export to Confluence if requested
     if getattr(args, 'confluence', False):
-        import os
         from .exporters import ConfluenceExporter, ConfluenceConfig
         
         print("\n☁️  Exporting to Confluence...", file=sys.stderr)
