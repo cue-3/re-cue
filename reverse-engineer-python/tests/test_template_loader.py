@@ -631,7 +631,7 @@ class TestCustomTemplateDirectory(unittest.TestCase):
         # Custom template should return custom path
         path = loader.get_template_path('phase1-structure.md')
         self.assertIsNotNone(path)
-        self.assertTrue('custom_templates' in str(path))
+        self.assertIn('custom_templates', str(path))
 
         # Common template should return common path
         path = loader.get_template_path('phase2-actors.md')
