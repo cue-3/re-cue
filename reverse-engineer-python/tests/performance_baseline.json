@@ -1,0 +1,31 @@
+{
+  "small_project_analysis": {
+    "max_duration": 2.0,
+    "min_throughput": 5.0
+  },
+  "medium_project_analysis": {
+    "max_duration": 5.0,
+    "min_throughput": 10.0
+  },
+  "large_project_analysis": {
+    "max_duration": 10.0,
+    "min_throughput": 10.0
+  },
+  "parallel_speedup": {
+    "min_speedup": 1.2
+  },
+  "cache_speedup": {
+    "min_speedup": 1.5,
+    "min_hit_rate": 95.0
+  },
+  "file_tracking": {
+    "max_track_time": 1.0,
+    "max_check_time": 0.5
+  },
+  "cache_operations": {
+    "max_write_time": 1.0,
+    "max_read_time": 0.5,
+    "min_write_throughput": 50.0,
+    "min_read_throughput": 100.0
+  }
+}
