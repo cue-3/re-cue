@@ -31,6 +31,7 @@ class WizardConfig:
     generate_use_cases: bool = True
     output_format: str = "markdown"
     output_directory: Optional[str] = None
+    custom_template_dir: Optional[str] = None
     description: Optional[str] = None
     verbose: bool = False
     phased: bool = False
@@ -414,6 +415,29 @@ preferences. Let's get started!
 
         print()
 
+        # Custom template directory (optional)
+        print("   Custom template directory (optional):")
+        print("   Specify a directory with custom templates to override built-in templates.")
+        print("   Press Enter to use built-in templates.")
+        print()
+
+        template_dir = input("   Template directory: ").strip()
+        if template_dir:
+            template_path = Path(template_dir)
+            if not template_path.exists():
+                print(f"   ⚠️  Warning: Directory does not exist: {template_dir}")
+                use_anyway = self._ask_yes_no("Use this path anyway?", default=False)
+                if not use_anyway:
+                    template_dir = ""
+            elif not template_path.is_dir():
+                print(f"   ❌ Path is not a directory: {template_dir}")
+                template_dir = ""
+
+        if template_dir:
+            self.config.custom_template_dir = template_dir
+
+        print()
+
     def _configure_additional_options(self):
         """Configure additional options."""
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -471,6 +495,9 @@ preferences. Let's get started!
 
         if self.config.output_directory:
             print(f"   📂 Output Directory: {self.config.output_directory}")
+
+        if self.config.custom_template_dir:
+            print(f"   📄 Custom Templates: {self.config.custom_template_dir}")
 
         print(f"   🔍 Verbose: {'Yes' if self.config.verbose else 'No'}")
 
@@ -576,6 +603,8 @@ def list_profiles():
             if config.generate_use_cases:
                 docs.append("use-cases")
             print(f"   Documents: {', '.join(docs)}")
+            if config.custom_template_dir:
+                print(f"   Custom Templates: {config.custom_template_dir}")
 
 
 def load_profile(profile_name: str) -> Optional[WizardConfig]:

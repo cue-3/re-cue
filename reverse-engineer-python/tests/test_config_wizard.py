@@ -242,20 +242,43 @@ class TestConfigurationWizard(unittest.TestCase):
     @patch('builtins.input')
     def test_configure_output_preferences(self, mock_input):
         """Test output preferences configuration."""
-        mock_input.side_effect = ["1", ""]  # markdown format, default output dir
+        # format, output dir, template dir
+        mock_input.side_effect = ["1", "", ""]  # markdown format, default output dir, default templates
         self.wizard._configure_output_preferences()
         
         self.assertEqual(self.wizard.config.output_format, "markdown")
         self.assertIsNone(self.wizard.config.output_directory)
+        self.assertIsNone(self.wizard.config.custom_template_dir)
     
     @patch('builtins.input')
     def test_configure_output_preferences_json(self, mock_input):
         """Test output preferences with JSON format."""
-        mock_input.side_effect = ["2", "/custom/output"]  # JSON format, custom dir
+        # format, output dir, template dir
+        mock_input.side_effect = ["2", "/custom/output", ""]  # JSON format, custom dir, default templates
         self.wizard._configure_output_preferences()
         
         self.assertEqual(self.wizard.config.output_format, "json")
         self.assertEqual(self.wizard.config.output_directory, "/custom/output")
+        self.assertIsNone(self.wizard.config.custom_template_dir)
+    
+    @patch('builtins.input')
+    def test_configure_output_preferences_with_custom_templates(self, mock_input):
+        """Test output preferences with custom template directory."""
+        import tempfile
+        import shutil
+        
+        # Create a temp directory for custom templates
+        temp_dir = tempfile.mkdtemp()
+        try:
+            # format, output dir, template dir
+            mock_input.side_effect = ["1", "", temp_dir]
+            self.wizard._configure_output_preferences()
+            
+            self.assertEqual(self.wizard.config.output_format, "markdown")
+            self.assertIsNone(self.wizard.config.output_directory)
+            self.assertEqual(self.wizard.config.custom_template_dir, temp_dir)
+        finally:
+            shutil.rmtree(temp_dir)
     
     @patch('builtins.input')
     def test_configure_additional_options(self, mock_input):
