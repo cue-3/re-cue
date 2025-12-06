@@ -570,9 +570,15 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         )
         self.results.append(result)
 
-        # Assertion: Overhead should be reasonable (process startup has overhead)
-        # Just verify both complete successfully
-        self.assertEqual(len(baseline_results), len([r for r in parallel_results if r[2] is None]))
+        # Assertion: Both should complete successfully
+        # parallel_results is a list of tuples: (file_path, result, error)
+        # where error is None for successful processing
+        successful_parallel = [r for r in parallel_results if r[2] is None]
+        self.assertEqual(
+            len(baseline_results),
+            len(successful_parallel),
+            f"Expected {len(baseline_results)} successful results, got {len(successful_parallel)}",
+        )
 
 
 if __name__ == "__main__":
