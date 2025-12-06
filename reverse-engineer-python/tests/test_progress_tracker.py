@@ -7,7 +7,7 @@ import time
 import unittest
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from reverse_engineer.domain.progress import (
     AnalysisProgress,
