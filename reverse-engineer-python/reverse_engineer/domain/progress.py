@@ -196,35 +196,35 @@ class ProgressCallback(Protocol):
 
     def on_stage_start(self, stage: StageProgress) -> None:
         """Called when a stage starts."""
-        ...
+        pass
 
     def on_stage_complete(self, stage: StageProgress) -> None:
         """Called when a stage completes."""
-        ...
+        pass
 
     def on_file_start(self, file_path: str, stage: AnalysisStage) -> None:
         """Called when file processing starts."""
-        ...
+        pass
 
     def on_file_complete(self, file_path: str, stage: AnalysisStage, success: bool) -> None:
         """Called when file processing completes."""
-        ...
+        pass
 
     def on_progress_update(self, progress: "AnalysisProgress") -> None:
         """Called periodically with overall progress update."""
-        ...
+        pass
 
     def on_error(self, error: str, file_path: Optional[str] = None) -> None:
         """Called when an error occurs."""
-        ...
+        pass
 
     def on_analysis_complete(self, progress: "AnalysisProgress") -> None:
         """Called when the entire analysis completes."""
-        ...
+        pass
 
     def should_cancel(self) -> bool:
         """Check if cancellation has been requested by the callback."""
-        ...
+        pass
 
 
 @dataclass
