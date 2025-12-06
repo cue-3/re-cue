@@ -10,6 +10,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional
+import logging
 
 from .domain.progress import (
     AnalysisProgress,
@@ -487,4 +488,4 @@ class AnalysisProgressTracker:
             try:
                 self.callback.on_progress_update(self.progress)
             except Exception:
-                pass
+                logging.exception("Exception occurred during progress update callback.")
