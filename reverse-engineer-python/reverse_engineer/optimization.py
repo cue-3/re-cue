@@ -19,7 +19,10 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
+
+if TYPE_CHECKING:
+    from .domain.progress import AnalysisStage, ProgressCallback
 
 
 @dataclass
@@ -162,8 +165,8 @@ class ProgressReporter:
         total: int,
         desc: str = "Processing",
         verbose: bool = True,
-        callback: Optional[Any] = None,
-        stage: Optional[Any] = None,
+        callback: Optional["ProgressCallback"] = None,
+        stage: Optional["AnalysisStage"] = None,
     ):
         """
         Initialize progress reporter.

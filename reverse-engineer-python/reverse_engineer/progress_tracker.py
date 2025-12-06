@@ -22,11 +22,12 @@ from .domain.progress import (
 )
 
 
-class ConsoleProgressCallback:
+class ConsoleProgressCallback(ProgressCallback):
     """
     A console-based progress callback that prints progress to stderr.
 
     This is the default callback used when verbose mode is enabled.
+    Implements the ProgressCallback protocol.
     """
 
     def __init__(self, verbose: bool = True, show_files: bool = False):
