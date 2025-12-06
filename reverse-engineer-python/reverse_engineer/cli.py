@@ -162,6 +162,7 @@ def interactive_mode():
     config.format = output_format
     config.verbose = verbose
     config.output = None  # Use default
+    config.template_dir = None  # Use default templates
 
     return config
 
@@ -249,6 +250,13 @@ No generation flags specified. Please provide at least one flag:
                   • Epic generation from journeys
                   • User story mapping
 
+Template Customization:
+  --template-dir DIR
+                  Use custom template directory for organizational templates
+                  • Templates in this directory override built-in templates
+                  • Supports team-specific documentation standards
+                  • Enables industry-specific template formats
+
 Git Integration:
   --git           Analyze only files changed in Git
                   • Focus analysis on uncommitted changes
@@ -283,6 +291,7 @@ Examples:
   reverse-engineer --use-cases --journey
   reverse-engineer --spec --plan --data-model --api-contract --use-cases
   reverse-engineer --refine-use-cases use-cases.md
+  reverse-engineer --use-cases --template-dir /path/to/custom/templates
   reverse-engineer --git --use-cases
   reverse-engineer --git-from main --git-changes
   reverse-engineer --changelog
@@ -477,6 +486,12 @@ The script will:
         "--output-dir",
         type=str,
         help='Output directory for generated files (default: <project-root>/re-<project-name>/, use "." for project root)',
+    )
+    parser.add_argument(
+        "--template-dir",
+        type=str,
+        help="Custom template directory for organizational or team-specific templates. "
+        "Templates in this directory override built-in templates.",
     )
     parser.add_argument(
         "-p",
@@ -869,6 +884,7 @@ def main():
         args.verbose = wizard_config.verbose
         args.phased = wizard_config.phased
         args.output = wizard_config.output_directory
+        args.template_dir = wizard_config.custom_template_dir
         # Continue with normal execution
 
     # Handle --load-profile flag
@@ -893,6 +909,7 @@ def main():
         args.verbose = wizard_config.verbose
         args.phased = wizard_config.phased
         args.output = wizard_config.output_directory
+        args.template_dir = wizard_config.custom_template_dir
         # Continue with normal execution
 
     # Handle --list-frameworks

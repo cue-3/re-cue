@@ -526,5 +526,174 @@ class TestDatabasePatterns(unittest.TestCase):
         self.assertGreaterEqual(len(python_templates), 4)
 
 
+class TestCustomTemplateDirectory(unittest.TestCase):
+    """Test custom template directory functionality."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        import tempfile
+        import shutil
+
+        # Create a temporary directory for custom templates
+        self.temp_dir = tempfile.mkdtemp()
+        self.custom_template_dir = Path(self.temp_dir) / "custom_templates"
+        self.custom_template_dir.mkdir()
+
+        # Create a custom template that will override a common template
+        custom_template = self.custom_template_dir / "phase1-structure.md"
+        custom_template.write_text("# Custom Phase 1 Template\n\nThis is a custom template.")
+
+        # Create a completely new custom template
+        new_template = self.custom_template_dir / "custom-report.md"
+        new_template.write_text("# Custom Report\n\n{{PROJECT_NAME}}")
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        import shutil
+        shutil.rmtree(self.temp_dir)
+
+    def test_init_with_custom_template_dir(self):
+        """Test initialization with custom template directory."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        self.assertEqual(loader.custom_dir, self.custom_template_dir)
+        self.assertIsNone(loader.framework_id)
+        self.assertIsNotNone(loader.common_dir)
+
+    def test_init_with_custom_and_framework(self):
+        """Test initialization with both custom template directory and framework."""
+        loader = TemplateLoader(
+            framework_id='java_spring',
+            custom_template_dir=self.custom_template_dir
+        )
+
+        self.assertEqual(loader.custom_dir, self.custom_template_dir)
+        self.assertEqual(loader.framework_id, 'java_spring')
+        self.assertIsNotNone(loader.framework_dir)
+
+    def test_custom_template_overrides_common(self):
+        """Test that custom templates override common templates."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        template = loader.load('phase1-structure.md')
+
+        self.assertIn('Custom Phase 1 Template', template)
+        self.assertIn('custom template', template)
+
+    def test_custom_template_overrides_framework(self):
+        """Test that custom templates override framework-specific templates."""
+        # Create a custom endpoint_section.md to override Java Spring template
+        custom_endpoint = self.custom_template_dir / "endpoint_section.md"
+        custom_endpoint.write_text("# Custom Endpoint Section\n\nOverridden template.")
+
+        loader = TemplateLoader(
+            framework_id='java_spring',
+            custom_template_dir=self.custom_template_dir
+        )
+
+        template = loader.load('endpoint_section.md')
+
+        self.assertIn('Custom Endpoint Section', template)
+        self.assertIn('Overridden template', template)
+
+    def test_load_custom_only_template(self):
+        """Test loading a template that only exists in custom directory."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        template = loader.load('custom-report.md')
+
+        self.assertIn('Custom Report', template)
+        self.assertIn('{{PROJECT_NAME}}', template)
+
+    def test_fallback_to_common_when_not_in_custom(self):
+        """Test fallback to common template when not in custom directory."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        # phase2-actors.md doesn't exist in custom, should fall back to common
+        template = loader.load('phase2-actors.md')
+
+        self.assertIsInstance(template, str)
+        self.assertIn('Phase 2', template)
+
+    def test_exists_custom_template(self):
+        """Test checking existence of custom template."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        self.assertTrue(loader.exists('phase1-structure.md'))
+        self.assertTrue(loader.exists('custom-report.md'))
+        self.assertTrue(loader.exists('phase2-actors.md'))  # Falls back to common
+        self.assertFalse(loader.exists('nonexistent.md'))
+
+    def test_get_template_path_custom(self):
+        """Test getting template path for custom template."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        # Custom template should return custom path
+        path = loader.get_template_path('phase1-structure.md')
+        self.assertIsNotNone(path)
+        self.assertTrue('custom_templates' in str(path))
+
+        # Common template should return common path
+        path = loader.get_template_path('phase2-actors.md')
+        self.assertIsNotNone(path)
+        self.assertTrue('common' in str(path))
+
+    def test_list_available_with_custom(self):
+        """Test listing templates includes custom templates."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        templates = loader.list_available()
+
+        self.assertIn('custom', templates)
+        self.assertIn('common', templates)
+        self.assertIn('phase1-structure.md', templates['custom'])
+        self.assertIn('custom-report.md', templates['custom'])
+
+    def test_list_available_custom_only(self):
+        """Test listing only custom templates."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        templates = loader.list_available(include_common=False, include_framework=False)
+
+        self.assertEqual(len(templates['common']), 0)
+        self.assertEqual(len(templates['framework']), 0)
+        self.assertGreater(len(templates['custom']), 0)
+
+    def test_render_custom_template(self):
+        """Test rendering a custom template with variables."""
+        loader = TemplateLoader(custom_template_dir=self.custom_template_dir)
+
+        output = loader.render_template('custom-report.md', PROJECT_NAME='MyProject')
+
+        self.assertIn('Custom Report', output)
+        self.assertIn('MyProject', output)
+
+    def test_invalid_custom_template_dir(self):
+        """Test that invalid custom template directory raises error."""
+        with self.assertRaises(FileNotFoundError):
+            TemplateLoader(custom_template_dir='/nonexistent/path')
+
+    def test_custom_template_dir_is_file(self):
+        """Test that specifying a file as custom template directory raises error."""
+        # Create a file instead of a directory
+        file_path = Path(self.temp_dir) / "not_a_directory.txt"
+        file_path.write_text("This is a file, not a directory")
+
+        with self.assertRaises(NotADirectoryError):
+            TemplateLoader(custom_template_dir=file_path)
+
+    def test_repr_with_custom_dir(self):
+        """Test __repr__ includes custom directory."""
+        loader = TemplateLoader(
+            framework_id='java_spring',
+            custom_template_dir=self.custom_template_dir
+        )
+        repr_str = repr(loader)
+
+        self.assertIn('TemplateLoader', repr_str)
+        self.assertIn('java_spring', repr_str)
+        self.assertIn('custom_dir', repr_str)
+
+
 if __name__ == '__main__':
     unittest.main()
