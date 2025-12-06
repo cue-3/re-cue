@@ -3,10 +3,31 @@ Project analyzer for reverse engineering.
 
 This module provides the main ProjectAnalyzer class that coordinates
 various analysis components to extract information from projects.
+
+.. deprecated:: 1.3.0
+    The `ProjectAnalyzer` class is deprecated and will be removed in version 2.0.0.
+    Use framework-specific analyzers (e.g., `JavaSpringAnalyzer`, `NodeExpressAnalyzer`)
+    or the `create_analyzer()` factory function instead.
+
+    Migration Guide:
+    ----------------
+    Instead of:
+        analyzer = ProjectAnalyzer(repo_root, verbose=True)
+
+    Use:
+        from reverse_engineer.analyzer import create_analyzer
+        analyzer = create_analyzer(repo_root, verbose=True)
+
+    Or for specific frameworks:
+        from reverse_engineer.analyzers import JavaSpringAnalyzer
+        analyzer = JavaSpringAnalyzer(repo_root, verbose=True)
+
+    See docs/developer-guides/legacy-analyzer-deprecation.md for full migration guide.
 """
 
 import re
 import sys
+import warnings
 from pathlib import Path
 from typing import Optional
 
@@ -74,7 +95,23 @@ if PLUGIN_ARCHITECTURE_AVAILABLE:
 
 
 class ProjectAnalyzer:
-    """Analyzes a project to discover its components."""
+    """
+    Analyzes a project to discover its components.
+
+    .. deprecated:: 1.3.0
+        This class is deprecated and will be removed in version 2.0.0.
+        Use framework-specific analyzers or the `create_analyzer()` factory function instead.
+
+        Example migration:
+            # Instead of:
+            analyzer = ProjectAnalyzer(repo_root, verbose=True)
+
+            # Use:
+            from reverse_engineer.analyzer import create_analyzer
+            analyzer = create_analyzer(repo_root, verbose=True)
+
+        See docs/developer-guides/legacy-analyzer-deprecation.md for full migration guide.
+    """
 
     def __init__(
         self,
@@ -87,6 +124,7 @@ class ProjectAnalyzer:
         naming_style: Optional[str] = None,
         naming_config: Optional[NamingConfig] = None,
         progress_callback: Optional[ProgressCallback] = None,
+        _suppress_deprecation_warning: bool = False,
     ):
         """
         Initialize the analyzer.
@@ -101,7 +139,23 @@ class ProjectAnalyzer:
             naming_style: Style for use case naming (business, technical, concise, verbose, user_centric)
             naming_config: Full naming configuration object (overrides naming_style)
             progress_callback: Optional callback for progress reporting
+            _suppress_deprecation_warning: Internal flag to suppress deprecation warning
+                (used by create_analyzer during transition period)
+
+        .. deprecated:: 1.3.0
+            Use `create_analyzer()` factory function or framework-specific analyzers instead.
         """
+        # Issue deprecation warning unless suppressed (e.g., when called from create_analyzer)
+        if not _suppress_deprecation_warning:
+            warnings.warn(
+                "ProjectAnalyzer is deprecated and will be removed in version 2.0.0. "
+                "Use create_analyzer() factory function or framework-specific analyzers "
+                "(e.g., JavaSpringAnalyzer, NodeExpressAnalyzer) instead. "
+                "See docs/developer-guides/legacy-analyzer-deprecation.md for migration guide.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         self.repo_root = repo_root
         self.verbose = verbose
         self.enable_optimizations = enable_optimizations
@@ -276,7 +330,11 @@ class ProjectAnalyzer:
             (AnalysisStage.SERVICES, self.discover_services, lambda: self.service_count),
             (AnalysisStage.FEATURES, self.extract_features, lambda: self.feature_count),
             (AnalysisStage.ACTORS, self.discover_actors, lambda: self.actor_count),
-            (AnalysisStage.BOUNDARIES, self.discover_system_boundaries, lambda: self.system_boundary_count),
+            (
+                AnalysisStage.BOUNDARIES,
+                self.discover_system_boundaries,
+                lambda: self.system_boundary_count,
+            ),
             (AnalysisStage.USE_CASES, self._run_use_case_analysis, lambda: self.use_case_count),
         ]
 
@@ -1577,7 +1635,8 @@ def create_analyzer(
     Create an analyzer instance using the new plugin architecture if available.
     Falls back to legacy ProjectAnalyzer if plugins are not available.
 
-    This function provides backward compatibility during the transition.
+    This is the recommended way to create analyzers as it automatically
+    detects the appropriate framework-specific analyzer to use.
 
     Args:
         repo_root: Path to repository root
@@ -1585,6 +1644,14 @@ def create_analyzer(
         enable_optimizations: Enable parallel processing and optimizations
         enable_incremental: Enable incremental analysis
         max_workers: Maximum worker processes
+
+    Returns:
+        A framework-specific analyzer instance or ProjectAnalyzer as fallback
+
+    Example:
+        >>> from reverse_engineer.analyzer import create_analyzer
+        >>> analyzer = create_analyzer(Path("/path/to/project"), verbose=True)
+        >>> analyzer.analyze()
     """
     if PLUGIN_ARCHITECTURE_AVAILABLE:
         try:
@@ -1625,10 +1692,12 @@ def create_analyzer(
                 print(f"Plugin architecture failed: {e}, using legacy analyzer")
 
     # Fall back to original ProjectAnalyzer with optimization support
+    # Suppress deprecation warning since this is the official transition path
     return ProjectAnalyzer(
         repo_root,
         verbose,
         enable_optimizations=enable_optimizations,
         enable_incremental=enable_incremental,
         max_workers=max_workers,
+        _suppress_deprecation_warning=True,
     )
