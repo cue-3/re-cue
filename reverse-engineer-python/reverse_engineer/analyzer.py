@@ -6,6 +6,7 @@ various analysis components to extract information from projects.
 """
 
 import re
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -29,14 +30,21 @@ from .analysis import (
 # Import domain models
 from .domain import (
     Actor,
+    AnalysisProgress,
+    AnalysisStage,
     Endpoint,
     Model,
+    ProgressCallback,
+    ProgressSummary,
     Relationship,
     Service,
     SystemBoundary,
     UseCase,
     View,
 )
+
+# Import progress tracking
+from .progress_tracker import AnalysisProgressTracker, ConsoleProgressCallback
 
 # Import utilities
 from .utils import log_info
@@ -78,6 +86,7 @@ class ProjectAnalyzer:
         max_workers: Optional[int] = None,
         naming_style: Optional[str] = None,
         naming_config: Optional[NamingConfig] = None,
+        progress_callback: Optional[ProgressCallback] = None,
     ):
         """
         Initialize the analyzer.
@@ -91,10 +100,17 @@ class ProjectAnalyzer:
             max_workers: Maximum number of worker processes for parallel processing
             naming_style: Style for use case naming (business, technical, concise, verbose, user_centric)
             naming_config: Full naming configuration object (overrides naming_style)
+            progress_callback: Optional callback for progress reporting
         """
         self.repo_root = repo_root
         self.verbose = verbose
         self.enable_optimizations = enable_optimizations
+
+        # Initialize progress tracker
+        self.progress_tracker = AnalysisProgressTracker(
+            callback=progress_callback or ConsoleProgressCallback(verbose=verbose),
+            verbose=verbose,
+        )
 
         # Existing collections
         self.endpoints: list[Endpoint] = []
@@ -241,54 +257,93 @@ class ProjectAnalyzer:
     def use_case_count(self) -> int:
         return len(self.use_cases)
 
-    def analyze(self):
-        """Run all analysis steps with progress feedback."""
-        import sys
+    def analyze(self) -> AnalysisProgress:
+        """Run all analysis steps with comprehensive progress feedback.
+
+        Returns:
+            AnalysisProgress object with complete progress information
+        """
+        tracker = self.progress_tracker
+        tracker.start_analysis()
 
         print("\n🔍 Starting project analysis...\n", file=sys.stderr)
 
-        # Stage 1: Endpoints
-        print("📍 Stage 1/8: Discovering API endpoints...", file=sys.stderr, end=" ", flush=True)
-        self.discover_endpoints()
-        print(f"✓ Found {self.endpoint_count} endpoints", file=sys.stderr)
+        # Define stages with their analysis methods and result getters
+        stages = [
+            (AnalysisStage.ENDPOINTS, self.discover_endpoints, lambda: self.endpoint_count),
+            (AnalysisStage.MODELS, self.discover_models, lambda: self.model_count),
+            (AnalysisStage.VIEWS, self.discover_views, lambda: self.view_count),
+            (AnalysisStage.SERVICES, self.discover_services, lambda: self.service_count),
+            (AnalysisStage.FEATURES, self.extract_features, lambda: self.feature_count),
+            (AnalysisStage.ACTORS, self.discover_actors, lambda: self.actor_count),
+            (AnalysisStage.BOUNDARIES, self.discover_system_boundaries, lambda: self.system_boundary_count),
+            (AnalysisStage.USE_CASES, self._run_use_case_analysis, lambda: self.use_case_count),
+        ]
 
-        # Stage 2: Models
-        print("📦 Stage 2/8: Analyzing data models...", file=sys.stderr, end=" ", flush=True)
-        self.discover_models()
-        print(f"✓ Found {self.model_count} models", file=sys.stderr)
+        stage_icons = {
+            AnalysisStage.ENDPOINTS: "📍",
+            AnalysisStage.MODELS: "📦",
+            AnalysisStage.VIEWS: "🎨",
+            AnalysisStage.SERVICES: "⚙️",
+            AnalysisStage.FEATURES: "✨",
+            AnalysisStage.ACTORS: "👥",
+            AnalysisStage.BOUNDARIES: "🏢",
+            AnalysisStage.USE_CASES: "📋",
+        }
 
-        # Stage 3: Views
-        print("🎨 Stage 3/8: Discovering UI views...", file=sys.stderr, end=" ", flush=True)
-        self.discover_views()
-        print(f"✓ Found {self.view_count} views", file=sys.stderr)
+        stage_names = {
+            AnalysisStage.ENDPOINTS: "Discovering API endpoints",
+            AnalysisStage.MODELS: "Analyzing data models",
+            AnalysisStage.VIEWS: "Discovering UI views",
+            AnalysisStage.SERVICES: "Detecting backend services",
+            AnalysisStage.FEATURES: "Extracting features",
+            AnalysisStage.ACTORS: "Identifying actors",
+            AnalysisStage.BOUNDARIES: "Mapping system boundaries",
+            AnalysisStage.USE_CASES: "Generating use cases",
+        }
 
-        # Stage 4: Services
-        print("⚙️  Stage 4/8: Detecting backend services...", file=sys.stderr, end=" ", flush=True)
-        self.discover_services()
-        print(f"✓ Found {self.service_count} services", file=sys.stderr)
+        for i, (stage, method, get_count) in enumerate(stages, 1):
+            # Check for cancellation before each stage
+            if tracker.is_cancelled():
+                print("\n⚠️  Analysis cancelled by user", file=sys.stderr)
+                return tracker.complete_analysis(error="Cancelled by user")
 
-        # Stage 5: Features
-        print("✨ Stage 5/8: Extracting features...", file=sys.stderr, end=" ", flush=True)
-        self.extract_features()
-        print(f"✓ Identified {self.feature_count} features", file=sys.stderr)
+            icon = stage_icons.get(stage, "•")
+            name = stage_names.get(stage, stage.value)
+            print(f"{icon} Stage {i}/8: {name}...", file=sys.stderr, end=" ", flush=True)
 
-        # Stage 6: Actors
-        print("👥 Stage 6/8: Identifying actors...", file=sys.stderr, end=" ", flush=True)
-        self.discover_actors()
-        print(f"✓ Found {self.actor_count} actors", file=sys.stderr)
+            # Start stage tracking
+            tracker.start_stage(stage)
 
-        # Stage 7: System Boundaries
-        print("🏢 Stage 7/8: Mapping system boundaries...", file=sys.stderr, end=" ", flush=True)
-        self.discover_system_boundaries()
-        print(f"✓ Found {self.system_boundary_count} boundaries", file=sys.stderr)
-
-        # Stage 8: Use Cases
-        print("📋 Stage 8/8: Generating use cases...", file=sys.stderr, end=" ", flush=True)
-        self.map_relationships()
-        self.extract_use_cases()
-        print(f"✓ Generated {self.use_case_count} use cases", file=sys.stderr)
+            try:
+                method()
+                count = get_count()
+                print(f"✓ Found {count} items", file=sys.stderr)
+                tracker.complete_stage(stage)
+            except Exception as e:
+                print(f"✗ Error: {e}", file=sys.stderr)
+                tracker.complete_stage(stage, error=str(e))
+                # Continue with other stages even if one fails
 
         print("\n✅ Analysis complete!\n", file=sys.stderr)
+        return tracker.complete_analysis()
+
+    def _run_use_case_analysis(self):
+        """Run the combined use case analysis (relationships + use cases)."""
+        self.map_relationships()
+        self.extract_use_cases()
+
+    def request_cancellation(self) -> None:
+        """Request cancellation of the current analysis."""
+        self.progress_tracker.request_cancellation()
+
+    def is_cancelled(self) -> bool:
+        """Check if cancellation has been requested."""
+        return self.progress_tracker.is_cancelled()
+
+    def get_progress_summary(self) -> ProgressSummary:
+        """Get a summary of the current analysis progress."""
+        return self.progress_tracker.get_summary()
 
     def discover_endpoints(self):
         """Discover API endpoints from Java controllers."""

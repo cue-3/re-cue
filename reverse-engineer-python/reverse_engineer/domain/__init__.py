@@ -62,6 +62,15 @@ from .transaction import (
     TransactionPattern,
     TransactionPropagation,
 )
+from .progress import (
+    AnalysisProgress,
+    AnalysisStage,
+    FileProgress,
+    ProgressCallback,
+    ProgressStatus,
+    ProgressSummary,
+    StageProgress,
+)
 from .use_case_model import EditableUseCase
 
 __all__ = [
@@ -120,4 +129,12 @@ __all__ = [
     "NestedTransaction",
     "TransactionPattern",
     "TransactionAnalysisResult",
+    # Progress tracking models
+    "AnalysisStage",
+    "ProgressStatus",
+    "FileProgress",
+    "StageProgress",
+    "AnalysisProgress",
+    "ProgressCallback",
+    "ProgressSummary",
 ]

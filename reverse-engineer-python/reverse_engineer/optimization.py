@@ -157,7 +157,14 @@ class FileTracker:
 class ProgressReporter:
     """Reports analysis progress with live updates."""
 
-    def __init__(self, total: int, desc: str = "Processing", verbose: bool = True):
+    def __init__(
+        self,
+        total: int,
+        desc: str = "Processing",
+        verbose: bool = True,
+        callback: Optional[Any] = None,
+        stage: Optional[Any] = None,
+    ):
         """
         Initialize progress reporter.
 
@@ -165,6 +172,8 @@ class ProgressReporter:
             total: Total number of items to process
             desc: Description of what's being processed
             verbose: Whether to show progress
+            callback: Optional ProgressCallback for external progress reporting
+            stage: Optional AnalysisStage for tracking
         """
         self.total = total
         self.completed = 0
@@ -172,12 +181,29 @@ class ProgressReporter:
         self.verbose = verbose
         self.start_time = datetime.now()
         self.errors: list[str] = []
+        self.callback = callback
+        self.stage = stage
+        self._cancellation_requested = False
+        self._recovered_count = 0
 
-    def update(self, n: int = 1):
-        """Update progress by n items."""
+    def update(self, n: int = 1, file_path: Optional[str] = None, success: bool = True):
+        """Update progress by n items.
+
+        Args:
+            n: Number of items completed
+            file_path: Optional file path that was processed
+            success: Whether the item was processed successfully
+        """
         self.completed += n
         if self.verbose:
             self._print_progress()
+
+        # Notify callback if provided
+        if self.callback and file_path and self.stage:
+            try:
+                self.callback.on_file_complete(file_path, self.stage, success)
+            except Exception:
+                pass  # Don't let callback errors affect processing
 
     def _print_progress(self):
         """Print current progress to stderr."""
@@ -216,12 +242,72 @@ class ProgressReporter:
     def add_error(self, error: str):
         """Add an error message."""
         self.errors.append(error)
+        if self.callback:
+            try:
+                self.callback.on_error(error)
+            except Exception:
+                pass
+
+    def add_recovery(self, file_path: str):
+        """Record a successful recovery from an error.
+
+        Args:
+            file_path: Path of file that was recovered
+        """
+        self._recovered_count += 1
 
     def finish(self):
         """Mark progress as complete."""
         self.completed = self.total
         if self.verbose:
             self._print_progress()
+
+    def request_cancellation(self):
+        """Request cancellation of processing."""
+        self._cancellation_requested = True
+
+    def is_cancelled(self) -> bool:
+        """Check if cancellation has been requested."""
+        if self._cancellation_requested:
+            return True
+        if self.callback:
+            try:
+                return self.callback.should_cancel()
+            except Exception:
+                pass
+        return False
+
+    @property
+    def percentage(self) -> float:
+        """Get current completion percentage."""
+        if self.total == 0:
+            return 100.0
+        return (self.completed / self.total) * 100.0
+
+    @property
+    def elapsed_seconds(self) -> float:
+        """Get elapsed time in seconds."""
+        return (datetime.now() - self.start_time).total_seconds()
+
+    @property
+    def estimated_remaining_seconds(self) -> Optional[float]:
+        """Estimate remaining time in seconds."""
+        if self.completed == 0:
+            return None
+        rate = self.completed / self.elapsed_seconds
+        if rate <= 0:
+            return None
+        return (self.total - self.completed) / rate
+
+    @property
+    def error_count(self) -> int:
+        """Get the number of errors encountered."""
+        return len(self.errors)
+
+    @property
+    def recovered_count(self) -> int:
+        """Get the number of recovered errors."""
+        return self._recovered_count
 
 
 class ParallelProcessor:
