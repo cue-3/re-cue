@@ -636,7 +636,7 @@ class TestCustomTemplateDirectory(unittest.TestCase):
         # Common template should return common path
         path = loader.get_template_path('phase2-actors.md')
         self.assertIsNotNone(path)
-        self.assertTrue('common' in str(path))
+        self.assertIn('common', str(path))
 
     def test_list_available_with_custom(self):
         """Test listing templates includes custom templates."""
