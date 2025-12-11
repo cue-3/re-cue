@@ -32,7 +32,7 @@ jobs:
             detect-secrets scan --all-files --force-use-all-plugins > .secrets.baseline
           fi
           
-          # Scan for secrets
+          # Scan for sensitive data
           detect-secrets scan --baseline .secrets.baseline --all-files > scan-results.json 2>&1 || true
           
           # Audit the results
@@ -82,7 +82,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const report = fs.readFileSync('secrets-report.txt', 'utf8');
+            const report = fs.readFileSync('scan-report.txt', 'utf8');
             
             const comment = `## 🔒 Secret Detection Results
             

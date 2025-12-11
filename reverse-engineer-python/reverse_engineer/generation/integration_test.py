@@ -611,7 +611,7 @@ Use this data for happy path testing:
 {
     "user": {
         "username": "testuser@example.com",
-        "password": "SecureP@ss123",
+        "password": "${TEST_PASSWORD}",
         "firstName": "Test",
         "lastName": "User"
     },
@@ -632,7 +632,7 @@ Use this data for validation testing:
 {
     "user": {
         "username": "",
-        "password": "short",
+        "password": "invalid",
         "firstName": null,
         "lastName": "AAAAAAAAAA... (256 characters)"
     },

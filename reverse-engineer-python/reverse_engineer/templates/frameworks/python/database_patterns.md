@@ -595,7 +595,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'mydb',
         'USER': 'dbuser',
-        'PASSWORD': 'dbpass',
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
         'CONN_MAX_AGE': 600,  # Connection pooling
@@ -610,9 +610,11 @@ DATABASES = {
 ```python
 from sqlalchemy import create_engine
 from sqlalchemy.pool import QueuePool
+import os
 
+db_password = os.environ.get('DB_PASSWORD', 'your-password')
 engine = create_engine(
-    'postgresql://user:password@localhost/dbname',
+    f'postgresql://user:{db_password}@localhost/dbname',
     poolclass=QueuePool,
     pool_size=10,
     max_overflow=20,

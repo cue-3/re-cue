@@ -417,8 +417,8 @@ class TestDomainModels(unittest.TestCase):
     def test_commit_info_model(self):
         """Test CommitInfo dataclass."""
         commit = CommitInfo(
-            sha="abc123def456",
-            short_sha="abc123d",
+            sha="0123456789abcdef0123456789abcdef01234567",
+            short_sha="0123456",
             author_name="Test User",
             author_email="test@example.com",
             timestamp=datetime.now(),
