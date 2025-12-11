@@ -189,9 +189,9 @@ class LaravelAnalyzer(BaseAnalyzer):
                     controller = parts[0].replace("::class", "").strip()
                     controller = controller.replace("'", "").replace('"', "")
                 if len(parts) >= 2:
-                    action = parts[1].strip().replace("'", "").replace('"', "")
+                    pass  # action part available, but not used
                 else:
-                    action = "unknown"
+                    pass  # action defaults to unknown, but not used
                 endpoint = Endpoint(
                     method=method,
                     path=path,
