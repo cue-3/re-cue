@@ -119,6 +119,18 @@ class TechDetector:
                 ],
                 "structure": ["app/controllers", "app/models", "config/routes.rb"],
             },
+            "php_laravel": {
+                "name": "PHP Laravel",
+                "language": "php",
+                "files": ["composer.json", "artisan"],
+                "patterns": [
+                    (r'"laravel/framework":', "composer.json"),
+                    (r"Illuminate\\Foundation\\Application", "**/*.php"),
+                    (r"Route::(get|post|resource)", "routes/*.php"),
+                    (r"extends\s+Model", "**/*.php"),
+                ],
+                "structure": ["app/Http/Controllers", "app/Models", "routes/web.php"],
+            },
         }
 
     def detect(self) -> TechStack:
@@ -284,6 +296,8 @@ class TechDetector:
                 return self._extract_dotnet_version()
             elif framework_id == "ruby_rails":
                 return self._extract_ruby_version()
+            elif framework_id == "php_laravel":
+                return self._extract_laravel_version()
         except Exception as e:
             log_info(f"  Could not extract version: {e}", self.verbose)
 
@@ -364,5 +378,23 @@ class TechDetector:
             match = re.search(r'gem [\'"]rails[\'"],\s*[\'"]([^\'\"]+)[\'"]', content)
             if match:
                 return match.group(1)
+
+        return None
+
+    def _extract_laravel_version(self) -> Optional[str]:
+        """Extract Laravel version from composer.json."""
+        composer_json = self.repo_root / "composer.json"
+        if composer_json.exists():
+            try:
+                data = json.loads(composer_json.read_text())
+                require = data.get("require", {})
+
+                if "laravel/framework" in require:
+                    version = require["laravel/framework"]
+                    # Remove version constraints (^, ~, >=, etc.)
+                    version = re.sub(r"[^\d.].*", "", version.lstrip("^~>="))
+                    return version
+            except Exception:
+                pass
 
         return None

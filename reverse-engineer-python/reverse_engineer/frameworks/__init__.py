@@ -13,6 +13,7 @@ from .factory import create_analyzer
 # Import framework-specific analyzers for convenience
 from .java_spring import JavaSpringAnalyzer
 from .nodejs import NodeExpressAnalyzer
+from .php import LaravelAnalyzer
 from .python import DjangoAnalyzer, FastAPIAnalyzer, FlaskAnalyzer
 from .ruby import RubyRailsAnalyzer
 
@@ -27,4 +28,5 @@ __all__ = [
     "NodeExpressAnalyzer",
     "RubyRailsAnalyzer",
     "DotNetAspNetCoreAnalyzer",
+    "LaravelAnalyzer",
 ]
