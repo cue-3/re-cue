@@ -398,5 +398,3 @@ class TechDetector:
                 pass
 
         return None
-
-        return None
