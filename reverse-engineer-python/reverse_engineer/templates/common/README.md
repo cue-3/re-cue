@@ -1,8 +1,42 @@
-# Phase Document Templates
+# RE-cue Templates
 
-This directory contains templates for the phased reverse engineering analysis documents.
+This directory contains templates for generating reverse engineering documentation.
 
-## Template Files
+## Template System Overview
+
+RE-cue uses **Jinja2** templating with support for:
+- ✅ **Template Inheritance** (`extends`) - Reuse common structure
+- ✅ **Reusable Components** (`include`) - Share common elements
+- ✅ **Conditional Rendering** - Show/hide sections based on data
+- ✅ **Loops** - Iterate over collections
+- ✅ **Filters** - Transform data for display
+
+See [Template Inheritance Guide](../../../../../docs/developer-guides/TEMPLATE-INHERITANCE-GUIDE.md) for details.
+
+## Template Categories
+
+### Base Templates (NEW in v1.4.0)
+
+- **`base.md`** - Base template for all documentation with reusable blocks
+- **`base_framework_section.md`** - Base for framework-specific sections
+
+### Extended Templates (NEW in v1.4.0)
+
+Templates that use inheritance for better maintainability:
+- **`phase1-structure-extended.md`** - Enhanced Phase 1 with inheritance
+- **`phase2-actors-extended.md`** - Enhanced Phase 2 with includes
+- **`endpoint_section_extended.md`** - Framework section with inheritance
+
+### Reusable Components (NEW in v1.4.0)
+
+Prefixed with `_` for easy identification:
+- **`_stats_table.md`** - Statistics table component
+- **`_footer.md`** - Document footer with generation info
+- **`_warning.md`** - Warning banner component
+
+### Original Phase Templates
+
+Classic templates (still supported for backward compatibility):
 
 ### Phase 1: Project Structure (`phase1-structure.md`)
 Documents the basic project structure including:
@@ -79,14 +113,55 @@ These templates are used by the phase document generators in `generators.py`. To
 3. Keep variable placeholders (`{{VARIABLE}}`) intact
 4. The generator will automatically use the updated template
 
-## Future Enhancements
+## Template Inheritance (ENH-TMPL-003)
 
-Templates can be extended to support:
-- Custom branding
-- Additional sections
-- Different output formats (HTML, PDF)
-- Internationalization
-- Custom styling
+### Using Template Inheritance
+
+**Create a custom template extending base:**
+
+```jinja2
+{% extends "base.md" %}
+
+{% block title %}My Analysis - {{ PROJECT_NAME }}{% endblock %}
+
+{% block main_content %}
+## Custom Content
+{{ my_data }}
+{% endblock %}
+```
+
+**Using components:**
+
+```jinja2
+{% include "_stats_table.md" %}
+{% include "_footer.md" %}
+```
+
+### Available Base Template Blocks
+
+**base.md:**
+- `header` - Document header
+- `title` - Title only
+- `overview` - Overview section
+- `overview_content` - Overview text
+- `overview_stats` - Statistics
+- `main_content` - Main content (override this!)
+- `next_steps` - Next steps
+- `footer` - Footer
+
+### Migration Guide
+
+Old templates still work! To use new features:
+
+1. **Keep using old templates** - No change required
+2. **Create extended versions** - New templates with `-extended.md` suffix
+3. **Gradually migrate** - Update generators when ready
+
+## Resources
+
+- [Template Inheritance Guide](../../../../../docs/developer-guides/TEMPLATE-INHERITANCE-GUIDE.md) - Complete guide
+- [Template Examples](../../../../../docs/developer-guides/TEMPLATE-INHERITANCE-EXAMPLES.md) - Practical examples
+- [Jinja2 Guide](../../../../../docs/JINJA2-TEMPLATE-GUIDE.md) - Jinja2 features
 
 ---
 
