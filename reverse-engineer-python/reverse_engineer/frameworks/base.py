@@ -4,7 +4,7 @@ Base analyzer abstract class for framework-specific analyzers.
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
+from typing import Any, Callable, Optional
 
 # Import domain models (no longer defined here - moved to domain package)
 from ..domain import (
@@ -26,16 +26,26 @@ class BaseAnalyzer(ABC):
     # Framework identifier (to be set by subclasses)
     framework_id: Optional[str] = None
 
-    def __init__(self, repo_root: Path, verbose: bool = False):
+    def __init__(
+        self,
+        repo_root: Path,
+        verbose: bool = False,
+        enable_parallel: bool = True,
+        max_workers: Optional[int] = None,
+    ):
         """
         Initialize the analyzer.
 
         Args:
             repo_root: Root directory of the project to analyze
             verbose: Enable verbose logging
+            enable_parallel: Enable parallel file processing (default: True)
+            max_workers: Maximum number of worker processes (default: CPU count)
         """
         self.repo_root = Path(repo_root)
         self.verbose = verbose
+        self.enable_parallel = enable_parallel
+        self.max_workers = max_workers
 
         # Data collections
         self.endpoints: list[Endpoint] = []
@@ -47,6 +57,9 @@ class BaseAnalyzer(ABC):
         self.relationships: list[Relationship] = []
         self.use_cases: list[UseCase] = []
         self.features: list[str] = []
+
+        # Optional optimization support
+        self._optimized_analyzer: Optional[Any] = None
 
     @abstractmethod
     def discover_endpoints(self) -> list[Endpoint]:
@@ -233,3 +246,75 @@ class BaseAnalyzer(ABC):
     def use_case_count(self) -> int:
         """Get count of extracted use cases."""
         return len(self.use_cases)
+
+    def _get_optimized_analyzer(self):
+        """
+        Get or create OptimizedAnalyzer instance for parallel processing.
+
+        Returns:
+            OptimizedAnalyzer instance or None if not available
+        """
+        if self._optimized_analyzer is None:
+            try:
+                # Import here to avoid circular dependency
+                # This is safe because OptimizedAnalyzer doesn't import BaseAnalyzer
+                from ..performance.optimized_analyzer import OptimizedAnalyzer
+
+                self._optimized_analyzer = OptimizedAnalyzer(
+                    repo_root=self.repo_root,
+                    enable_parallel=self.enable_parallel,
+                    enable_incremental=False,  # Framework analyzers handle their own file tracking
+                    enable_caching=False,  # Framework analyzers don't need file-level caching
+                    max_workers=self.max_workers,
+                    verbose=self.verbose,
+                )
+            except ImportError:
+                # Performance module not available - parallel processing will fall back to sequential
+                self._optimized_analyzer = None
+
+        return self._optimized_analyzer
+
+    def _process_files_parallel(
+        self,
+        files: list[Path],
+        processor_func: Callable[[Path], Any],
+        desc: str = "Processing files",
+    ) -> list[Any]:
+        """
+        Process files in parallel using multiprocessing.
+
+        Args:
+            files: List of file paths to process
+            processor_func: Function to process each file (must be picklable)
+            desc: Description for progress reporting
+
+        Returns:
+            List of processing results
+        """
+        if not files:
+            return []
+
+        # Try to use optimized analyzer if available
+        optimized = self._get_optimized_analyzer()
+        if optimized is not None:
+            results = optimized.process_files_optimized(
+                files=files,
+                processor=processor_func,
+                desc=desc,
+                skip_unchanged=False,  # Framework analyzers analyze all files
+                use_cache=False,  # Framework analyzers don't use caching
+            )
+            return results
+
+        # Fall back to sequential processing if optimized analyzer not available
+        results = []
+        for file_path in files:
+            try:
+                result = processor_func(file_path)
+                if result is not None:
+                    results.append(result)
+            except Exception as e:
+                if self.verbose:
+                    log_info(f"  Error processing {file_path}: {e}", self.verbose)
+
+        return results
