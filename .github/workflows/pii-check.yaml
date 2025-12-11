@@ -20,90 +20,89 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install Presidio CLI
+      - name: Install detect-secrets
         run: |
-          pip install presidio-cli
+          pip install detect-secrets
       
-      - name: Run Presidio PII Scan
-        id: presidio-scan
+      - name: Run Secret Detection Scan
+        id: secrets-scan
         run: |
-          # Create a default configuration
-          cat > presidio-config.yaml <<EOF
-          entities:
-            - PERSON
-            - EMAIL_ADDRESS
-            - PHONE_NUMBER
-            - CREDIT_CARD
-            - US_SSN
-            - US_PASSPORT
-            - IBAN_CODE
-            - IP_ADDRESS
-            - CRYPTO
-            - PASSWORD
-            - API_KEY
-            - AZURE_KEY
-            - AWS_ACCESS_KEY
-            - AWS_SECRET_ACCESS_KEY
-            - GITHUB_TOKEN
-            - PRIVATE_KEY
-            - CERTIFICATE
-            - JWT
-            - BEARER_TOKEN
-          threshold: 0.85
-          ignore_paths:
-            - ".git"
-            - "node_modules"
-            - "*.lock"
-            - "package-lock.json"
-            - ".vscode"
-            - "dist"
-            - "build"
-            - "__pycache__"
-            - "*.pyc"
-            - ".pytest_cache"
-            - "venv"
-            - ".env.*"
+          # Create baseline if it doesn't exist
+          if [ ! -f .secrets.baseline ]; then
+            detect-secrets scan --all-files --force-use-all-plugins > .secrets.baseline
+          fi
+          
+          # Scan for secrets
+          detect-secrets scan --baseline .secrets.baseline --all-files > scan-results.json 2>&1 || true
+          
+          # Audit the results
+          detect-secrets audit --report --json .secrets.baseline > audit-report.json 2>&1 || true
+          
+          # Create human-readable report
+          cat > secrets-report.txt <<EOF
+          === Secret Detection Report ===
+          Generated: $(date)
+          
           EOF
           
-          # Run presidio scan
-          presidio scan --config presidio-config.yaml . > presidio-results.txt 2>&1 || true
+          # Check if secrets were found
+          SECRET_COUNT=$(jq '.results | length' .secrets.baseline 2>/dev/null || echo "0")
           
-          # Display results
-          cat presidio-results.txt
-          
-          # Check if PII was found
-          if grep -q "entity_type" presidio-results.txt; then
-            echo "pii_found=true" >> $GITHUB_OUTPUT
-            echo "::warning::PII entities detected in the code"
+          if [ "$SECRET_COUNT" -gt 0 ]; then
+            echo "secrets_found=true" >> $GITHUB_OUTPUT
+            echo "::warning::Potential secrets detected in the code"
+            
+            # Generate detailed report
+            echo "Found $SECRET_COUNT file(s) with potential secrets:" >> secrets-report.txt
+            echo "" >> secrets-report.txt
+            
+            jq -r '.results | to_entries[] | "File: \(.key)\n" + (.value[] | "  - Type: \(.type)\n    Line: \(.line_number)\n")' .secrets.baseline >> secrets-report.txt 2>/dev/null || echo "Error parsing results" >> secrets-report.txt
           else
-            echo "pii_found=false" >> $GITHUB_OUTPUT
-            echo "No PII detected"
+            echo "secrets_found=false" >> $GITHUB_OUTPUT
+            echo "No secrets detected" >> secrets-report.txt
           fi
+          
+          # Display report
+          cat secrets-report.txt
       
-      - name: Upload Results
+      - name: Upload Scan Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: presidio-pii-scan-results
-          path: presidio-results.txt
+          name: secret-detection-results
+          path: |
+            .secrets.baseline
+            secrets-report.txt
+            scan-results.json
+            audit-report.json
       
       - name: Comment on PR
-        if: github.event_name == 'pull_request' && steps.presidio-scan.outputs.pii_found == 'true'
+        if: github.event_name == 'pull_request' && steps.secrets-scan.outputs.secrets_found == 'true'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const results = fs.readFileSync('presidio-results.txt', 'utf8');
+            const report = fs.readFileSync('secrets-report.txt', 'utf8');
             
-            const comment = `## 🔒 PII Detection Results
+            const comment = `## 🔒 Secret Detection Results
             
-            Presidio has detected potential PII entities in this PR:
+            ⚠️ Potential secrets or sensitive data detected in this PR:
             
             \`\`\`
-            ${results}
+            ${report}
             \`\`\`
             
-            Please review these findings and ensure no sensitive data is being committed.`;
+            **What to do:**
+            1. Review the flagged items carefully
+            2. Remove any actual secrets/credentials
+            3. Use environment variables or secret management instead
+            4. If these are false positives, they can be allowlisted
+            
+            **Detected patterns include:**
+            - API Keys & Tokens (GitHub, AWS, Azure, etc.)
+            - Private Keys & Certificates
+            - Passwords & Connection Strings
+            - High Entropy Strings (potential secrets)`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
