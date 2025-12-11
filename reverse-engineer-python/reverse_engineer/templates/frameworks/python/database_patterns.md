@@ -424,9 +424,11 @@ results = session.execute(
 #### Transactions
 ```python
 # Automatic transaction management
+import os
+
 session = SessionLocal()
 try:
-    user = User(email='test@example.com', password='password')
+    user = User(email='test@example.com', password=os.environ.get('TEST_PASSWORD', 'password'))
     session.add(user)
     session.flush()  # Get user.id without committing
     
@@ -456,8 +458,10 @@ def get_db():
         session.close()
 
 # Usage
+import os
+
 with get_db() as session:
-    user = User(email='test@example.com', password='password')
+    user = User(email='test@example.com', password=os.environ.get('TEST_PASSWORD', 'password'))
     session.add(user)
     # Commits automatically on success
 
@@ -546,9 +550,11 @@ user_stats = await User.annotate(
 ).filter(post_count__gt=0)
 
 # Create
+import os
+
 user = await User.create(
     email='test@example.com',
-    password='password'
+    password=os.environ.get('TEST_PASSWORD', 'password')
 )
 
 # Update

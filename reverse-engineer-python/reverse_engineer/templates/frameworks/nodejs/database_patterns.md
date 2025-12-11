@@ -199,7 +199,7 @@ const stats = await Post.findAll({
 const result = await sequelize.transaction(async (t) => {
     const user = await User.create({
         email: 'test@example.com',
-        password: 'password'
+        password: process.env.TEST_PASSWORD || 'password'
     }, { transaction: t });
     
     await Post.create({
@@ -323,7 +323,7 @@ const userRepository = AppDataSource.getRepository(User);
 // Basic operations
 const user = await userRepository.findOne({ where: { email: 'test@example.com' } });
 const users = await userRepository.find();
-const newUser = await userRepository.save({ email: 'new@example.com', password: 'password' });
+const newUser = await userRepository.save({ email: 'new@example.com', password: process.env.TEST_PASSWORD || 'password' });
 await userRepository.delete(1);
 
 // Complex queries
@@ -366,7 +366,7 @@ import { AppDataSource } from './data-source';
 await AppDataSource.transaction(async (manager) => {
     const user = await manager.save(User, {
         email: 'test@example.com',
-        password: 'password'
+        password: process.env.TEST_PASSWORD || 'password'
     });
     
     await manager.save(Post, {
@@ -383,7 +383,7 @@ await queryRunner.startTransaction();
 try {
     const user = await queryRunner.manager.save(User, {
         email: 'test@example.com',
-        password: 'password'
+        password: process.env.TEST_PASSWORD || 'password'
     });
     
     await queryRunner.manager.save(Post, {
@@ -608,7 +608,7 @@ session.startTransaction();
 try {
     const user = await User.create([{
         email: 'test@example.com',
-        password: 'password'
+        password: process.env.TEST_PASSWORD || 'password'
     }], { session });
     
     await Post.create([{
@@ -684,7 +684,7 @@ const userByEmail = await prisma.user.findUnique({ where: { email: 'test@example
 const newUser = await prisma.user.create({
     data: {
         email: 'test@example.com',
-        password: 'password',
+        password: process.env.TEST_PASSWORD || 'password',
         posts: {
             create: [
                 { title: 'First Post', content: 'Content' }
@@ -739,7 +739,7 @@ const stats = await prisma.post.groupBy({
 // Sequential transactions
 const [user, post] = await prisma.$transaction([
     prisma.user.create({
-        data: { email: 'test@example.com', password: 'password' }
+        data: { email: 'test@example.com', password: process.env.TEST_PASSWORD || 'password' }
     }),
     prisma.post.create({
         data: { title: 'First Post', authorId: 1 }
@@ -749,7 +749,7 @@ const [user, post] = await prisma.$transaction([
 // Interactive transactions
 const result = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
-        data: { email: 'test@example.com', password: 'password' }
+        data: { email: 'test@example.com', password: process.env.TEST_PASSWORD || 'password' }
     });
     
     const post = await tx.post.create({
@@ -785,7 +785,7 @@ export const AppDataSource = new DataSource({
     host: 'localhost',
     port: 5432,
     username: 'user',
-    password: 'password',
+    password: process.env.TEST_PASSWORD || 'password',
     database: 'mydb',
     extra: {
         max: 10,
