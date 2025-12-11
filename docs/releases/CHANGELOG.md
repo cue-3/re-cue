@@ -9,6 +9,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **PHP Laravel Framework Support** (ENH-FW-003): Full support for Laravel framework
+  - Route detection from `routes/web.php` and `routes/api.php` files
+  - Laravel resource routes and API resource routes parsing
+  - Eloquent ORM model analysis with field detection
+  - Blade template discovery
+  - Controller action analysis with middleware detection
+  - Service class, background job, event listener, and Artisan command detection
+  - Authentication package detection (Sanctum, Passport, Fortify, Breeze, Jetstream, Spatie Permission)
+  - Composer dependency analysis
+  - Actor identification from authentication patterns
+  - System boundary mapping for Laravel architectural layers
+  - Use case extraction from controller methods
+  - Comprehensive test suite (14 tests) for Laravel analyzer
+  - Framework documentation: `docs/frameworks/php-laravel-guide.md`
+  - Support for Laravel 8.x, 9.x, 10.x, and 11.x
+
 ## [1.1.0] - 2025-11-16
 
 ### Added
