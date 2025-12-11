@@ -31,10 +31,10 @@ def _process_controller_file(file_path: Path) -> dict[str, Any]:
         file_path: Path to controller file
 
     Returns:
-        Dictionary with endpoints data
+        Dictionary with endpoints data and any errors
     """
     try:
-        content = file_path.read_text(encoding="utf-8", errors="ignore")
+        content = file_path.read_text(encoding="utf-8", errors="replace")
     except Exception as e:
         return {"file": str(file_path), "error": str(e), "endpoints": []}
 
@@ -88,11 +88,13 @@ def _process_model_file(file_path: Path) -> Optional[dict[str, Any]]:
         file_path: Path to model file
 
     Returns:
-        Dictionary with model data or None if error
+        Dictionary with model data, None if not an entity, or error dict
     """
     try:
-        content = file_path.read_text(encoding="utf-8", errors="ignore")
+        content = file_path.read_text(encoding="utf-8", errors="replace")
     except Exception as e:
+        # Return None to filter out files with read errors
+        # The parallel processor will log this as a processing failure
         return None
 
     # Check if file contains entity annotations
@@ -119,11 +121,13 @@ def _process_service_file(file_path: Path) -> Optional[dict[str, Any]]:
         file_path: Path to service file
 
     Returns:
-        Dictionary with service data or None if not a service
+        Dictionary with service data, None if not a service, or error dict
     """
     try:
-        content = file_path.read_text(encoding="utf-8", errors="ignore")
+        content = file_path.read_text(encoding="utf-8", errors="replace")
     except Exception:
+        # Return None to filter out files with read errors
+        # The parallel processor will log this as a processing failure
         return None
 
     # Check if file contains service annotations

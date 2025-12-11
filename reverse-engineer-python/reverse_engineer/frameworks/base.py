@@ -252,22 +252,24 @@ class BaseAnalyzer(ABC):
         Get or create OptimizedAnalyzer instance for parallel processing.
 
         Returns:
-            OptimizedAnalyzer instance
+            OptimizedAnalyzer instance or None if not available
         """
         if self._optimized_analyzer is None:
             try:
+                # Import here to avoid circular dependency
+                # This is safe because OptimizedAnalyzer doesn't import BaseAnalyzer
                 from ..performance.optimized_analyzer import OptimizedAnalyzer
 
                 self._optimized_analyzer = OptimizedAnalyzer(
                     repo_root=self.repo_root,
                     enable_parallel=self.enable_parallel,
-                    enable_incremental=False,  # Framework analyzers don't use incremental
-                    enable_caching=False,  # Framework analyzers don't use caching
+                    enable_incremental=False,  # Framework analyzers handle their own file tracking
+                    enable_caching=False,  # Framework analyzers don't need file-level caching
                     max_workers=self.max_workers,
                     verbose=self.verbose,
                 )
             except ImportError:
-                # Fall back if performance module not available
+                # Performance module not available - parallel processing will fall back to sequential
                 self._optimized_analyzer = None
 
         return self._optimized_analyzer
