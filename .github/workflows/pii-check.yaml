@@ -13,14 +13,101 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for only-changed-files option
+          fetch-depth: 0
       
-      - name: Run Presidio PII check
-        uses: insightsengineering/presidio-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          path: "."
-          configuration-file: "default"  # Uses built-in default config (checks common PII, ignores .git)
-          output: "auto"  # Auto-formats for GitHub or terminal
-          publish: ${{ github.event_name == 'pull_request' }}  # Only publish comments on PRs
-          upload: "true"  # Upload results as artifact
-          only-changed-files: true  # Only check changed files for efficiency
+          python-version: '3.11'
+      
+      - name: Install Presidio CLI
+        run: |
+          pip install presidio-cli
+      
+      - name: Run Presidio PII Scan
+        id: presidio-scan
+        run: |
+          # Create a default configuration
+          cat > presidio-config.yaml <<EOF
+          entities:
+            - PERSON
+            - EMAIL_ADDRESS
+            - PHONE_NUMBER
+            - CREDIT_CARD
+            - US_SSN
+            - US_PASSPORT
+            - IBAN_CODE
+            - IP_ADDRESS
+            - CRYPTO
+            - PASSWORD
+            - API_KEY
+            - AZURE_KEY
+            - AWS_ACCESS_KEY
+            - AWS_SECRET_ACCESS_KEY
+            - GITHUB_TOKEN
+            - PRIVATE_KEY
+            - CERTIFICATE
+            - JWT
+            - BEARER_TOKEN
+          threshold: 0.85
+          ignore_paths:
+            - ".git"
+            - "node_modules"
+            - "*.lock"
+            - "package-lock.json"
+            - ".vscode"
+            - "dist"
+            - "build"
+            - "__pycache__"
+            - "*.pyc"
+            - ".pytest_cache"
+            - "venv"
+            - ".env.*"
+          EOF
+          
+          # Run presidio scan
+          presidio scan --config presidio-config.yaml . > presidio-results.txt 2>&1 || true
+          
+          # Display results
+          cat presidio-results.txt
+          
+          # Check if PII was found
+          if grep -q "entity_type" presidio-results.txt; then
+            echo "pii_found=true" >> $GITHUB_OUTPUT
+            echo "::warning::PII entities detected in the code"
+          else
+            echo "pii_found=false" >> $GITHUB_OUTPUT
+            echo "No PII detected"
+          fi
+      
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: presidio-pii-scan-results
+          path: presidio-results.txt
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.presidio-scan.outputs.pii_found == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = fs.readFileSync('presidio-results.txt', 'utf8');
+            
+            const comment = `## 🔒 PII Detection Results
+            
+            Presidio has detected potential PII entities in this PR:
+            
+            \`\`\`
+            ${results}
+            \`\`\`
+            
+            Please review these findings and ensure no sensitive data is being committed.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
