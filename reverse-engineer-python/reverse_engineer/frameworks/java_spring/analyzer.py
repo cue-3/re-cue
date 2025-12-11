@@ -4,13 +4,145 @@ Java Spring Boot analyzer implementation.
 This analyzer extracts endpoints, models, services, actors, and use cases
 from Java Spring Boot projects by analyzing Java source files, Spring annotations,
 and project structure.
+
+Supports parallel processing for improved performance on large codebases.
 """
 
 import re
 from pathlib import Path
+from typing import Any, Optional
 
 from ...utils import log_info
 from ..base import Actor, BaseAnalyzer, Endpoint, Model, Service, SystemBoundary, UseCase, View
+
+
+# ============================================================================
+# Module-level processor functions for multiprocessing
+# These must be at module level to be picklable by multiprocessing
+# ============================================================================
+
+
+def _process_controller_file(file_path: Path) -> dict[str, Any]:
+    """
+    Process a Spring controller file to extract endpoints.
+    Module-level function for multiprocessing support.
+
+    Args:
+        file_path: Path to controller file
+
+    Returns:
+        Dictionary with endpoints data and any errors
+    """
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="replace")
+    except Exception as e:
+        return {"file": str(file_path), "error": str(e), "endpoints": []}
+
+    controller_name = file_path.stem.replace("Controller", "")
+
+    # Extract base path from @RequestMapping
+    base_path = ""
+    base_match = re.search(r'@RequestMapping\("([^"]*)"\)', content)
+    if base_match:
+        base_path = base_match.group(1)
+
+    # Find all endpoint methods
+    mapping_pattern = r'@(Get|Post|Put|Delete|Patch)Mapping(?:\("([^"]*)"\))?'
+
+    endpoints = []
+    lines = content.split("\n")
+    for i, line in enumerate(lines):
+        match = re.search(mapping_pattern, line)
+        if match:
+            method = match.group(1).upper()
+            path = match.group(2) or ""
+            full_path = base_path + path
+
+            # Check for authentication in nearby lines
+            authenticated = False
+            start_line = max(0, i - 3)
+            end_line = min(len(lines), i + 3)
+            for check_line in lines[start_line:end_line]:
+                if "@PreAuthorize" in check_line or "@Secured" in check_line:
+                    authenticated = True
+                    break
+
+            endpoints.append(
+                {
+                    "method": method,
+                    "path": full_path,
+                    "controller": controller_name,
+                    "authenticated": authenticated,
+                }
+            )
+
+    return {"file": str(file_path), "endpoints": endpoints}
+
+
+def _process_model_file(file_path: Path) -> Optional[dict[str, Any]]:
+    """
+    Process a Java model/entity file.
+    Module-level function for multiprocessing support.
+
+    Args:
+        file_path: Path to model file
+
+    Returns:
+        Dictionary with model data, None if not an entity, or error dict
+    """
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="replace")
+    except Exception as e:
+        # Return None to filter out files with read errors
+        # The parallel processor will log this as a processing failure
+        return None
+
+    # Check if file contains entity annotations
+    if not any(
+        annotation in content
+        for annotation in ["@Entity", "@Table", "@Document", "@Embeddable"]
+    ):
+        return None
+
+    model_name = file_path.stem
+
+    # Count private fields
+    field_count = len(re.findall(r"^\s*private\s+", content, re.MULTILINE))
+
+    return {"name": model_name, "fields": field_count, "file_path": str(file_path)}
+
+
+def _process_service_file(file_path: Path) -> Optional[dict[str, Any]]:
+    """
+    Process a Java service file.
+    Module-level function for multiprocessing support.
+
+    Args:
+        file_path: Path to service file
+
+    Returns:
+        Dictionary with service data, None if not a service, or error dict
+    """
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        # Return None to filter out files with read errors
+        # The parallel processor will log this as a processing failure
+        return None
+
+    # Check if file contains service annotations
+    if not any(annotation in content for annotation in ["@Service", "@Component", "@Repository"]):
+        return None
+
+    service_name = file_path.stem.replace("Service", "")
+    is_interface = "interface" in content
+
+    return {"name": service_name, "is_interface": is_interface, "file_path": str(file_path)}
+
+
+# ============================================================================
+# JavaSpringAnalyzer Class
+# ============================================================================
 
 
 class JavaSpringAnalyzer(BaseAnalyzer):
@@ -18,9 +150,23 @@ class JavaSpringAnalyzer(BaseAnalyzer):
 
     framework_id = "java_spring"
 
-    def __init__(self, repo_root: Path, verbose: bool = False):
-        """Initialize Java Spring analyzer."""
-        super().__init__(repo_root, verbose)
+    def __init__(
+        self,
+        repo_root: Path,
+        verbose: bool = False,
+        enable_parallel: bool = True,
+        max_workers: Optional[int] = None,
+    ):
+        """
+        Initialize Java Spring analyzer.
+
+        Args:
+            repo_root: Root directory of the project
+            verbose: Enable verbose logging
+            enable_parallel: Enable parallel file processing (default: True)
+            max_workers: Maximum number of worker processes (default: CPU count)
+        """
+        super().__init__(repo_root, verbose, enable_parallel, max_workers)
 
         # Spring-specific patterns
         self.controller_patterns = ["*Controller.java"]
@@ -79,64 +225,42 @@ class JavaSpringAnalyzer(BaseAnalyzer):
             log_info("  No controllers found in project", self.verbose)
             return self.endpoints
 
+        # Collect all controller files
+        all_controller_files = []
         for controller_dir in controller_dirs:
             for java_file in controller_dir.glob("*Controller.java"):
                 if self._is_test_file(java_file):
                     if self.verbose:
                         log_info(f"  Skipping test controller: {java_file.name}", self.verbose)
                     continue
+                all_controller_files.append(java_file)
 
-                self._analyze_controller_file(java_file)
+        # Process files in parallel
+        if all_controller_files:
+            results = self._process_files_parallel(
+                all_controller_files,
+                _process_controller_file,
+                desc="Processing controllers",
+            )
+
+            # Convert results to Endpoint objects
+            for result in results:
+                if "error" in result:
+                    if self.verbose:
+                        log_info(f"  Error processing {result.get('file')}: {result['error']}", self.verbose)
+                    continue
+
+                for endpoint_data in result.get("endpoints", []):
+                    endpoint = Endpoint(
+                        method=endpoint_data["method"],
+                        path=endpoint_data["path"],
+                        controller=endpoint_data["controller"],
+                        authenticated=endpoint_data["authenticated"],
+                    )
+                    self.endpoints.append(endpoint)
 
         log_info(f"Found {self.endpoint_count} endpoints", self.verbose)
         return self.endpoints
-
-    def _analyze_controller_file(self, file_path: Path):
-        """Analyze a single controller file for endpoints."""
-        log_info(f"  Processing: {file_path.name}", self.verbose)
-
-        try:
-            content = file_path.read_text()
-        except Exception as e:
-            log_info(f"  Error reading {file_path}: {e}", self.verbose)
-            return
-
-        controller_name = file_path.stem.replace("Controller", "")
-
-        # Extract base path from @RequestMapping
-        base_path = ""
-        base_match = re.search(r'@RequestMapping\("([^"]*)"\)', content)
-        if base_match:
-            base_path = base_match.group(1)
-
-        # Find all endpoint methods
-        mapping_pattern = r'@(Get|Post|Put|Delete|Patch)Mapping(?:\("([^"]*)"\))?'
-
-        lines = content.split("\n")
-        for i, line in enumerate(lines):
-            match = re.search(mapping_pattern, line)
-            if match:
-                method = match.group(1).upper()
-                path = match.group(2) or ""
-                full_path = base_path + path
-
-                # Check for authentication in nearby lines (3 before, 2 after)
-                authenticated = False
-                start_line = max(0, i - 3)
-                end_line = min(len(lines), i + 3)
-                for check_line in lines[start_line:end_line]:
-                    if "@PreAuthorize" in check_line or "@Secured" in check_line:
-                        authenticated = True
-                        break
-
-                endpoint = Endpoint(
-                    method=method,
-                    path=full_path,
-                    controller=controller_name,
-                    authenticated=authenticated,
-                )
-                self.endpoints.append(endpoint)
-                log_info(f"    → {method} {full_path}", self.verbose)
 
     def discover_models(self) -> list[Model]:
         """Discover data models from Java entities."""
@@ -151,31 +275,32 @@ class JavaSpringAnalyzer(BaseAnalyzer):
             log_info("  No model directories found", self.verbose)
             return self.models
 
+        # Collect all model files
+        all_model_files = []
         for model_dir in model_dirs:
             for java_file in model_dir.glob("*.java"):
                 if self._is_test_file(java_file):
                     continue
+                all_model_files.append(java_file)
 
-                self._analyze_model_file(java_file)
+        # Process files in parallel
+        if all_model_files:
+            results = self._process_files_parallel(
+                all_model_files, _process_model_file, desc="Processing models"
+            )
+
+            # Convert results to Model objects
+            for result in results:
+                if result is not None:
+                    model = Model(
+                        name=result["name"],
+                        fields=result["fields"],
+                        file_path=Path(result["file_path"]),
+                    )
+                    self.models.append(model)
 
         log_info(f"Found {self.model_count} models", self.verbose)
         return self.models
-
-    def _analyze_model_file(self, file_path: Path):
-        """Analyze a single model file."""
-        try:
-            content = file_path.read_text()
-        except Exception as e:
-            log_info(f"  Error reading {file_path}: {e}", self.verbose)
-            return
-
-        model_name = file_path.stem
-
-        # Count private fields
-        field_count = len(re.findall(r"^\s*private\s+", content, re.MULTILINE))
-
-        model = Model(name=model_name, fields=field_count, file_path=file_path)
-        self.models.append(model)
 
     def discover_services(self) -> list[Service]:
         """Discover backend services."""
@@ -198,14 +323,25 @@ class JavaSpringAnalyzer(BaseAnalyzer):
             log_info("  No services found", self.verbose)
             return self.services
 
+        # Collect all service files
+        all_service_files = []
         for service_dir in service_dirs:
             for java_file in service_dir.glob("*Service.java"):
                 if self._is_test_file(java_file):
                     continue
+                all_service_files.append(java_file)
 
-                service_name = java_file.stem
-                service = Service(name=service_name, file_path=java_file)
-                self.services.append(service)
+        # Process files in parallel
+        if all_service_files:
+            results = self._process_files_parallel(
+                all_service_files, _process_service_file, desc="Processing services"
+            )
+
+            # Convert results to Service objects
+            for result in results:
+                if result is not None:
+                    service = Service(name=result["name"], file_path=Path(result["file_path"]))
+                    self.services.append(service)
 
         log_info(f"Found {self.service_count} services", self.verbose)
         return self.services

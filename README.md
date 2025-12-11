@@ -210,6 +210,7 @@ RE-cue automatically detects and analyzes multiple technology stacks:
 |-----------|----------|---------|--------|-------|
 | **Spring Boot** | Java | 2.x, 3.x | ✅ Full Support | [Java Spring Guide](docs/frameworks/java-spring-guide.md) |
 | **Ruby on Rails** | Ruby | 6.x, 7.x | ✅ Full Support | [Rails Guide](docs/frameworks/ruby-rails-guide.md) |
+| **Laravel** | PHP | 8.x, 9.x, 10.x, 11.x | ✅ Full Support | [Laravel Guide](docs/frameworks/php-laravel-guide.md) |
 | **Express** | Node.js | 4.x+ | 🚧 In Development | [Node.js Guide](docs/frameworks/nodejs-guide.md) |
 | **NestJS** | TypeScript | 9.x+ | 🚧 In Development | [Node.js Guide](docs/frameworks/nodejs-guide.md) |
 | **Django** | Python | 3.x, 4.x | 🚧 In Development | [Python Guide](docs/frameworks/python-guide.md) |
@@ -218,13 +219,13 @@ RE-cue automatically detects and analyzes multiple technology stacks:
 | **ASP.NET Core** | C# | 6.0+ | 🚧 Planned | [.NET Guide](docs/frameworks/dotnet-guide.md) |
 
 **Framework Detection** - RE-cue automatically identifies your framework by analyzing:
-- Build files (`pom.xml`, `package.json`, `requirements.txt`, `Gemfile`, etc.)
+- Build files (`pom.xml`, `package.json`, `requirements.txt`, `Gemfile`, `composer.json`, etc.)
 - Project structure and directory conventions
 - Framework-specific configuration files
 
 **Manual Selection** - Override auto-detection when needed:
 ```bash
-recue --spec --framework ruby_rails --path ~/projects/my-rails-app
+recue --spec --framework php_laravel --path ~/projects/my-laravel-app
 ```
 
 See [docs/frameworks/README.md](docs/frameworks/README.md) for complete framework support documentation.

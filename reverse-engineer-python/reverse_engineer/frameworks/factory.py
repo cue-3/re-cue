@@ -34,6 +34,7 @@ def create_analyzer(
         from .dotnet import DotNetAspNetCoreAnalyzer
         from .java_spring import JavaSpringAnalyzer
         from .nodejs import NodeExpressAnalyzer
+        from .php import LaravelAnalyzer
         from .python import DjangoAnalyzer, FastAPIAnalyzer, FlaskAnalyzer
         from .ruby import RubyRailsAnalyzer
 
@@ -58,6 +59,8 @@ def create_analyzer(
             return RubyRailsAnalyzer(repo_root, verbose)
         elif tech_stack.framework_id in ["dotnet", "dotnet_aspnetcore"]:
             return DotNetAspNetCoreAnalyzer(repo_root, verbose)
+        elif tech_stack.framework_id == "php_laravel":
+            return LaravelAnalyzer(repo_root, verbose)
         else:
             if verbose:
                 print(f"Using legacy analyzer for {tech_stack.name}")
