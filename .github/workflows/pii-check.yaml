@@ -1,0 +1,26 @@
+name: PII Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pii-check:
+    runs-on: ubuntu-latest
+    name: PII Check
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for only-changed-files option
+      
+      - name: Run Presidio PII check
+        uses: insightsengineering/presidio-action@v1
+        with:
+          path: "."
+          configuration-file: "default"  # Uses built-in default config (checks common PII, ignores .git)
+          output: "auto"  # Auto-formats for GitHub or terminal
+          publish: ${{ github.event_name == 'pull_request' }}  # Only publish comments on PRs
+          upload: "true"  # Upload results as artifact
+          only-changed-files: true  # Only check changed files for efficiency
