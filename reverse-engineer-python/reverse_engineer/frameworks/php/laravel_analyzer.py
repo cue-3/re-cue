@@ -229,7 +229,7 @@ class LaravelAnalyzer(BaseAnalyzer):
             middleware_pattern = r"Route::middleware\(['\"]([^'\"]+)['\"]"
             middlewares = re.findall(middleware_pattern, content)
             if "auth" in middlewares or "auth:sanctum" in middlewares:
-                authenticated = True
+                pass
 
         except Exception as e:
             log_info(f"Error parsing route file {route_file.name}: {e}", self.verbose)
