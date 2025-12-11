@@ -185,15 +185,13 @@ class LaravelAnalyzer(BaseAnalyzer):
                 # Parse controller and action
                 parts = controller_action.split(",")
                 controller = "unknown"
-                action = "unknown"
-
                 if len(parts) >= 1:
                     controller = parts[0].replace("::class", "").strip()
                     controller = controller.replace("'", "").replace('"', "")
-
                 if len(parts) >= 2:
                     action = parts[1].strip().replace("'", "").replace('"', "")
-
+                else:
+                    action = "unknown"
                 endpoint = Endpoint(
                     method=method,
                     path=path,
