@@ -72,6 +72,20 @@ from .progress import (
     StageProgress,
 )
 from .use_case_model import EditableUseCase
+from .workflow import (
+    AsyncOperation,
+    EventListener,
+    SagaPattern,
+    SagaStep,
+    ScheduledTask,
+    ScheduleType,
+    StateMachine,
+    StateTransition,
+    WorkflowAnalysisResult,
+    WorkflowPattern,
+    WorkflowStep,
+    WorkflowType,
+)
 
 __all__ = [
     # Core entities
@@ -137,4 +151,17 @@ __all__ = [
     "AnalysisProgress",
     "ProgressCallback",
     "ProgressSummary",
+    # Workflow models
+    "WorkflowType",
+    "ScheduleType",
+    "AsyncOperation",
+    "ScheduledTask",
+    "EventListener",
+    "StateTransition",
+    "StateMachine",
+    "SagaStep",
+    "SagaPattern",
+    "WorkflowStep",
+    "WorkflowPattern",
+    "WorkflowAnalysisResult",
 ]
