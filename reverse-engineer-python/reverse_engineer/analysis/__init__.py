@@ -18,6 +18,7 @@ from .structure import PackageStructureAnalyzer
 from .traceability import TraceabilityAnalyzer
 from .transaction import TransactionAnalyzer
 from .ui_patterns import UIPatternAnalyzer
+from .workflow import WorkflowAnalyzer
 
 __all__ = [
     "SecurityPatternAnalyzer",
@@ -38,4 +39,5 @@ __all__ = [
     "NamingStyle",
     "NamingConfig",
     "NameSuggestion",
+    "WorkflowAnalyzer",
 ]
