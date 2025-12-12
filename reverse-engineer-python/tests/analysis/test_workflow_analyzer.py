@@ -19,7 +19,6 @@ from reverse_engineer.analysis.workflow import WorkflowAnalyzer
 from reverse_engineer.domain import (
     AsyncOperation,
     EventListener,
-    SagaPattern,
     ScheduledTask,
     ScheduleType,
     StateMachine,
