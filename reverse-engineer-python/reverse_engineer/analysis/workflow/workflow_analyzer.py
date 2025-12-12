@@ -26,7 +26,6 @@ from ...domain.workflow import (
     StateTransition,
     WorkflowAnalysisResult,
     WorkflowPattern,
-    WorkflowStep,
     WorkflowType,
 )
 from ...utils import log_info
