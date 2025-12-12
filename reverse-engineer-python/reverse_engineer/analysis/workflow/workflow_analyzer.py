@@ -251,15 +251,22 @@ class WorkflowAnalyzer:
         if match:
             executor = match.group(1)
 
-        # Try to determine return type
+        # Try to determine return type from method signature
         return_type = "void"
         for i in range(idx + 1, min(len(lines), idx + 5)):
             method_line = lines[i].strip()
             if method_line and not method_line.startswith("@"):
-                if "Future" in method_line or "CompletableFuture" in method_line:
-                    if "CompletableFuture" in method_line:
+                # Match return type in method signature more precisely
+                method_sig_match = re.match(
+                    r"(?:public|protected|private)?\s*(?:static\s+)?"
+                    r"((?:CompletableFuture|Future)<[^>]+>|\w+)\s+\w+\s*\(",
+                    method_line,
+                )
+                if method_sig_match:
+                    ret_type = method_sig_match.group(1)
+                    if "CompletableFuture" in ret_type:
                         return_type = "CompletableFuture"
-                    else:
+                    elif "Future" in ret_type:
                         return_type = "Future"
                 break
 
@@ -294,32 +301,33 @@ class WorkflowAnalyzer:
             return None
 
         # Parse schedule configuration
-        schedule_type = ScheduleType.CRON
+        # Priority: cron > fixedRate > fixedDelay (Spring's precedence)
+        schedule_type = ScheduleType.CRON  # Default
         cron_expr = ""
         fixed_rate = -1
         fixed_delay = -1
         initial_delay = -1
         time_unit = "MILLISECONDS"
 
-        # Check for cron expression
+        # Check for cron expression (highest priority)
         cron_match = self.CRON_PATTERN.search(annotation_text)
         if cron_match:
             cron_expr = cron_match.group(1)
             schedule_type = ScheduleType.CRON
+        else:
+            # Check for fixed rate (second priority)
+            rate_match = self.FIXED_RATE_PATTERN.search(annotation_text)
+            if rate_match:
+                fixed_rate = int(rate_match.group(1))
+                schedule_type = ScheduleType.FIXED_RATE
+            else:
+                # Check for fixed delay (third priority)
+                delay_match = self.FIXED_DELAY_PATTERN.search(annotation_text)
+                if delay_match:
+                    fixed_delay = int(delay_match.group(1))
+                    schedule_type = ScheduleType.FIXED_DELAY
 
-        # Check for fixed rate
-        rate_match = self.FIXED_RATE_PATTERN.search(annotation_text)
-        if rate_match:
-            fixed_rate = int(rate_match.group(1))
-            schedule_type = ScheduleType.FIXED_RATE
-
-        # Check for fixed delay
-        delay_match = self.FIXED_DELAY_PATTERN.search(annotation_text)
-        if delay_match:
-            fixed_delay = int(delay_match.group(1))
-            schedule_type = ScheduleType.FIXED_DELAY
-
-        # Check for initial delay
+        # Check for initial delay (applies to rate/delay, not cron)
         initial_match = self.INITIAL_DELAY_PATTERN.search(annotation_text)
         if initial_match:
             initial_delay = int(initial_match.group(1))
@@ -423,8 +431,8 @@ class WorkflowAnalyzer:
         enum_name = state_enum_match.group(1)
         enum_body = state_enum_match.group(2)
 
-        # Extract state names
-        states = re.findall(r"([A-Z_]+)\s*(?:,|;|\})", enum_body)
+        # Extract state names - match any valid Java identifier
+        states = re.findall(r"([A-Z][A-Za-z0-9_]*)\s*(?:,|;|\})", enum_body)
         if not states or len(states) < 2:
             return None
 
@@ -469,7 +477,11 @@ class WorkflowAnalyzer:
         methods = re.findall(r"public\s+\w+\s+(\w+)\s*\([^)]*\)", content)
         for method in methods:
             # Look for a corresponding compensate/rollback method
-            compensation_pattern = f"(compensate{method}|rollback{method}|undo{method})"
+            # Use re.escape to prevent regex injection
+            escaped_method = re.escape(method)
+            compensation_pattern = (
+                f"(compensate{escaped_method}|rollback{escaped_method}|undo{escaped_method})"
+            )
             if re.search(compensation_pattern, content, re.IGNORECASE):
                 saga_steps.append(
                     SagaStep(
