@@ -25,7 +25,7 @@ jobs:
           pip install detect-secrets
       
       - name: Run Secret Detection Scan
-        id: secrets-scan
+        id: detection-scan
         run: |
           # Create baseline if it doesn't exist
           if [ ! -f .secrets.baseline ]; then
@@ -48,45 +48,45 @@ jobs:
           detect-secrets audit --report --json .secrets.baseline > audit-report.json 2>&1 || true
           
           # Create human-readable report
-          cat > secrets-report.txt <<EOF
-          === Secret Detection Report ===
+          cat > scan-report.txt <<EOF
+          === PII Detection Report ===
           Generated: $(date)
           
           EOF
           
-          # Check if secrets were found
-          SECRET_COUNT=$(jq '.results | length' .secrets.baseline 2>/dev/null || echo "0")
+          # Check if findings were detected
+          FINDING_COUNT=$(jq '.results | length' .secrets.baseline 2>/dev/null || echo "0")
           
-          if [ "$SECRET_COUNT" -gt 0 ]; then
-            echo "secrets_found=true" >> $GITHUB_OUTPUT
-            echo "::warning::Potential secrets detected in the code"
+          if [ "$FINDING_COUNT" -gt 0 ]; then
+            echo "findings_detected=true" >> $GITHUB_OUTPUT
+            echo "::warning::Potential sensitive data detected in the code"
             
             # Generate detailed report
-            echo "Found $SECRET_COUNT file(s) with potential secrets:" >> secrets-report.txt
-            echo "" >> secrets-report.txt
+            echo "Found $FINDING_COUNT file(s) with potential issues:" >> scan-report.txt
+            echo "" >> scan-report.txt
             
-            jq -r '.results | to_entries[] | "File: \(.key)\n" + (.value[] | "  - Type: \(.type)\n    Line: \(.line_number)\n")' .secrets.baseline >> secrets-report.txt 2>/dev/null || echo "Error parsing results" >> secrets-report.txt
+            jq -r '.results | to_entries[] | "File: \(.key)\n" + (.value[] | "  - Type: \(.type)\n    Line: \(.line_number)\n")' .secrets.baseline >> scan-report.txt 2>/dev/null || echo "Error parsing results" >> scan-report.txt
           else
-            echo "secrets_found=false" >> $GITHUB_OUTPUT
-            echo "No secrets detected" >> secrets-report.txt
+            echo "findings_detected=false" >> $GITHUB_OUTPUT
+            echo "No issues detected" >> scan-report.txt
           fi
           
           # Display report
-          cat secrets-report.txt
+          cat scan-report.txt
       
       - name: Upload Scan Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: secret-detection-results
+          name: pii-scan-results
           path: |
             .secrets.baseline
-            secrets-report.txt
+            scan-report.txt
             scan-results.json
             audit-report.json
       
       - name: Comment on PR
-        if: github.event_name == 'pull_request' && steps.secrets-scan.outputs.secrets_found == 'true'
+        if: github.event_name == 'pull_request' && steps.detection-scan.outputs.findings_detected == 'true'
         uses: actions/github-script@v7
         with:
           script: |

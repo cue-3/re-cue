@@ -3718,11 +3718,10 @@ Use this data for happy path testing:
 Use this data for validation testing:
 
 ```json
-<!-- pragma: allowlist secret -->
 {
     "user": {
         "username": "",
-        "password": "invalid",
+        "password": "invalid",  <!-- pragma: allowlist secret -->
         "firstName": null,
         "lastName": "AAAAAAAAAA... (256 characters)"
     },
