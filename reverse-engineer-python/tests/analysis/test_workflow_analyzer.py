@@ -21,7 +21,6 @@ from reverse_engineer.domain import (
     EventListener,
     ScheduledTask,
     ScheduleType,
-    StateMachine,
     WorkflowAnalysisResult,
     WorkflowType,
 )
