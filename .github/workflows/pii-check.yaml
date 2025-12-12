@@ -29,11 +29,20 @@ jobs:
         run: |
           # Create baseline if it doesn't exist
           if [ ! -f .secrets.baseline ]; then
-            detect-secrets scan --all-files --force-use-all-plugins > .secrets.baseline
+            detect-secrets scan --all-files --force-use-all-plugins \
+              --exclude-files '.git/.*' \
+              --exclude-files '.env' \
+              --exclude-files 'node_modules/.*' \
+              --exclude-files '.secrets.baseline' \
+              > .secrets.baseline
           fi
           
-          # Scan for sensitive data
-          detect-secrets scan --baseline .secrets.baseline --all-files > scan-results.json 2>&1 || true
+          # Scan for sensitive data  # pragma: allowlist secret
+          detect-secrets scan --baseline .secrets.baseline --all-files \
+            --exclude-files '.git/.*' \
+            --exclude-files '.env' \
+            --exclude-files 'node_modules/.*' \
+            > scan-results.json 2>&1 || true
           
           # Audit the results
           detect-secrets audit --report --json .secrets.baseline > audit-report.json 2>&1 || true
@@ -82,7 +91,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const report = fs.readFileSync('scan-report.txt', 'utf8');
+            const report = fs.readFileSync('scan-report.txt', 'utf8');  // pragma: allowlist secret
             
             const comment = `## 🔒 Secret Detection Results
             

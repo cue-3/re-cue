@@ -627,9 +627,11 @@ engine = create_engine(
 #### Tortoise ORM
 ```python
 from tortoise import Tortoise
+import os
 
+db_password = os.environ.get('DB_PASSWORD', 'your-password')
 await Tortoise.init(
-    db_url='postgres://user:password@localhost:5432/dbname',
+    db_url=f'postgres://user:{db_password}@localhost:5432/dbname',  # pragma: allowlist secret
     modules={'models': ['app.models']},
     use_tz=True,
     timezone='UTC',

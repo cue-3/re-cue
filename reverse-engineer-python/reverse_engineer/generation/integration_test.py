@@ -632,7 +632,7 @@ Use this data for validation testing:
 {
     "user": {
         "username": "",
-        "password": "invalid",
+        "password": "invalid",  // pragma: allowlist secret
         "firstName": null,
         "lastName": "AAAAAAAAAA... (256 characters)"
     },

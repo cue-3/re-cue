@@ -417,7 +417,7 @@ class TestDomainModels(unittest.TestCase):
     def test_commit_info_model(self):
         """Test CommitInfo dataclass."""
         commit = CommitInfo(
-            sha="0123456789abcdef0123456789abcdef01234567",
+            sha="0123456789abcdef0123456789abcdef01234567",  # pragma: allowlist secret
             short_sha="0123456",
             author_name="Test User",
             author_email="test@example.com",
@@ -425,7 +425,7 @@ class TestDomainModels(unittest.TestCase):
             subject="feat: test commit"
         )
         
-        self.assertEqual(commit.sha, "abc123def456")
+        self.assertEqual(commit.sha, "0123456789abcdef0123456789abcdef01234567")  # pragma: allowlist secret
         self.assertEqual(commit.author_name, "Test User")
     
     def test_blame_result_primary_author(self):
