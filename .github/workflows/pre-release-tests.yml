@@ -122,7 +122,23 @@ jobs:
       - name: Test Python CLI on sample project
         run: |
           cd sample-apps/spring-boot-demo
-          recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management"
+          echo "=== Running recue CLI ==="
+          recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management" --verbose
+          echo "=== CLI completed with exit code: $? ==="
+      
+      - name: Debug - List generated files
+        run: |
+          cd sample-apps/spring-boot-demo
+          echo "=== Directory structure ==="
+          ls -la
+          echo "=== Looking for output directories ==="
+          find . -maxdepth 1 -type d -name "re-*" || echo "No re-* directories found"
+          if [ -d "re-bookstore-api" ]; then
+            echo "=== Contents of re-bookstore-api ==="
+            ls -la re-bookstore-api/
+          else
+            echo "re-bookstore-api directory not found"
+          fi
       
       - name: Debug - List generated files
         run: |
