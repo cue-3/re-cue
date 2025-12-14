@@ -123,7 +123,7 @@ jobs:
         run: |
           cd sample-apps/spring-boot-demo
           echo "=== Running recue CLI ==="
-          recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management" --verbose
+          recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management" --path . --verbose
           echo "=== CLI completed with exit code: $? ==="
       
       - name: Debug - List generated files
@@ -138,16 +138,6 @@ jobs:
             ls -la re-bookstore-api/
           else
             echo "re-bookstore-api directory not found"
-          fi
-      
-      - name: Debug - List generated files
-        run: |
-          cd sample-apps/spring-boot-demo
-          echo "=== Directory structure ==="
-          ls -la
-          if [ -d "re-bookstore-api" ]; then
-            echo "=== Contents of re-bookstore-api ==="
-            ls -la re-bookstore-api/
           fi
       
       - name: Verify generated documentation
