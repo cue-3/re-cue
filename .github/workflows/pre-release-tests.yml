@@ -122,7 +122,7 @@ jobs:
       - name: Test Python CLI on sample project
         run: |
           cd sample-apps/spring-boot-demo
-          recue --spec --plan --use-cases --data-model
+          recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management"
       
       - name: Verify generated documentation
         run: |
