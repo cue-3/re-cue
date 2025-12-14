@@ -62,7 +62,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       
       - name: Install dependencies
         run: |
@@ -101,7 +101,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       
       - name: Install Python package
         run: |
@@ -123,16 +123,6 @@ jobs:
         run: |
           cd sample-apps/spring-boot-demo
           recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management"
-      
-      - name: Debug - List generated files
-        run: |
-          cd sample-apps/spring-boot-demo
-          echo "=== Directory structure ==="
-          ls -la
-          if [ -d "re-spring-boot-demo" ]; then
-            echo "=== Contents of re-spring-boot-demo ==="
-            ls -la re-spring-boot-demo/
-          fi
       
       - name: Verify generated documentation
         run: |
