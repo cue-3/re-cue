@@ -103,18 +103,20 @@ jobs:
             core.info('Previous tag: ' + previousTag);
             
             try {
-              const result = await github.rest.actions.createWorkflowDispatch({
+              const result = await github.rest.repos.createDispatchEvent({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                workflow_id: 'publish-coordinated.yml',
-                ref: 'main',
-                inputs: {
+                event_type: 'trigger-release',
+                client_payload: {
                   version: version,
-                  previous_tag: previousTag
+                  previous_tag: previousTag,
+                  triggered_by: 'tag-release-workflow',
+                  pr_number: context.payload.pull_request.number
                 }
               });
               
-              core.info('✓ Coordinated Release workflow triggered successfully');
+              core.info('✓ Coordinated Release workflow triggered via repository_dispatch');
+              core.info('Monitor progress at: https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/workflows/publish-coordinated.yml');
             } catch (error) {
               core.setFailed('Failed to trigger Coordinated Release: ' + error.message);
             }

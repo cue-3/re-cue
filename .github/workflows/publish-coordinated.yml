@@ -17,6 +17,8 @@ on:
         description: 'Previous tag for changelog (optional)'
         required: false
         type: string
+  repository_dispatch:
+    types: [trigger-release]
 
 permissions:
   contents: write
@@ -44,6 +46,9 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # Triggered manually - use input version
             TAG="${{ inputs.version }}"
+          elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            # Triggered by repository dispatch - use client payload
+            TAG="${{ github.event.client_payload.version }}"
           else
             # Triggered by tag push
             TAG=${GITHUB_REF#refs/tags/v}
@@ -57,6 +62,9 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.previous_tag }}" ]; then
             # Use provided previous tag
             PREVIOUS="${{ inputs.previous_tag }}"
+          elif [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -n "${{ github.event.client_payload.previous_tag }}" ]; then
+            # Use payload previous tag
+            PREVIOUS="${{ github.event.client_payload.previous_tag }}"
           else
             # Find previous tag automatically
             PREVIOUS=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
