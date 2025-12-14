@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.PAT_TOKEN || github.token }}
+          token: ${{ secrets.PAT_TOKEN || github.token }}  # pragma: allowlist secret
           fetch-depth: 0
 
       - name: Set up Python
