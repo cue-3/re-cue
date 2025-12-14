@@ -1,0 +1,374 @@
+name: AI-Assisted Label Suggestion (Phase 2)
+
+on:
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  check-labels:
+    name: Check if Labels Needed
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    outputs:
+      needs_labels: ${{ steps.check.outputs.needs_labels }}
+      pr_number: ${{ github.event.pull_request.number }}
+    
+    steps:
+      - name: Check if PR has category labels
+        id: check
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+            const categoryLabels = labels.filter(l => l.startsWith('type: '));
+            
+            const needsLabels = categoryLabels.length === 0;
+            core.setOutput('needs_labels', needsLabels);
+            
+            if (needsLabels) {
+              core.info('No category labels found - will trigger AI analysis');
+            } else {
+              core.info('Found ' + categoryLabels.length + ' category labels - AI analysis not needed');
+            }
+  
+  ai-suggest-labels:
+    name: AI Label Suggestion
+    needs: check-labels
+    if: needs.check-labels.outputs.needs_labels == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Fetch recent labeled PRs for few-shot learning
+        id: fetch-examples
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            // Fetch 10 recent merged PRs with labels
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 50
+            });
+            
+            const labeledPrs = prs
+              .filter(pr => pr.merged_at && pr.labels.some(l => l.name.startsWith('type: ')))
+              .slice(0, 10);
+            
+            const examples = labeledPrs.map(pr => ({
+              title: pr.title,
+              labels: pr.labels.filter(l => l.name.startsWith('type: ')).map(l => l.name),
+              filesChanged: pr.changed_files
+            }));
+            
+            core.setOutput('examples', JSON.stringify(examples));
+            return examples;
+      
+      - name: Get PR diff and files
+        id: pr-context
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            const prNumber = ${{ needs.check-labels.outputs.pr_number }};
+            
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            const context = {
+              title: pr.title,
+              body: pr.body || '',
+              filesChanged: files.map(f => ({
+                filename: f.filename,
+                status: f.status,
+                additions: f.additions,
+                deletions: f.deletions,
+                changes: f.changes
+              }))
+            };
+            
+            core.setOutput('pr_context', JSON.stringify(context));
+            return context;
+      
+      - name: Try GitHub Copilot AI Analysis
+        id: copilot
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            // Note: GitHub Copilot Chat API integration would go here
+            // For now, this is a placeholder that will fail and trigger fallback
+            core.info('GitHub Copilot Chat API not yet implemented');
+            throw new Error('Copilot API not available - will try fallback');
+      
+      - name: Fallback to Anthropic Claude Analysis
+        id: anthropic
+        if: steps.copilot.outcome == 'failure' && env.ANTHROPIC_API_KEY != ''
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}  # pragma: allowlist secret
+        with:
+          script: |
+            const prContext = JSON.parse('${{ steps.pr-context.outputs.pr_context }}');
+            const examples = JSON.parse('${{ steps.fetch-examples.outputs.examples }}');
+            
+            // Construct prompt for Anthropic Claude
+            const systemPrompt = 'You are a PR labeling assistant for the RE-cue project, a reverse engineering toolkit that analyzes codebases to generate documentation and specifications.\n\n' +
+              'Available labels:\n' +
+              '- type: breaking - Breaking changes requiring major version bump\n' +
+              '- type: enhancement - New features and capabilities\n' +
+              '- type: bug - Bug fixes\n' +
+              '- type: documentation - Documentation updates\n' +
+              '- type: dependencies - Dependency updates\n' +
+              '- type: chore - Maintenance and internal changes\n' +
+              '- type: security - Security fixes\n' +
+              '- type: performance - Performance improvements\n\n' +
+              'Analyze the PR and suggest appropriate labels with confidence scores (0-100).\n' +
+              'Return ONLY a JSON object with this structure:\n' +
+              '{\n' +
+              '  "labels": [\n' +
+              '    {"name": "type: bug", "confidence": 85, "reasoning": "..."}\n' +
+              '  ]\n' +
+              '}';
+
+            const userPrompt = 'Here are examples of recently labeled PRs:\n' +
+              examples.map(ex => '- "' + ex.title + '" → ' + ex.labels.join(', ')).join('\n') + '\n\n' +
+              'Now analyze this PR:\n' +
+              'Title: ' + prContext.title + '\n' +
+              'Body: ' + prContext.body + '\n' +
+              'Files changed (' + prContext.filesChanged.length + '):\n' +
+              prContext.filesChanged.slice(0, 20).map(f => '- ' + f.filename + ' (+' + f.additions + '/-' + f.deletions + ')').join('\n') + '\n\n' +
+              'Suggest appropriate labels with confidence scores.';
+
+            try {
+              const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-api-key': process.env.ANTHROPIC_API_KEY,
+                  'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                  model: 'claude-3-5-sonnet-20241022',
+                  max_tokens: 1024,
+                  messages: [
+                    {
+                      role: 'user',
+                      content: systemPrompt + '\n\n' + userPrompt
+                    }
+                  ]
+                })
+              });
+              
+              if (!response.ok) {
+                throw new Error('Anthropic API error: ' + response.status);
+              }
+              
+              const data = await response.json();
+              const content = data.content[0].text;
+              
+              // Extract JSON from response
+              const jsonMatch = content.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                const result = JSON.parse(jsonMatch[0]);
+                core.setOutput('suggestions', JSON.stringify(result.labels));
+                core.setOutput('provider', 'anthropic');
+                return result.labels;
+              } else {
+                throw new Error('Could not parse AI response');
+              }
+            } catch (error) {
+              core.error('Anthropic API failed: ' + error.message);
+              throw error;
+            }
+      
+      - name: Process AI suggestions
+        if: steps.anthropic.outcome == 'success' || steps.copilot.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            const prNumber = ${{ needs.check-labels.outputs.pr_number }};
+            const suggestionsRaw = '${{ steps.anthropic.outputs.suggestions }}' || '${{ steps.copilot.outputs.suggestions }}';
+            const provider = '${{ steps.anthropic.outputs.provider }}' || '${{ steps.copilot.outputs.provider }}';
+            
+            if (!suggestionsRaw) {
+              core.info('No AI suggestions available');
+              return;
+            }
+            
+            const suggestions = JSON.parse(suggestionsRaw);
+            const autoApplyThreshold = 95;
+            const suggestThreshold = 80;
+            
+            const toAutoApply = suggestions.filter(s => s.confidence >= autoApplyThreshold);
+            const toSuggest = suggestions.filter(s => s.confidence >= suggestThreshold && s.confidence < autoApplyThreshold);
+            const belowThreshold = suggestions.filter(s => s.confidence < suggestThreshold);
+            
+            // Auto-apply high-confidence labels
+            if (toAutoApply.length > 0) {
+              const labels = toAutoApply.map(s => s.name);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels
+              });
+              
+              core.info('Auto-applied ' + labels.length + ' high-confidence labels: ' + labels.join(', '));
+            }
+            
+            // Post suggestions for medium-confidence labels
+            if (toSuggest.length > 0 || toAutoApply.length > 0) {
+              let commentBody = '## 🤖 AI Label Suggestions\n\n';
+              
+              commentBody += provider === 'anthropic' ? '🧠 Powered by Anthropic Claude\n\n' : '🚀 Powered by GitHub Copilot\n\n';
+              
+              if (toAutoApply.length > 0) {
+                commentBody += '### ✅ Auto-Applied (≥95% confidence)\n\n';
+                commentBody += toAutoApply.map(s => '- `' + s.name + '` **(' + s.confidence + '% confidence)**\n  ' + s.reasoning).join('\n\n') + '\n\n';
+              }
+              
+              if (toSuggest.length > 0) {
+                commentBody += '### 💡 Suggested Labels (80-94% confidence)\n\n';
+                commentBody += toSuggest.map(s => '- `' + s.name + '` **(' + s.confidence + '% confidence)**\n  ' + s.reasoning + '\n  Reply with `/apply-label ' + s.name + '` to apply this label').join('\n\n') + '\n\n';
+              }
+              
+              commentBody += '---\n<sub>💡 Auto-labeling learns from your corrections. If these labels aren\'t quite right, please adjust them manually!</sub>';
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }
+      
+      - name: Post manual labeling prompt
+        if: |
+          steps.copilot.outcome == 'failure' && 
+          (steps.anthropic.outcome == 'failure' || steps.anthropic.outcome == 'skipped')
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            const prNumber = ${{ needs.check-labels.outputs.pr_number }};
+            
+            let commentBody = '## ⚠️ Manual Labeling Required\n\n';
+            commentBody += 'AI-assisted labeling is currently unavailable. Please manually add at least one category label to this PR:\n\n';
+            commentBody += '| Label | When to Use |\n';
+            commentBody += '|-------|-------------|\n';
+            commentBody += '| `type: breaking` 💥 | Breaking changes requiring major version bump |\n';
+            commentBody += '| `type: enhancement` ✨ | New features and capabilities |\n';
+            commentBody += '| `type: bug` 🐛 | Bug fixes |\n';
+            commentBody += '| `type: documentation` 📚 | Documentation updates |\n';
+            commentBody += '| `type: dependencies` ⬆️ | Dependency updates |\n';
+            commentBody += '| `type: chore` 🔧 | Maintenance and internal changes |\n';
+            commentBody += '| `type: security` 🔒 | Security fixes |\n';
+            commentBody += '| `type: performance` ⚡ | Performance improvements |\n\n';
+            commentBody += '---\n<sub>💡 This PR requires at least one category label before it can be merged.</sub>';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody
+            });
+  
+  handle-apply-command:
+    name: Handle /apply-label Command
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/apply-label')
+    
+    steps:
+      - name: Parse and apply label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            const comment = context.payload.comment.body;
+            const match = comment.match(/\/apply-label\s+(type:\s*\w+)/);
+            
+            if (!match) {
+              core.info('Invalid /apply-label command format');
+              return;
+            }
+            
+            const labelToApply = match[1];
+            const validLabels = [
+              'type: breaking',
+              'type: enhancement', 
+              'type: bug',
+              'type: documentation',
+              'type: dependencies',
+              'type: chore',
+              'type: security',
+              'type: performance'
+            ];
+            
+            if (!validLabels.includes(labelToApply)) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '❌ Invalid label: `' + labelToApply + '`. Must be one of: ' + validLabels.map(l => '`' + l + '`').join(', ')
+              });
+              return;
+            }
+            
+            // Apply the label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [labelToApply]
+            });
+            
+            // React to the command
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: '+1'
+            });
+            
+            // Confirm application
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ Applied label `' + labelToApply + '`'
+            });

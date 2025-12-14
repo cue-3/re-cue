@@ -1,0 +1,66 @@
+# Auto-labeling configuration for PR categorization
+# This file defines path-based rules for automatically applying category labels to pull requests
+# Conservative rules with high confidence to minimize false positives
+
+# Documentation changes
+'type: documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**'
+      - 'README*.md'
+      - 'CONTRIBUTING.md'
+      - 'CODE_OF_CONDUCT.md'
+      - 'SECURITY.md'
+      - '*.md'
+      - '!reverse-engineer-python/**/*.md'
+      - '!vscode-extension/**/*.md'
+      - '!sample-apps/**/*.md'
+
+# Dependency updates
+'type: dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'requirements*.txt'
+      - 'package*.json'
+      - 'package-lock.json'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'pom.xml'
+      - 'build.gradle'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Gemfile'
+      - 'Gemfile.lock'
+      - 'yarn.lock'
+
+# Workflow, CI/CD, and test changes
+'type: chore':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+      - '.github/scripts/**'
+      - '.github/actions/**'
+      - '*.sh'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.gitignore'
+      - '.gitattributes'
+      - 'Makefile'
+      - 'install*.sh'
+      - 'tests/**'
+      - 'test_*.py'
+      - '*_test.py'
+      - '**/__tests__/**'
+      - '*.test.ts'
+      - '*.test.js'
+      - '*.spec.ts'
+      - '*.spec.js'
+
+# Security-related files
+'type: security':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'SECURITY.md'
+      - '.github/workflows/pii-check.yaml'
+      - '.github/workflows/codeql*.yml'
+      - '.secrets.baseline'
