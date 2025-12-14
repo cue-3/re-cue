@@ -177,6 +177,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
       
+      - name: Create version bump branch
+        run: |
+          NEW_VERSION="${{ steps.new.outputs.version }}"
+          BRANCH="release/v$NEW_VERSION"
+          
+          git checkout -b "$BRANCH"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+        id: branch
+      
       - name: Commit version changes
         run: |
           NEW_VERSION="${{ steps.new.outputs.version }}"
@@ -189,18 +198,82 @@ jobs:
           
           git commit -m "chore: bump version to $NEW_VERSION"
       
-      - name: Create Git tag
+      - name: Push branch
         run: |
-          NEW_VERSION="${{ steps.new.outputs.version }}"
-          TAG="v$NEW_VERSION"
-          
-          git tag -a "$TAG" -m "Release version $NEW_VERSION"
-          echo "Created tag: $TAG"
+          git push origin "${{ steps.branch.outputs.branch }}"
       
-      - name: Push changes and tag
-        run: |
-          git push origin main
-          git push origin --tags
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        id: create_pr
+        with:
+          script: |
+            const newVersion = '${{ steps.new.outputs.version }}';
+            const bumpType = '${{ inputs.version_type }}';
+            const currentVersion = '${{ steps.current.outputs.version }}';
+            
+            let body = '## Version Bump: ' + currentVersion + ' → ' + newVersion + '\n\n';
+            body += '**Bump type:** `' + bumpType + '`\n\n';
+            body += '### Changes\n\n';
+            body += 'This PR updates version numbers across all package files:\n\n';
+            body += '- `reverse-engineer-python/reverse_engineer/__init__.py`\n';
+            body += '- `reverse-engineer-python/setup.py`\n';
+            body += '- `reverse-engineer-python/pyproject.toml`\n';
+            body += '- `vscode-extension/package.json`\n';
+            body += '- `vscode-extension/test-vsix.sh`\n\n';
+            body += '### Post-Merge Actions\n\n';
+            body += 'Once merged, this will:\n';
+            body += '1. ✓ Create git tag `v' + newVersion + '`\n';
+            body += '2. ✓ Trigger release workflows\n';
+            body += '3. ✓ Generate changelog\n';
+            body += '4. ✓ Publish packages\n\n';
+            body += '---\n\n';
+            body += '*This PR was created automatically by the Bump Version workflow.*\n';
+            
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'chore: bump version to ' + newVersion,
+              head: 'release/v' + newVersion,
+              base: 'main',
+              body: body
+            });
+            
+            // Add the chore label to satisfy PR label requirements
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['type: chore']
+            });
+            
+            core.info('Created PR #' + pr.number);
+            return pr.number;
+      
+      - name: Enable PR auto-merge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.create_pr.outputs.result }};
+            
+            // Get the PR to get its node ID
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            // Enable auto-merge using GraphQL
+            const mutation = 'mutation($prId: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $prId, mergeMethod: SQUASH }) { pullRequest { number } } }';
+            
+            try {
+              await github.graphql(mutation, {
+                prId: pr.node_id
+              });
+              core.info('Auto-merge enabled for PR #' + prNumber);
+            } catch (error) {
+              core.warning('Could not enable auto-merge: ' + error.message);
+              core.warning('You may need to merge the PR manually');
+            }
       
       - name: Output summary
         uses: actions/github-script@v7
@@ -302,8 +375,11 @@ jobs:
             }
             
             summary += '\n---\n\n';
-            summary += '*The release workflows will be triggered automatically by the new tag.*\n';
-            summary += '*The changelog will be generated based on PR labels using the generate-changelog workflow.*\n';
+            summary += '### Next Steps\n\n';
+            summary += '1. Review and merge PR #' + '${{ steps.create_pr.outputs.result }}' + '\n';
+            summary += '2. Once merged, the tag-release workflow will create tag `v' + newVersion + '`\n';
+            summary += '3. Release workflows will be triggered automatically\n';
+            summary += '4. Changelog will be generated based on PR labels\n';
             
             await core.summary.addRaw(summary).write();
 

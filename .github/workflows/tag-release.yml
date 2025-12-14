@@ -1,0 +1,76 @@
+name: Tag Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  create-tag:
+    name: Create Release Tag
+    runs-on: ubuntu-latest
+    # Only run if PR was merged and has chore label (version bump PRs)
+    if: |
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'type: chore') &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      
+      - name: Extract version from branch name
+        id: version
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          VERSION="${BRANCH#release/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+      
+      - name: Verify version in code
+        run: |
+          EXPECTED_VERSION="${{ steps.version.outputs.version }}"
+          CODE_VERSION=$(grep -E '^__version__ = ' reverse-engineer-python/reverse_engineer/__init__.py | cut -d'"' -f2)
+          
+          if [ "$CODE_VERSION" != "$EXPECTED_VERSION" ]; then
+            echo "❌ Version mismatch!"
+            echo "Branch suggests: $EXPECTED_VERSION"
+            echo "Code contains: $CODE_VERSION"
+            exit 1
+          fi
+          
+          echo "✓ Version verified: $CODE_VERSION"
+      
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Create and push tag
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="v$VERSION"
+          
+          git tag -a "$TAG" -m "Release version $VERSION"
+          git push origin "$TAG"
+          
+          echo "✓ Created and pushed tag: $TAG"
+      
+      - name: Output summary
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="v$VERSION"
+          
+          echo "## Release Tag Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** $TAG" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release workflows will be triggered automatically by this tag." >> $GITHUB_STEP_SUMMARY
