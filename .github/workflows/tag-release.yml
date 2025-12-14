@@ -24,6 +24,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
       
       - name: Extract version from branch name
         id: version
@@ -57,10 +58,30 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           TAG="v$VERSION"
           
-          git tag -a "$TAG" -m "Release version $VERSION"
-          git push origin "$TAG"
+          # Check if tag already exists
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "⚠️  Tag $TAG already exists"
+            git tag -d "$TAG" || true
+            git push origin ":refs/tags/$TAG" || true
+            echo "Deleted existing tag"
+          fi
           
-          echo "✓ Created and pushed tag: $TAG"
+          # Create annotated tag
+          git tag -a "$TAG" -m "Release version $VERSION"
+          echo "✓ Created tag: $TAG"
+          
+          # Push tag
+          git push origin "$TAG"
+          echo "✓ Pushed tag: $TAG"
+          
+          # Verify tag was pushed
+          sleep 2
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "✓ Tag verified on remote"
+          else
+            echo "❌ Tag not found on remote!"
+            exit 1
+          fi
       
       - name: Output summary
         run: |
@@ -73,4 +94,15 @@ jobs:
           echo "- **Tag:** $TAG" >> $GITHUB_STEP_SUMMARY
           echo "- **PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release workflows will be triggered automatically by this tag." >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The tag has been pushed and should trigger the **Coordinated Release** workflow automatically." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Expected workflows to run:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. 🔄 Coordinated Release - orchestrates the entire release" >> $GITHUB_STEP_SUMMARY
+          echo "2. 📝 Generate Changelog - creates release notes" >> $GITHUB_STEP_SUMMARY
+          echo "3. 🧪 Pre-Release Tests - validates the release" >> $GITHUB_STEP_SUMMARY
+          echo "4. 🐍 Publish Python Package - publishes to PyPI" >> $GITHUB_STEP_SUMMARY
+          echo "5. 📦 Publish VS Code Extension - publishes to marketplace" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Monitor progress in the [Actions tab](https://github.com/${{ github.repository }}/actions/workflows/publish-coordinated.yml)." >> $GITHUB_STEP_SUMMARY
