@@ -62,7 +62,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
       
       - name: Install dependencies
         run: |
@@ -101,7 +101,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
       
       - name: Install Python package
         run: |
@@ -124,22 +124,32 @@ jobs:
           cd sample-apps/spring-boot-demo
           recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management"
       
+      - name: Debug - List generated files
+        run: |
+          cd sample-apps/spring-boot-demo
+          echo "=== Directory structure ==="
+          ls -la
+          if [ -d "re-bookstore-api" ]; then
+            echo "=== Contents of re-bookstore-api ==="
+            ls -la re-bookstore-api/
+          fi
+      
       - name: Verify generated documentation
         run: |
           cd sample-apps/spring-boot-demo
           
-          # Check for expected output directory
-          if [ ! -d "re-spring-boot-demo" ]; then
+          # Check for expected output directory (project name is bookstore-api from pom.xml)
+          if [ ! -d "re-bookstore-api" ]; then
             echo "❌ Output directory not created"
             exit 1
           fi
           
           # Check for expected files
           EXPECTED_FILES=(
-            "re-spring-boot-demo/spec.md"
-            "re-spring-boot-demo/plan.md"
-            "re-spring-boot-demo/phase4-use-cases.md"
-            "re-spring-boot-demo/data-model.md"
+            "re-bookstore-api/spec.md"
+            "re-bookstore-api/plan.md"
+            "re-bookstore-api/phase4-use-cases.md"
+            "re-bookstore-api/data-model.md"
           )
           
           for file in "${EXPECTED_FILES[@]}"; do
