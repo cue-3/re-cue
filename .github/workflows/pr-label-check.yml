@@ -34,26 +34,21 @@ jobs:
             const hasCategoryLabel = categoryLabels.some(cat => prLabels.includes(cat));
             
             if (!hasCategoryLabel) {
-              const comment = `## ⚠️ Missing Category Label
-              
-This pull request requires at least one category label before it can be merged.
-
-**Available category labels:**
-
-| Label | Description | Changelog Section |
-|-------|-------------|-------------------|
-| \`breaking\` 💥 | Breaking changes requiring major version bump | Breaking Changes |
-| \`enhancement\` ✨ | New features and enhancements | Added |
-| \`bug\` 🐛 | Bug fixes | Fixed |
-| \`documentation\` 📚 | Documentation updates | Changed |
-| \`dependencies\` ⬆️ | Dependency updates | Dependencies |
-| \`chore\` 🔧 | Maintenance and chores | Maintenance |
-| \`security\` 🔒 | Security fixes | Security |
-| \`performance\` ⚡ | Performance improvements | Performance |
-
-**Please add at least one label** to this PR. You can add multiple labels if the PR covers multiple categories.
-
-*This check will automatically pass once a category label is added.*`;
+              const comment = '## ⚠️ Missing Category Label\n\n' +
+                'This pull request requires at least one category label before it can be merged.\n\n' +
+                '**Available category labels:**\n\n' +
+                '| Label | Description | Changelog Section |\n' +
+                '|-------|-------------|-------------------|\n' +
+                '| `breaking` 💥 | Breaking changes requiring major version bump | Breaking Changes |\n' +
+                '| `enhancement` ✨ | New features and enhancements | Added |\n' +
+                '| `bug` 🐛 | Bug fixes | Fixed |\n' +
+                '| `documentation` 📚 | Documentation updates | Changed |\n' +
+                '| `dependencies` ⬆️ | Dependency updates | Dependencies |\n' +
+                '| `chore` 🔧 | Maintenance and chores | Maintenance |\n' +
+                '| `security` 🔒 | Security fixes | Security |\n' +
+                '| `performance` ⚡ | Performance improvements | Performance |\n\n' +
+                '**Please add at least one label** to this PR. You can add multiple labels if the PR covers multiple categories.\n\n' +
+                '*This check will automatically pass once a category label is added.*';
               
               // Post comment
               await github.rest.issues.createComment({
