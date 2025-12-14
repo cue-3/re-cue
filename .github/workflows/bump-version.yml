@@ -42,16 +42,73 @@ jobs:
       
       - name: Validate major version bump
         if: inputs.version_type == 'major'
-        run: |
-          if [ "${{ inputs.confirm_major }}" != "BREAKING" ]; then
-            echo "❌ Major version bump requires confirmation"
-            echo "Please enter 'BREAKING' in the confirm_major field"
-            exit 1
-          fi
-          
-          # Check for 'type: breaking' label on recent merged PRs
-          echo "Checking for breaking changes in recent PRs..."
-          # This is advisory - the manual confirmation is the requirement
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Check manual confirmation
+            if (context.payload.inputs.confirm_major !== 'BREAKING') {
+              core.setFailed('❌ Major version bump requires confirmation. Please enter "BREAKING" in the confirm_major field');
+              return;
+            }
+            
+            // Check for 'type: breaking' label on recent merged PRs
+            core.info('Checking for breaking changes in recent PRs...');
+            
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 50
+            });
+            
+            const mergedPRs = pullRequests.filter(pr => pr.merged_at);
+            const breakingPRs = mergedPRs.filter(pr => 
+              pr.labels.some(label => label.name === 'type: breaking')
+            );
+            
+            if (breakingPRs.length === 0) {
+              core.warning('⚠️  No merged PRs with "type: breaking" label found in recent history');
+              core.warning('Please verify that a major version bump is appropriate');
+            } else {
+              core.info('✓ Found ' + breakingPRs.length + ' merged PR(s) with breaking changes:');
+              breakingPRs.forEach(pr => {
+                core.info('  - #' + pr.number + ': ' + pr.title);
+              });
+            }
+      
+      - name: Validate non-breaking version bump
+        if: inputs.version_type != 'major'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // For minor and patch bumps, check that there are no breaking changes
+            core.info('Checking that no breaking changes are present for ' + context.payload.inputs.version_type + ' bump...');
+            
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 50
+            });
+            
+            const mergedPRs = pullRequests.filter(pr => pr.merged_at);
+            const breakingPRs = mergedPRs.filter(pr => 
+              pr.labels.some(label => label.name === 'type: breaking')
+            );
+            
+            if (breakingPRs.length > 0) {
+              core.warning('⚠️  Found merged PRs with breaking changes:');
+              breakingPRs.forEach(pr => {
+                core.warning('  - #' + pr.number + ': ' + pr.title);
+              });
+              core.warning('Consider using a major version bump instead of ' + context.payload.inputs.version_type);
+            } else {
+              core.info('✓ No breaking changes detected - ' + context.payload.inputs.version_type + ' bump is appropriate');
+            }
       
       - name: Get current version
         id: current
@@ -146,12 +203,107 @@ jobs:
           git push origin --tags
       
       - name: Output summary
-        run: |
-          echo "## Version Bump Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Previous version:** ${{ steps.current.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **New version:** ${{ steps.new.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Bump type:** ${{ inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Git tag:** v${{ steps.new.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release workflows will be triggered automatically by the new tag." >> $GITHUB_STEP_SUMMARY
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const currentVersion = '${{ steps.current.outputs.version }}';
+            const newVersion = '${{ steps.new.outputs.version }}';
+            const bumpType = '${{ inputs.version_type }}';
+            
+            // Get merged PRs since last release tag
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 100
+            });
+            
+            const mergedPRs = pullRequests.filter(pr => pr.merged_at);
+            
+            // Categorize PRs by label
+            const categorizedPRs = {
+              breaking: [],
+              enhancement: [],
+              bug: [],
+              documentation: [],
+              dependencies: [],
+              security: [],
+              performance: [],
+              chore: [],
+              other: []
+            };
+            
+            mergedPRs.forEach(pr => {
+              const labels = pr.labels.map(l => l.name);
+              if (labels.includes('type: breaking')) categorizedPRs.breaking.push(pr);
+              else if (labels.includes('type: enhancement')) categorizedPRs.enhancement.push(pr);
+              else if (labels.includes('type: bug')) categorizedPRs.bug.push(pr);
+              else if (labels.includes('type: documentation')) categorizedPRs.documentation.push(pr);
+              else if (labels.includes('type: dependencies')) categorizedPRs.dependencies.push(pr);
+              else if (labels.includes('type: security')) categorizedPRs.security.push(pr);
+              else if (labels.includes('type: performance')) categorizedPRs.performance.push(pr);
+              else if (labels.includes('type: chore')) categorizedPRs.chore.push(pr);
+              else categorizedPRs.other.push(pr);
+            });
+            
+            let summary = '## Version Bump Summary\n\n';
+            summary += '- **Previous version:** ' + currentVersion + '\n';
+            summary += '- **New version:** ' + newVersion + '\n';
+            summary += '- **Bump type:** ' + bumpType + '\n';
+            summary += '- **Git tag:** v' + newVersion + '\n\n';
+            
+            summary += '### Changes in This Release\n\n';
+            
+            if (categorizedPRs.breaking.length > 0) {
+              summary += '#### 💥 Breaking Changes\n';
+              categorizedPRs.breaking.slice(0, 10).forEach(pr => {
+                summary += '- #' + pr.number + ': ' + pr.title + '\n';
+              });
+              summary += '\n';
+            }
+            
+            if (categorizedPRs.enhancement.length > 0) {
+              summary += '#### ✨ Enhancements\n';
+              categorizedPRs.enhancement.slice(0, 10).forEach(pr => {
+                summary += '- #' + pr.number + ': ' + pr.title + '\n';
+              });
+              summary += '\n';
+            }
+            
+            if (categorizedPRs.bug.length > 0) {
+              summary += '#### 🐛 Bug Fixes\n';
+              categorizedPRs.bug.slice(0, 10).forEach(pr => {
+                summary += '- #' + pr.number + ': ' + pr.title + '\n';
+              });
+              summary += '\n';
+            }
+            
+            if (categorizedPRs.security.length > 0) {
+              summary += '#### 🔒 Security\n';
+              categorizedPRs.security.slice(0, 10).forEach(pr => {
+                summary += '- #' + pr.number + ': ' + pr.title + '\n';
+              });
+              summary += '\n';
+            }
+            
+            if (categorizedPRs.performance.length > 0) {
+              summary += '#### ⚡ Performance\n';
+              categorizedPRs.performance.slice(0, 10).forEach(pr => {
+                summary += '- #' + pr.number + ': ' + pr.title + '\n';
+              });
+              summary += '\n';
+            }
+            
+            if (categorizedPRs.other.length > 0) {
+              summary += '#### 📝 Other Changes\n';
+              summary += categorizedPRs.other.length + ' PR(s) without category labels\n\n';
+            }
+            
+            summary += '\n---\n\n';
+            summary += '*The release workflows will be triggered automatically by the new tag.*\n';
+            summary += '*The changelog will be generated based on PR labels using the generate-changelog workflow.*\n';
+            
+            await core.summary.addRaw(summary).write();
+
