@@ -136,7 +136,7 @@ jobs:
             reverse-engineer-python/dist/*.tar.gz
             reverse-engineer-python/dist/*.whl
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
       
       - name: Trigger publish workflow
         if: ${{ !contains(steps.version.outputs.tag, '-rc') && !contains(steps.version.outputs.tag, '-beta') && !contains(steps.version.outputs.tag, '-alpha') }}

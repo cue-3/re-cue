@@ -22,49 +22,49 @@ version:
 labels:
   # Category labels (required on all PRs)
   categories:
-    - name: breaking
+    - name: type: breaking
       section: "Breaking Changes"
       description: "Breaking changes that require major version bump"
       color: "d73a4a"
       emoji: "💥"
       
-    - name: enhancement
+    - name: type: enhancement
       section: "Added"
       description: "New features and enhancements"
       color: "a2eeef"
       emoji: "✨"
       
-    - name: bug
+    - name: type: bug
       section: "Fixed"
       description: "Bug fixes"
       color: "d73a4a"
       emoji: "🐛"
       
-    - name: documentation
+    - name: type: documentation
       section: "Changed"
       description: "Documentation updates"
       color: "0075ca"
       emoji: "📚"
       
-    - name: dependencies
+    - name: type: dependencies
       section: "Dependencies"
       description: "Dependency updates"
       color: "0366d6"
       emoji: "⬆️"
       
-    - name: chore
+    - name: type: chore
       section: "Maintenance"
       description: "Maintenance and chores"
       color: "fef2c0"
       emoji: "🔧"
       
-    - name: security
+    - name: type: security
       section: "Security"
       description: "Security fixes"
       color: "ee0701"
       emoji: "🔒"
       
-    - name: performance
+    - name: type: performance
       section: "Performance"
       description: "Performance improvements"
       color: "fbca04"

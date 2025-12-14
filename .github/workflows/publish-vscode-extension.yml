@@ -13,7 +13,7 @@ on:
         type: string
         default: 'vsix-package'
     secrets:
-      VSCODE_MARKETPLACE_PAT:
+      VSCODE_MARKETPLACE_PAT:  # pragma: allowlist secret
         required: true
 
 permissions:
@@ -48,7 +48,7 @@ jobs:
       - name: Publish to marketplace
         id: publish
         env:
-          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}
+          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}  # pragma: allowlist secret
         run: |
           cd vscode-extension
           
@@ -128,7 +128,7 @@ jobs:
             
             See the [CHANGELOG](https://github.com/cue-3/re-cue/blob/main/vscode-extension/CHANGELOG.md) for details.
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
       
       - name: Publish summary
         run: |

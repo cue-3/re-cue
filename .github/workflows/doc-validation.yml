@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}  # pragma: allowlist secret
           # For workflow_run, checkout the PR branch
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 

@@ -65,7 +65,7 @@ jobs:
     name: Publish Python Package
     needs: [extract-version, pre-release-tests]
     uses: ./.github/workflows/publish-package.yml
-    secrets: inherit
+    secrets: inherit  # pragma: allowlist secret
     permissions:
       contents: write
       id-token: write
@@ -78,7 +78,7 @@ jobs:
       version: ${{ needs.extract-version.outputs.version }}
       vsix_artifact: vsix-package
     secrets:
-      VSCODE_MARKETPLACE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}
+      VSCODE_MARKETPLACE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}  # pragma: allowlist secret
     permissions:
       contents: write
   
@@ -92,8 +92,8 @@ jobs:
       python_published: ${{ needs.publish-python.result == 'success' }}
       vscode_published: ${{ needs.publish-vscode.result == 'success' }}
     secrets:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-      VSCODE_MARKETPLACE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}  # pragma: allowlist secret
+      VSCODE_MARKETPLACE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}  # pragma: allowlist secret
     permissions:
       contents: write
       issues: write

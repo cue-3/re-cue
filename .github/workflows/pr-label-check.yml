@@ -8,11 +8,14 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  statuses: write
 
 jobs:
   check-labels:
     name: Validate PR Labels
     runs-on: ubuntu-latest
+    # Don't run on forks to avoid permission issues
+    if: github.event.pull_request.head.repo.full_name == github.repository
     
     steps:
       - name: Check for category label
@@ -20,14 +23,14 @@ jobs:
         with:
           script: |
             const categoryLabels = [
-              'breaking',
-              'enhancement',
-              'bug',
-              'documentation',
-              'dependencies',
-              'chore',
-              'security',
-              'performance'
+              'type: breaking',
+              'type: enhancement',
+              'type: bug',
+              'type: documentation',
+              'type: dependencies',
+              'type: chore',
+              'type: security',
+              'type: performance'
             ];
             
             const prLabels = context.payload.pull_request.labels.map(label => label.name);
@@ -39,14 +42,14 @@ jobs:
                 '**Available category labels:**\n\n' +
                 '| Label | Description | Changelog Section |\n' +
                 '|-------|-------------|-------------------|\n' +
-                '| `breaking` 💥 | Breaking changes requiring major version bump | Breaking Changes |\n' +
-                '| `enhancement` ✨ | New features and enhancements | Added |\n' +
-                '| `bug` 🐛 | Bug fixes | Fixed |\n' +
-                '| `documentation` 📚 | Documentation updates | Changed |\n' +
-                '| `dependencies` ⬆️ | Dependency updates | Dependencies |\n' +
-                '| `chore` 🔧 | Maintenance and chores | Maintenance |\n' +
-                '| `security` 🔒 | Security fixes | Security |\n' +
-                '| `performance` ⚡ | Performance improvements | Performance |\n\n' +
+                '| `type: breaking` 💥 | Breaking changes requiring major version bump | Breaking Changes |\n' +
+                '| `type: enhancement` ✨ | New features and enhancements | Added |\n' +
+                '| `type: bug` 🐛 | Bug fixes | Fixed |\n' +
+                '| `type: documentation` 📚 | Documentation updates | Changed |\n' +
+                '| `type: dependencies` ⬆️ | Dependency updates | Dependencies |\n' +
+                '| `type: chore` 🔧 | Maintenance and chores | Maintenance |\n' +
+                '| `type: security` 🔒 | Security fixes | Security |\n' +
+                '| `type: performance` ⚡ | Performance improvements | Performance |\n\n' +
                 '**Please add at least one label** to this PR. You can add multiple labels if the PR covers multiple categories.\n\n' +
                 '*This check will automatically pass once a category label is added.*';
               

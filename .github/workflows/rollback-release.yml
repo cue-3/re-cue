@@ -16,9 +16,9 @@ on:
         required: true
         type: boolean
     secrets:
-      PYPI_API_TOKEN:
+      PYPI_API_TOKEN:  # pragma: allowlist secret
         required: true
-      VSCODE_MARKETPLACE_PAT:
+      VSCODE_MARKETPLACE_PAT:  # pragma: allowlist secret
         required: false
 
 permissions:
@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -50,7 +50,7 @@ jobs:
         if: inputs.python_published
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}  # pragma: allowlist secret
         run: |
           echo "Yanking re-cue version ${{ inputs.version }} from PyPI..."
           
