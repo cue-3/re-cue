@@ -156,6 +156,37 @@ async function analyzeFile(uri: vscode.Uri): Promise<AnalysisResult | undefined>
 - **Functions**: Use meaningful function names with comments
 - **Variable Names**: Use lowercase with underscores: `endpoint_count`
 
+### GitHub Actions Workflow Standards
+
+- **YAML Syntax**: GitHub Actions workflows use strict YAML parsing
+- **JavaScript Strings**: NEVER use template literals (backticks) in `actions/github-script` script blocks
+- **String Concatenation**: Use traditional `+` operator for JavaScript string building
+- **Quote Escaping**: Escape single quotes with backslash: `'don\'t'` not `'don't'`
+- **Multi-line Strings**: Build incrementally: `let str = 'line1\n'; str += 'line2\n';`
+- **Secret References**: Add `# pragma: allowlist secret` comment on lines using `secrets.*` to prevent PII check false positives
+
+```yaml
+# ❌ WRONG - Template literals cause YAML syntax errors
+- uses: actions/github-script@v7
+  with:
+    script: |
+      const message = `Hello ${name}!`;
+
+# ✅ CORRECT - Use string concatenation
+- uses: actions/github-script@v7
+  with:
+    script: |
+      const message = 'Hello ' + name + '!';
+      
+# ✅ CORRECT - Multi-line string building
+- uses: actions/github-script@v7
+  with:
+    script: |
+      let body = '## Title\n\n';
+      body += 'Content: ' + variable + '\n';
+      body += condition ? 'Yes\n' : 'No\n';
+```
+
 ## Testing Guidelines
 
 ### Test Organization

@@ -250,20 +250,21 @@ jobs:
             
             // Post suggestions for medium-confidence labels
             if (toSuggest.length > 0 || toAutoApply.length > 0) {
-              const commentBody = `## 🤖 AI Label Suggestions
-
-${provider === 'anthropic' ? '🧠 Powered by Anthropic Claude' : '🚀 Powered by GitHub Copilot'}
-
-${toAutoApply.length > 0 ? `### ✅ Auto-Applied (≥95% confidence)
-
-${toAutoApply.map(s => `- \`${s.name}\` **(${s.confidence}% confidence)**\n  ${s.reasoning}`).join('\n\n')}
-
-` : ''}${toSuggest.length > 0 ? `### 💡 Suggested Labels (80-94% confidence)
-
-${toSuggest.map(s => `- \`${s.name}\` **(${s.confidence}% confidence)**\n  ${s.reasoning}\n  Reply with \`/apply-label ${s.name}\` to apply this label`).join('\n\n')}
-
-` : ''}---
-<sub>💡 Auto-labeling learns from your corrections. If these labels aren't quite right, please adjust them manually!</sub>`;
+              let commentBody = '## 🤖 AI Label Suggestions\n\n';
+              
+              commentBody += provider === 'anthropic' ? '🧠 Powered by Anthropic Claude\n\n' : '🚀 Powered by GitHub Copilot\n\n';
+              
+              if (toAutoApply.length > 0) {
+                commentBody += '### ✅ Auto-Applied (≥95% confidence)\n\n';
+                commentBody += toAutoApply.map(s => '- `' + s.name + '` **(' + s.confidence + '% confidence)**\n  ' + s.reasoning).join('\n\n') + '\n\n';
+              }
+              
+              if (toSuggest.length > 0) {
+                commentBody += '### 💡 Suggested Labels (80-94% confidence)\n\n';
+                commentBody += toSuggest.map(s => '- `' + s.name + '` **(' + s.confidence + '% confidence)**\n  ' + s.reasoning + '\n  Reply with `/apply-label ' + s.name + '` to apply this label').join('\n\n') + '\n\n';
+              }
+              
+              commentBody += '---\n<sub>💡 Auto-labeling learns from your corrections. If these labels aren\'t quite right, please adjust them manually!</sub>';
               
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
