@@ -61,12 +61,16 @@ jobs:
               previousCommit = commits.data[0].sha;
             }
             
+            // Get the current commit SHA
+            const currentCommit = context.sha;
+            console.log('Comparing commits from ' + previousCommit + ' to ' + currentCommit);
+            
             // Get all commits since previous tag
             const commits = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
               repo: context.repo.repo,
               base: previousCommit,
-              head: 'HEAD'
+              head: currentCommit
             });
             
             // Get PRs associated with these commits
