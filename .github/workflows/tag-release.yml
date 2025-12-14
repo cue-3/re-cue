@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   create-tag:
@@ -24,6 +25,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
       
       - name: Extract version from branch name
         id: version
@@ -32,6 +34,13 @@ jobs:
           VERSION="${BRANCH#release/v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
+      
+      - name: Get previous tag
+        id: previous
+        run: |
+          PREVIOUS=$(git describe --abbrev=0 --tags 2>/dev/null || echo "")
+          echo "tag=$PREVIOUS" >> $GITHUB_OUTPUT
+          echo "Previous tag: $PREVIOUS"
       
       - name: Verify version in code
         run: |
@@ -57,10 +66,60 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           TAG="v$VERSION"
           
-          git tag -a "$TAG" -m "Release version $VERSION"
-          git push origin "$TAG"
+          # Check if tag already exists
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "⚠️  Tag $TAG already exists"
+            git tag -d "$TAG" || true
+            git push origin ":refs/tags/$TAG" || true
+            echo "Deleted existing tag"
+          fi
           
-          echo "✓ Created and pushed tag: $TAG"
+          # Create annotated tag
+          git tag -a "$TAG" -m "Release version $VERSION"
+          echo "✓ Created tag: $TAG"
+          
+          # Push tag
+          git push origin "$TAG"
+          echo "✓ Pushed tag: $TAG"
+          
+          # Verify tag was pushed
+          sleep 2
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "✓ Tag verified on remote"
+          else
+            echo "❌ Tag not found on remote!"
+            exit 1
+          fi
+      
+      - name: Trigger Coordinated Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.version.outputs.version }}';
+            const previousTag = '${{ steps.previous.outputs.tag }}';
+            
+            core.info('Triggering Coordinated Release workflow...');
+            core.info('Version: ' + version);
+            core.info('Previous tag: ' + previousTag);
+            
+            try {
+              const result = await github.rest.repos.createDispatchEvent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                event_type: 'trigger-release',
+                client_payload: {
+                  version: version,
+                  previous_tag: previousTag,
+                  triggered_by: 'tag-release-workflow',
+                  pr_number: context.payload.pull_request.number
+                }
+              });
+              
+              core.info('✓ Coordinated Release workflow triggered via repository_dispatch');
+              core.info('Monitor progress at: https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/workflows/publish-coordinated.yml');
+            } catch (error) {
+              core.setFailed('Failed to trigger Coordinated Release: ' + error.message);
+            }
       
       - name: Output summary
         run: |
@@ -73,4 +132,15 @@ jobs:
           echo "- **Tag:** $TAG" >> $GITHUB_STEP_SUMMARY
           echo "- **PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release workflows will be triggered automatically by this tag." >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The **Coordinated Release** workflow has been triggered automatically." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Expected workflows to run:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. 🔄 Coordinated Release - orchestrates the entire release" >> $GITHUB_STEP_SUMMARY
+          echo "2. 📝 Generate Changelog - creates release notes" >> $GITHUB_STEP_SUMMARY
+          echo "3. 🧪 Pre-Release Tests - validates the release" >> $GITHUB_STEP_SUMMARY
+          echo "4. 🐍 Publish Python Package - publishes to PyPI" >> $GITHUB_STEP_SUMMARY
+          echo "5. 📦 Publish VS Code Extension - publishes to marketplace" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Monitor progress in the [Actions tab](https://github.com/${{ github.repository }}/actions/workflows/publish-coordinated.yml)." >> $GITHUB_STEP_SUMMARY
