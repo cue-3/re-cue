@@ -33,7 +33,7 @@
       - 'Gemfile.lock'
       - 'yarn.lock'
 
-# Workflow and CI/CD changes
+# Workflow, CI/CD, and test changes
 'type: chore':
   - changed-files:
     - any-glob-to-any-file:
@@ -47,12 +47,6 @@
       - '.gitattributes'
       - 'Makefile'
       - 'install*.sh'
-
-# Test files (often accompany bug fixes or enhancements)
-# Note: This doesn't auto-label as bug/enhancement, but helps identify test-related changes
-'type: chore':
-  - changed-files:
-    - any-glob-to-any-file:
       - 'tests/**'
       - 'test_*.py'
       - '*_test.py'
