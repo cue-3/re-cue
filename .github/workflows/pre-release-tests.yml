@@ -140,6 +140,16 @@ jobs:
             echo "re-bookstore-api directory not found"
           fi
       
+      - name: Debug - List generated files
+        run: |
+          cd sample-apps/spring-boot-demo
+          echo "=== Directory structure ==="
+          ls -la
+          if [ -d "re-bookstore-api" ]; then
+            echo "=== Contents of re-bookstore-api ==="
+            ls -la re-bookstore-api/
+          fi
+      
       - name: Verify generated documentation
         run: |
           cd sample-apps/spring-boot-demo
