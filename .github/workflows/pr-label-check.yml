@@ -8,11 +8,14 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  statuses: write
 
 jobs:
   check-labels:
     name: Validate PR Labels
     runs-on: ubuntu-latest
+    # Don't run on forks to avoid permission issues
+    if: github.event.pull_request.head.repo.full_name == github.repository
     
     steps:
       - name: Check for category label
