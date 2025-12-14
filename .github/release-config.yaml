@@ -74,6 +74,44 @@ labels:
   enforcement:
     require_category: true
     allow_multiple: true
+
+# Auto-labeling configuration
+auto_labeling:
+  # Enable automatic PR labeling
+  enabled: true
+  
+  # Path-based labeling (Phase 1)
+  path_based:
+    enabled: true
+    allow_multiple: true
+    
+  # AI-assisted labeling (Phase 2)
+  ai_assisted:
+    enabled: true
+    
+    # Confidence thresholds
+    confidence_threshold: 80  # Minimum confidence to suggest (%)
+    auto_apply_threshold: 95  # Auto-apply without confirmation (%)
+    
+    # Few-shot learning
+    few_shot_example_count: 10  # Number of recent PRs to use as examples
+    
+    # Cascading fallback
+    primary_provider: github-copilot  # GitHub Copilot Chat API
+    enable_anthropic_fallback: true   # Use Anthropic Claude if Copilot unavailable
+    
+  # Learning system
+  learning:
+    enabled: true
+    track_corrections: true
+    artifact_retention_days: 90
+    
+  # Monthly accuracy reports
+  accuracy_reports:
+    enabled: true
+    schedule: "0 0 1 * *"  # First day of each month
+    assignees:
+      - "@cue-3/release-managers"
     
 # Release workflow configuration
 release:

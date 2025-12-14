@@ -1,0 +1,336 @@
+name: Monthly Label Accuracy Report
+
+on:
+  schedule:
+    # Run on the 1st day of each month at midnight UTC
+    - cron: '0 0 1 * *'
+  workflow_dispatch:  # Allow manual trigger for testing
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  generate-report:
+    name: Generate Monthly Accuracy Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download all label accuracy artifacts from past 30 days
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Create directory for downloaded reports
+            const reportsDir = path.join(process.env.GITHUB_WORKSPACE, 'downloaded-reports');
+            if (!fs.existsSync(reportsDir)) {
+              fs.mkdirSync(reportsDir, { recursive: true });
+            }
+            
+            // Calculate date 30 days ago
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            // List all workflow runs for track-label-changes
+            const { data: runs } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'track-label-changes.yml',
+              status: 'success',
+              per_page: 100
+            });
+            
+            // Filter runs from past 30 days
+            const recentRuns = runs.workflow_runs.filter(run => 
+              new Date(run.created_at) > thirtyDaysAgo
+            );
+            
+            core.info(`Found ${recentRuns.length} workflow runs in the past 30 days`);
+            
+            let downloadedCount = 0;
+            
+            // Download artifacts from each run
+            for (const run of recentRuns) {
+              try {
+                const { data: artifacts } = await github.rest.actions.listWorkflowRunArtifacts({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: run.id
+                });
+                
+                for (const artifact of artifacts.artifacts) {
+                  if (artifact.name.startsWith('label-accuracy-report-pr-')) {
+                    const download = await github.rest.actions.downloadArtifact({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      artifact_id: artifact.id,
+                      archive_format: 'zip'
+                    });
+                    
+                    // Save artifact
+                    const filename = `${artifact.name}.zip`;
+                    const filepath = path.join(reportsDir, filename);
+                    fs.writeFileSync(filepath, Buffer.from(download.data));
+                    downloadedCount++;
+                  }
+                }
+              } catch (error) {
+                core.warning(`Failed to download artifacts from run ${run.id}: ${error.message}`);
+              }
+            }
+            
+            core.setOutput('downloaded_count', downloadedCount);
+            core.info(`Downloaded ${downloadedCount} accuracy report artifacts`);
+      
+      - name: Extract and aggregate reports
+        id: aggregate
+        run: |
+          cd downloaded-reports
+          
+          # Unzip all artifacts
+          for zip in *.zip; do
+            if [ -f "$zip" ]; then
+              unzip -q "$zip" || true
+            fi
+          done
+          
+          # Find all JSON reports
+          find . -name "*.json" -type f > report-list.txt
+          
+          echo "Found $(wc -l < report-list.txt) report files"
+      
+      - name: Calculate aggregate metrics
+        id: metrics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            const reportsDir = path.join(process.env.GITHUB_WORKSPACE, 'downloaded-reports');
+            const reportListFile = path.join(reportsDir, 'report-list.txt');
+            
+            if (!fs.existsSync(reportListFile)) {
+              core.warning('No reports found');
+              return {};
+            }
+            
+            const reportFiles = fs.readFileSync(reportListFile, 'utf8')
+              .split('\n')
+              .filter(f => f.trim());
+            
+            if (reportFiles.length === 0) {
+              core.warning('No report files to process');
+              return {};
+            }
+            
+            // Aggregate metrics by label type
+            const aggregated = {
+              total_prs: 0,
+              by_label: {}
+            };
+            
+            const labelTypes = [
+              'type: breaking',
+              'type: enhancement',
+              'type: bug',
+              'type: documentation',
+              'type: dependencies',
+              'type: chore',
+              'type: security',
+              'type: performance'
+            ];
+            
+            // Initialize counters
+            for (const label of labelTypes) {
+              aggregated.by_label[label] = {
+                true_positives: 0,  // Auto-applied and kept
+                false_positives: 0, // Auto-applied but removed
+                false_negatives: 0, // Not auto-applied but added manually
+                true_negatives: 0,  // Not auto-applied and not needed
+                total: 0
+              };
+            }
+            
+            // Process each report
+            for (const reportFile of reportFiles) {
+              try {
+                const fullPath = path.join(reportsDir, reportFile);
+                const report = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+                
+                aggregated.total_prs++;
+                
+                // Process metrics for each label
+                for (const label of labelTypes) {
+                  const metric = report.metrics[label];
+                  if (!metric) continue;
+                  
+                  const stats = aggregated.by_label[label];
+                  stats.total++;
+                  
+                  if (metric.correct) {
+                    stats.true_positives++;
+                  } else if (metric.false_positive) {
+                    stats.false_positives++;
+                  } else if (metric.false_negative) {
+                    stats.false_negatives++;
+                  } else {
+                    stats.true_negatives++;
+                  }
+                }
+              } catch (error) {
+                core.warning(`Failed to process report ${reportFile}: ${error.message}`);
+              }
+            }
+            
+            // Calculate precision, recall, F1 for each label
+            for (const label of labelTypes) {
+              const stats = aggregated.by_label[label];
+              
+              const tp = stats.true_positives;
+              const fp = stats.false_positives;
+              const fn = stats.false_negatives;
+              
+              stats.precision = tp + fp > 0 ? (tp / (tp + fp) * 100).toFixed(1) : 'N/A';
+              stats.recall = tp + fn > 0 ? (tp / (tp + fn) * 100).toFixed(1) : 'N/A';
+              
+              if (typeof stats.precision === 'number' && typeof stats.recall === 'number') {
+                const p = parseFloat(stats.precision);
+                const r = parseFloat(stats.recall);
+                stats.f1 = p + r > 0 ? (2 * p * r / (p + r)).toFixed(1) : 'N/A';
+              } else {
+                stats.f1 = 'N/A';
+              }
+            }
+            
+            core.setOutput('aggregated', JSON.stringify(aggregated));
+            return aggregated;
+      
+      - name: Create accuracy report issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}  # pragma: allowlist secret
+          script: |
+            const aggregated = JSON.parse('${{ steps.metrics.outputs.aggregated }}' || '{}');
+            
+            if (!aggregated.total_prs) {
+              core.info('No data to report');
+              return;
+            }
+            
+            const now = new Date();
+            const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            // Build metrics table
+            let metricsTable = `| Label | Precision | Recall | F1 Score | Auto-Applied | Corrections |\n`;
+            metricsTable += `|-------|-----------|--------|----------|--------------|-------------|\n`;
+            
+            for (const [label, stats] of Object.entries(aggregated.by_label)) {
+              const autoApplied = stats.true_positives + stats.false_positives;
+              const corrections = stats.false_positives + stats.false_negatives;
+              
+              metricsTable += `| \`${label}\` | ${stats.precision}% | ${stats.recall}% | ${stats.f1}% | ${autoApplied} | ${corrections} |\n`;
+            }
+            
+            // Calculate overall accuracy
+            const totalCorrect = Object.values(aggregated.by_label)
+              .reduce((sum, stats) => sum + stats.true_positives, 0);
+            const totalAutoApplied = Object.values(aggregated.by_label)
+              .reduce((sum, stats) => sum + stats.true_positives + stats.false_positives, 0);
+            const overallAccuracy = totalAutoApplied > 0 
+              ? (totalCorrect / totalAutoApplied * 100).toFixed(1)
+              : 'N/A';
+            
+            // Identify improvements and regressions
+            // (For first report, we don't have previous data to compare)
+            const insights = [];
+            
+            // Find best and worst performing labels
+            const labelPerformance = Object.entries(aggregated.by_label)
+              .filter(([_, stats]) => stats.f1 !== 'N/A')
+              .map(([label, stats]) => ({ label, f1: parseFloat(stats.f1) }))
+              .sort((a, b) => b.f1 - a.f1);
+            
+            if (labelPerformance.length > 0) {
+              insights.push(`🏆 **Best performing**: \`${labelPerformance[0].label}\` (F1: ${labelPerformance[0].f1}%)`);
+              
+              if (labelPerformance.length > 1) {
+                const worst = labelPerformance[labelPerformance.length - 1];
+                insights.push(`📉 **Needs improvement**: \`${worst.label}\` (F1: ${worst.f1}%)`);
+              }
+            }
+            
+            // Generate recommendations
+            const recommendations = [];
+            
+            for (const [label, stats] of Object.entries(aggregated.by_label)) {
+              if (stats.false_positives > stats.true_positives && stats.false_positives > 2) {
+                recommendations.push(`- **\`${label}\`**: High false positive rate (${stats.false_positives} incorrect auto-applications). Consider refining path-based rules.`);
+              }
+              if (stats.false_negatives > 5) {
+                recommendations.push(`- **\`${label}\`**: Frequently added manually (${stats.false_negatives} times). Consider adding more keyword patterns.`);
+              }
+            }
+            
+            const issueBody = `# 📊 Auto-Labeling Accuracy Report - ${monthYear}
+
+## Summary
+
+**Reporting Period**: Past 30 days
+**PRs Analyzed**: ${aggregated.total_prs}
+**Overall Accuracy**: ${overallAccuracy}%
+
+## Performance Metrics
+
+${metricsTable}
+
+### Metric Definitions
+- **Precision**: % of auto-applied labels that were correct (not removed)
+- **Recall**: % of correct labels that were auto-applied (vs manually added)
+- **F1 Score**: Harmonic mean of precision and recall
+- **Auto-Applied**: Total labels automatically applied
+- **Corrections**: Labels removed or manually added
+
+## Insights
+
+${insights.join('\n')}
+
+${recommendations.length > 0 ? `## Recommendations
+
+${recommendations.join('\n')}
+
+` : ''}## Next Steps
+
+1. **Review recommendations** above to improve auto-labeling accuracy
+2. **Update path-based rules** in \`.github/labeler.yml\` if needed
+3. **Refine keyword patterns** in \`auto-label-pr.yml\` based on false negatives
+4. **Monitor trends** in next month's report
+
+## About This Report
+
+This report is automatically generated on the 1st of each month by analyzing label changes on merged PRs. The auto-labeling system learns from your corrections to continuously improve accuracy.
+
+---
+
+**Configuration**: See [.github/release-config.yaml](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/.github/release-config.yaml)
+**Documentation**: [Release Automation Guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/archive/RELEASE-AUTOMATION-GUIDE.md)
+
+/cc @cue-3/release-managers`;
+            
+            // Create the issue
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📊 Auto-Labeling Accuracy Report - ${monthYear}`,
+              body: issueBody,
+              labels: ['automated', 'metrics', 'auto-labeling']
+            });
+            
+            core.info(`Created accuracy report issue: ${issue.html_url}`);
