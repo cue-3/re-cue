@@ -13,6 +13,16 @@ on:
         description: 'Version to publish (e.g., 1.0.0)'
         required: true
         type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: false
+        type: string
+    outputs:
+      published:
+        description: 'Whether package was published successfully'
+        value: ${{ jobs.publish-testpypi.result == 'success' && jobs.publish-pypi.result == 'success' }}
 
 jobs:
   build:
