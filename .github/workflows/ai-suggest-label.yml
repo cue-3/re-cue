@@ -39,7 +39,7 @@ jobs:
             if (needsLabels) {
               core.info('No category labels found - will trigger AI analysis');
             } else {
-              core.info(`Found ${categoryLabels.length} category labels - AI analysis not needed`);
+              core.info('Found ' + categoryLabels.length + ' category labels - AI analysis not needed');
             }
   
   ai-suggest-labels:
@@ -184,14 +184,14 @@ jobs:
                   messages: [
                     {
                       role: 'user',
-                      content: `${systemPrompt}\n\n${userPrompt}`
+                      content: systemPrompt + '\n\n' + userPrompt
                     }
                   ]
                 })
               });
               
               if (!response.ok) {
-                throw new Error(`Anthropic API error: ${response.status}`);
+                throw new Error('Anthropic API error: ' + response.status);
               }
               
               const data = await response.json();
@@ -208,7 +208,7 @@ jobs:
                 throw new Error('Could not parse AI response');
               }
             } catch (error) {
-              core.error(`Anthropic API failed: ${error.message}`);
+              core.error('Anthropic API failed: ' + error.message);
               throw error;
             }
       
@@ -245,7 +245,7 @@ jobs:
                 labels
               });
               
-              core.info(`Auto-applied ${labels.length} high-confidence labels: ${labels.join(', ')}`);
+              core.info('Auto-applied ' + labels.length + ' high-confidence labels: ' + labels.join(', '));
             }
             
             // Post suggestions for medium-confidence labels
@@ -284,23 +284,19 @@ jobs:
           script: |
             const prNumber = ${{ needs.check-labels.outputs.pr_number }};
             
-            const commentBody = `## ⚠️ Manual Labeling Required
-
-AI-assisted labeling is currently unavailable. Please manually add at least one category label to this PR:
-
-| Label | When to Use |
-|-------|-------------|
-| \`type: breaking\` 💥 | Breaking changes requiring major version bump |
-| \`type: enhancement\` ✨ | New features and capabilities |
-| \`type: bug\` 🐛 | Bug fixes |
-| \`type: documentation\` 📚 | Documentation updates |
-| \`type: dependencies\` ⬆️ | Dependency updates |
-| \`type: chore\` 🔧 | Maintenance and internal changes |
-| \`type: security\` 🔒 | Security fixes |
-| \`type: performance\` ⚡ | Performance improvements |
-
----
-<sub>💡 This PR requires at least one category label before it can be merged.</sub>`;
+            let commentBody = '## ⚠️ Manual Labeling Required\n\n';
+            commentBody += 'AI-assisted labeling is currently unavailable. Please manually add at least one category label to this PR:\n\n';
+            commentBody += '| Label | When to Use |\n';
+            commentBody += '|-------|-------------|\n';
+            commentBody += '| `type: breaking` 💥 | Breaking changes requiring major version bump |\n';
+            commentBody += '| `type: enhancement` ✨ | New features and capabilities |\n';
+            commentBody += '| `type: bug` 🐛 | Bug fixes |\n';
+            commentBody += '| `type: documentation` 📚 | Documentation updates |\n';
+            commentBody += '| `type: dependencies` ⬆️ | Dependency updates |\n';
+            commentBody += '| `type: chore` 🔧 | Maintenance and internal changes |\n';
+            commentBody += '| `type: security` 🔒 | Security fixes |\n';
+            commentBody += '| `type: performance` ⚡ | Performance improvements |\n\n';
+            commentBody += '---\n<sub>💡 This PR requires at least one category label before it can be merged.</sub>';
             
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -348,7 +344,7 @@ AI-assisted labeling is currently unavailable. Please manually add at least one 
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `❌ Invalid label: \`${labelToApply}\`. Must be one of: ${validLabels.map(l => `\`${l}\``).join(', ')}`
+                body: '❌ Invalid label: `' + labelToApply + '`. Must be one of: ' + validLabels.map(l => '`' + l + '`').join(', ')
               });
               return;
             }
@@ -374,5 +370,5 @@ AI-assisted labeling is currently unavailable. Please manually add at least one 
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `✅ Applied label \`${labelToApply}\``
+              body: '✅ Applied label `' + labelToApply + '`'
             });

@@ -52,7 +52,7 @@ jobs:
               new Date(run.created_at) > thirtyDaysAgo
             );
             
-            core.info(`Found ${recentRuns.length} workflow runs in the past 30 days`);
+            core.info('Found ' + recentRuns.length + ' workflow runs in the past 30 days');
             
             let downloadedCount = 0;
             
@@ -75,19 +75,19 @@ jobs:
                     });
                     
                     // Save artifact
-                    const filename = `${artifact.name}.zip`;
+                    const filename = artifact.name + '.zip';
                     const filepath = path.join(reportsDir, filename);
                     fs.writeFileSync(filepath, Buffer.from(download.data));
                     downloadedCount++;
                   }
                 }
               } catch (error) {
-                core.warning(`Failed to download artifacts from run ${run.id}: ${error.message}`);
+                core.warning('Failed to download artifacts from run ' + run.id + ': ' + error.message);
               }
             }
             
             core.setOutput('downloaded_count', downloadedCount);
-            core.info(`Downloaded ${downloadedCount} accuracy report artifacts`);
+            core.info('Downloaded ' + downloadedCount + ' accuracy report artifacts');
       
       - name: Extract and aggregate reports
         id: aggregate
@@ -186,7 +186,7 @@ jobs:
                   }
                 }
               } catch (error) {
-                core.warning(`Failed to process report ${reportFile}: ${error.message}`);
+                core.warning('Failed to process report ' + reportFile + ': ' + error.message);
               }
             }
             
@@ -229,14 +229,14 @@ jobs:
             const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             
             // Build metrics table
-            let metricsTable = `| Label | Precision | Recall | F1 Score | Auto-Applied | Corrections |\n`;
-            metricsTable += `|-------|-----------|--------|----------|--------------|-------------|\n`;
+            let metricsTable = '| Label | Precision | Recall | F1 Score | Auto-Applied | Corrections |\n';
+            metricsTable += '|-------|-----------|--------|----------|--------------|-------------|\n';
             
             for (const [label, stats] of Object.entries(aggregated.by_label)) {
               const autoApplied = stats.true_positives + stats.false_positives;
               const corrections = stats.false_positives + stats.false_negatives;
               
-              metricsTable += `| \`${label}\` | ${stats.precision}% | ${stats.recall}% | ${stats.f1}% | ${autoApplied} | ${corrections} |\n`;
+              metricsTable += '| `' + label + '` | ' + stats.precision + '% | ' + stats.recall + '% | ' + stats.f1 + '% | ' + autoApplied + ' | ' + corrections + ' |\n';
             }
             
             // Calculate overall accuracy
@@ -259,11 +259,11 @@ jobs:
               .sort((a, b) => b.f1 - a.f1);
             
             if (labelPerformance.length > 0) {
-              insights.push(`🏆 **Best performing**: \`${labelPerformance[0].label}\` (F1: ${labelPerformance[0].f1}%)`);
+              insights.push('🏆 **Best performing**: `' + labelPerformance[0].label + '` (F1: ' + labelPerformance[0].f1 + '%)');
               
               if (labelPerformance.length > 1) {
                 const worst = labelPerformance[labelPerformance.length - 1];
-                insights.push(`📉 **Needs improvement**: \`${worst.label}\` (F1: ${worst.f1}%)`);
+                insights.push('📉 **Needs improvement**: `' + worst.label + '` (F1: ' + worst.f1 + '%)');
               }
             }
             
@@ -272,10 +272,10 @@ jobs:
             
             for (const [label, stats] of Object.entries(aggregated.by_label)) {
               if (stats.false_positives > stats.true_positives && stats.false_positives > 2) {
-                recommendations.push(`- **\`${label}\`**: High false positive rate (${stats.false_positives} incorrect auto-applications). Consider refining path-based rules.`);
+                recommendations.push('- **`' + label + '`**: High false positive rate (' + stats.false_positives + ' incorrect auto-applications). Consider refining path-based rules.');
               }
               if (stats.false_negatives > 5) {
-                recommendations.push(`- **\`${label}\`**: Frequently added manually (${stats.false_negatives} times). Consider adding more keyword patterns.`);
+                recommendations.push('- **`' + label + '`**: Frequently added manually (' + stats.false_negatives + ' times). Consider adding more keyword patterns.');
               }
             }
             
@@ -317,4 +317,4 @@ jobs:
               labels: ['automated', 'metrics', 'auto-labeling']
             });
             
-            core.info(`Created accuracy report issue: ${issue.html_url}`);
+            core.info('Created accuracy report issue: ' + issue.html_url);

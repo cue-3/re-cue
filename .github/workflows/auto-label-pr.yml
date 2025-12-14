@@ -40,7 +40,7 @@ jobs:
             const pr = context.payload.pull_request;
             const title = pr.title.toLowerCase();
             const body = (pr.body || '').toLowerCase();
-            const text = `${title} ${body}`;
+            const text = title + ' ' + body;
             
             // Define keyword patterns for each label type
             const labelPatterns = {
@@ -71,7 +71,7 @@ jobs:
                 labels: labelsToAdd
               });
               
-              core.info(`Applied ${labelsToAdd.length} keyword-based labels: ${labelsToAdd.join(', ')}`);
+              core.info('Applied ' + labelsToAdd.length + ' keyword-based labels: ' + labelsToAdd.join(', '));
             } else {
               core.info('No keyword-based labels to apply');
             }

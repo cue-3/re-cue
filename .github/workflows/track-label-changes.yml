@@ -161,11 +161,11 @@ jobs:
             
             // Save report with timestamp
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const filename = `pr-${report.pr_number}-${timestamp}.json`;
+            const filename = 'pr-' + report.pr_number + '-' + timestamp + '.json';
             const filepath = path.join(reportsDir, filename);
             
             fs.writeFileSync(filepath, JSON.stringify(report, null, 2));
-            core.info(`Saved accuracy report to ${filepath}`);
+            core.info('Saved accuracy report to ' + filepath);
       
       - name: Upload accuracy report artifact
         if: github.event.pull_request.merged == true
@@ -194,7 +194,7 @@ jobs:
             const isBot = actorType === 'Bot' || actor === 'github-actions[bot]';
             const actionType = isBot ? 'auto' : 'manual';
             
-            core.info(`Label ${action}: ${label} (${actionType} by ${actor})`);
+            core.info('Label ' + action + ': ' + label + ' (' + actionType + ' by ' + actor + ')');
             
             // This provides real-time visibility into label changes
             // Future enhancement: Could send to analytics service

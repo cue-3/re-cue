@@ -88,14 +88,14 @@ jobs:
               core.setFailed('PR is missing a required category label');
             } else {
               // Build label summary showing auto vs manual
-              let labelSummary = `✓ PR has ${categoryLabelsPresent.length} category label(s):\n\n`;
+              let labelSummary = '✓ PR has ' + categoryLabelsPresent.length + ' category label(s):\n\n';
               
               if (autoApplied.length > 0) {
-                labelSummary += `**🤖 Auto-applied:**\n${autoApplied.map(l => `- \`${l}\``).join('\n')}\n\n`;
+                labelSummary += '**🤖 Auto-applied:**\n' + autoApplied.map(l => '- `' + l + '`').join('\n') + '\n\n';
               }
               
               if (manuallyAdded.length > 0) {
-                labelSummary += `**👤 Manually added:**\n${manuallyAdded.map(l => `- \`${l}\``).join('\n')}\n\n`;
+                labelSummary += '**👤 Manually added:**\n' + manuallyAdded.map(l => '- `' + l + '`').join('\n') + '\n\n';
               }
               
               labelSummary += '**Please verify** these labels accurately reflect your changes. ';
