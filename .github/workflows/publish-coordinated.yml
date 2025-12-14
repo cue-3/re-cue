@@ -96,6 +96,8 @@ jobs:
     name: Publish Python Package
     needs: [extract-version, pre-release-tests]
     uses: ./.github/workflows/publish-package.yml
+    with:
+      version: ${{ needs.extract-version.outputs.version }}
     secrets: inherit  # pragma: allowlist secret
     permissions:
       contents: write
