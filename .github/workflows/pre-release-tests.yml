@@ -128,17 +128,14 @@ jobs:
       
       - name: Debug - List generated files
         run: |
-          cd sample-apps/spring-boot-demo
-          echo "=== Directory structure ==="
-          ls -la
-          echo "=== Looking for output directories ==="
-          find . -maxdepth 1 -type d -name "re-*" || echo "No re-* directories found"
-          if [ -d "re-bookstore-api" ]; then
-            echo "=== Contents of re-bookstore-api ==="
-            ls -la re-bookstore-api/
-          else
-            echo "re-bookstore-api directory not found"
-          fi
+          echo "=== Current working directory ==="
+          pwd
+          echo "=== Searching entire workspace for re-* directories ==="
+          find /home/runner/work/re-cue/re-cue -type d -name "re-*" 2>/dev/null || echo "No re-* directories found"
+          echo "=== Searching for .md files in workspace ==="
+          find /home/runner/work/re-cue/re-cue -name "spec.md" -o -name "plan.md" 2>/dev/null | head -20 || echo "No spec/plan files found"
+          echo "=== Contents of sample-apps/spring-boot-demo ==="
+          ls -la sample-apps/spring-boot-demo/
       
       - name: Verify generated documentation
         run: |
@@ -146,7 +143,9 @@ jobs:
           
           # Check for expected output directory (project name is bookstore-api from pom.xml)
           if [ ! -d "re-bookstore-api" ]; then
-            echo "❌ Output directory not created"
+            echo "❌ Output directory not created in $(pwd)"
+            echo "Searching for actual location..."
+            find /home/runner/work/re-cue/re-cue -type d -name "re-bookstore-api" 2>/dev/null || echo "Directory not found anywhere"
             exit 1
           fi
           
