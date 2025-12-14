@@ -18,7 +18,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   bump-version:
@@ -251,28 +251,31 @@ jobs:
       
       - name: Enable PR auto-merge
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
             const prNumber = ${{ steps.create_pr.outputs.result }};
             
-            // Get the PR to get its node ID
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            
-            // Enable auto-merge using GraphQL
-            const mutation = 'mutation($prId: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $prId, mergeMethod: SQUASH }) { pullRequest { number } } }';
-            
             try {
+              // Get the PR to get its node ID
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              
+              // Enable auto-merge using GraphQL
+              const mutation = 'mutation($prId: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $prId, mergeMethod: SQUASH }) { pullRequest { number } } }';
+              
               await github.graphql(mutation, {
                 prId: pr.node_id
               });
-              core.info('Auto-merge enabled for PR #' + prNumber);
+              
+              core.info('✓ Auto-merge enabled for PR #' + prNumber);
             } catch (error) {
-              core.warning('Could not enable auto-merge: ' + error.message);
-              core.warning('You may need to merge the PR manually');
+              core.warning('⚠️ Could not enable auto-merge: ' + error.message);
+              core.warning('This is not critical - you can merge the PR manually or enable auto-merge via the GitHub UI');
+              core.warning('Note: Auto-merge requires repository settings to allow it and appropriate permissions');
             }
       
       - name: Output summary
