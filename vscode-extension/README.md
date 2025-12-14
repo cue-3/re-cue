@@ -55,20 +55,156 @@ View analysis results in a dedicated sidebar with organized views:
 
 ## Installation
 
-### Prerequisites
-- Python 3.6+ installed
-- RE-cue Python package installed: `pip install -e reverse-engineer-python/`
+### Step 1: Install Python Package (Required)
 
-### From Source
-1. Clone the repository
+The VS Code extension **requires** the RE-cue Python package to function. The extension provides the IDE interface, but all analysis is performed by the Python CLI.
+
+#### Option A: Install from PyPI (Recommended for Most Users)
+
+The easiest way to install RE-cue is from the Python Package Index (PyPI):
+
+```bash
+# Install the latest stable version
+pip install re-cue
+
+# Verify installation
+recue --help
+python3 -c "import reverse_engineer; print('RE-cue Python package installed successfully')"
+```
+
+**PyPI Package**: [https://pypi.org/project/re-cue/](https://pypi.org/project/re-cue/)
+
+This is the recommended method for most users as it:
+- ✅ Installs the latest stable release
+- ✅ Works on all platforms (macOS, Linux, Windows)
+- ✅ Handles updates easily with `pip install --upgrade re-cue`
+- ✅ No repository cloning required
+
+#### Option B: Install from GitHub Repository (Recommended for Development)
+
+For development or to get the latest unreleased features:
+
+```bash
+# Clone the repository
+git clone https://github.com/cue-3/re-cue.git
+cd re-cue
+
+# Install the Python package in development mode
+pip install -e reverse-engineer-python/
+
+# Verify installation
+python3 -c "import reverse_engineer; print('RE-cue Python package installed successfully')"
+recue --help
+```
+
+#### Option C: Install from Local Directory
+
+If you already have the repository cloned:
+
+```bash
+# Navigate to the Python package directory
+cd /path/to/re-cue/reverse-engineer-python
+
+# Install in development mode (recommended)
+pip install -e .
+
+# OR install as a regular package
+pip install .
+
+# Verify installation
+recue --help
+```
+
+#### Option D: Install with Virtual Environment (Recommended for Isolation)
+
+```bash
+# Create a virtual environment
+python3 -m venv recue-venv
+
+# Activate the virtual environment
+# On macOS/Linux:
+source recue-venv/bin/activate
+# On Windows:
+recue-venv\Scripts\activate
+
+# Install from PyPI (recommended)
+pip install re-cue
+
+# OR install from local source
+pip install -e /path/to/re-cue/reverse-engineer-python/
+
+# Verify installation
+recue --help
+```
+
+**Important Notes:**
+- Python 3.6+ is required (3.9+ recommended)
+- The package has **zero external dependencies** - only Python standard library is used
+- Use `pip install re-cue` for stable releases from PyPI
+- Use `pip install -e .` for development (changes reflected immediately)
+- Use `pip install .` for production from source (installs a fixed version)
+
+### Step 2: Install VS Code Extension
+
+#### Option A: From Source (Development)
+1. Clone the repository (if not already done)
 2. Navigate to `vscode-extension/`
-3. Run `npm install`
-4. Run `npm run compile`
-5. Press F5 to launch Extension Development Host
+   ```bash
+   cd re-cue/vscode-extension
+   ```
+3. Install dependencies
+   ```bash
+   npm install
+   ```
+4. Compile TypeScript
+   ```bash
+   npm run compile
+   ```
+5. Launch Extension Development Host
+   - Press `F5` in VS Code, OR
+   - Run `Debug > Start Debugging` from the menu
 
-### From VSIX
-1. Download the `.vsix` file
-2. Run: `code --install-extension re-cue-x.x.x.vsix`
+#### Option B: From VSIX Package (Production)
+1. Download the `.vsix` file from [GitHub Releases](https://github.com/cue-3/re-cue/releases)
+2. Install using VS Code CLI:
+   ```bash
+   code --install-extension re-cue-x.x.x.vsix
+   ```
+3. Or install via VS Code UI:
+   - Open VS Code
+   - Go to Extensions view (Ctrl+Shift+X / Cmd+Shift+X)
+   - Click "..." menu → "Install from VSIX..."
+   - Select the downloaded `.vsix` file
+
+### Step 3: Configure Python Path (If Needed)
+
+If you used a virtual environment or non-standard Python installation, configure the Python path:
+
+1. Open VS Code Settings (Ctrl+, / Cmd+,)
+2. Search for "RE-cue: Python Path"
+3. Set the path to your Python executable:
+   ```json
+   {
+     "recue.pythonPath": "/path/to/venv/bin/python3"
+   }
+   ```
+
+**Common Python paths:**
+- macOS/Linux with venv: `/path/to/re-cue/reverse-engineer-python/venv/bin/python3`
+- macOS with Homebrew: `/usr/local/bin/python3` or `/opt/homebrew/bin/python3`
+- Linux: `/usr/bin/python3`
+- Windows with venv: `C:\path\to\re-cue\reverse-engineer-python\venv\Scripts\python.exe`
+- Windows: `C:\Python39\python.exe`
+
+### Verify Installation
+
+After completing all steps, verify everything is working:
+
+1. Open a supported project (Java, Python, TypeScript, etc.)
+2. Right-click on a file in the Explorer
+3. Select "RE-cue: Analyze File"
+4. Check the Output panel (View > Output > RE-cue) for analysis logs
+5. View results in the RE-cue sidebar
 
 ## Usage
 
@@ -167,28 +303,149 @@ your-project/
 ## Troubleshooting
 
 ### Python not found
-Set the correct Python path in settings:
-```json
-{
-  "recue.pythonPath": "/usr/local/bin/python3"
-}
-```
+**Error**: "Python executable not found" or "python3 command not found"
+
+**Solutions**:
+1. Verify Python is installed:
+   ```bash
+   python3 --version
+   # Should show Python 3.6 or higher
+   ```
+2. Set the correct Python path in VS Code settings:
+   ```json
+   {
+     "recue.pythonPath": "/usr/local/bin/python3"
+   }
+   ```
+3. Find your Python path:
+   ```bash
+   # macOS/Linux
+   which python3
+   
+   # Windows (PowerShell)
+   Get-Command python
+   ```
 
 ### RE-cue module not found
-Install the RE-cue Python package:
-```bash
-pip install -e /path/to/re-cue/reverse-engineer-python/
-```
+**Error**: "ModuleNotFoundError: No module named 'reverse_engineer'" or "recue command not found"
+
+**Solutions**:
+1. Verify the Python package is installed:
+   ```bash
+   python3 -c "import reverse_engineer; print('Installed')"
+   # Should print "Installed" without errors
+   ```
+2. Install/reinstall the Python package:
+   ```bash
+   # From repository root
+   pip install -e reverse-engineer-python/
+   
+   # Or from the Python package directory
+   cd reverse-engineer-python
+   pip install -e .
+   ```
+3. If using a virtual environment, ensure it's activated:
+   ```bash
+   # macOS/Linux
+   source venv/bin/activate
+   
+   # Windows
+   venv\Scripts\activate
+   ```
+4. If using a virtual environment, configure the VS Code extension to use the venv Python:
+   ```json
+   {
+     "recue.pythonPath": "/absolute/path/to/venv/bin/python3"
+   }
+   ```
+5. Check which pip is being used (might be installing to wrong Python):
+   ```bash
+   which pip
+   pip --version
+   # Should match your Python 3 installation
+   ```
 
 ### No results showing
-1. Ensure the project is supported (has recognizable framework)
-2. Check Output panel (View > Output > RE-cue) for errors
-3. Try analyzing with verbose output enabled
+**Issue**: Analysis completes but no results appear in the sidebar
+
+**Solutions**:
+1. Ensure the project is supported (has recognizable framework):
+   - Java: Spring Boot, Maven/Gradle projects
+   - Python: Django, Flask, FastAPI
+   - TypeScript/JavaScript: Express, NestJS
+   - Ruby: Rails
+   - C#: ASP.NET Core
+2. Check Output panel for errors:
+   - Open View > Output
+   - Select "RE-cue" from the dropdown
+   - Look for error messages
+3. Enable verbose output:
+   ```json
+   {
+     "recue.verboseOutput": true
+   }
+   ```
+4. Try analyzing with a simple test file first
+5. Verify file permissions (extension needs read access)
 
 ### Analysis is slow
-- Enable caching in settings
-- Enable parallel processing
-- For large codebases, use incremental analysis
+**Issue**: Analysis takes a long time for large projects
+
+**Solutions**:
+- Enable caching (stores analysis results):
+  ```json
+  {
+    "recue.enableCache": true
+  }
+  ```
+- Enable parallel processing (analyzes multiple files concurrently):
+  ```json
+  {
+    "recue.enableParallelProcessing": true
+  }
+  ```
+- Analyze folders incrementally instead of entire workspace
+- Exclude large dependencies/node_modules from analysis
+- Use file-level analysis for quick checks
+- Check available system resources (RAM, CPU)
+
+### Permission denied errors
+**Error**: "EACCES: permission denied" or "Access denied"
+
+**Solutions**:
+1. Ensure you have read permissions for the project directory
+2. Check output directory permissions (defaults to project root)
+3. Set a custom output directory with write permissions:
+   ```json
+   {
+     "recue.outputDirectory": "/path/to/writable/directory"
+   }
+   ```
+
+### Extension not appearing in VS Code
+**Issue**: Extension installed but not visible
+
+**Solutions**:
+1. Reload VS Code window (Ctrl+Shift+P / Cmd+Shift+P → "Reload Window")
+2. Verify extension is installed:
+   - Open Extensions view (Ctrl+Shift+X / Cmd+Shift+X)
+   - Search for "RE-cue"
+   - Should show as installed
+3. Check for installation errors:
+   - Help > Toggle Developer Tools
+   - Look for errors in Console tab
+4. Try reinstalling the extension
+
+### Getting Help
+If you continue experiencing issues:
+1. Check the [GitHub Issues](https://github.com/cue-3/re-cue/issues) for similar problems
+2. Review the [documentation](https://github.com/cue-3/re-cue/tree/main/docs)
+3. Open a new issue with:
+   - VS Code version
+   - Python version
+   - RE-cue extension version
+   - Full error message from Output panel
+   - Steps to reproduce
 
 ## Development
 

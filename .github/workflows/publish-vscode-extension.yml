@@ -1,0 +1,142 @@
+name: Publish VS Code Extension
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to publish'
+        required: true
+        type: string
+      vsix_artifact:
+        description: 'Name of VSIX artifact to download'
+        required: false
+        type: string
+        default: 'vsix-package'
+    secrets:
+      VSCODE_MARKETPLACE_PAT:
+        required: true
+
+permissions:
+  contents: write
+  
+jobs:
+  publish-vscode:
+    name: Publish to VS Code Marketplace
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+      marketplace_url: ${{ steps.publish.outputs.marketplace_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Download VSIX artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.vsix_artifact }}
+          path: vscode-extension/
+      
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+      
+      - name: Publish to marketplace
+        id: publish
+        env:
+          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_PAT }}
+        run: |
+          cd vscode-extension
+          
+          echo "Publishing re-cue-${{ inputs.version }}.vsix to VS Code Marketplace..."
+          
+          # Publish the pre-built VSIX
+          vsce publish --packagePath re-cue-${{ inputs.version }}.vsix --pat $VSCE_PAT
+          
+          if [ $? -eq 0 ]; then
+            echo "✓ Successfully published to marketplace"
+            echo "published=true" >> $GITHUB_OUTPUT
+            echo "marketplace_url=https://marketplace.visualstudio.com/items?itemName=cue3.re-cue" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Failed to publish to marketplace"
+            echo "published=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+      
+      - name: Wait for marketplace propagation
+        run: |
+          echo "Waiting for marketplace propagation..."
+          MAX_RETRIES=5
+          RETRY_INTERVAL=120
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Checking marketplace (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)..."
+            
+            # Check if the extension page returns the new version
+            RESPONSE=$(curl -s "https://marketplace.visualstudio.com/items?itemName=cue3.re-cue")
+            
+            if echo "$RESPONSE" | grep -q "${{ inputs.version }}"; then
+              echo "✓ Version ${{ inputs.version }} is now visible on marketplace"
+              exit 0
+            fi
+            
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              echo "Not visible yet, waiting ${RETRY_INTERVAL}s before retry..."
+              sleep $RETRY_INTERVAL
+            fi
+          done
+          
+          echo "⚠️ Marketplace propagation check timed out after $((MAX_RETRIES * RETRY_INTERVAL))s"
+          echo "The extension may still propagate successfully - check manually"
+          exit 1
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          name: VS Code Extension v${{ inputs.version }}
+          draft: false
+          prerelease: false
+          files: vscode-extension/re-cue-${{ inputs.version }}.vsix
+          body: |
+            ## RE-cue VS Code Extension v${{ inputs.version }}
+            
+            Released to [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=cue3.re-cue)
+            
+            ### Installation
+            
+            **From Marketplace:**
+            ```bash
+            code --install-extension cue3.re-cue
+            ```
+            
+            **From VSIX:**
+            Download the `.vsix` file below and install:
+            ```bash
+            code --install-extension re-cue-${{ inputs.version }}.vsix
+            ```
+            
+            ### Requirements
+            - Python 3.9+
+            - RE-cue Python package: `pip install re-cue`
+            
+            See the [CHANGELOG](https://github.com/cue-3/re-cue/blob/main/vscode-extension/CHANGELOG.md) for details.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Publish summary
+        run: |
+          echo "## VS Code Extension Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Marketplace:** ✓ Published" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** https://marketplace.visualstudio.com/items?itemName=cue3.re-cue" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitHub Release:** ✓ Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Users can now install the extension from the marketplace." >> $GITHUB_STEP_SUMMARY

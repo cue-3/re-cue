@@ -1,0 +1,88 @@
+name: PR Label Check
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  check-labels:
+    name: Validate PR Labels
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check for category label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const categoryLabels = [
+              'breaking',
+              'enhancement',
+              'bug',
+              'documentation',
+              'dependencies',
+              'chore',
+              'security',
+              'performance'
+            ];
+            
+            const prLabels = context.payload.pull_request.labels.map(label => label.name);
+            const hasCategoryLabel = categoryLabels.some(cat => prLabels.includes(cat));
+            
+            if (!hasCategoryLabel) {
+              const comment = `## ⚠️ Missing Category Label
+              
+This pull request requires at least one category label before it can be merged.
+
+**Available category labels:**
+
+| Label | Description | Changelog Section |
+|-------|-------------|-------------------|
+| \`breaking\` 💥 | Breaking changes requiring major version bump | Breaking Changes |
+| \`enhancement\` ✨ | New features and enhancements | Added |
+| \`bug\` 🐛 | Bug fixes | Fixed |
+| \`documentation\` 📚 | Documentation updates | Changed |
+| \`dependencies\` ⬆️ | Dependency updates | Dependencies |
+| \`chore\` 🔧 | Maintenance and chores | Maintenance |
+| \`security\` 🔒 | Security fixes | Security |
+| \`performance\` ⚡ | Performance improvements | Performance |
+
+**Please add at least one label** to this PR. You can add multiple labels if the PR covers multiple categories.
+
+*This check will automatically pass once a category label is added.*`;
+              
+              // Post comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: comment
+              });
+              
+              // Fail the check
+              core.setFailed('PR is missing a required category label');
+            } else {
+              console.log(`✓ PR has category label(s): ${prLabels.filter(l => categoryLabels.includes(l)).join(', ')}`);
+              
+              // Find and delete old bot comments about missing labels
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number
+              });
+              
+              for (const comment of comments.data) {
+                if (comment.user.type === 'Bot' && 
+                    comment.body.includes('Missing Category Label')) {
+                  await github.rest.issues.deleteComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: comment.id
+                  });
+                }
+              }
+            }

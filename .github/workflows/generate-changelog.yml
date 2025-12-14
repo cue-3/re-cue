@@ -1,0 +1,222 @@
+name: Generate Changelog
+
+on:
+  workflow_call:
+    inputs:
+      previous_tag:
+        description: 'Previous release tag'
+        required: true
+        type: string
+      new_version:
+        description: 'New version number'
+        required: true
+        type: string
+    outputs:
+      changelog_content:
+        description: 'Generated changelog content'
+        value: ${{ jobs.generate.outputs.changelog }}
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  generate:
+    name: Generate Changelog from PR Labels
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.build.outputs.changelog }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get merged PRs since last release
+        id: prs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previousTag = '${{ inputs.previous_tag }}';
+            const newVersion = '${{ inputs.new_version }}';
+            
+            // Get the commit SHA of the previous tag
+            let previousCommit;
+            try {
+              const tagRef = await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `tags/${previousTag}`
+              });
+              previousCommit = tagRef.data.object.sha;
+            } catch (error) {
+              console.log('Previous tag not found, using first commit');
+              const commits = await github.rest.repos.listCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 1,
+                page: 1
+              });
+              previousCommit = commits.data[0].sha;
+            }
+            
+            // Get all commits since previous tag
+            const commits = await github.rest.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: previousCommit,
+              head: 'HEAD'
+            });
+            
+            // Get PRs associated with these commits
+            const prNumbers = new Set();
+            for (const commit of commits.data.commits) {
+              const match = commit.commit.message.match(/#(\d+)/);
+              if (match) {
+                prNumbers.add(parseInt(match[1]));
+              }
+            }
+            
+            // Fetch PR details
+            const prs = [];
+            for (const prNumber of prNumbers) {
+              try {
+                const pr = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                });
+                
+                if (pr.data.merged_at) {
+                  prs.push({
+                    number: pr.data.number,
+                    title: pr.data.title,
+                    labels: pr.data.labels.map(l => l.name),
+                    author: pr.data.user.login,
+                    merged_at: pr.data.merged_at
+                  });
+                }
+              } catch (error) {
+                console.log(`Could not fetch PR #${prNumber}: ${error.message}`);
+              }
+            }
+            
+            core.setOutput('prs', JSON.stringify(prs));
+            return prs;
+      
+      - name: Build changelog content
+        id: build
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prs = JSON.parse('${{ steps.prs.outputs.prs }}');
+            const newVersion = '${{ inputs.new_version }}';
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Category configuration matching release-config.yaml
+            const categories = [
+              { label: 'breaking', section: '💥 Breaking Changes', emoji: '💥' },
+              { label: 'security', section: '🔒 Security', emoji: '🔒' },
+              { label: 'enhancement', section: '✨ Added', emoji: '✨' },
+              { label: 'bug', section: '🐛 Fixed', emoji: '🐛' },
+              { label: 'performance', section: '⚡ Performance', emoji: '⚡' },
+              { label: 'documentation', section: '📚 Changed', emoji: '📚' },
+              { label: 'dependencies', section: '⬆️ Dependencies', emoji: '⬆️' },
+              { label: 'chore', section: '🔧 Maintenance', emoji: '🔧' }
+            ];
+            
+            // Categorize PRs
+            const categorized = {};
+            const uncategorized = [];
+            
+            for (const pr of prs) {
+              let assigned = false;
+              for (const category of categories) {
+                if (pr.labels.includes(category.label)) {
+                  if (!categorized[category.section]) {
+                    categorized[category.section] = [];
+                  }
+                  categorized[category.section].push(pr);
+                  assigned = true;
+                  break; // Use first matching category
+                }
+              }
+              if (!assigned) {
+                uncategorized.push(pr);
+              }
+            }
+            
+            // Build changelog content
+            let changelog = `## [${newVersion}] - ${today}\n\n`;
+            
+            // Add categorized sections
+            for (const category of categories) {
+              const section = category.section;
+              if (categorized[section] && categorized[section].length > 0) {
+                changelog += `### ${section}\n\n`;
+                for (const pr of categorized[section]) {
+                  changelog += `- ${pr.title} ([#${pr.number}](https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${pr.number}))\n`;
+                }
+                changelog += '\n';
+              }
+            }
+            
+            // Add uncategorized if any (shouldn't happen with PR label enforcement)
+            if (uncategorized.length > 0) {
+              changelog += `### Other Changes\n\n`;
+              for (const pr of uncategorized) {
+                changelog += `- ${pr.title} ([#${pr.number}](https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${pr.number}))\n`;
+              }
+              changelog += '\n';
+            }
+            
+            core.setOutput('changelog', changelog);
+            return changelog;
+      
+      - name: Update Python CHANGELOG.md
+        run: |
+          CHANGELOG_FILE="reverse-engineer-python/CHANGELOG.md"
+          NEW_CONTENT='${{ steps.build.outputs.changelog }}'
+          
+          # Insert new content after "## [Unreleased]" line
+          awk -v new="$NEW_CONTENT" '
+            /^## \[Unreleased\]/ { 
+              print $0
+              print ""
+              print new
+              next 
+            }
+            { print }
+          ' "$CHANGELOG_FILE" > "${CHANGELOG_FILE}.tmp"
+          
+          mv "${CHANGELOG_FILE}.tmp" "$CHANGELOG_FILE"
+      
+      - name: Update VS Code CHANGELOG.md
+        run: |
+          CHANGELOG_FILE="vscode-extension/CHANGELOG.md"
+          NEW_CONTENT='${{ steps.build.outputs.changelog }}'
+          
+          # Insert new content after "## [Unreleased]" line
+          awk -v new="$NEW_CONTENT" '
+            /^## \[Unreleased\]/ { 
+              print $0
+              print ""
+              print new
+              next 
+            }
+            { print }
+          ' "$CHANGELOG_FILE" > "${CHANGELOG_FILE}.tmp"
+          
+          mv "${CHANGELOG_FILE}.tmp" "$CHANGELOG_FILE"
+      
+      - name: Commit changelog updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add reverse-engineer-python/CHANGELOG.md
+          git add vscode-extension/CHANGELOG.md
+          
+          git commit -m "docs: update changelog for v${{ inputs.new_version }}" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"

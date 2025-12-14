@@ -1,0 +1,259 @@
+name: Rollback Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to rollback'
+        required: true
+        type: string
+      python_published:
+        description: 'Whether Python package was published'
+        required: true
+        type: boolean
+      vscode_published:
+        description: 'Whether VS Code extension was published'
+        required: true
+        type: boolean
+    secrets:
+      PYPI_API_TOKEN:
+        required: true
+      VSCODE_MARKETPLACE_PAT:
+        required: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  rollback:
+    name: Rollback Failed Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install twine
+        if: inputs.python_published
+        run: pip install twine
+      
+      - name: Yank PyPI package
+        if: inputs.python_published
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          echo "Yanking re-cue version ${{ inputs.version }} from PyPI..."
+          
+          # Yank the package (makes it unavailable for new installs)
+          twine yank re-cue -v ${{ inputs.version }} || {
+            echo "⚠️ Failed to yank package - may need manual intervention"
+            echo "yank_failed=true" >> $GITHUB_ENV
+          }
+          
+          if [ "${yank_failed}" != "true" ]; then
+            echo "✓ Successfully yanked re-cue v${{ inputs.version }} from PyPI"
+          fi
+      
+      - name: Attempt VS Code extension unpublish
+        if: inputs.vscode_published
+        run: |
+          echo "⚠️ VS Code Marketplace does not support automated unpublishing"
+          echo "Manual action required to unpublish extension version ${{ inputs.version }}"
+          echo "vscode_manual_required=true" >> $GITHUB_ENV
+          
+          # Note: vsce doesn't support unpublishing via CLI
+          # This would need to be done manually through the marketplace website
+      
+      - name: Delete Git tag
+        run: |
+          TAG="v${{ inputs.version }}"
+          
+          echo "Deleting Git tag $TAG..."
+          
+          # Delete local tag
+          git tag -d "$TAG" || echo "Local tag not found"
+          
+          # Delete remote tag
+          git push origin --delete "$TAG" || echo "Remote tag not found"
+          
+          echo "✓ Git tag deleted"
+      
+      - name: Delete GitHub Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ inputs.version }}';
+            const tag = `v${version}`;
+            
+            try {
+              // Get the release by tag
+              const release = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag
+              });
+              
+              // Delete the release
+              await github.rest.repos.deleteRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: release.data.id
+              });
+              
+              console.log(`✓ Deleted GitHub release for ${tag}`);
+            } catch (error) {
+              console.log(`⚠️ Could not delete GitHub release: ${error.message}`);
+            }
+      
+      - name: Revert version bump commits
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Find the version bump commit
+          BUMP_COMMIT=$(git log --all --grep="chore: bump version to ${{ inputs.version }}" --format="%H" -n 1)
+          
+          if [ -n "$BUMP_COMMIT" ]; then
+            echo "Found version bump commit: $BUMP_COMMIT"
+            
+            # Revert the commit
+            git revert --no-edit "$BUMP_COMMIT"
+            git push origin main
+            
+            echo "✓ Reverted version bump commit"
+          else
+            echo "⚠️ Version bump commit not found"
+          fi
+      
+      - name: Create rollback issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ inputs.version }}';
+            const pythonPublished = ${{ inputs.python_published }};
+            const vscodePublished = ${{ inputs.vscode_published }};
+            const vscodeManual = process.env.vscode_manual_required === 'true';
+            const yankFailed = process.env.yank_failed === 'true';
+            
+            let body = `## 🔄 Automated Release Rollback
+            
+            The release process for version **v${version}** failed and has been automatically rolled back.
+            
+            ### Rollback Actions Taken
+            
+            `;
+            
+            if (pythonPublished) {
+              body += `#### Python Package (PyPI)\n`;
+              if (yankFailed) {
+                body += `- ⚠️ **Failed to yank package** - Manual action required\n`;
+                body += `- Go to https://pypi.org/manage/project/re-cue/release/${version}/ and yank the release\n`;
+              } else {
+                body += `- ✅ Package yanked from PyPI (unavailable for new installs)\n`;
+              }
+              body += `\n`;
+            }
+            
+            if (vscodePublished) {
+              body += `#### VS Code Extension\n`;
+              if (vscodeManual) {
+                body += `- ⚠️ **Manual unpublish required**\n`;
+                body += `- Go to https://marketplace.visualstudio.com/manage/publishers/cue3\n`;
+                body += `- Unpublish version ${version} of the re-cue extension\n`;
+              }
+              body += `\n`;
+            }
+            
+            body += `#### Git & GitHub
+            - ✅ Git tag \`v${version}\` deleted
+            - ✅ GitHub release deleted
+            - ✅ Version bump commits reverted
+            
+            ### What Happened
+            
+            The coordinated release workflow failed during:
+            `;
+            
+            if (!pythonPublished) {
+              body += `- ❌ Python package publishing\n`;
+            } else if (!vscodePublished) {
+              body += `- ❌ VS Code extension publishing\n`;
+            }
+            
+            body += `
+            ### Next Steps
+            
+            1. Review the [failed workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            2. Fix the underlying issue
+            3. Complete any manual rollback steps listed above
+            4. Re-run the release when ready
+            
+            ### Manual Rollback Checklist
+            
+            `;
+            
+            if (pythonPublished && yankFailed) {
+              body += `- [ ] Yank PyPI package version ${version}\n`;
+            }
+            
+            if (vscodePublished && vscodeManual) {
+              body += `- [ ] Unpublish VS Code extension version ${version}\n`;
+            }
+            
+            body += `- [ ] Verify all rollback actions completed
+            - [ ] Close this issue
+            
+            ---
+            
+            **Workflow Run:** https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+            
+            cc @cue-3/release-managers`;
+            
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🔄 Release Rollback: v${version} Failed`,
+              body: body,
+              labels: ['release-failed', 'automated']
+            });
+            
+            console.log(`Created rollback issue: ${issue.data.html_url}`);
+      
+      - name: Rollback summary
+        if: always()
+        run: |
+          echo "## 🔄 Release Rollback Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Version **v${{ inputs.version }}** has been rolled back due to release failure." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Actions Taken" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.python_published }}" == "true" ]; then
+            if [ "${yank_failed}" == "true" ]; then
+              echo "- ⚠️ PyPI package yank failed - manual action required" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ✅ PyPI package yanked" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          if [ "${{ inputs.vscode_published }}" == "true" ]; then
+            echo "- ⚠️ VS Code extension requires manual unpublish" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "- ✅ Git tag deleted" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GitHub release deleted" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Version bump commits reverted" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Rollback issue created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the rollback issue for manual steps and next actions." >> $GITHUB_STEP_SUMMARY

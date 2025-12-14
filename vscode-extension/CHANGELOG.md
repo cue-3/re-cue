@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.9.1] - 2025-12-14 (Pre-release)
+
+### Changed
+- **Enhanced installation documentation** with comprehensive Python package setup instructions
+  - Added PyPI installation as the recommended method (Option A)
+  - Included multiple installation options: PyPI, GitHub, local directory, and virtual environment
+  - Added detailed Python path configuration guidance for different platforms
+  - Expanded troubleshooting section with 7 comprehensive scenarios
+  - Added platform-specific commands for macOS, Linux, and Windows
+  - Included verification steps to confirm successful installation
+
+### Fixed
+- Improved clarity around the Python package dependency requirement
+- Added direct link to PyPI package page (https://pypi.org/project/re-cue/)
+
 ## [0.0.9] - 2025-11-29 (Pre-release)
 
 ### Added
@@ -60,5 +75,6 @@ Initial development version with basic analysis functionality.
 
 ---
 
-[Unreleased]: https://github.com/cue-3/re-cue/compare/vscode-extension-v0.0.9...HEAD
+[Unreleased]: https://github.com/cue-3/re-cue/compare/vscode-extension-v0.0.9.1...HEAD
+[0.0.9.1]: https://github.com/cue-3/re-cue/releases/tag/vscode-extension-v0.0.9.1
 [0.0.9]: https://github.com/cue-3/re-cue/releases/tag/vscode-extension-v0.0.9

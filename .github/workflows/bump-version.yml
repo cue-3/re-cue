@@ -1,0 +1,157 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      confirm_major:
+        description: 'For major bumps: confirm breaking changes (type "BREAKING")'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  bump-version:
+    name: Bump Version and Create Tag
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install bump2version
+        run: pip install bump2version
+      
+      - name: Validate major version bump
+        if: inputs.version_type == 'major'
+        run: |
+          if [ "${{ inputs.confirm_major }}" != "BREAKING" ]; then
+            echo "❌ Major version bump requires confirmation"
+            echo "Please enter 'BREAKING' in the confirm_major field"
+            exit 1
+          fi
+          
+          # Check for 'breaking' label on recent merged PRs
+          echo "Checking for breaking changes in recent PRs..."
+          # This is advisory - the manual confirmation is the requirement
+      
+      - name: Get current version
+        id: current
+        run: |
+          CURRENT_VERSION=$(grep -E '^__version__ = ' reverse-engineer-python/reverse_engineer/__init__.py | cut -d'"' -f2)
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+      
+      - name: Calculate new version
+        id: new
+        run: |
+          CURRENT="${{ steps.current.outputs.version }}"
+          TYPE="${{ inputs.version_type }}"
+          
+          IFS='.' read -r major minor patch <<< "$CURRENT"
+          
+          case $TYPE in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$major.$minor.$patch"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+      
+      - name: Update Python package version files
+        run: |
+          NEW_VERSION="${{ steps.new.outputs.version }}"
+          
+          # Update __init__.py
+          sed -i "s/__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" \
+            reverse-engineer-python/reverse_engineer/__init__.py
+          
+          # Update setup.py
+          sed -i "s/version=\".*\"/version=\"$NEW_VERSION\"/" \
+            reverse-engineer-python/setup.py
+          
+          # Update pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" \
+            reverse-engineer-python/pyproject.toml
+      
+      - name: Update VS Code extension version files
+        run: |
+          NEW_VERSION="${{ steps.new.outputs.version }}"
+          
+          # Update package.json
+          sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" \
+            vscode-extension/package.json
+          
+          # Update test-vsix.sh
+          sed -i "s/VSIX_FILE=\"re-cue-.*\.vsix\"/VSIX_FILE=\"re-cue-$NEW_VERSION.vsix\"/" \
+            vscode-extension/test-vsix.sh
+      
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Commit version changes
+        run: |
+          NEW_VERSION="${{ steps.new.outputs.version }}"
+          
+          git add reverse-engineer-python/reverse_engineer/__init__.py
+          git add reverse-engineer-python/setup.py
+          git add reverse-engineer-python/pyproject.toml
+          git add vscode-extension/package.json
+          git add vscode-extension/test-vsix.sh
+          
+          git commit -m "chore: bump version to $NEW_VERSION"
+      
+      - name: Create Git tag
+        run: |
+          NEW_VERSION="${{ steps.new.outputs.version }}"
+          TAG="v$NEW_VERSION"
+          
+          git tag -a "$TAG" -m "Release version $NEW_VERSION"
+          echo "Created tag: $TAG"
+      
+      - name: Push changes and tag
+        run: |
+          git push origin main
+          git push origin --tags
+      
+      - name: Output summary
+        run: |
+          echo "## Version Bump Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous version:** ${{ steps.current.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New version:** ${{ steps.new.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bump type:** ${{ inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Git tag:** v${{ steps.new.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release workflows will be triggered automatically by the new tag." >> $GITHUB_STEP_SUMMARY

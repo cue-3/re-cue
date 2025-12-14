@@ -1,0 +1,206 @@
+# RE-cue Release Configuration
+
+# This configuration defines the release automation settings for both
+# the Python package and VS Code extension
+
+version:
+  # Synchronized versioning - both packages use the same version number
+  strategy: synchronized
+  current: "0.0.9"
+  
+  # Version files to update during bump
+  files:
+    python:
+      - reverse-engineer-python/setup.py
+      - reverse-engineer-python/pyproject.toml
+      - reverse-engineer-python/reverse_engineer/__init__.py
+    vscode:
+      - vscode-extension/package.json
+      - vscode-extension/test-vsix.sh
+
+# PR label configuration for changelog generation
+labels:
+  # Category labels (required on all PRs)
+  categories:
+    - name: breaking
+      section: "Breaking Changes"
+      description: "Breaking changes that require major version bump"
+      color: "d73a4a"
+      emoji: "💥"
+      
+    - name: enhancement
+      section: "Added"
+      description: "New features and enhancements"
+      color: "a2eeef"
+      emoji: "✨"
+      
+    - name: bug
+      section: "Fixed"
+      description: "Bug fixes"
+      color: "d73a4a"
+      emoji: "🐛"
+      
+    - name: documentation
+      section: "Changed"
+      description: "Documentation updates"
+      color: "0075ca"
+      emoji: "📚"
+      
+    - name: dependencies
+      section: "Dependencies"
+      description: "Dependency updates"
+      color: "0366d6"
+      emoji: "⬆️"
+      
+    - name: chore
+      section: "Maintenance"
+      description: "Maintenance and chores"
+      color: "fef2c0"
+      emoji: "🔧"
+      
+    - name: security
+      section: "Security"
+      description: "Security fixes"
+      color: "ee0701"
+      emoji: "🔒"
+      
+    - name: performance
+      section: "Performance"
+      description: "Performance improvements"
+      color: "fbca04"
+      emoji: "⚡"
+
+  # At least one category label is required before merge
+  enforcement:
+    require_category: true
+    allow_multiple: true
+    
+# Release workflow configuration
+release:
+  # Pre-release testing requirements
+  testing:
+    python:
+      - unit_tests
+      - integration_tests
+      - smoke_tests
+    vscode:
+      - compile
+      - lint
+      - unit_tests
+      - smoke_tests
+      
+  # Block release if any test fails
+  block_on_failure: true
+  
+  # Marketplace propagation timing
+  vscode_propagation_wait: 600  # seconds (10 minutes)
+  vscode_propagation_retries: 5
+  vscode_propagation_interval: 120  # seconds (2 minutes)
+  
+  # Rollback configuration
+  rollback:
+    enabled: true
+    # Wait for marketplace propagation before rolling back
+    wait_for_propagation: true
+    # Create GitHub issue on rollback
+    create_issue: true
+    issue_labels:
+      - release-failed
+      - automated
+    # Mention these users in rollback issues
+    mention_users:
+      - "@cue-3/release-managers"
+    # Yank PyPI package on rollback
+    yank_pypi: true
+    # Attempt to unpublish VS Code extension (may require manual intervention)
+    unpublish_vscode: true
+    # Delete Git tags
+    delete_tags: true
+    # Delete GitHub releases
+    delete_releases: true
+    # Revert version bump commits
+    revert_commits: true
+
+# Version bump rules
+bump:
+  # Require 'breaking' label for major version bumps
+  major_requires_breaking_label: true
+  
+  # Commit message format
+  commit_message: "chore: bump version to {version}"
+  
+  # Tag format
+  tag_format: "v{version}"
+  
+  # Branch to commit to
+  target_branch: main
+
+# Changelog configuration
+changelog:
+  # Changelog files
+  files:
+    - reverse-engineer-python/CHANGELOG.md
+    - vscode-extension/CHANGELOG.md
+    
+  # Format
+  format: keepachangelog  # Keep a Changelog format
+  
+  # Include all PRs or only labeled ones
+  include_unlabeled: false
+  
+  # PR title format for changelog entries
+  entry_format: "- {title} (#{number})"
+  
+  # Sections to include
+  sections:
+    - "Breaking Changes"
+    - "Security"
+    - "Added"
+    - "Changed"
+    - "Fixed"
+    - "Performance"
+    - "Dependencies"
+    - "Maintenance"
+
+# Publishing configuration
+publish:
+  python:
+    # PyPI repository
+    repository: pypi
+    test_repository: testpypi
+    
+    # Run tests on TestPyPI first
+    test_first: true
+    
+    # Docker image publishing
+    docker:
+      enabled: true
+      registry: ghcr.io
+      image_name: cue-3/re-cue
+      
+  vscode:
+    # VS Code Marketplace publisher
+    publisher: cue3
+    
+    # Pre-release vs stable
+    pre_release: false
+    
+    # GitHub release configuration
+    github_release:
+      enabled: true
+      attach_vsix: true
+      draft: false
+
+# Notifications
+notifications:
+  # GitHub Issues for failures
+  issues:
+    enabled: true
+    assignees:
+      - cue-3/release-managers
+      
+  # Future: Add Slack, email, etc.
+  slack:
+    enabled: false
+  email:
+    enabled: false

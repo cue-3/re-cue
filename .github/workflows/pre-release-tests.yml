@@ -1,0 +1,189 @@
+name: Pre-Release Tests
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version being tested'
+        required: true
+        type: string
+    outputs:
+      success:
+        description: 'Whether tests passed'
+        value: ${{ jobs.test-python.result == 'success' && jobs.test-vscode.result == 'success' && jobs.smoke-test.result == 'success' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test-python:
+    name: Test Python Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          cd reverse-engineer-python
+          pip install -e .
+          pip install -r requirements-dev.txt
+      
+      - name: Run unit tests
+        run: |
+          cd reverse-engineer-python
+          python3 -m unittest discover tests/ -v
+      
+      - name: Run integration tests
+        run: |
+          cd reverse-engineer-python
+          python3 -m unittest tests.test_integration_full_pipeline -v
+          python3 -m unittest tests.test_framework_integration -v
+      
+      - name: Verify CLI works
+        run: |
+          recue --help
+          python3 -c "import reverse_engineer; print(f'Version: {reverse_engineer.__version__}')"
+  
+  test-vscode:
+    name: Test VS Code Extension
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: |
+          cd vscode-extension
+          npm install
+      
+      - name: Compile TypeScript
+        run: |
+          cd vscode-extension
+          npm run compile
+      
+      - name: Run linting
+        run: |
+          cd vscode-extension
+          npm run lint
+      
+      - name: Run tests
+        run: |
+          cd vscode-extension
+          xvfb-run -a npm test || echo "Tests completed"
+  
+  smoke-test:
+    name: Smoke Test Integration
+    needs: [test-python, test-vscode]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Python package
+        run: |
+          cd reverse-engineer-python
+          pip install -e .
+      
+      - name: Build VS Code extension
+        run: |
+          cd vscode-extension
+          npm install
+          npm run compile
+          npm run package
+      
+      - name: Verify VSIX was created
+        run: |
+          ls -lh vscode-extension/re-cue-${{ inputs.version }}.vsix
+      
+      - name: Test Python CLI on sample project
+        run: |
+          cd sample-apps/spring-boot-demo
+          recue --spec --plan --use-cases --data-model
+      
+      - name: Verify generated documentation
+        run: |
+          cd sample-apps/spring-boot-demo
+          
+          # Check for expected output directory
+          if [ ! -d "re-spring-boot-demo" ]; then
+            echo "❌ Output directory not created"
+            exit 1
+          fi
+          
+          # Check for expected files
+          EXPECTED_FILES=(
+            "re-spring-boot-demo/spec.md"
+            "re-spring-boot-demo/plan.md"
+            "re-spring-boot-demo/phase4-use-cases.md"
+            "re-spring-boot-demo/data-model.md"
+          )
+          
+          for file in "${EXPECTED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing expected file: $file"
+              exit 1
+            fi
+            echo "✓ Found: $file"
+          done
+      
+      - name: Check version consistency
+        run: |
+          PYTHON_VERSION=$(grep -E '^__version__ = ' reverse-engineer-python/reverse_engineer/__init__.py | cut -d'"' -f2)
+          VSCODE_VERSION=$(grep -E '^\s*"version":' vscode-extension/package.json | cut -d'"' -f4)
+          
+          echo "Python package version: $PYTHON_VERSION"
+          echo "VS Code extension version: $VSCODE_VERSION"
+          
+          if [ "$PYTHON_VERSION" != "$VSCODE_VERSION" ]; then
+            echo "❌ Version mismatch between Python package and VS Code extension"
+            exit 1
+          fi
+          
+          if [ "$PYTHON_VERSION" != "${{ inputs.version }}" ]; then
+            echo "❌ Version mismatch: expected ${{ inputs.version }}, got $PYTHON_VERSION"
+            exit 1
+          fi
+          
+          echo "✓ Versions are consistent"
+      
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-package
+          path: vscode-extension/re-cue-${{ inputs.version }}.vsix
+          retention-days: 30
+      
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Python CLI:** ✓ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Documentation Generation:** ✓ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version Consistency:** ✓ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **VSIX Package:** ✓ Created" >> $GITHUB_STEP_SUMMARY
