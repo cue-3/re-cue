@@ -143,36 +143,32 @@ jobs:
             const examples = JSON.parse('${{ steps.fetch-examples.outputs.examples }}');
             
             // Construct prompt for Anthropic Claude
-            const systemPrompt = `You are a PR labeling assistant for the RE-cue project, a reverse engineering toolkit that analyzes codebases to generate documentation and specifications.
+            const systemPrompt = 'You are a PR labeling assistant for the RE-cue project, a reverse engineering toolkit that analyzes codebases to generate documentation and specifications.\n\n' +
+              'Available labels:\n' +
+              '- type: breaking - Breaking changes requiring major version bump\n' +
+              '- type: enhancement - New features and capabilities\n' +
+              '- type: bug - Bug fixes\n' +
+              '- type: documentation - Documentation updates\n' +
+              '- type: dependencies - Dependency updates\n' +
+              '- type: chore - Maintenance and internal changes\n' +
+              '- type: security - Security fixes\n' +
+              '- type: performance - Performance improvements\n\n' +
+              'Analyze the PR and suggest appropriate labels with confidence scores (0-100).\n' +
+              'Return ONLY a JSON object with this structure:\n' +
+              '{\n' +
+              '  "labels": [\n' +
+              '    {"name": "type: bug", "confidence": 85, "reasoning": "..."}\n' +
+              '  ]\n' +
+              '}';
 
-Available labels:
-- type: breaking - Breaking changes requiring major version bump
-- type: enhancement - New features and capabilities  
-- type: bug - Bug fixes
-- type: documentation - Documentation updates
-- type: dependencies - Dependency updates
-- type: chore - Maintenance and internal changes
-- type: security - Security fixes
-- type: performance - Performance improvements
-
-Analyze the PR and suggest appropriate labels with confidence scores (0-100).
-Return ONLY a JSON object with this structure:
-{
-  "labels": [
-    {"name": "type: bug", "confidence": 85, "reasoning": "..."}
-  ]
-}`;
-
-            const userPrompt = `Here are examples of recently labeled PRs:
-${examples.map(ex => `- "${ex.title}" → ${ex.labels.join(', ')}`).join('\n')}
-
-Now analyze this PR:
-Title: ${prContext.title}
-Body: ${prContext.body}
-Files changed (${prContext.filesChanged.length}):
-${prContext.filesChanged.slice(0, 20).map(f => `- ${f.filename} (+${f.additions}/-${f.deletions})`).join('\n')}
-
-Suggest appropriate labels with confidence scores.`;
+            const userPrompt = 'Here are examples of recently labeled PRs:\n' +
+              examples.map(ex => '- "' + ex.title + '" → ' + ex.labels.join(', ')).join('\n') + '\n\n' +
+              'Now analyze this PR:\n' +
+              'Title: ' + prContext.title + '\n' +
+              'Body: ' + prContext.body + '\n' +
+              'Files changed (' + prContext.filesChanged.length + '):\n' +
+              prContext.filesChanged.slice(0, 20).map(f => '- ' + f.filename + ' (+' + f.additions + '/-' + f.deletions + ')').join('\n') + '\n\n' +
+              'Suggest appropriate labels with confidence scores.';
 
             try {
               const response = await fetch('https://api.anthropic.com/v1/messages', {

@@ -116,22 +116,17 @@ jobs:
               c.body.includes('🤖 Auto-Labeling Applied')
             );
             
-            const commentBody = `## 🤖 Auto-Labeling Applied
-
-The following category labels have been automatically applied based on file paths and PR content:
-
-${allLabels.map(l => `- \`${l}\``).join('\n')}
-
-**Please review** these labels to ensure they accurately reflect your changes. You can:
-- ✅ Keep them if they're correct
-- ➕ Add additional labels if needed
-- ➖ Remove incorrect labels
-- 🔄 Change labels to better match your PR
-
-Your corrections help improve the auto-labeling system! 🎯
-
----
-<sub>💡 Auto-labeling is powered by path-based rules and keyword analysis. See the [Release Automation Guide](${context.payload.repository.html_url}/blob/main/docs/archive/RELEASE-AUTOMATION-GUIDE.md) for details.</sub>`;
+            const commentBody = '## 🤖 Auto-Labeling Applied\n\n' +
+              'The following category labels have been automatically applied based on file paths and PR content:\n\n' +
+              allLabels.map(l => '- `' + l + '`').join('\n') + '\n\n' +
+              '**Please review** these labels to ensure they accurately reflect your changes. You can:\n' +
+              '- ✅ Keep them if they\'re correct\n' +
+              '- ➕ Add additional labels if needed\n' +
+              '- ➖ Remove incorrect labels\n' +
+              '- 🔄 Change labels to better match your PR\n\n' +
+              'Your corrections help improve the auto-labeling system! 🎯\n\n' +
+              '---\n' +
+              '<sub>💡 Auto-labeling is powered by path-based rules and keyword analysis. See the [Release Automation Guide](' + context.payload.repository.html_url + '/blob/main/docs/archive/RELEASE-AUTOMATION-GUIDE.md) for details.</sub>';
             
             if (botComment) {
               // Update existing comment

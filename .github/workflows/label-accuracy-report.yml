@@ -279,56 +279,40 @@ jobs:
               }
             }
             
-            const issueBody = `# 📊 Auto-Labeling Accuracy Report - ${monthYear}
-
-## Summary
-
-**Reporting Period**: Past 30 days
-**PRs Analyzed**: ${aggregated.total_prs}
-**Overall Accuracy**: ${overallAccuracy}%
-
-## Performance Metrics
-
-${metricsTable}
-
-### Metric Definitions
-- **Precision**: % of auto-applied labels that were correct (not removed)
-- **Recall**: % of correct labels that were auto-applied (vs manually added)
-- **F1 Score**: Harmonic mean of precision and recall
-- **Auto-Applied**: Total labels automatically applied
-- **Corrections**: Labels removed or manually added
-
-## Insights
-
-${insights.join('\n')}
-
-${recommendations.length > 0 ? `## Recommendations
-
-${recommendations.join('\n')}
-
-` : ''}## Next Steps
-
-1. **Review recommendations** above to improve auto-labeling accuracy
-2. **Update path-based rules** in \`.github/labeler.yml\` if needed
-3. **Refine keyword patterns** in \`auto-label-pr.yml\` based on false negatives
-4. **Monitor trends** in next month's report
-
-## About This Report
-
-This report is automatically generated on the 1st of each month by analyzing label changes on merged PRs. The auto-labeling system learns from your corrections to continuously improve accuracy.
-
----
-
-**Configuration**: See [.github/release-config.yaml](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/.github/release-config.yaml)
-**Documentation**: [Release Automation Guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/archive/RELEASE-AUTOMATION-GUIDE.md)
-
-/cc @cue-3/release-managers`;
+            const issueBody = '# 📊 Auto-Labeling Accuracy Report - ' + monthYear + '\n\n' +
+              '## Summary\n\n' +
+              '**Reporting Period**: Past 30 days\n' +
+              '**PRs Analyzed**: ' + aggregated.total_prs + '\n' +
+              '**Overall Accuracy**: ' + overallAccuracy + '%\n\n' +
+              '## Performance Metrics\n\n' +
+              metricsTable + '\n\n' +
+              '### Metric Definitions\n' +
+              '- **Precision**: % of auto-applied labels that were correct (not removed)\n' +
+              '- **Recall**: % of correct labels that were auto-applied (vs manually added)\n' +
+              '- **F1 Score**: Harmonic mean of precision and recall\n' +
+              '- **Auto-Applied**: Total labels automatically applied\n' +
+              '- **Corrections**: Labels removed or manually added\n\n' +
+              '## Insights\n\n' +
+              insights.join('\n') + '\n\n' +
+              (recommendations.length > 0 ? '## Recommendations\n\n' + recommendations.join('\n') + '\n\n' : '') +
+              '## Next Steps\n\n' +
+              '1. **Review recommendations** above to improve auto-labeling accuracy\n' +
+              '2. **Update path-based rules** in `.github/labeler.yml` if needed\n' +
+              '3. **Refine keyword patterns** in `auto-label-pr.yml` based on false negatives\n' +
+              '4. **Monitor trends** in next month\'s report\n\n' +
+              '## About This Report\n\n' +
+              'This report is automatically generated on the 1st of each month by analyzing label changes on merged PRs. ' +
+              'The auto-labeling system learns from your corrections to continuously improve accuracy.\n\n' +
+              '---\n\n' +
+              '**Configuration**: See [.github/release-config.yaml](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/blob/main/.github/release-config.yaml)\n' +
+              '**Documentation**: [Release Automation Guide](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/blob/main/docs/archive/RELEASE-AUTOMATION-GUIDE.md)\n\n' +
+              '/cc @cue-3/release-managers';
             
             // Create the issue
             const { data: issue } = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `📊 Auto-Labeling Accuracy Report - ${monthYear}`,
+              title: '📊 Auto-Labeling Accuracy Report - ' + monthYear,
               body: issueBody,
               labels: ['automated', 'metrics', 'auto-labeling']
             });
