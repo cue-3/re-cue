@@ -2,7 +2,7 @@
   "name": "re-cue",
   "displayName": "RE-cue",
   "description": "Reverse engineering toolkit for code analysis and documentation - in-editor analysis with right-click support, side panel results, and inline documentation preview",
-  "version": "0.0.9",
+  "version": "0.2.0",
   "publisher": "cue3",
   "repository": {
     "type": "git",

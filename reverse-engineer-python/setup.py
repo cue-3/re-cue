@@ -9,7 +9,7 @@ long_description = readme_file.read_text() if readme_file.exists() else ""
 
 setup(
     name="re-cue",
-    version="0.0.9",
+    version="0.2.0",
     description="RE-cue: Universal reverse engineering toolkit for multi-framework codebases",
     long_description=long_description,
     long_description_content_type="text/markdown",
