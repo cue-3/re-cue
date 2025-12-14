@@ -116,14 +116,14 @@ jobs:
             
             // Category configuration matching release-config.yaml
             const categories = [
-              { label: 'type:breaking', section: '💥 Breaking Changes', emoji: '💥' },
-              { label: 'type:security', section: '🔒 Security', emoji: '🔒' },
-              { label: 'type:enhancement', section: '✨ Added', emoji: '✨' },
-              { label: 'type:bug', section: '🐛 Fixed', emoji: '🐛' },
-              { label: 'type:performance', section: '⚡ Performance', emoji: '⚡' },
-              { label: 'type:documentation', section: '📚 Changed', emoji: '📚' },
-              { label: 'type:dependencies', section: '⬆️ Dependencies', emoji: '⬆️' },
-              { label: 'type:chore', section: '🔧 Maintenance', emoji: '🔧' }
+              { label: 'type: breaking', section: '💥 Breaking Changes', emoji: '💥' },
+              { label: 'type: security', section: '🔒 Security', emoji: '🔒' },
+              { label: 'type: enhancement', section: '✨ Added', emoji: '✨' },
+              { label: 'type: bug', section: '🐛 Fixed', emoji: '🐛' },
+              { label: 'type: performance', section: '⚡ Performance', emoji: '⚡' },
+              { label: 'type: documentation', section: '📚 Changed', emoji: '📚' },
+              { label: 'type: dependencies', section: '⬆️ Dependencies', emoji: '⬆️' },
+              { label: 'type: chore', section: '🔧 Maintenance', emoji: '🔧' }
             ];
             
             // Categorize PRs

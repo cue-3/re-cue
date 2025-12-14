@@ -49,7 +49,7 @@ jobs:
             exit 1
           fi
           
-          # Check for 'type:breaking' label on recent merged PRs
+          # Check for 'type: breaking' label on recent merged PRs
           echo "Checking for breaking changes in recent PRs..."
           # This is advisory - the manual confirmation is the requirement
       
