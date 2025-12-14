@@ -122,7 +122,17 @@ jobs:
       - name: Test Python CLI on sample project
         run: |
           cd sample-apps/spring-boot-demo
-          recue --spec --plan --use-cases --data-model
+          recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management"
+      
+      - name: Debug - List generated files
+        run: |
+          cd sample-apps/spring-boot-demo
+          echo "=== Directory structure ==="
+          ls -la
+          if [ -d "re-spring-boot-demo" ]; then
+            echo "=== Contents of re-spring-boot-demo ==="
+            ls -la re-spring-boot-demo/
+          fi
       
       - name: Verify generated documentation
         run: |
