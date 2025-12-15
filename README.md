@@ -621,6 +621,34 @@ Generated documentation covers all aspects of your codebase:
 - **use-cases.md** - Use case analysis with business context (Python version)
 - **contracts/** - OpenAPI 3.0 specifications for API endpoints
 
+### 📤 **Export Options** (NEW)
+
+Export your documentation to different formats:
+
+- **HTML Export** - Generate responsive HTML documentation with:
+  - 📱 Responsive design for mobile, tablet, and desktop
+  - 🔍 Full-text search functionality
+  - 🌙 Dark mode support
+  - 📑 Table of contents navigation
+  - 🖨️ Print-friendly CSS
+  
+  ```bash
+  reverse-engineer --spec --plan --html --html-title "My Project Docs"
+  ```
+
+- **Confluence Export** - Publish directly to Confluence wiki:
+  - Automatic Markdown to Confluence format conversion
+  - Page hierarchy management
+  - Update existing pages or create new ones
+  
+  ```bash
+  reverse-engineer --spec --plan --confluence \
+    --confluence-url https://your-domain.atlassian.net/wiki \
+    --confluence-space DOC
+  ```
+
+See [HTML Export Guide](docs/user-guides/html-export-guide.md) for detailed instructions.
+
 ### 🔗 **GitHub Copilot Integration**
 
 Includes a specialized prompt (`prompts/recue.reverse.prompt.md`) that enables GitHub Copilot to:
