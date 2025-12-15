@@ -121,9 +121,11 @@ jobs:
       
       - name: Test Python CLI on sample project
         run: |
-          cd sample-apps/spring-boot-demo
           echo "=== Running recue CLI ==="
-          recue --spec --plan --use-cases --data-model --description "Spring Boot demo application for task and user management" --path . --verbose
+          recue --spec --plan --use-cases --data-model \
+            --description "Spring Boot demo application for task and user management" \
+            --path sample-apps/spring-boot-demo \
+            --verbose
           echo "=== CLI completed with exit code: $? ==="
       
       - name: Debug - List generated files
