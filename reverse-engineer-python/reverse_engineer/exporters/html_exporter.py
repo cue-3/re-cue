@@ -193,9 +193,10 @@ class MarkdownToHTMLConverter:
                 level = len(match.group(1))
                 content = match.group(2).strip()
                 heading_id = self._generate_heading_id(content)
-                # Escape HTML in content to prevent XSS
+                # Escape HTML in content and ID to prevent XSS
                 escaped_content = html.escape(content)
-                result.append(f'<h{level} id="{html.escape(heading_id)}">{escaped_content}</h{level}>')
+                escaped_id = html.escape(heading_id, quote=True)
+                result.append(f'<h{level} id="{escaped_id}">{escaped_content}</h{level}>')
             else:
                 result.append(line)
 
@@ -621,7 +622,12 @@ class HTMLExporter:
         html_parts = ["<ul class='toc-list'>"]
 
         for item in toc_items:
-            level_class = f"toc-level-{item['level']}"
+            # level is an integer from 1-6, so it's safe
+            level = item['level']
+            if not isinstance(level, int) or level < 1 or level > 6:
+                level = 1  # Fallback to safe default
+            level_class = f"toc-level-{level}"
+            
             escaped_id = html.escape(item['id'], quote=True)
             escaped_text = html.escape(item['text'])
             html_parts.append(
@@ -680,7 +686,8 @@ class HTMLExporter:
         sections_html = []
         for category, docs in categories.items():
             if docs:
-                sections_html.append(f"<h2>{html.escape(category)}</h2>")
+                # category is a hardcoded key from categories dict, so no escaping needed
+                sections_html.append(f"<h2>{category}</h2>")
                 sections_html.append('<ul class="document-list">')
                 for doc in docs:
                     rel_path = html.escape(doc.file_path.name, quote=True) if doc.file_path else ""
