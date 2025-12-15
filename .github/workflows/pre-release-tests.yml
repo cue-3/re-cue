@@ -143,20 +143,20 @@ jobs:
         run: |
           cd sample-apps/spring-boot-demo
           
-          # Check for expected output directory (project name is bookstore-api from pom.xml)
-          if [ ! -d "re-bookstore-api" ]; then
+          # Check for expected output directory (uses directory name, not Maven artifactId)
+          if [ ! -d "re-spring-boot-demo" ]; then
             echo "❌ Output directory not created in $(pwd)"
             echo "Searching for actual location..."
-            find /home/runner/work/re-cue/re-cue -type d -name "re-bookstore-api" 2>/dev/null || echo "Directory not found anywhere"
+            find /home/runner/work/re-cue/re-cue -type d -name "re-spring-boot-demo" 2>/dev/null || echo "Directory not found anywhere"
             exit 1
           fi
           
           # Check for expected files
           EXPECTED_FILES=(
-            "re-bookstore-api/spec.md"
-            "re-bookstore-api/plan.md"
-            "re-bookstore-api/phase4-use-cases.md"
-            "re-bookstore-api/data-model.md"
+            "re-spring-boot-demo/spec.md"
+            "re-spring-boot-demo/plan.md"
+            "re-spring-boot-demo/phase4-use-cases.md"
+            "re-spring-boot-demo/data-model.md"
           )
           
           for file in "${EXPECTED_FILES[@]}"; do
