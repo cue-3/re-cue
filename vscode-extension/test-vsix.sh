@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-VSIX_FILE="re-cue-0.3.3.vsix"
+VSIX_FILE="re-cue-0.3.4.vsix"
 EXTENSION_ID="cue-3.re-cue"
 DEMO_PROJECT="../sample-apps/spring-boot-demo"
 
