@@ -357,15 +357,36 @@ export class AnalysisManager {
     /**
      * Run a Python command
      */
+    /**
+     * Run a Python command
+     */
     private async runPythonCommand(args: string[], cwd: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const config = vscode.workspace.getConfiguration('recue');
-            const pythonPath = config.get<string>('pythonPath') || 'python3';
+            const useRecueCLI = config.get<boolean>('useRecueCLI', true);
+            
+            let command: string;
+            let cmdArgs: string[];
+            
+            if (useRecueCLI) {
+                // Try to use recue CLI directly (installed via pip)
+                command = 'recue';
+                // Remove '-m' and 'reverse_engineer' from args if present
+                cmdArgs = args.filter(arg => arg !== '-m' && arg !== 'reverse_engineer');
+            } else {
+                // Fall back to python -m approach
+                const pythonPath = config.get<string>('pythonPath') || 'python3';
+                command = pythonPath;
+                cmdArgs = args;
+            }
 
-            this.outputChannel.appendLine(`Running: ${pythonPath} ${args.join(' ')}`);
+            this.outputChannel.appendLine(`Running: ${command} ${cmdArgs.join(' ')}`);
             this.outputChannel.appendLine(`Working directory: ${cwd}`);
 
-            const process = cp.spawn(pythonPath, args, { cwd });
+            const process = cp.spawn(command, cmdArgs, { 
+                cwd,
+                shell: true  // Use shell to resolve 'recue' from PATH
+            });
 
             let stdout = '';
             let stderr = '';
@@ -396,6 +417,14 @@ export class AnalysisManager {
             process.on('error', (err: Error) => {
                 const error = `Failed to start process: ${err.message}`;
                 this.outputChannel.appendLine(error);
+                
+                if (useRecueCLI && err.message.includes('ENOENT')) {
+                    this.outputChannel.appendLine('');
+                    this.outputChannel.appendLine('Hint: recue command not found. Make sure you have installed the Python package:');
+                    this.outputChannel.appendLine('  pip install -e /path/to/reverse-engineer-python');
+                    this.outputChannel.appendLine('Or set "recue.useRecueCLI": false in settings to use python -m instead.');
+                }
+                
                 reject(new Error(error));
             });
         });

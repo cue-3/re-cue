@@ -35,19 +35,25 @@ let tyClient: TyLanguageClient | undefined;
  */
 export function activate(context: vscode.ExtensionContext): void {
     outputChannel = vscode.window.createOutputChannel('RE-cue');
-    outputChannel.appendLine('RE-cue extension activated');
+    outputChannel.appendLine('=== RE-cue Extension Starting ===');
+    outputChannel.appendLine(`Activation time: ${new Date().toISOString()}`);
+    outputChannel.show(); // Show output channel immediately
+    
+    try {
+        // Initialize analysis manager
+        outputChannel.appendLine('Initializing analysis manager...');
+        analysisManager = new AnalysisManager(context, outputChannel);
 
-    // Initialize analysis manager
-    analysisManager = new AnalysisManager(context, outputChannel);
+        // Initialize code index manager for direct parsing
+        outputChannel.appendLine('Initializing code index manager...');
+        codeIndexManager = new CodeIndexManager(outputChannel);
+        context.subscriptions.push({ dispose: () => codeIndexManager.dispose() });
 
-    // Initialize code index manager for direct parsing
-    codeIndexManager = new CodeIndexManager(outputChannel);
-    context.subscriptions.push({ dispose: () => codeIndexManager.dispose() });
-
-    // Initialize tree view providers
-    const resultsProvider = new ResultsTreeProvider(analysisManager);
-    const useCasesProvider = new UseCasesTreeProvider(analysisManager);
-    const actorsProvider = new ActorsTreeProvider(analysisManager);
+        // Initialize tree view providers
+        outputChannel.appendLine('Initializing tree view providers...');
+        const resultsProvider = new ResultsTreeProvider(analysisManager);
+        const useCasesProvider = new UseCasesTreeProvider(analysisManager);
+        const actorsProvider = new ActorsTreeProvider(analysisManager);
     const boundariesProvider = new BoundariesTreeProvider(analysisManager);
     const endpointsProvider = new EndpointsTreeProvider(analysisManager);
 
@@ -75,7 +81,9 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     // Register commands
+    outputChannel.appendLine('Registering commands...');
     registerCommands(context, resultsProvider, useCasesProvider, actorsProvider, boundariesProvider, endpointsProvider, codeLensProvider);
+    outputChannel.appendLine('Commands registered successfully');
 
     // Register file save watcher for auto-update
     context.subscriptions.push(
@@ -99,7 +107,15 @@ export function activate(context: vscode.ExtensionContext): void {
     // Initialize ty language server for Python type checking
     initializeTyLanguageServer(context);
 
-    outputChannel.appendLine('RE-cue extension ready');
+    outputChannel.appendLine('=== RE-cue Extension Ready ===');
+    vscode.window.showInformationMessage('RE-cue extension activated successfully!');
+    
+    } catch (error) {
+        outputChannel.appendLine(`ERROR during activation: ${error}`);
+        outputChannel.show();
+        vscode.window.showErrorMessage(`RE-cue extension failed to activate: ${error}`);
+        throw error;
+    }
 }
 
 /**
