@@ -43,69 +43,102 @@ jobs:
             
             // Get the commit SHA of the previous tag
             let previousCommit;
+            let useFallback = false;
+            
             try {
               const tagRef = await github.rest.git.getRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: `tags/${previousTag}`
+                ref: 'tags/' + previousTag
               });
               previousCommit = tagRef.data.object.sha;
+              console.log('Found previous tag ' + previousTag + ' at commit ' + previousCommit);
             } catch (error) {
-              console.log('Previous tag not found, using first commit');
-              const commits = await github.rest.repos.listCommits({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                per_page: 1,
-                page: 1
-              });
-              previousCommit = commits.data[0].sha;
+              console.log('Previous tag ' + previousTag + ' not found: ' + error.message);
+              console.log('Will fetch all merged PRs instead of comparing commits');
+              useFallback = true;
             }
             
-            // Get the current commit SHA
-            const currentCommit = context.sha;
-            console.log('Comparing commits from ' + previousCommit + ' to ' + currentCommit);
+            let prs = [];
             
-            // Get all commits since previous tag
-            const commits = await github.rest.repos.compareCommits({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              base: previousCommit,
-              head: currentCommit
-            });
-            
-            // Get PRs associated with these commits
-            const prNumbers = new Set();
-            for (const commit of commits.data.commits) {
-              const match = commit.commit.message.match(/#(\d+)/);
-              if (match) {
-                prNumbers.add(parseInt(match[1]));
-              }
-            }
-            
-            // Fetch PR details
-            const prs = [];
-            for (const prNumber of prNumbers) {
+            if (!useFallback) {
+              // Get the current commit SHA
+              const currentCommit = context.sha;
+              console.log('Comparing commits from ' + previousCommit + ' to ' + currentCommit);
+              
               try {
-                const pr = await github.rest.pulls.get({
+                // Get all commits since previous tag
+                const commits = await github.rest.repos.compareCommits({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  pull_number: prNumber
+                  base: previousCommit,
+                  head: currentCommit
                 });
                 
-                if (pr.data.merged_at) {
-                  prs.push({
-                    number: pr.data.number,
-                    title: pr.data.title,
-                    labels: pr.data.labels.map(l => l.name),
-                    author: pr.data.user.login,
-                    merged_at: pr.data.merged_at
-                  });
+                // Get PRs associated with these commits
+                const prNumbers = new Set();
+                for (const commit of commits.data.commits) {
+                  const match = commit.commit.message.match(/#(\d+)/);
+                  if (match) {
+                    prNumbers.add(parseInt(match[1]));
+                  }
+                }
+                
+                // Fetch PR details
+                for (const prNumber of prNumbers) {
+                  try {
+                    const pr = await github.rest.pulls.get({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: prNumber
+                    });
+                    
+                    if (pr.data.merged_at) {
+                      prs.push({
+                        number: pr.data.number,
+                        title: pr.data.title,
+                        labels: pr.data.labels.map(l => l.name),
+                        author: pr.data.user.login,
+                        merged_at: pr.data.merged_at
+                      });
+                    }
+                  } catch (error) {
+                    console.log('Could not fetch PR #' + prNumber + ': ' + error.message);
+                  }
                 }
               } catch (error) {
-                console.log(`Could not fetch PR #${prNumber}: ${error.message}`);
+                console.log('Error comparing commits: ' + error.message);
+                console.log('Falling back to all merged PRs');
+                useFallback = true;
               }
             }
             
+            // Fallback: get all merged PRs if tag comparison failed
+            if (useFallback) {
+              console.log('Fetching all recently merged PRs...');
+              const pullRequests = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'closed',
+                sort: 'updated',
+                direction: 'desc',
+                per_page: 100
+              });
+              
+              for (const pr of pullRequests.data) {
+                if (pr.merged_at) {
+                  prs.push({
+                    number: pr.number,
+                    title: pr.title,
+                    labels: pr.labels.map(l => l.name),
+                    author: pr.user.login,
+                    merged_at: pr.merged_at
+                  });
+                }
+              }
+            }
+            
+            console.log('Found ' + prs.length + ' merged PRs');
             core.setOutput('prs', JSON.stringify(prs));
             return prs;
       
