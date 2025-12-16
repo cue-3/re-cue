@@ -11,7 +11,7 @@ This module provides functionality to:
 
 import html
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
