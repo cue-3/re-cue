@@ -314,10 +314,27 @@ Confluence Export:
                         API token for authentication
                         • Can also use CONFLUENCE_API_TOKEN environment variable
 
+HTML Export:
+  --html                Export generated documentation to HTML
+                        • Responsive design with mobile support
+                        • Table of contents navigation
+                        • Search functionality
+                        • Dark mode support
+                        • Print-friendly CSS
+
+  --html-output DIR     Output directory for HTML files
+                        • Default: <project-root>/re-<project-name>/html/
+
+  --html-title TITLE    Title for HTML documentation
+                        • Default: "RE-cue Documentation"
+
 Examples:
   reverse-engineer --use-cases --confluence \\
     --confluence-url https://company.atlassian.net/wiki \\
     --confluence-space DOC --confluence-user user@example.com
+
+  reverse-engineer --spec --plan --html \\
+    --html-title "My Project Documentation"
 
 Use --help for more options.
     """)
@@ -668,6 +685,42 @@ The script will:
         type=str,
         default="",
         help='Prefix for all page titles (e.g., "RE-cue: ")',
+    )
+
+    # HTML export flags
+    html_group = parser.add_argument_group("html export")
+    html_group.add_argument(
+        "--html",
+        action="store_true",
+        help="Export generated documentation to HTML with navigation",
+    )
+    html_group.add_argument(
+        "--html-output",
+        type=str,
+        metavar="DIR",
+        help="Output directory for HTML files (default: <project-root>/re-<project-name>/html/)",
+    )
+    html_group.add_argument(
+        "--html-title",
+        type=str,
+        default="RE-cue Documentation",
+        help='Title for HTML documentation (default: "RE-cue Documentation")',
+    )
+    html_group.add_argument(
+        "--html-no-dark-mode",
+        action="store_true",
+        help="Disable dark mode support in HTML output",
+    )
+    html_group.add_argument(
+        "--html-no-search",
+        action="store_true",
+        help="Disable search functionality in HTML output",
+    )
+    html_group.add_argument(
+        "--html-theme-color",
+        type=str,
+        default="#2563eb",
+        help='Primary theme color for HTML output (default: "#2563eb")',
     )
 
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.7")
@@ -1513,6 +1566,108 @@ def main():
         except Exception as e:
             print(f"❌ Confluence export error: {e}", file=sys.stderr)
             sys.exit(1)
+
+    # Export to HTML if requested
+    if getattr(args, "html", False):
+        from .exporters import HTMLConfig, HTMLExporter
+
+        print("\n📄 Exporting to HTML...", file=sys.stderr)
+
+        # Determine HTML output directory
+        html_output = getattr(args, "html_output", None)
+        if html_output:
+            html_dir = Path(html_output).resolve()
+        else:
+            html_dir = output_path.parent / "html"
+
+        html_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create HTML configuration
+        html_title = getattr(args, "html_title", "RE-cue Documentation")
+        dark_mode = not getattr(args, "html_no_dark_mode", False)
+        search = not getattr(args, "html_no_search", False)
+        theme_color = getattr(args, "html_theme_color", "#2563eb")
+
+        config = HTMLConfig(
+            output_dir=html_dir,
+            title=html_title,
+            dark_mode=dark_mode,
+            search=search,
+            theme_color=theme_color,
+        )
+
+        exporter = HTMLExporter(config)
+
+        # Collect all generated markdown files
+        files_to_export = []
+
+        if args.spec:
+            files_to_export.append(output_path)
+        if args.plan:
+            files_to_export.append(output_path.parent / "plan.md")
+        if args.data_model:
+            files_to_export.append(output_path.parent / "data-model.md")
+        if args.use_cases:
+            files_to_export.extend(
+                [
+                    output_path.parent / "phase1-structure.md",
+                    output_path.parent / "phase2-actors.md",
+                    output_path.parent / "phase3-boundaries.md",
+                    output_path.parent / "phase4-use-cases.md",
+                ]
+            )
+        if getattr(args, "fourplusone", False):
+            files_to_export.append(output_path.parent / "fourplusone-architecture.md")
+        if getattr(args, "diagrams", False):
+            files_to_export.append(output_path.parent / "diagrams.md")
+        if getattr(args, "integration_tests", False):
+            files_to_export.append(output_path.parent / "integration-tests.md")
+        if getattr(args, "traceability", False):
+            files_to_export.append(output_path.parent / "traceability.md")
+        if getattr(args, "journey", False):
+            files_to_export.append(output_path.parent / "journey-map.md")
+
+        # Filter to only existing files
+        files_to_export = [f for f in files_to_export if f.exists()]
+
+        if not files_to_export:
+            print("⚠️  No files to export to HTML", file=sys.stderr)
+        else:
+            print(f"   Exporting {len(files_to_export)} document(s)...", file=sys.stderr)
+
+            try:
+                # Export files
+                results = exporter.export_multiple_files(files_to_export, create_index=True)
+
+                # Report results
+                success_count = sum(1 for r in results if r.success)
+                fail_count = len(results) - success_count
+
+                for result in results:
+                    if result.success:
+                        print(f"   ✓ Generated: {result.title}", file=sys.stderr)
+                    else:
+                        print(
+                            f"   ✗ Failed: {result.title} - {result.error_message}",
+                            file=sys.stderr,
+                        )
+
+                if success_count > 0:
+                    print(
+                        f"\n✅ HTML export complete: {success_count} document(s) generated",
+                        file=sys.stderr,
+                    )
+                    print(f"   Output directory: {html_dir}", file=sys.stderr)
+                    print(f"   Open {html_dir / 'index.html'} in your browser", file=sys.stderr)
+
+                if fail_count > 0:
+                    print(f"⚠️  {fail_count} document(s) failed to export", file=sys.stderr)
+
+            except Exception as e:
+                print(f"❌ Error exporting to HTML: {e}", file=sys.stderr)
+                import traceback
+
+                traceback.print_exc()
 
     # Display results
     log_section("Generation Complete")
