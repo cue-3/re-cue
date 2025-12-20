@@ -189,7 +189,7 @@ public class TestController {
 
     def test_malformed_pom_xml(self):
         """Test handling of malformed pom.xml."""
-        src = self._create_spring_structure()
+        self._create_spring_structure()
         
         # Now replace pom.xml with malformed version
         malformed_pom = """<?xml version="1.0"?>
