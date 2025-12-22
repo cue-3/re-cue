@@ -2,10 +2,8 @@
 
 import unittest
 from pathlib import Path
-from reverse_engineer.templates.template_validator import (
-    TemplateValidator,
-    ValidationResult
-)
+
+from reverse_engineer.templates.template_validator import TemplateValidator, ValidationResult
 
 
 class TestValidationResult(unittest.TestCase):
