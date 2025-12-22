@@ -17,7 +17,6 @@ from reverse_engineer.logging_config import (
     PerformanceLogger,
     log_info,
     log_warning,
-    log_error,
 )
 
 
