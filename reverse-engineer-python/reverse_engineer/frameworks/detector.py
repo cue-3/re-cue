@@ -137,7 +137,7 @@ class TechDetector:
                 "files": ["go.mod", "go.sum"],
                 "patterns": [
                     (r"github\.com/gin-gonic/gin", "go.mod"),
-                    (r'gin\.(GET|POST|PUT|DELETE|PATCH)\s*\(', "**/*.go"),
+                    (r"gin\.(GET|POST|PUT|DELETE|PATCH)\s*\(", "**/*.go"),
                     (r"router\.(?:GET|POST|PUT|DELETE)", "**/*.go"),
                 ],
                 "structure": ["main.go"],
@@ -152,7 +152,7 @@ class TechDetector:
                 "files": ["go.mod", "go.sum"],
                 "patterns": [
                     (r"github\.com/labstack/echo", "go.mod"),
-                    (r'echo\.(GET|POST|PUT|DELETE|PATCH)\s*\(', "**/*.go"),
+                    (r"echo\.(GET|POST|PUT|DELETE|PATCH)\s*\(", "**/*.go"),
                     (r"e\.(?:GET|POST|PUT|DELETE)", "**/*.go"),
                 ],
                 "structure": ["main.go"],
@@ -167,7 +167,7 @@ class TechDetector:
                 "files": ["go.mod", "go.sum"],
                 "patterns": [
                     (r"github\.com/gofiber/fiber", "go.mod"),
-                    (r'fiber\.(Get|Post|Put|Delete|Patch)\s*\(', "**/*.go"),
+                    (r"fiber\.(Get|Post|Put|Delete|Patch)\s*\(", "**/*.go"),
                     (r"app\.(?:Get|Post|Put|Delete)", "**/*.go"),
                 ],
                 "structure": ["main.go"],

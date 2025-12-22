@@ -7,8 +7,8 @@ Supports:
 - Fiber (github.com/gofiber/fiber)
 """
 
-from .gin_analyzer import GinAnalyzer
 from .echo_analyzer import EchoAnalyzer
 from .fiber_analyzer import FiberAnalyzer
+from .gin_analyzer import GinAnalyzer
 
 __all__ = ["GinAnalyzer", "EchoAnalyzer", "FiberAnalyzer"]

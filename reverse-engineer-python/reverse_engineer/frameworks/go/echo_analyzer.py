@@ -34,9 +34,7 @@ class EchoAnalyzer(BaseAnalyzer):
         log_info("Discovering Echo routes...", self.verbose)
 
         # Find Go files that might contain routes
-        go_files = [
-            f for f in self.repo_root.rglob("*.go") if not self._is_test_file(f)
-        ]
+        go_files = [f for f in self.repo_root.rglob("*.go") if not self._is_test_file(f)]
 
         for go_file in go_files:
             self._analyze_route_file(go_file)
@@ -71,10 +69,7 @@ class EchoAnalyzer(BaseAnalyzer):
         lines = content.split("\n")
         for i, line in enumerate(lines):
             # Check for HTTP method patterns
-            method_match = re.search(
-                r'\.(?:GET|POST|PUT|DELETE|PATCH|Add)\s*\(',
-                line
-            )
+            method_match = re.search(r"\.(?:GET|POST|PUT|DELETE|PATCH|Add)\s*\(", line)
 
             if method_match:
                 method = None
@@ -84,15 +79,14 @@ class EchoAnalyzer(BaseAnalyzer):
                 match = re.search(patterns[0], line)
                 if match:
                     path = match.group(1)
-                    method_func = re.search(r'\.(\w+)\s*\(', line)
+                    method_func = re.search(r"\.(\w+)\s*\(", line)
                     if method_func:
                         method = method_func.group(1).upper()
 
                 # Try pattern 2: e.Add("GET", "/path", ...)
                 if not match:
                     match = re.search(
-                        r'\.Add\s*\(\s*"(GET|POST|PUT|DELETE|PATCH)"\s*,\s*"([^"]+)"',
-                        line
+                        r'\.Add\s*\(\s*"(GET|POST|PUT|DELETE|PATCH)"\s*,\s*"([^"]+)"', line
                     )
                     if match:
                         method = match.group(1).upper()
@@ -113,27 +107,32 @@ class EchoAnalyzer(BaseAnalyzer):
 
     def _check_authentication(self, lines: list[str], current_line: int) -> bool:
         """Check for authentication middleware in nearby lines."""
-        # Check 5 lines before and 2 after
-        start = max(0, current_line - 5)
-        end = min(len(lines), current_line + 3)
-
+        # Check the current line for inline middleware
+        current = lines[current_line]
         auth_keywords = [
             "auth",
-            "authenticate",
             "jwt",
             "token",
             "bearer",
             "protected",
             "requireauth",
-            "authmiddleware",
             "verifytoken",
             "checkauth",
         ]
 
-        for line in lines[start:end]:
-            line_lower = line.lower()
-            if any(keyword in line_lower for keyword in auth_keywords):
-                return True
+        # Look for auth keywords as function/variable names in the same line as the route
+        # Pattern: e.POST("/path", authMiddleware, handler)
+        for keyword in auth_keywords:
+            # Match keyword as a separate identifier (not part of a larger word)
+            if re.search(rf"\b{keyword}\w*\b", current, re.IGNORECASE):
+                # Make sure it's after the route path and before the handler
+                # Split by commas to see if auth is between path and handler
+                parts = current.split(",")
+                if len(parts) >= 3:  # Has middleware
+                    # Check if auth keyword is in middle parts (middleware position)
+                    for i in range(1, len(parts) - 1):
+                        if re.search(rf"\b{keyword}\w*\b", parts[i], re.IGNORECASE):
+                            return True
 
         return False
 
@@ -147,16 +146,12 @@ class EchoAnalyzer(BaseAnalyzer):
 
         for pattern in model_patterns:
             model_files.extend(
-                [f for f in self.repo_root.rglob(f"**/{pattern}/*.go")
-                 if not self._is_test_file(f)]
+                [f for f in self.repo_root.rglob(f"**/{pattern}/*.go") if not self._is_test_file(f)]
             )
 
         # Also look for struct definitions in any Go file
         if not model_files:
-            model_files = [
-                f for f in self.repo_root.rglob("*.go")
-                if not self._is_test_file(f)
-            ]
+            model_files = [f for f in self.repo_root.rglob("*.go") if not self._is_test_file(f)]
 
         for model_file in model_files:
             self._analyze_model_file(model_file)
@@ -174,7 +169,7 @@ class EchoAnalyzer(BaseAnalyzer):
 
         # Find struct definitions
         # Pattern: type ModelName struct {
-        struct_pattern = r'type\s+(\w+)\s+struct\s*\{'
+        struct_pattern = r"type\s+(\w+)\s+struct\s*\{"
         structs = re.finditer(struct_pattern, content)
 
         for struct_match in structs:
@@ -182,8 +177,14 @@ class EchoAnalyzer(BaseAnalyzer):
 
             # Skip common non-model structs
             if model_name.lower() in [
-                'config', 'handler', 'controller', 'service',
-                'middleware', 'router', 'request', 'response'
+                "config",
+                "handler",
+                "controller",
+                "service",
+                "middleware",
+                "router",
+                "request",
+                "response",
             ]:
                 continue
 
@@ -194,18 +195,16 @@ class EchoAnalyzer(BaseAnalyzer):
             field_count = 0
 
             for i in range(start_pos, len(content)):
-                if content[i] == '{':
+                if content[i] == "{":
                     brace_count += 1
-                elif content[i] == '}':
+                elif content[i] == "}":
                     brace_count -= 1
                     if brace_count == 0:
                         # Extract struct body
                         struct_body = content[start_pos:i]
                         # Count field lines (lines with identifiers followed by types)
-                        field_pattern = r'^\s*\w+\s+(?:\*)?(?:\[\])?(?:\w+\.)?(\w+)'
-                        field_count = len(
-                            re.findall(field_pattern, struct_body, re.MULTILINE)
-                        )
+                        field_pattern = r"^\s*\w+\s+(?:\*)?(?:\[\])?(?:\w+\.)?(\w+)"
+                        field_count = len(re.findall(field_pattern, struct_body, re.MULTILINE))
                         break
 
             if field_count > 0:
@@ -222,8 +221,7 @@ class EchoAnalyzer(BaseAnalyzer):
 
         for pattern in service_patterns:
             service_files.extend(
-                [f for f in self.repo_root.rglob(f"**/{pattern}/*.go")
-                 if not self._is_test_file(f)]
+                [f for f in self.repo_root.rglob(f"**/{pattern}/*.go") if not self._is_test_file(f)]
             )
 
         for service_file in service_files:
@@ -241,16 +239,13 @@ class EchoAnalyzer(BaseAnalyzer):
         # Look for auth/user related files
         auth_files: list[Path] = []
         auth_files.extend(
-            [f for f in self.repo_root.rglob("**/auth*.go")
-             if not self._is_test_file(f)]
+            [f for f in self.repo_root.rglob("**/auth*.go") if not self._is_test_file(f)]
         )
         auth_files.extend(
-            [f for f in self.repo_root.rglob("**/user*.go")
-             if not self._is_test_file(f)]
+            [f for f in self.repo_root.rglob("**/user*.go") if not self._is_test_file(f)]
         )
         auth_files.extend(
-            [f for f in self.repo_root.rglob("**/role*.go")
-             if not self._is_test_file(f)]
+            [f for f in self.repo_root.rglob("**/role*.go") if not self._is_test_file(f)]
         )
 
         roles_found = set()
@@ -261,7 +256,7 @@ class EchoAnalyzer(BaseAnalyzer):
 
                 # Look for role definitions (const, enums, string literals)
                 role_patterns = [
-                    r'const\s+Role(\w+)',
+                    r"const\s+Role(\w+)",
                     r'Role\s*=\s*"(\w+)"',
                     r'"role"\s*:\s*"(\w+)"',
                     r'roles?\[\].*?"(\w+)"',
@@ -311,27 +306,21 @@ class EchoAnalyzer(BaseAnalyzer):
         # API boundary
         if self.endpoints:
             api_boundary = SystemBoundary(
-                name="REST API",
-                type="external",
-                components=[e.controller for e in self.endpoints]
+                name="REST API", type="external", components=[e.controller for e in self.endpoints]
             )
             self.boundaries.append(api_boundary)
 
         # Database boundary
         if self.models:
             db_boundary = SystemBoundary(
-                name="Database",
-                type="data",
-                components=[m.name for m in self.models]
+                name="Database", type="data", components=[m.name for m in self.models]
             )
             self.boundaries.append(db_boundary)
 
         # Service boundary
         if self.services:
             service_boundary = SystemBoundary(
-                name="Business Logic",
-                type="internal",
-                components=[s.name for s in self.services]
+                name="Business Logic", type="internal", components=[s.name for s in self.services]
             )
             self.boundaries.append(service_boundary)
 
