@@ -2,6 +2,7 @@
 Utility functions for the reverse engineering tool.
 """
 
+import logging
 import sys
 from pathlib import Path
 from typing import Optional
@@ -31,12 +32,83 @@ def log_info(message: str, verbose: bool = True):
     """
     Log an informational message if verbose mode is enabled.
 
+    This function maintains backward compatibility with the old logging approach
+    while also forwarding to the structured logging system.
+
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features. This function
+    maintains the legacy verbose=bool parameter for backward compatibility.
+
     Args:
         message: Message to log
         verbose: Whether to actually print the message
     """
     if verbose:
-        print(f"[INFO] {message}", file=sys.stderr)
+        # Use structured logger if available
+        logger = logging.getLogger("reverse_engineer")
+        if logger.hasHandlers():
+            logger.info(message)
+        else:
+            # Fallback to simple print for backward compatibility
+            print(f"[INFO] {message}", file=sys.stderr)
+
+
+def log_error(message: str, verbose: bool = True, exc_info: bool = False):
+    """
+    Log an error message if verbose mode is enabled.
+
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features.
+
+    Args:
+        message: Message to log
+        verbose: Whether to actually print the message
+        exc_info: Whether to include exception information
+    """
+    if verbose:
+        logger = logging.getLogger("reverse_engineer")
+        if logger.hasHandlers():
+            logger.error(message, exc_info=exc_info)
+        else:
+            print(f"[ERROR] {message}", file=sys.stderr)
+
+
+def log_warning(message: str, verbose: bool = True):
+    """
+    Log a warning message if verbose mode is enabled.
+
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features.
+
+    Args:
+        message: Message to log
+        verbose: Whether to actually print the message
+    """
+    if verbose:
+        logger = logging.getLogger("reverse_engineer")
+        if logger.hasHandlers():
+            logger.warning(message)
+        else:
+            print(f"[WARNING] {message}", file=sys.stderr)
+
+
+def log_debug(message: str, verbose: bool = True):
+    """
+    Log a debug message if verbose mode is enabled.
+
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features.
+
+    Args:
+        message: Message to log
+        verbose: Whether to actually print the message
+    """
+    if verbose:
+        logger = logging.getLogger("reverse_engineer")
+        if logger.hasHandlers():
+            logger.debug(message)
+        else:
+            print(f"[DEBUG] {message}", file=sys.stderr)
 
 
 def log_section(title: str):
