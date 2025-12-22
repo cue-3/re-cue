@@ -873,6 +873,11 @@ def merge_config_with_args(args, config: ProjectConfig):
     CLI arguments take precedence over configuration file settings.
     Only updates args attributes that weren't explicitly set on the command line.
 
+    Note: We check sys.argv to detect explicit CLI flags. This doesn't handle
+    short flags or combined flags perfectly (e.g., -v), but provides reasonable
+    behavior for the common case. The conservative approach ensures config
+    values are only used when the CLI argument wasn't provided.
+
     Args:
         args: Parsed command-line arguments (argparse.Namespace)
         config: Loaded project configuration from .recue.yaml

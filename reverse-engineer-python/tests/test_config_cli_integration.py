@@ -1,5 +1,6 @@
 """Integration tests for .recue.yaml configuration file support in CLI."""
 
+import shutil
 import sys
 import tempfile
 import unittest
@@ -21,8 +22,6 @@ class TestConfigCLIIntegration(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        import shutil
-
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def create_args(self, **kwargs):

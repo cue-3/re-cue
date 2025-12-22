@@ -1,5 +1,6 @@
 """Tests for ProjectConfig loader."""
 
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -19,8 +20,6 @@ class TestProjectConfig(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        import shutil
-
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_load_minimal_config(self):
