@@ -672,7 +672,18 @@ Export your documentation to different formats:
     --confluence-space DOC
   ```
 
-See [HTML Export Guide](docs/user-guides/html-export-guide.md) for detailed instructions.
+- **Jira Export** - ✨ **NEW** Create Jira issues from use cases:
+  - Automatic use case to issue conversion
+  - Rich formatted descriptions with scenarios and acceptance criteria
+  - Batch export all use cases to your project backlog
+  
+  ```bash
+  reverse-engineer --use-cases --jira \
+    --jira-url https://your-domain.atlassian.net \
+    --jira-project PROJ
+  ```
+
+See [HTML Export Guide](docs/user-guides/html-export-guide.md) and [Jira Export Guide](docs/user-guides/jira-export-guide.md) for detailed instructions.
 
 ### 🔗 **GitHub Copilot Integration**
 
