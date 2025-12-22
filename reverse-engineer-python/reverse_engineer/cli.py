@@ -730,6 +730,46 @@ The script will:
         help='Primary theme color for HTML output (default: "#2563eb")',
     )
 
+    # Logging configuration flags
+    logging_group = parser.add_argument_group("logging configuration")
+    logging_group.add_argument(
+        "--log-level",
+        type=str,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Set logging level (default: INFO)",
+    )
+    logging_group.add_argument(
+        "--log-file",
+        type=str,
+        metavar="FILE",
+        help="Write logs to FILE with rotation (default: logs to stderr only)",
+    )
+    logging_group.add_argument(
+        "--log-format",
+        type=str,
+        choices=["text", "json"],
+        default="text",
+        help="Log output format: text or json (default: text)",
+    )
+    logging_group.add_argument(
+        "--log-max-bytes",
+        type=int,
+        default=10485760,  # 10MB
+        help="Maximum log file size in bytes before rotation (default: 10MB)",
+    )
+    logging_group.add_argument(
+        "--log-backup-count",
+        type=int,
+        default=5,
+        help="Number of rotated log files to keep (default: 5)",
+    )
+    logging_group.add_argument(
+        "--no-console-log",
+        action="store_true",
+        help="Disable console logging (only log to file if --log-file specified)",
+    )
+
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.7")
 
     return parser
@@ -1059,6 +1099,27 @@ def merge_config_with_args(args, config: ProjectConfig):
 def main():
     """Main entry point for the CLI."""
     parser = create_parser()
+
+    # Parse args early to get logging configuration
+    # We parse twice - once for logging setup, once for full processing
+    temp_args, _ = parser.parse_known_args()
+
+    # Initialize logging as early as possible
+    from .logging_config import configure_logging
+    from pathlib import Path as LogPath
+
+    log_file = None
+    if hasattr(temp_args, "log_file") and temp_args.log_file:
+        log_file = LogPath(temp_args.log_file)
+
+    configure_logging(
+        level=getattr(temp_args, "log_level", "INFO"),
+        log_file=log_file,
+        format_type=getattr(temp_args, "log_format", "text"),
+        max_bytes=getattr(temp_args, "log_max_bytes", 10485760),
+        backup_count=getattr(temp_args, "log_backup_count", 5),
+        enable_console=not getattr(temp_args, "no_console_log", False),
+    )
 
     # Check if .recue.yaml exists before entering interactive mode
     # This allows users to run `recue` without arguments when a config file is present
