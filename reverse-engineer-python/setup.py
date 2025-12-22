@@ -29,6 +29,7 @@ setup(
     install_requires=[
         "pyyaml>=6.0",
         "jinja2>=3.0.0",
+        "jira>=3.0.0",
     ],
     entry_points={
         "console_scripts": [

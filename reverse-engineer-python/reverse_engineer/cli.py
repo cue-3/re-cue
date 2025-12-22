@@ -329,6 +329,25 @@ HTML Export:
   --html-title TITLE    Title for HTML documentation
                         • Default: "RE-cue Documentation"
 
+Jira Export:
+  --jira                Export use cases to Jira as issues
+                        • Automatically converts use cases to Jira issues
+                        • Creates issues in specified project
+
+  --jira-url URL        Jira server URL
+                        • Example: https://your-domain.atlassian.net
+
+  --jira-project KEY    Jira project key where issues will be created
+
+  --jira-user USER      Username or email for authentication
+
+  --jira-token TOKEN    API token for authentication
+                        • Can also use JIRA_API_TOKEN environment variable
+
+  --jira-issue-type TYPE
+                        Issue type for created issues
+                        • Default: "Story"
+
 Examples:
   reverse-engineer --use-cases --confluence \\
     --confluence-url https://company.atlassian.net/wiki \\
@@ -336,6 +355,10 @@ Examples:
 
   reverse-engineer --spec --plan --html \\
     --html-title "My Project Documentation"
+
+  reverse-engineer --use-cases --jira \\
+    --jira-url https://company.atlassian.net \\
+    --jira-project PROJ --jira-user user@example.com
 
 Use --help for more options.
     """)
@@ -730,6 +753,41 @@ The script will:
         help='Primary theme color for HTML output (default: "#2563eb")',
     )
 
+    # Jira export flags
+    jira_group = parser.add_argument_group("jira export")
+    jira_group.add_argument(
+        "--jira",
+        action="store_true",
+        help="Export use cases to Jira as issues",
+    )
+    jira_group.add_argument(
+        "--jira-url",
+        type=str,
+        metavar="URL",
+        help="Jira server URL (e.g., https://your-domain.atlassian.net)",
+    )
+    jira_group.add_argument(
+        "--jira-user", type=str, metavar="USER", help="Jira username or email"
+    )
+    jira_group.add_argument(
+        "--jira-token",
+        type=str,
+        metavar="TOKEN",
+        help="Jira API token (or use JIRA_API_TOKEN env var)",
+    )
+    jira_group.add_argument(
+        "--jira-project",
+        type=str,
+        metavar="KEY",
+        help="Jira project key (or use JIRA_PROJECT_KEY env var)",
+    )
+    jira_group.add_argument(
+        "--jira-issue-type",
+        type=str,
+        default="Story",
+        help='Issue type for created issues (default: "Story")',
+    )
+
     # Logging configuration flags
     logging_group = parser.add_argument_group("logging configuration")
     logging_group.add_argument(
@@ -1074,6 +1132,25 @@ def merge_config_with_args(args, config: ProjectConfig):
 
     if "--html-theme-color" not in sys.argv:
         args.html_theme_color = config.html_theme_color
+
+    # Jira settings
+    if "--jira" not in sys.argv and config.jira_export:
+        args.jira = True
+
+    if "--jira-url" not in sys.argv and config.jira_url:
+        args.jira_url = config.jira_url
+
+    if "--jira-user" not in sys.argv and config.jira_user:
+        args.jira_user = config.jira_user
+
+    if "--jira-token" not in sys.argv and config.jira_token:
+        args.jira_token = config.jira_token
+
+    if "--jira-project" not in sys.argv and config.jira_project:
+        args.jira_project = config.jira_project
+
+    if "--jira-issue-type" not in sys.argv:
+        args.jira_issue_type = config.jira_issue_type
 
     # Phase settings
     if "--phased" not in sys.argv and config.phased:
@@ -1968,6 +2045,119 @@ def main():
                 import traceback
 
                 traceback.print_exc()
+
+    # Export to Jira if requested
+    if getattr(args, "jira", False):
+        from .exporters import JiraConfig, JiraExporter
+
+        print("\n🎫 Exporting to Jira...", file=sys.stderr)
+
+        # Get Jira configuration from args or environment
+        jira_url = getattr(args, "jira_url", None) or os.environ.get("JIRA_URL")
+        jira_user = getattr(args, "jira_user", None) or os.environ.get("JIRA_USER")
+        jira_token = getattr(args, "jira_token", None) or os.environ.get("JIRA_API_TOKEN")
+        jira_project = getattr(args, "jira_project", None) or os.environ.get(
+            "JIRA_PROJECT_KEY"
+        )
+        jira_issue_type = getattr(args, "jira_issue_type", "Story")
+
+        # Validate required Jira configuration
+        if not jira_url:
+            print(
+                "❌ Error: --jira-url or JIRA_URL environment variable is required",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        if not jira_user:
+            print(
+                "❌ Error: --jira-user or JIRA_USER environment variable is required",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        if not jira_token:
+            print(
+                "❌ Error: --jira-token or JIRA_API_TOKEN environment variable is required",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        if not jira_project:
+            print(
+                "❌ Error: --jira-project or JIRA_PROJECT_KEY environment variable is required",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Check if use cases were generated
+        if not args.use_cases:
+            print(
+                "⚠️  Warning: --jira requires --use-cases to generate use cases first",
+                file=sys.stderr,
+            )
+            print("   No use cases to export to Jira", file=sys.stderr)
+        else:
+            try:
+                config = JiraConfig(
+                    server=jira_url,
+                    username=jira_user,
+                    api_token=jira_token,
+                    project_key=jira_project,
+                    issue_type=jira_issue_type,
+                )
+
+                exporter = JiraExporter(config)
+
+                # Test connection first
+                print("   Testing connection...", file=sys.stderr)
+                if not exporter.test_connection():
+                    print(
+                        "❌ Error: Could not connect to Jira. Please check your credentials and URL.",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+                print("   ✓ Connection successful", file=sys.stderr)
+
+                # Get use cases from analyzer
+                if hasattr(analyzer, "use_cases") and analyzer.use_cases:
+                    use_cases = analyzer.use_cases
+                    print(f"   Exporting {len(use_cases)} use case(s)...", file=sys.stderr)
+
+                    results = exporter.export_use_cases(use_cases)
+
+                    # Report results
+                    success_count = sum(1 for r in results if r.success)
+                    fail_count = len(results) - success_count
+
+                    for result in results:
+                        if result.success:
+                            print(
+                                f"   ✓ Created: {result.use_case_name} → {result.issue_key}",
+                                file=sys.stderr,
+                            )
+                            if result.issue_url:
+                                print(f"     URL: {result.issue_url}", file=sys.stderr)
+                        else:
+                            print(
+                                f"   ✗ Failed: {result.use_case_name} - {result.error_message}",
+                                file=sys.stderr,
+                            )
+
+                    print(
+                        f"\n✅ Jira export complete: {success_count} succeeded, {fail_count} failed",
+                        file=sys.stderr,
+                    )
+                else:
+                    print("⚠️  No use cases found to export to Jira", file=sys.stderr)
+
+            except ImportError as e:
+                print(f"❌ Jira export error: {e}", file=sys.stderr)
+                print("   Install the jira library with: pip install jira>=3.0.0", file=sys.stderr)
+                sys.exit(1)
+            except Exception as e:
+                print(f"❌ Jira export error: {e}", file=sys.stderr)
+                import traceback
+
+                traceback.print_exc()
+                sys.exit(1)
 
     # Display results
     log_section("Generation Complete")
