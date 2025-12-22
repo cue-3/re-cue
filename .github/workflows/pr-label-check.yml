@@ -3,6 +3,18 @@ name: PR Label Check
 on:
   pull_request:
     types: [opened, labeled, unlabeled, synchronize]
+  workflow_run:
+    workflows: 
+      - "Auto-Label Pull Requests (Phase 1)"
+      - "AI-Assisted Label Suggestion (Phase 2)"
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to check'
+        required: true
+        type: number
 
 permissions:
   contents: read
@@ -15,14 +27,61 @@ jobs:
     name: Validate PR Labels
     runs-on: ubuntu-latest
     # Don't run on forks to avoid permission issues
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      github.event_name == 'workflow_dispatch'
     
     steps:
+      - name: Get PR number from workflow_run
+        if: github.event_name == 'workflow_run'
+        id: get-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = github.event.workflow_run.pull_requests[0]?.number;
+            if (!prNumber) {
+              core.info('No PR found in workflow_run event');
+              return;
+            }
+            core.setOutput('pr_number', prNumber);
+            return prNumber;
+      
       - name: Check for category label
         uses: actions/github-script@v7
         with:
           script: |
-            const categoryLabels = [
+            let pr;
+            let prNumber;
+            
+            if (context.eventName === 'workflow_run') {
+              prNumber = '${{ steps.get-pr.outputs.pr_number }}';
+              if (!prNumber) {
+                core.info('Skipping check - no PR number available');
+                return;
+              }
+              
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: parseInt(prNumber)
+              });
+              pr = prData;
+            } else if (context.eventName === 'workflow_dispatch') {
+              prNumber = ${{ inputs.pr_number }};
+              
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              pr = prData;
+            } else {
+              pr = context.payload.pull_request;
+              prNumber = pr.number;
+            }
+            
+const categoryLabels = [
               'type: breaking',
               'type: enhancement',
               'type: bug',
@@ -33,7 +92,6 @@ jobs:
               'type: performance'
             ];
             
-            const pr = context.payload.pull_request;
             const prLabels = pr.labels.map(label => label.name);
             const categoryLabelsPresent = prLabels.filter(l => categoryLabels.includes(l));
             const hasCategoryLabel = categoryLabelsPresent.length > 0;
