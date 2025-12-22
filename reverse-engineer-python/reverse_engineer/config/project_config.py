@@ -6,7 +6,7 @@ This module provides support for loading project-specific configuration from
 version-controlled configuration file.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
