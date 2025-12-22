@@ -425,5 +425,229 @@ class TestValidationReport(unittest.TestCase):
             sys.stdout = sys.__stdout__
 
 
+class TestAutoFix(unittest.TestCase):
+    """Test auto-fix functionality."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        self.validator = TemplateValidator()
+    
+    def test_auto_fix_unbalanced_code_blocks(self):
+        """Test auto-fix for unbalanced code blocks."""
+        import tempfile
+        
+        content = """## Test Template
+
+```python
+def hello():
+    pass
+
+Missing closing marker
+"""
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(content)
+            temp_path = Path(f.name)
+        
+        try:
+            result = self.validator.validate_template(temp_path, auto_fix=True)
+            
+            # Should have applied fix
+            self.assertGreater(len(result.fixes_applied), 0)
+            self.assertTrue(
+                any('code block' in fix.lower() for fix in result.fixes_applied)
+            )
+            
+            # Check that file was updated
+            fixed_content = temp_path.read_text()
+            self.assertEqual(fixed_content.count('```'), 2)
+        finally:
+            temp_path.unlink()
+    
+    def test_auto_fix_broken_links(self):
+        """Test auto-fix for broken markdown links."""
+        import tempfile
+        
+        content = """## Test Template
+
+This is a [broken link]() that should be fixed.
+"""
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(content)
+            temp_path = Path(f.name)
+        
+        try:
+            result = self.validator.validate_template(temp_path, auto_fix=True)
+            
+            # Should have applied fix
+            self.assertGreater(len(result.fixes_applied), 0)
+            self.assertTrue(
+                any('broken link' in fix.lower() for fix in result.fixes_applied)
+            )
+            
+            # Check that link was removed
+            fixed_content = temp_path.read_text()
+            self.assertNotIn('[broken link]()', fixed_content)
+            self.assertIn('broken link', fixed_content)  # Text should remain
+        finally:
+            temp_path.unlink()
+    
+    def test_auto_fix_code_block_languages(self):
+        """Test auto-fix for code blocks without language specification."""
+        import tempfile
+        
+        content = """## Test Template
+
+```
+print("Hello")
+```
+"""
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(content)
+            temp_path = Path(f.name)
+        
+        try:
+            result = self.validator.validate_template(
+                temp_path, framework_id='python', auto_fix=True
+            )
+            
+            # Should have applied fix
+            self.assertGreater(len(result.fixes_applied), 0)
+            self.assertTrue(
+                any('language' in fix.lower() for fix in result.fixes_applied)
+            )
+            
+            # Check that language was added
+            fixed_content = temp_path.read_text()
+            self.assertIn('```python', fixed_content)
+        finally:
+            temp_path.unlink()
+    
+    def test_auto_fix_heading_hierarchy(self):
+        """Test auto-fix for heading hierarchy."""
+        import tempfile
+        
+        content = """# Test Template
+
+This starts with h1 but should be h2.
+"""
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(content)
+            temp_path = Path(f.name)
+        
+        try:
+            result = self.validator.validate_template(temp_path, auto_fix=True)
+            
+            # Should have applied fix
+            self.assertGreater(len(result.fixes_applied), 0)
+            self.assertTrue(
+                any('heading' in fix.lower() for fix in result.fixes_applied)
+            )
+            
+            # Check that heading was converted
+            fixed_content = temp_path.read_text()
+            self.assertTrue(fixed_content.startswith('## Test Template'))
+        finally:
+            temp_path.unlink()
+    
+    def test_auto_fix_multiple_issues(self):
+        """Test auto-fix for multiple issues at once."""
+        import tempfile
+        
+        content = """# Test Template
+
+This is a [broken link]().
+
+```
+code without language
+```
+
+Missing closing marker:
+```python
+def test():
+    pass
+"""
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(content)
+            temp_path = Path(f.name)
+        
+        try:
+            result = self.validator.validate_template(
+                temp_path, framework_id='python', auto_fix=True
+            )
+            
+            # Should have applied multiple fixes
+            self.assertGreaterEqual(len(result.fixes_applied), 3)
+            
+            # Check each fix type
+            fixes_text = ' '.join(result.fixes_applied).lower()
+            self.assertIn('heading', fixes_text)
+            self.assertIn('link', fixes_text)
+            self.assertTrue('language' in fixes_text or 'code block' in fixes_text)
+        finally:
+            temp_path.unlink()
+    
+    def test_no_auto_fix_when_disabled(self):
+        """Test that auto-fix doesn't run when disabled."""
+        import tempfile
+        
+        content = """# Test Template
+
+```
+code without language
+```
+"""
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(content)
+            temp_path = Path(f.name)
+        
+        try:
+            result = self.validator.validate_template(temp_path, auto_fix=False)
+            
+            # Should have no fixes applied
+            self.assertEqual(len(result.fixes_applied), 0)
+            
+            # Content should be unchanged
+            content_after = temp_path.read_text()
+            self.assertEqual(content, content_after)
+        finally:
+            temp_path.unlink()
+    
+    def test_get_default_language(self):
+        """Test default language selection for different frameworks."""
+        self.assertEqual(self.validator._get_default_language('java_spring'), 'java')
+        self.assertEqual(self.validator._get_default_language('nodejs_express'), 'javascript')
+        self.assertEqual(self.validator._get_default_language('python_django'), 'python')
+        self.assertEqual(self.validator._get_default_language('ruby_rails'), 'ruby')
+        self.assertEqual(self.validator._get_default_language('dotnet_core'), 'csharp')
+        self.assertEqual(self.validator._get_default_language(None), 'text')
+        self.assertEqual(self.validator._get_default_language('unknown'), 'text')
+
+
+class TestValidationResultWithFixes(unittest.TestCase):
+    """Test ValidationResult with fixes."""
+    
+    def test_result_with_fixes_str(self):
+        """Test string representation with fixes."""
+        result = ValidationResult(True, [], [], ['Fix 1', 'Fix 2'])
+        output = str(result)
+        self.assertIn('🔧 Fixes Applied:', output)
+        self.assertIn('Fix 1', output)
+        self.assertIn('Fix 2', output)
+    
+    def test_result_with_all_types(self):
+        """Test string representation with errors, warnings, and fixes."""
+        result = ValidationResult(False, ['Error 1'], ['Warning 1'], ['Fix 1'])
+        output = str(result)
+        self.assertIn('❌ Errors:', output)
+        self.assertIn('⚠️  Warnings:', output)
+        self.assertIn('🔧 Fixes Applied:', output)
+
+
 if __name__ == '__main__':
     unittest.main()

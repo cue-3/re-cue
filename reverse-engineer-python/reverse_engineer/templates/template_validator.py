@@ -20,9 +20,15 @@ class ValidationResult:
     is_valid: bool
     errors: list[str]
     warnings: list[str]
+    fixes_applied: list[str] = None
+
+    def __post_init__(self):
+        """Initialize fixes_applied list if not provided."""
+        if self.fixes_applied is None:
+            self.fixes_applied = []
 
     def __str__(self):
-        if self.is_valid and not self.warnings:
+        if self.is_valid and not self.warnings and not self.fixes_applied:
             return "✅ Validation passed"
 
         lines = []
@@ -35,6 +41,11 @@ class ValidationResult:
             lines.append("⚠️  Warnings:")
             for warning in self.warnings:
                 lines.append(f"  - {warning}")
+
+        if self.fixes_applied:
+            lines.append("🔧 Fixes Applied:")
+            for fix in self.fixes_applied:
+                lines.append(f"  - {fix}")
 
         return "\n".join(lines)
 
@@ -98,6 +109,7 @@ class TemplateValidator:
         template_path: Path,
         framework_id: Optional[str] = None,
         required_placeholders: Optional[set[str]] = None,
+        auto_fix: bool = False,
     ) -> ValidationResult:
         """Validate a template file.
 
@@ -105,27 +117,41 @@ class TemplateValidator:
             template_path: Path to the template file
             framework_id: Framework ID for framework-specific validation
             required_placeholders: Set of required placeholder names
+            auto_fix: Whether to automatically fix common issues
 
         Returns:
             ValidationResult with validation status and messages
         """
         errors = []
         warnings = []
+        fixes_applied = []
 
         if not template_path.exists():
             errors.append(f"Template file not found: {template_path}")
-            return ValidationResult(False, errors, warnings)
+            return ValidationResult(False, errors, warnings, fixes_applied)
 
         try:
             content = template_path.read_text(encoding="utf-8")
         except Exception as e:
             errors.append(f"Failed to read template: {e}")
-            return ValidationResult(False, errors, warnings)
+            return ValidationResult(False, errors, warnings, fixes_applied)
 
         # Check if file is empty
         if not content.strip():
             errors.append("Template is empty")
-            return ValidationResult(False, errors, warnings)
+            return ValidationResult(False, errors, warnings, fixes_applied)
+
+        # Auto-fix if requested
+        if auto_fix:
+            content, auto_fixes = self._auto_fix_template(content, template_path.name, framework_id)
+            fixes_applied.extend(auto_fixes)
+            
+            # Write fixed content back to file
+            if auto_fixes:
+                try:
+                    template_path.write_text(content, encoding="utf-8")
+                except Exception as e:
+                    warnings.append(f"Failed to write auto-fixes: {e}")
 
         # Validate markdown structure
         md_errors, md_warnings = self._validate_markdown(content, template_path.name)
@@ -151,7 +177,163 @@ class TemplateValidator:
         warnings.extend(code_warnings)
 
         is_valid = len(errors) == 0
-        return ValidationResult(is_valid, errors, warnings)
+        return ValidationResult(is_valid, errors, warnings, fixes_applied)
+
+    def _auto_fix_template(
+        self, content: str, filename: str, framework_id: Optional[str] = None
+    ) -> tuple[str, list[str]]:
+        """Automatically fix common issues in template.
+
+        Args:
+            content: Template content
+            filename: Template filename
+            framework_id: Framework ID for framework-specific fixes
+
+        Returns:
+            Tuple of (fixed_content, list_of_fixes_applied)
+        """
+        fixes_applied = []
+
+        # Fix unbalanced code blocks
+        content, code_block_fix = self._fix_unbalanced_code_blocks(content)
+        if code_block_fix:
+            fixes_applied.append(code_block_fix)
+
+        # Fix broken markdown links
+        content, broken_link_fixes = self._fix_broken_links(content)
+        fixes_applied.extend(broken_link_fixes)
+
+        # Add language specification to code blocks
+        content, lang_fixes = self._fix_code_block_languages(content, framework_id)
+        fixes_applied.extend(lang_fixes)
+
+        # Fix heading hierarchy (convert h1 to h2 if template starts with h1)
+        content, heading_fix = self._fix_heading_hierarchy(content)
+        if heading_fix:
+            fixes_applied.append(heading_fix)
+
+        return content, fixes_applied
+
+    def _fix_unbalanced_code_blocks(self, content: str) -> tuple[str, Optional[str]]:
+        """Fix unbalanced code blocks by adding missing closing markers.
+
+        Args:
+            content: Template content
+
+        Returns:
+            Tuple of (fixed_content, fix_description or None)
+        """
+        code_markers = self.CODE_BLOCK_PATTERN.findall(content)
+
+        # If odd number of markers, add closing marker at the end
+        if len(code_markers) % 2 != 0:
+            content = content.rstrip() + "\n```\n"
+            return content, "Added missing code block closing marker"
+
+        return content, None
+
+    def _fix_broken_links(self, content: str) -> tuple[str, list[str]]:
+        """Fix broken markdown links by removing them or adding placeholder URLs.
+
+        Args:
+            content: Template content
+
+        Returns:
+            Tuple of (fixed_content, list_of_fixes)
+        """
+        fixes = []
+        broken_link_pattern = re.compile(r"\[([^\]]+)\]\(\s*\)")
+
+        # Replace broken links with placeholder text
+        def replace_broken_link(match):
+            link_text = match.group(1)
+            fixes.append(f"Removed broken link: [{link_text}]()")
+            return link_text  # Just return the text without link
+
+        fixed_content = broken_link_pattern.sub(replace_broken_link, content)
+        return fixed_content, fixes
+
+    def _fix_code_block_languages(
+        self, content: str, framework_id: Optional[str] = None
+    ) -> tuple[str, list[str]]:
+        """Add language specifications to code blocks without them.
+
+        Args:
+            content: Template content
+            framework_id: Framework ID to determine default language
+
+        Returns:
+            Tuple of (fixed_content, list_of_fixes)
+        """
+        fixes = []
+
+        # Determine default language based on framework
+        default_lang = self._get_default_language(framework_id)
+
+        # Pattern to find code blocks without language
+        lines = content.split("\n")
+        fixed_lines = []
+        i = 0
+
+        while i < len(lines):
+            line = lines[i]
+
+            # Check if this is a code block start
+            if line.strip() == "```":
+                # Add language specification
+                fixed_lines.append(f"```{default_lang}")
+                fixes.append(f"Added '{default_lang}' language to code block at line {i + 1}")
+            else:
+                fixed_lines.append(line)
+
+            i += 1
+
+        return "\n".join(fixed_lines), fixes
+
+    def _fix_heading_hierarchy(self, content: str) -> tuple[str, Optional[str]]:
+        """Fix heading hierarchy - convert h1 to h2 for templates.
+
+        Args:
+            content: Template content
+
+        Returns:
+            Tuple of (fixed_content, fix_description or None)
+        """
+        lines = content.split("\n")
+
+        # Find first heading
+        for i, line in enumerate(lines):
+            if line.startswith("# ") and not line.startswith("## "):
+                # Convert h1 to h2
+                lines[i] = "#" + line
+                return "\n".join(lines), "Converted first heading from h1 to h2"
+
+        return content, None
+
+    def _get_default_language(self, framework_id: Optional[str]) -> str:
+        """Get default language for code blocks based on framework.
+
+        Args:
+            framework_id: Framework identifier
+
+        Returns:
+            Default language string
+        """
+        if not framework_id:
+            return "text"
+
+        if framework_id.startswith("java"):
+            return "java"
+        elif framework_id.startswith("nodejs"):
+            return "javascript"
+        elif framework_id.startswith("python"):
+            return "python"
+        elif framework_id.startswith("ruby"):
+            return "ruby"
+        elif framework_id.startswith("dotnet") or framework_id.startswith("csharp"):
+            return "csharp"
+        else:
+            return "text"
 
     def _validate_markdown(self, content: str, filename: str) -> tuple[list[str], list[str]]:
         """Validate markdown structure.
@@ -282,13 +464,14 @@ class TemplateValidator:
         return errors, warnings
 
     def validate_directory(
-        self, template_dir: Path, framework_id: Optional[str] = None
+        self, template_dir: Path, framework_id: Optional[str] = None, auto_fix: bool = False
     ) -> dict[str, ValidationResult]:
         """Validate all templates in a directory.
 
         Args:
             template_dir: Directory containing template files
             framework_id: Framework ID for framework-specific validation
+            auto_fix: Whether to automatically fix common issues
 
         Returns:
             Dictionary mapping template names to validation results
@@ -302,7 +485,7 @@ class TemplateValidator:
             if template_file.name == "README.md":
                 continue  # Skip README files
 
-            result = self.validate_template(template_file, framework_id)
+            result = self.validate_template(template_file, framework_id, auto_fix=auto_fix)
             results[template_file.name] = result
 
         return results
@@ -319,12 +502,13 @@ class TemplateValidator:
         return set(self.PLACEHOLDER_PATTERN.findall(content))
 
     def validate_all_templates(
-        self, templates_root: Path
+        self, templates_root: Path, auto_fix: bool = False
     ) -> dict[str, dict[str, ValidationResult]]:
         """Validate all templates in the templates directory structure.
 
         Args:
             templates_root: Root templates directory
+            auto_fix: Whether to automatically fix common issues
 
         Returns:
             Nested dictionary: framework -> template_name -> ValidationResult
@@ -334,7 +518,7 @@ class TemplateValidator:
         # Validate common templates
         common_dir = templates_root / "common"
         if common_dir.exists():
-            all_results["common"] = self.validate_directory(common_dir)
+            all_results["common"] = self.validate_directory(common_dir, auto_fix=auto_fix)
 
         # Validate framework-specific templates
         frameworks_dir = templates_root / "frameworks"
@@ -342,7 +526,9 @@ class TemplateValidator:
             for framework_dir in frameworks_dir.iterdir():
                 if framework_dir.is_dir():
                     framework_id = framework_dir.name
-                    all_results[framework_id] = self.validate_directory(framework_dir, framework_id)
+                    all_results[framework_id] = self.validate_directory(
+                        framework_dir, framework_id, auto_fix=auto_fix
+                    )
 
         return all_results
 
@@ -359,6 +545,7 @@ class TemplateValidator:
         total_templates = 0
         total_errors = 0
         total_warnings = 0
+        total_fixes = 0
 
         print("=" * 70)
         print("Template Validation Report")
@@ -376,6 +563,11 @@ class TemplateValidator:
                 status = "✅" if result.is_valid else "❌"
                 print(f"{status} {template_name}")
 
+                if result.fixes_applied:
+                    total_fixes += len(result.fixes_applied)
+                    for fix in result.fixes_applied:
+                        print(f"    🔧 {fix}")
+
                 if result.errors:
                     total_errors += len(result.errors)
                     for error in result.errors:
@@ -389,6 +581,8 @@ class TemplateValidator:
 
         print("\n" + "=" * 70)
         print(f"Summary: {total_templates} templates validated")
+        if total_fixes > 0:
+            print(f"  Fixes Applied: {total_fixes}")
         print(f"  Errors: {total_errors}")
         print(f"  Warnings: {total_warnings}")
         print(f"  Status: {'✅ All valid' if all_valid else '❌ Validation failed'}")
@@ -399,11 +593,33 @@ class TemplateValidator:
 
 def validate_templates_cli():
     """CLI entry point for template validation."""
+    import argparse
     import sys
 
-    # Determine templates root - template_validator.py is in templates/
-    script_dir = Path(__file__).parent
-    templates_root = script_dir  # This is already the templates directory
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description="Validate RE-cue template files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--auto-fix",
+        action="store_true",
+        help="Automatically fix common issues in templates",
+    )
+    parser.add_argument(
+        "--template-dir",
+        type=Path,
+        help="Path to templates directory (defaults to script location)",
+    )
+    args = parser.parse_args()
+
+    # Determine templates root
+    if args.template_dir:
+        templates_root = args.template_dir
+    else:
+        # template_validator.py is in templates/
+        script_dir = Path(__file__).parent
+        templates_root = script_dir
 
     if not templates_root.exists():
         print(f"❌ Templates directory not found: {templates_root}")
@@ -411,7 +627,11 @@ def validate_templates_cli():
 
     # Run validation
     validator = TemplateValidator()
-    results = validator.validate_all_templates(templates_root)
+    
+    if args.auto_fix:
+        print("🔧 Auto-fix mode enabled - fixing common issues...\n")
+    
+    results = validator.validate_all_templates(templates_root, auto_fix=args.auto_fix)
 
     # Print report
     all_valid = validator.print_validation_report(results)
