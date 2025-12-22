@@ -1,0 +1,198 @@
+# .recue.yaml - RE-cue Configuration File
+#
+# This file allows you to configure RE-cue analysis preferences for your project.
+# Place this file in your project root and RE-cue will automatically use it.
+#
+# All settings are optional. CLI arguments override these settings.
+
+# Project Settings
+# ===============================================================================
+
+# Project path (default: current directory)
+# project_path: /path/to/your/project
+
+# Framework to use (auto-detected if not specified)
+# Options: java_spring, nodejs_express, nodejs_nestjs, python_django, python_flask,
+#          python_fastapi, ruby_rails, dotnet
+# framework: java_spring
+
+# Project description (required for spec generation)
+description: "Your project description here"
+
+
+# Generation Options
+# ===============================================================================
+# Enable/disable specific document generation
+
+generation:
+  # Core documentation
+  spec: true                    # Generate specification document (spec.md)
+  plan: true                    # Generate implementation plan (plan.md)
+  data_model: true              # Generate data model documentation (data-model.md)
+  api_contract: true            # Generate API contract (api-spec.json)
+  
+  # Use case analysis (generates 4 phase documents)
+  use_cases: true               # Generate use case analysis
+  fourplusone: false            # Generate 4+1 architecture document
+  
+  # Additional analysis
+  integration_tests: false      # Generate integration testing guidance
+  traceability: false           # Generate requirements traceability matrix
+  diagrams: false               # Generate visualization diagrams
+  journey: false                # Generate user journey mapping
+  
+  # Git-based analysis
+  git_changes: false            # Generate Git change analysis
+  changelog: false              # Generate changelog from Git history
+
+
+# Output Settings
+# ===============================================================================
+
+output:
+  # Output format: markdown or json
+  format: markdown
+  
+  # Output directory (default: re-<project-name>/)
+  # Use "." for project root
+  dir: ./docs/reverse-engineering
+  
+  # Specific output file (for spec generation)
+  # file: custom-spec.md
+  
+  # Custom template directory for organizational templates
+  # template_dir: ./templates
+
+
+# Analysis Settings
+# ===============================================================================
+
+analysis:
+  # Show detailed progress during analysis
+  verbose: false
+  
+  # Enable parallel file processing (recommended for large projects)
+  parallel: true
+  
+  # Enable incremental analysis - skip unchanged files
+  incremental: true
+  
+  # Enable result caching for faster re-runs
+  cache: true
+  
+  # Maximum number of worker processes (default: CPU count)
+  # max_workers: 4
+
+
+# Use Case Naming Settings
+# ===============================================================================
+
+naming:
+  # Naming style for use cases
+  # Options: business, technical, concise, verbose, user_centric
+  style: business
+  
+  # Generate alternative name suggestions
+  alternatives: true
+
+
+# Git Integration
+# ===============================================================================
+
+git:
+  # Analyze only files changed in Git
+  enabled: false
+  
+  # Git reference to compare from (branch, commit, tag)
+  # from: main
+  
+  # Git reference to compare to (default: HEAD)
+  to: HEAD
+  
+  # Only analyze staged changes
+  staged: false
+
+
+# Diagram Settings
+# ===============================================================================
+
+diagrams:
+  # Type of diagrams to generate
+  # Options: flowchart, sequence, component, er, architecture, all
+  type: all
+
+
+# Confluence Export
+# ===============================================================================
+# Export generated documentation to Confluence wiki
+
+confluence:
+  # Enable Confluence export
+  enabled: false
+  
+  # Confluence base URL
+  # url: https://your-domain.atlassian.net/wiki
+  
+  # Username or email for authentication
+  # user: user@example.com
+  
+  # API token (or use CONFLUENCE_API_TOKEN environment variable)
+  # token: your-api-token
+  
+  # Confluence space key
+  # space: DOC
+  
+  # Parent page ID for creating child pages
+  # parent: "12345"
+  
+  # Prefix for all page titles
+  prefix: ""
+
+
+# HTML Export
+# ===============================================================================
+# Export generated documentation to HTML
+
+html:
+  # Enable HTML export
+  enabled: false
+  
+  # Output directory for HTML files
+  # output: ./docs/html
+  
+  # Title for HTML documentation
+  title: "RE-cue Documentation"
+  
+  # Enable dark mode support
+  dark_mode: true
+  
+  # Enable search functionality
+  search: true
+  
+  # Primary theme color (hex color code)
+  theme_color: "#2563eb"
+
+
+# Phased Analysis
+# ===============================================================================
+# Run analysis in phases with prompts between phases
+
+phases:
+  # Enable phased analysis mode
+  enabled: false
+  
+  # Specific phase to run: 1, 2, 3, 4, or all
+  # phase: all
+
+
+# Advanced Options
+# ===============================================================================
+
+# Analyze impact of changes to specific file (use with traceability)
+# impact_file: src/controllers/UserController.java
+
+# Interactively refine existing use cases
+# refine_use_cases_file: use-cases.md
+
+# Show blame analysis for a specific file
+# blame_file: src/main.py

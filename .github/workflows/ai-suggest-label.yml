@@ -103,7 +103,7 @@ jobs:
               pull_number: prNumber
             });
             
-            const context = {
+            const prContextData = {
               title: pr.title,
               body: pr.body || '',
               filesChanged: files.map(f => ({
@@ -115,8 +115,8 @@ jobs:
               }))
             };
             
-            core.setOutput('pr_context', JSON.stringify(context));
-            return context;
+            core.setOutput('pr_context', JSON.stringify(prContextData));
+            return prContextData;
       
       - name: Try GitHub Copilot AI Analysis
         id: copilot

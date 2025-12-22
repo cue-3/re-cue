@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from .analyzer import PLUGIN_ARCHITECTURE_AVAILABLE, ProjectAnalyzer
+from .config import ProjectConfig
 from .generators import (
     ApiContractGenerator,
     DataModelGenerator,
@@ -314,10 +315,27 @@ Confluence Export:
                         API token for authentication
                         • Can also use CONFLUENCE_API_TOKEN environment variable
 
+HTML Export:
+  --html                Export generated documentation to HTML
+                        • Responsive design with mobile support
+                        • Table of contents navigation
+                        • Search functionality
+                        • Dark mode support
+                        • Print-friendly CSS
+
+  --html-output DIR     Output directory for HTML files
+                        • Default: <project-root>/re-<project-name>/html/
+
+  --html-title TITLE    Title for HTML documentation
+                        • Default: "RE-cue Documentation"
+
 Examples:
   reverse-engineer --use-cases --confluence \\
     --confluence-url https://company.atlassian.net/wiki \\
     --confluence-space DOC --confluence-user user@example.com
+
+  reverse-engineer --spec --plan --html \\
+    --html-title "My Project Documentation"
 
 Use --help for more options.
     """)
@@ -373,6 +391,12 @@ The script will:
         "--wizard",
         action="store_true",
         help="Launch interactive configuration wizard for guided setup",
+    )
+    wizard_group.add_argument(
+        "--config",
+        type=str,
+        metavar="FILE",
+        help="Load configuration from .recue.yaml file (default: search from current directory)",
     )
     wizard_group.add_argument(
         "--load-profile",
@@ -670,6 +694,42 @@ The script will:
         help='Prefix for all page titles (e.g., "RE-cue: ")',
     )
 
+    # HTML export flags
+    html_group = parser.add_argument_group("html export")
+    html_group.add_argument(
+        "--html",
+        action="store_true",
+        help="Export generated documentation to HTML with navigation",
+    )
+    html_group.add_argument(
+        "--html-output",
+        type=str,
+        metavar="DIR",
+        help="Output directory for HTML files (default: <project-root>/re-<project-name>/html/)",
+    )
+    html_group.add_argument(
+        "--html-title",
+        type=str,
+        default="RE-cue Documentation",
+        help='Title for HTML documentation (default: "RE-cue Documentation")',
+    )
+    html_group.add_argument(
+        "--html-no-dark-mode",
+        action="store_true",
+        help="Disable dark mode support in HTML output",
+    )
+    html_group.add_argument(
+        "--html-no-search",
+        action="store_true",
+        help="Disable search functionality in HTML output",
+    )
+    html_group.add_argument(
+        "--html-theme-color",
+        type=str,
+        default="#2563eb",
+        help='Primary theme color for HTML output (default: "#2563eb")',
+    )
+
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.7")
 
     return parser
@@ -807,15 +867,247 @@ def detect_framework(repo_root, verbose=False):
     print()
 
 
+def merge_config_with_args(args, config: ProjectConfig):
+    """Merge configuration file settings with CLI arguments.
+
+    CLI arguments take precedence over configuration file settings.
+    Only updates args attributes that weren't explicitly set on the command line.
+
+    Note: We check sys.argv to detect explicit CLI flags. This doesn't handle
+    short flags or combined flags perfectly (e.g., -v), but provides reasonable
+    behavior for the common case. The conservative approach ensures config
+    values are only used when the CLI argument wasn't provided.
+
+    Args:
+        args: Parsed command-line arguments (argparse.Namespace)
+        config: Loaded project configuration from .recue.yaml
+
+    Returns:
+        Modified args namespace with config values merged in
+    """
+    # Track which args were explicitly provided on CLI
+    # For flags, we consider them "set" if they're True
+    # For other args, we check if they differ from defaults
+
+    # Project settings (only set if not provided via CLI)
+    if not args.project_path and not args.path and config.project_path:
+        args.path = config.project_path
+
+    if not args.framework and config.framework:
+        args.framework = config.framework
+
+    if not args.description and config.description:
+        args.description = config.description
+
+    # Generation flags (only enable from config if not already set via CLI)
+    # We check sys.argv to see if the flag was explicitly provided
+    if "--spec" not in sys.argv and config.generate_spec:
+        args.spec = True
+
+    if "--plan" not in sys.argv and config.generate_plan:
+        args.plan = True
+
+    if "--data-model" not in sys.argv and config.generate_data_model:
+        args.data_model = True
+
+    if "--api-contract" not in sys.argv and config.generate_api_contract:
+        args.api_contract = True
+
+    if "--use-cases" not in sys.argv and config.generate_use_cases:
+        args.use_cases = True
+
+    if "--fourplusone" not in sys.argv and config.generate_fourplusone:
+        args.fourplusone = True
+
+    if "--integration-tests" not in sys.argv and config.generate_integration_tests:
+        args.integration_tests = True
+
+    if "--traceability" not in sys.argv and config.generate_traceability:
+        args.traceability = True
+
+    if "--diagrams" not in sys.argv and config.generate_diagrams:
+        args.diagrams = True
+
+    if "--journey" not in sys.argv and config.generate_journey:
+        args.journey = True
+
+    if "--git-changes" not in sys.argv and config.generate_git_changes:
+        args.git_changes = True
+
+    if "--changelog" not in sys.argv and config.generate_changelog:
+        args.changelog = True
+
+    # Output settings
+    if "--format" not in sys.argv and "-f" not in sys.argv:
+        args.format = config.output_format
+
+    if "--output-dir" not in sys.argv and config.output_dir:
+        args.output_dir = config.output_dir
+
+    if "--output" not in sys.argv and "-o" not in sys.argv and config.output_file:
+        args.output = config.output_file
+
+    if "--template-dir" not in sys.argv and config.template_dir:
+        args.template_dir = config.template_dir
+
+    # Analysis settings
+    if "--verbose" not in sys.argv and "-v" not in sys.argv:
+        args.verbose = config.verbose
+
+    if "--no-parallel" not in sys.argv:
+        args.parallel = config.parallel
+
+    if "--no-incremental" not in sys.argv:
+        args.incremental = config.incremental
+
+    if "--no-cache" not in sys.argv:
+        args.cache = config.cache
+
+    if "--max-workers" not in sys.argv and config.max_workers:
+        args.max_workers = config.max_workers
+
+    # Naming settings
+    if "--naming-style" not in sys.argv:
+        args.naming_style = config.naming_style
+
+    if "--no-naming-alternatives" not in sys.argv:
+        args.naming_alternatives = config.naming_alternatives
+
+    # Git settings
+    if "--git" not in sys.argv and config.git_mode:
+        args.git = True
+
+    if "--git-from" not in sys.argv and config.git_from:
+        args.git_from = config.git_from
+
+    if "--git-to" not in sys.argv:
+        args.git_to = config.git_to
+
+    if "--git-staged" not in sys.argv and config.git_staged:
+        args.git_staged = True
+
+    # Diagram settings
+    if "--diagram-type" not in sys.argv:
+        args.diagram_type = config.diagram_type
+
+    # Confluence settings
+    if "--confluence" not in sys.argv and config.confluence_export:
+        args.confluence = True
+
+    if "--confluence-url" not in sys.argv and config.confluence_url:
+        args.confluence_url = config.confluence_url
+
+    if "--confluence-user" not in sys.argv and config.confluence_user:
+        args.confluence_user = config.confluence_user
+
+    if "--confluence-token" not in sys.argv and config.confluence_token:
+        args.confluence_token = config.confluence_token
+
+    if "--confluence-space" not in sys.argv and config.confluence_space:
+        args.confluence_space = config.confluence_space
+
+    if "--confluence-parent" not in sys.argv and config.confluence_parent:
+        args.confluence_parent = config.confluence_parent
+
+    if "--confluence-prefix" not in sys.argv:
+        args.confluence_prefix = config.confluence_prefix
+
+    # HTML settings
+    if "--html" not in sys.argv and config.html_export:
+        args.html = True
+
+    if "--html-output" not in sys.argv and config.html_output:
+        args.html_output = config.html_output
+
+    if "--html-title" not in sys.argv:
+        args.html_title = config.html_title
+
+    if "--html-no-dark-mode" not in sys.argv:
+        # If config disables dark mode and user didn't specify, set the flag
+        if not config.html_dark_mode:
+            args.html_no_dark_mode = True
+
+    if "--html-no-search" not in sys.argv:
+        # If config disables search and user didn't specify, set the flag
+        if not config.html_search:
+            args.html_no_search = True
+
+    if "--html-theme-color" not in sys.argv:
+        args.html_theme_color = config.html_theme_color
+
+    # Phase settings
+    if "--phased" not in sys.argv and config.phased:
+        args.phased = True
+
+    if "--phase" not in sys.argv and config.phase:
+        args.phase = config.phase
+
+    # Impact analysis
+    if "--impact-file" not in sys.argv and config.impact_file:
+        args.impact_file = config.impact_file
+
+    # Additional options
+    if "--refine-use-cases" not in sys.argv and config.refine_use_cases_file:
+        args.refine_use_cases = config.refine_use_cases_file
+
+    if "--blame" not in sys.argv and config.blame_file:
+        args.blame = config.blame_file
+
+    return args
+
+
 def main():
     """Main entry point for the CLI."""
     parser = create_parser()
 
-    # Check if no arguments provided - enter interactive mode
+    # Check if .recue.yaml exists before entering interactive mode
+    # This allows users to run `recue` without arguments when a config file is present
+    config_exists = False
     if len(sys.argv) == 1:
+        # No arguments provided - check for config file
+        config = ProjectConfig.find_and_load(Path.cwd())
+        if config:
+            config_exists = True
+            # Parse empty args and merge with config
+            args = parser.parse_args([])
+            args = merge_config_with_args(args, config)
+            print("✓ Using configuration from .recue.yaml", file=sys.stderr)
+
+    # Check if no arguments provided - enter interactive mode (only if no config)
+    if len(sys.argv) == 1 and not config_exists:
         args = interactive_mode()
-    else:
+    elif not config_exists:
         args = parser.parse_args()
+
+    # Load configuration file if explicitly specified
+    if not config_exists and hasattr(args, "config") and args.config:
+        # Explicit config file specified
+        config_file = Path(args.config)
+        if not config_file.exists():
+            print(f"Error: Configuration file not found: {args.config}", file=sys.stderr)
+            sys.exit(1)
+        try:
+            config = ProjectConfig.load(config_file)
+            if config:
+                args = merge_config_with_args(args, config)
+                if args.verbose:
+                    print(f"✓ Loaded configuration from {config_file}", file=sys.stderr)
+        except Exception as e:
+            print(f"Error loading configuration file: {e}", file=sys.stderr)
+            sys.exit(1)
+    elif not config_exists:
+        # Try to auto-discover .recue.yaml from current directory or project path
+        search_path = Path.cwd()
+        if hasattr(args, "project_path") and args.project_path:
+            search_path = Path(args.project_path).resolve()
+        elif hasattr(args, "path") and args.path:
+            search_path = Path(args.path).resolve()
+
+        config = ProjectConfig.find_and_load(search_path)
+        if config:
+            args = merge_config_with_args(args, config)
+            if args.verbose:
+                print("✓ Loaded configuration from .recue.yaml", file=sys.stderr)
 
     # Handle cache management commands (these need project path)
     if hasattr(args, "cache_stats") and args.cache_stats:
@@ -1513,6 +1805,108 @@ def main():
         except Exception as e:
             print(f"❌ Confluence export error: {e}", file=sys.stderr)
             sys.exit(1)
+
+    # Export to HTML if requested
+    if getattr(args, "html", False):
+        from .exporters import HTMLConfig, HTMLExporter
+
+        print("\n📄 Exporting to HTML...", file=sys.stderr)
+
+        # Determine HTML output directory
+        html_output = getattr(args, "html_output", None)
+        if html_output:
+            html_dir = Path(html_output).resolve()
+        else:
+            html_dir = output_path.parent / "html"
+
+        html_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create HTML configuration
+        html_title = getattr(args, "html_title", "RE-cue Documentation")
+        dark_mode = not getattr(args, "html_no_dark_mode", False)
+        search = not getattr(args, "html_no_search", False)
+        theme_color = getattr(args, "html_theme_color", "#2563eb")
+
+        config = HTMLConfig(
+            output_dir=html_dir,
+            title=html_title,
+            dark_mode=dark_mode,
+            search=search,
+            theme_color=theme_color,
+        )
+
+        exporter = HTMLExporter(config)
+
+        # Collect all generated markdown files
+        files_to_export = []
+
+        if args.spec:
+            files_to_export.append(output_path)
+        if args.plan:
+            files_to_export.append(output_path.parent / "plan.md")
+        if args.data_model:
+            files_to_export.append(output_path.parent / "data-model.md")
+        if args.use_cases:
+            files_to_export.extend(
+                [
+                    output_path.parent / "phase1-structure.md",
+                    output_path.parent / "phase2-actors.md",
+                    output_path.parent / "phase3-boundaries.md",
+                    output_path.parent / "phase4-use-cases.md",
+                ]
+            )
+        if getattr(args, "fourplusone", False):
+            files_to_export.append(output_path.parent / "fourplusone-architecture.md")
+        if getattr(args, "diagrams", False):
+            files_to_export.append(output_path.parent / "diagrams.md")
+        if getattr(args, "integration_tests", False):
+            files_to_export.append(output_path.parent / "integration-tests.md")
+        if getattr(args, "traceability", False):
+            files_to_export.append(output_path.parent / "traceability.md")
+        if getattr(args, "journey", False):
+            files_to_export.append(output_path.parent / "journey-map.md")
+
+        # Filter to only existing files
+        files_to_export = [f for f in files_to_export if f.exists()]
+
+        if not files_to_export:
+            print("⚠️  No files to export to HTML", file=sys.stderr)
+        else:
+            print(f"   Exporting {len(files_to_export)} document(s)...", file=sys.stderr)
+
+            try:
+                # Export files
+                results = exporter.export_multiple_files(files_to_export, create_index=True)
+
+                # Report results
+                success_count = sum(1 for r in results if r.success)
+                fail_count = len(results) - success_count
+
+                for result in results:
+                    if result.success:
+                        print(f"   ✓ Generated: {result.title}", file=sys.stderr)
+                    else:
+                        print(
+                            f"   ✗ Failed: {result.title} - {result.error_message}",
+                            file=sys.stderr,
+                        )
+
+                if success_count > 0:
+                    print(
+                        f"\n✅ HTML export complete: {success_count} document(s) generated",
+                        file=sys.stderr,
+                    )
+                    print(f"   Output directory: {html_dir}", file=sys.stderr)
+                    print(f"   Open {html_dir / 'index.html'} in your browser", file=sys.stderr)
+
+                if fail_count > 0:
+                    print(f"⚠️  {fail_count} document(s) failed to export", file=sys.stderr)
+
+            except Exception as e:
+                print(f"❌ Error exporting to HTML: {e}", file=sys.stderr)
+                import traceback
+
+                traceback.print_exc()
 
     # Display results
     log_section("Generation Complete")
