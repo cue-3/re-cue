@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from argparse import Namespace
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from reverse_engineer.cli import merge_config_with_args
 from reverse_engineer.config import ProjectConfig
