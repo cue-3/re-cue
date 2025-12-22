@@ -1,5 +1,6 @@
 """Tests for template validation."""
 
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -69,7 +70,6 @@ class TestTemplateValidator(unittest.TestCase):
     
     def test_validate_empty_template(self):
         """Test validation of empty template."""
-        import tempfile
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
             f.write('')
@@ -84,7 +84,6 @@ class TestTemplateValidator(unittest.TestCase):
     
     def test_validate_valid_markdown(self):
         """Test validation of valid markdown template."""
-        import tempfile
         
         content = """## Section Title
 
@@ -112,7 +111,6 @@ More text.
     
     def test_validate_broken_links(self):
         """Test detection of broken markdown links."""
-        import tempfile
         
         content = """## Test
 
@@ -132,7 +130,6 @@ This is a [broken link]() that should be detected.
     
     def test_validate_unbalanced_code_blocks(self):
         """Test detection of unbalanced code blocks."""
-        import tempfile
         
         content = """## Test
 
@@ -156,7 +153,6 @@ Missing closing marker
     
     def test_validate_missing_placeholders(self):
         """Test detection of missing required placeholders."""
-        import tempfile
         
         content = """## Template
 
@@ -183,7 +179,6 @@ Hello {name}!
     
     def test_validate_java_spring_template(self):
         """Test framework-specific validation for Java Spring."""
-        import tempfile
         
         content = """## Spring Annotations
 
@@ -215,7 +210,6 @@ public class UserController {
     
     def test_validate_nodejs_template(self):
         """Test framework-specific validation for Node.js."""
-        import tempfile
         
         content = """## Express Routes
 
@@ -242,7 +236,6 @@ app.get('/users', async (req, res) => {
     
     def test_validate_python_template(self):
         """Test framework-specific validation for Python."""
-        import tempfile
         
         content = """## Django Views
 
@@ -432,7 +425,6 @@ class TestAutoFix(unittest.TestCase):
     
     def test_auto_fix_unbalanced_code_blocks(self):
         """Test auto-fix for unbalanced code blocks."""
-        import tempfile
         
         content = """## Test Template
 
@@ -464,7 +456,6 @@ Missing closing marker
     
     def test_auto_fix_broken_links(self):
         """Test auto-fix for broken markdown links."""
-        import tempfile
         
         content = """## Test Template
 
@@ -493,7 +484,6 @@ This is a [broken link]() that should be fixed.
     
     def test_auto_fix_code_block_languages(self):
         """Test auto-fix for code blocks without language specification."""
-        import tempfile
         
         content = """## Test Template
 
@@ -525,7 +515,6 @@ print("Hello")
     
     def test_auto_fix_heading_hierarchy(self):
         """Test auto-fix for heading hierarchy."""
-        import tempfile
         
         content = """# Test Template
 
@@ -553,7 +542,6 @@ This starts with h1 but should be h2.
     
     def test_auto_fix_multiple_issues(self):
         """Test auto-fix for multiple issues at once."""
-        import tempfile
         
         content = """# Test Template
 
@@ -591,7 +579,6 @@ def test():
     
     def test_no_auto_fix_when_disabled(self):
         """Test that auto-fix doesn't run when disabled."""
-        import tempfile
         
         content = """# Test Template
 

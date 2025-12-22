@@ -8,7 +8,7 @@ This module provides validation for template files to ensure:
 """
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
@@ -20,12 +20,7 @@ class ValidationResult:
     is_valid: bool
     errors: list[str]
     warnings: list[str]
-    fixes_applied: list[str] = None
-
-    def __post_init__(self):
-        """Initialize fixes_applied list if not provided."""
-        if self.fixes_applied is None:
-            self.fixes_applied = []
+    fixes_applied: list[str] = field(default_factory=list)
 
     def __str__(self):
         if self.is_valid and not self.warnings and not self.fixes_applied:
@@ -310,6 +305,16 @@ class TemplateValidator:
 
         return content, None
 
+    # Framework to language mapping for code blocks
+    FRAMEWORK_LANGUAGE_MAP = {
+        "java": "java",
+        "nodejs": "javascript",
+        "python": "python",
+        "ruby": "ruby",
+        "dotnet": "csharp",
+        "csharp": "csharp",
+    }
+
     def _get_default_language(self, framework_id: Optional[str]) -> str:
         """Get default language for code blocks based on framework.
 
@@ -322,18 +327,12 @@ class TemplateValidator:
         if not framework_id:
             return "text"
 
-        if framework_id.startswith("java"):
-            return "java"
-        elif framework_id.startswith("nodejs"):
-            return "javascript"
-        elif framework_id.startswith("python"):
-            return "python"
-        elif framework_id.startswith("ruby"):
-            return "ruby"
-        elif framework_id.startswith("dotnet") or framework_id.startswith("csharp"):
-            return "csharp"
-        else:
-            return "text"
+        # Check for matching framework prefix
+        for prefix, language in self.FRAMEWORK_LANGUAGE_MAP.items():
+            if framework_id.startswith(prefix):
+                return language
+
+        return "text"
 
     def _validate_markdown(self, content: str, filename: str) -> tuple[list[str], list[str]]:
         """Validate markdown structure.
