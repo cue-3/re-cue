@@ -32,6 +32,7 @@ def create_analyzer(
     try:
         # Import framework-specific analyzers
         from .dotnet import DotNetAspNetCoreAnalyzer
+        from .go import EchoAnalyzer, FiberAnalyzer, GinAnalyzer
         from .java_spring import JavaSpringAnalyzer
         from .nodejs import NodeExpressAnalyzer
         from .php import LaravelAnalyzer
@@ -61,6 +62,12 @@ def create_analyzer(
             return DotNetAspNetCoreAnalyzer(repo_root, verbose)
         elif tech_stack.framework_id == "php_laravel":
             return LaravelAnalyzer(repo_root, verbose)
+        elif tech_stack.framework_id == "go_gin":
+            return GinAnalyzer(repo_root, verbose)
+        elif tech_stack.framework_id == "go_echo":
+            return EchoAnalyzer(repo_root, verbose)
+        elif tech_stack.framework_id == "go_fiber":
+            return FiberAnalyzer(repo_root, verbose)
         else:
             if verbose:
                 print(f"Using legacy analyzer for {tech_stack.name}")
