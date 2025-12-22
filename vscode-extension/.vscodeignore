@@ -6,6 +6,10 @@ src/**
 tsconfig.json
 *.ts
 !*.d.ts
-node_modules/**
+node_modules/**/@types/**
+node_modules/**/test/**
+node_modules/**/tests/**
+node_modules/**/*.md
+!node_modules/vscode-languageclient/**
 .eslintrc.json
 *.vsix

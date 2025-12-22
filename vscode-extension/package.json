@@ -2,7 +2,11 @@
   "name": "re-cue",
   "displayName": "RE-cue",
   "description": "Reverse engineering toolkit for code analysis and documentation - in-editor analysis with right-click support, side panel results, and inline documentation preview",
+<<<<<<< HEAD
+  "version": "0.3.41",
+=======
   "version": "0.3.4",
+>>>>>>> 090abce4837eb1b67f13d59d5228c58ab0ab2db5
   "publisher": "cue3",
   "repository": {
     "type": "git",
@@ -26,6 +30,7 @@
     "architecture"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onLanguage:java",
     "onLanguage:python",
     "onLanguage:typescript",
@@ -267,10 +272,15 @@
     "configuration": {
       "title": "RE-cue",
       "properties": {
+        "recue.useRecueCLI": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use 'recue' command directly (requires pip install). Set to false to use 'python -m reverse_engineer' instead."
+        },
         "recue.pythonPath": {
           "type": "string",
           "default": "python3",
-          "description": "Path to Python executable for running RE-cue analysis"
+          "description": "Path to Python executable (only used when useRecueCLI is false)"
         },
         "recue.autoAnalyzeOnSave": {
           "type": "boolean",
