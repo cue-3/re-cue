@@ -386,7 +386,31 @@ recue --wizard
 # - Saving configuration as a reusable profile
 ```
 
-#### Option 2: Command-Line Interface
+#### Option 2: Configuration File (Recommended for Teams)
+
+```bash
+# 1. Install Python version
+pip install -e reverse-engineer-python/
+
+# 2. Create .recue.yaml in your project root
+cat > .recue.yaml << EOF
+description: "My project description"
+generation:
+  spec: true
+  plan: true
+  use_cases: true
+  diagrams: true
+EOF
+
+# 3. Run RE-cue (automatically finds and uses .recue.yaml)
+recue
+
+# 4. Commit config to share with your team
+git add .recue.yaml
+git commit -m "Add RE-cue configuration"
+```
+
+#### Option 3: Command-Line Interface
 
 ```bash
 # 1. Install Python version
@@ -405,6 +429,7 @@ ls -la re-my-spring-app/
 **That's it!** Your documentation (including visual diagrams) is now in the `re-my-spring-app/` directory.
 
 **Next Steps:**
+- 📄 Learn about [Configuration Files](docs/user-guides/configuration-file.md) for team-wide settings
 - 🧙 Try the [Interactive Configuration Wizard](docs/features/configuration-wizard.md) for guided setup
 - 📖 Read the [Getting Started Guide](docs/user-guides/GETTING-STARTED.md) for detailed walkthrough
 - 📚 Explore the [Complete User Guide](docs/user-guides/USER-GUIDE.md) for all features

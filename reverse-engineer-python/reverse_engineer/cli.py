@@ -1055,14 +1055,27 @@ def main():
     """Main entry point for the CLI."""
     parser = create_parser()
 
-    # Check if no arguments provided - enter interactive mode
+    # Check if .recue.yaml exists before entering interactive mode
+    # This allows users to run `recue` without arguments when a config file is present
+    config_exists = False
     if len(sys.argv) == 1:
+        # No arguments provided - check for config file
+        config = ProjectConfig.find_and_load(Path.cwd())
+        if config:
+            config_exists = True
+            # Parse empty args and merge with config
+            args = parser.parse_args([])
+            args = merge_config_with_args(args, config)
+            print("✓ Using configuration from .recue.yaml", file=sys.stderr)
+
+    # Check if no arguments provided - enter interactive mode (only if no config)
+    if len(sys.argv) == 1 and not config_exists:
         args = interactive_mode()
-    else:
+    elif not config_exists:
         args = parser.parse_args()
 
-    # Load configuration file if available (unless in interactive mode)
-    if hasattr(args, "config") and args.config:
+    # Load configuration file if explicitly specified
+    if not config_exists and hasattr(args, "config") and args.config:
         # Explicit config file specified
         config_file = Path(args.config)
         if not config_file.exists():
@@ -1077,7 +1090,7 @@ def main():
         except Exception as e:
             print(f"Error loading configuration file: {e}", file=sys.stderr)
             sys.exit(1)
-    else:
+    elif not config_exists:
         # Try to auto-discover .recue.yaml from current directory or project path
         search_path = Path.cwd()
         if hasattr(args, "project_path") and args.project_path:
