@@ -160,7 +160,7 @@ def example_error_logging():
 
     try:
         # Simulate an error
-        result = 1 / 0
+        1 / 0
     except ZeroDivisionError:
         logger.error("Mathematical error occurred", exc_info=True)
 
