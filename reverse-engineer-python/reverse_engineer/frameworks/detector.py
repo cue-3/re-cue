@@ -131,6 +131,51 @@ class TechDetector:
                 ],
                 "structure": ["app/Http/Controllers", "app/Models", "routes/web.php"],
             },
+            "go_gin": {
+                "name": "Go Gin",
+                "language": "go",
+                "files": ["go.mod", "go.sum"],
+                "patterns": [
+                    (r"github\.com/gin-gonic/gin", "go.mod"),
+                    (r"gin\.(GET|POST|PUT|DELETE|PATCH)\s*\(", "**/*.go"),
+                    (r"router\.(?:GET|POST|PUT|DELETE)", "**/*.go"),
+                ],
+                "structure": ["main.go"],
+                "exclude_patterns": [
+                    (r"github\.com/labstack/echo", "go.mod"),
+                    (r"github\.com/gofiber/fiber", "go.mod"),
+                ],
+            },
+            "go_echo": {
+                "name": "Go Echo",
+                "language": "go",
+                "files": ["go.mod", "go.sum"],
+                "patterns": [
+                    (r"github\.com/labstack/echo", "go.mod"),
+                    (r"echo\.(GET|POST|PUT|DELETE|PATCH)\s*\(", "**/*.go"),
+                    (r"e\.(?:GET|POST|PUT|DELETE)", "**/*.go"),
+                ],
+                "structure": ["main.go"],
+                "exclude_patterns": [
+                    (r"github\.com/gin-gonic/gin", "go.mod"),
+                    (r"github\.com/gofiber/fiber", "go.mod"),
+                ],
+            },
+            "go_fiber": {
+                "name": "Go Fiber",
+                "language": "go",
+                "files": ["go.mod", "go.sum"],
+                "patterns": [
+                    (r"github\.com/gofiber/fiber", "go.mod"),
+                    (r"fiber\.(Get|Post|Put|Delete|Patch)\s*\(", "**/*.go"),
+                    (r"app\.(?:Get|Post|Put|Delete)", "**/*.go"),
+                ],
+                "structure": ["main.go"],
+                "exclude_patterns": [
+                    (r"github\.com/gin-gonic/gin", "go.mod"),
+                    (r"github\.com/labstack/echo", "go.mod"),
+                ],
+            },
         }
 
     def detect(self) -> TechStack:
@@ -298,6 +343,8 @@ class TechDetector:
                 return self._extract_ruby_version()
             elif framework_id == "php_laravel":
                 return self._extract_laravel_version()
+            elif framework_id.startswith("go_"):
+                return self._extract_go_version(framework_id)
         except Exception as e:
             log_info(f"  Could not extract version: {e}", self.verbose)
 
@@ -396,5 +443,28 @@ class TechDetector:
                     return version
             except Exception:
                 pass
+
+        return None
+
+    def _extract_go_version(self, framework_id: str) -> Optional[str]:
+        """Extract Go framework version from go.mod."""
+        go_mod = self.repo_root / "go.mod"
+        if go_mod.exists():
+            content = go_mod.read_text()
+
+            # Map framework_id to module name
+            module_map = {
+                "go_gin": "github.com/gin-gonic/gin",
+                "go_echo": "github.com/labstack/echo",
+                "go_fiber": "github.com/gofiber/fiber",
+            }
+
+            module_name = module_map.get(framework_id)
+            if module_name:
+                # Look for version in go.mod (e.g., github.com/gin-gonic/gin v1.9.1)
+                pattern = rf"{re.escape(module_name)}\s+v([0-9.]+)"
+                match = re.search(pattern, content)
+                if match:
+                    return match.group(1)
 
         return None
