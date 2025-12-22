@@ -35,6 +35,10 @@ def log_info(message: str, verbose: bool = True):
     This function maintains backward compatibility with the old logging approach
     while also forwarding to the structured logging system.
 
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features. This function
+    maintains the legacy verbose=bool parameter for backward compatibility.
+
     Args:
         message: Message to log
         verbose: Whether to actually print the message
@@ -53,6 +57,9 @@ def log_error(message: str, verbose: bool = True, exc_info: bool = False):
     """
     Log an error message if verbose mode is enabled.
 
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features.
+
     Args:
         message: Message to log
         verbose: Whether to actually print the message
@@ -70,6 +77,9 @@ def log_warning(message: str, verbose: bool = True):
     """
     Log a warning message if verbose mode is enabled.
 
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features.
+
     Args:
         message: Message to log
         verbose: Whether to actually print the message
@@ -85,6 +95,9 @@ def log_warning(message: str, verbose: bool = True):
 def log_debug(message: str, verbose: bool = True):
     """
     Log a debug message if verbose mode is enabled.
+
+    Note: For new code, prefer using the structured logging API from
+    logging_config.py which supports richer context and features.
 
     Args:
         message: Message to log

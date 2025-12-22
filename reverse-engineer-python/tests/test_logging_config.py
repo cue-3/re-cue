@@ -4,6 +4,7 @@ Tests for structured logging configuration.
 
 import json
 import logging
+import logging.handlers
 import tempfile
 import unittest
 from pathlib import Path
