@@ -255,7 +255,7 @@ class UsersController < ApplicationController
 
     def test_malformed_routes_rb(self):
         """Test handling of malformed routes.rb file."""
-        app = self._create_rails_structure()
+        self._create_rails_structure()
         
         malformed_routes = """
 Rails.application.routes.draw do
