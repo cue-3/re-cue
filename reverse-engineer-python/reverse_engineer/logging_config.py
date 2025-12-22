@@ -14,7 +14,7 @@ import logging
 import logging.handlers
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -37,8 +37,6 @@ class JSONFormatter(logging.Formatter):
         Returns:
             JSON string representation of the log record
         """
-        from datetime import datetime, timezone
-
         log_data: Dict[str, Any] = {
             "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
             "level": record.levelname,
