@@ -83,6 +83,14 @@ class ProjectConfig:
     html_search: bool = True
     html_theme_color: str = "#2563eb"
 
+    # Jira export settings
+    jira_export: bool = False
+    jira_url: Optional[str] = None
+    jira_user: Optional[str] = None
+    jira_token: Optional[str] = None
+    jira_project: Optional[str] = None
+    jira_issue_type: str = "Story"
+
     # Phase settings
     phased: bool = False
     phase: Optional[str] = None
@@ -236,6 +244,22 @@ class ProjectConfig:
                     config_data["html_search"] = bool(html["search"])
                 if "theme_color" in html:
                     config_data["html_theme_color"] = str(html["theme_color"])
+
+            # Jira export settings
+            jira = data.get("jira", {})
+            if isinstance(jira, dict):
+                if "enabled" in jira:
+                    config_data["jira_export"] = bool(jira["enabled"])
+                if "url" in jira:
+                    config_data["jira_url"] = str(jira["url"])
+                if "user" in jira:
+                    config_data["jira_user"] = str(jira["user"])
+                if "token" in jira:
+                    config_data["jira_token"] = str(jira["token"])
+                if "project" in jira:
+                    config_data["jira_project"] = str(jira["project"])
+                if "issue_type" in jira:
+                    config_data["jira_issue_type"] = str(jira["issue_type"])
 
             # Phase settings
             phases = data.get("phases", {})

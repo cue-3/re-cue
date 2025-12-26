@@ -1,0 +1,97 @@
+# RE-cue Configuration File Example
+#
+# This file demonstrates all configuration options available in RE-cue.
+# Copy this to your project root as .recue.yaml and customize as needed.
+#
+# Environment variables can be referenced using ${VAR_NAME} syntax.
+
+# Project Settings
+project:
+  path: .  # Path to project directory (default: current directory)
+  framework: auto  # auto, java_spring, nodejs_express, python_django, etc.
+  description: "My application description"
+
+# Generation Settings
+generate:
+  spec: true              # Generate specification (spec.md)
+  plan: true              # Generate implementation plan (plan.md)
+  data_model: true        # Generate data model documentation (data-model.md)
+  api_contract: true      # Generate API contract (api-spec.json)
+  use_cases: true         # Generate use case analysis (phase1-4 documents)
+  fourplusone: false      # Generate 4+1 Architecture View document
+  integration_tests: false # Generate integration testing guidance
+  traceability: false     # Generate requirements traceability matrix
+  diagrams: false         # Generate visualization diagrams
+  journey: false          # Generate user journey mapping
+  git_changes: false      # Generate Git change analysis
+  changelog: false        # Generate changelog from Git history
+
+# Output Settings
+output:
+  format: markdown        # markdown or json
+  dir: .                  # Output directory (default: re-<project-name>/)
+  template_dir: null      # Custom template directory
+
+# Analysis Settings
+analysis:
+  verbose: false          # Enable verbose output
+  parallel: true          # Enable parallel processing
+  incremental: true       # Enable incremental analysis
+  cache: true            # Enable caching
+  max_workers: null      # Maximum number of worker threads (null = auto)
+
+# Use Case Naming Settings
+naming:
+  style: business         # business or technical
+  alternatives: true      # Generate alternative names
+
+# Git Integration
+git:
+  enabled: false          # Analyze only Git changes
+  from: null             # Compare from this branch/commit/tag
+  to: HEAD               # Compare to this ref
+  staged: false          # Include staged changes
+
+# Diagram Settings
+diagrams:
+  type: all              # all, flowchart, sequence, component, er, architecture
+
+# Confluence Export
+confluence:
+  enabled: false
+  url: ${CONFLUENCE_URL}                    # e.g., https://your-domain.atlassian.net/wiki
+  user: ${CONFLUENCE_USER}                  # e.g., user@example.com
+  token: ${CONFLUENCE_API_TOKEN}            # API token
+  space: ${CONFLUENCE_SPACE_KEY}            # Space key (e.g., DOC)
+  parent: ${CONFLUENCE_PARENT_ID}           # Optional parent page ID
+  prefix: ""                                # Optional page title prefix
+
+# HTML Export
+html:
+  enabled: false
+  output: null           # Output directory (default: re-<project-name>/html/)
+  title: "RE-cue Documentation"
+  dark_mode: true
+  search: true
+  theme_color: "#2563eb"
+
+# Jira Export
+jira:
+  enabled: false
+  url: ${JIRA_URL}                          # e.g., https://your-domain.atlassian.net
+  user: ${JIRA_USER}                        # e.g., user@example.com
+  token: ${JIRA_API_TOKEN}                  # API token
+  project: ${JIRA_PROJECT_KEY}              # Project key (e.g., PROJ)
+  issue_type: Story                         # Story, Task, Epic, etc.
+
+# Phase Settings (for phased analysis)
+phases:
+  enabled: false         # Enable phased analysis
+  phase: all            # all, 1, 2, 3, or 4
+
+# Impact Analysis
+impact_file: null      # File path for impact analysis
+
+# Additional Options
+refine_use_cases_file: null  # Path to use case file for refinement
+blame_file: null             # File path for Git blame analysis
