@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..analyzer import ProjectAnalyzer
 
+from ..analysis.quality import QualityAnalyzer
 from .base import BaseGenerator
 
 
@@ -88,7 +89,7 @@ class QualityReportGenerator(BaseGenerator):
             f"- **Average Complexity**: {metrics.average_complexity:.2f}",
             f"- **Maximum Complexity**: {metrics.max_complexity}",
             f"- **High Complexity Files**: {len(metrics.high_complexity_files)} "
-            f"(>{15} complexity)\n",
+            f"(>{QualityAnalyzer.HIGH_COMPLEXITY_THRESHOLD} complexity)\n",
         ]
 
         if metrics.high_complexity_files:

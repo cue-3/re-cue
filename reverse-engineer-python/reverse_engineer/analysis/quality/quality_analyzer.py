@@ -21,6 +21,9 @@ from ...domain import CodeQualityMetrics, FileQualityMetrics
 class QualityAnalyzer:
     """Analyzes code quality metrics for a project."""
 
+    # Complexity threshold for high complexity classification
+    HIGH_COMPLEXITY_THRESHOLD = 15
+
     def __init__(self, repo_root: Path, verbose: bool = False):
         """
         Initialize the quality analyzer.
@@ -177,11 +180,14 @@ class QualityAnalyzer:
         """
         Calculate cyclomatic complexity for Python code using AST.
 
+        Note: This calculates file-level complexity (sum of all decision points).
+        For per-function complexity, iterate over function definitions separately.
+
         Args:
             content: Python source code
 
         Returns:
-            Cyclomatic complexity score
+            Cyclomatic complexity score for the entire file
         """
         try:
             tree = ast.parse(content)
@@ -202,7 +208,7 @@ class QualityAnalyzer:
                     ),
                 ):
                     complexity += 1
-                # Function/method definitions
+                # Each function adds its own path
                 elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     complexity += 1
 
@@ -216,13 +222,16 @@ class QualityAnalyzer:
         """
         Calculate complexity using simple heuristic (count decision keywords).
 
+        Note: This counts all decision points in the file (file-level complexity).
+        
         Args:
             content: Source code
 
         Returns:
             Estimated complexity score
         """
-        keywords = ["if", "else", "while", "for", "switch", "case", "catch", "&&", "||"]
+        # Note: 'else' is not included as it's part of the if statement
+        keywords = ["if", "while", "for", "switch", "case", "catch", "&&", "||"]
         complexity = 1  # Base complexity
 
         for keyword in keywords:
@@ -285,10 +294,9 @@ class QualityAnalyzer:
         # Calculate averages
         avg_complexity = total_complexity / total_files if total_files > 0 else 0
 
-        # Find high complexity files (threshold: >15)
-        high_complexity_threshold = 15
+        # Find high complexity files (using class constant threshold)
         high_complexity_files = [
-            m for m in self.file_metrics if m.cyclomatic_complexity > high_complexity_threshold
+            m for m in self.file_metrics if m.cyclomatic_complexity > self.HIGH_COMPLEXITY_THRESHOLD
         ]
 
         # Sort by complexity to get worst offenders
