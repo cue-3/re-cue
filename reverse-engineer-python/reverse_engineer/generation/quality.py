@@ -113,8 +113,8 @@ class QualityReportGenerator(BaseGenerator):
             f"- **Overall Tech Debt Score**: {metrics.tech_debt_score:.1f}/100 "
             f"({self._get_debt_level(metrics.tech_debt_score)})",
             f"- **Code Smells Detected**: {metrics.code_smells}",
-            f"- **Long Methods**: {metrics.long_methods} (>100 lines)",
-            f"- **Large Classes**: {metrics.large_classes} (>500 lines)\n",
+            f"- **Long Methods**: {metrics.long_methods} (>{QualityAnalyzer.LONG_METHOD_THRESHOLD} lines)",
+            f"- **Large Classes**: {metrics.large_classes} (>{QualityAnalyzer.LARGE_CLASS_THRESHOLD} lines)\n",
         ]
 
         # Explanation
@@ -215,13 +215,13 @@ class QualityReportGenerator(BaseGenerator):
         # Long methods/large classes
         if metrics.long_methods > 0:
             recommendations.append(
-                f"**Long Methods**: Found {metrics.long_methods} methods with >100 lines. "
+                f"**Long Methods**: Found {metrics.long_methods} methods with >{QualityAnalyzer.LONG_METHOD_THRESHOLD} lines. "
                 "Break down long methods into smaller, reusable functions."
             )
 
         if metrics.large_classes > 0:
             recommendations.append(
-                f"**Large Classes**: Found {metrics.large_classes} classes with >500 lines. "
+                f"**Large Classes**: Found {metrics.large_classes} classes with >{QualityAnalyzer.LARGE_CLASS_THRESHOLD} lines. "
                 "Consider splitting large classes following Single Responsibility Principle."
             )
 

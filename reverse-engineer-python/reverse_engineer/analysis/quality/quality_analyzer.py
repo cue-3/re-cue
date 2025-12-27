@@ -23,6 +23,10 @@ class QualityAnalyzer:
 
     # Complexity threshold for high complexity classification
     HIGH_COMPLEXITY_THRESHOLD = 15
+    
+    # Line count thresholds
+    LONG_METHOD_THRESHOLD = 100
+    LARGE_CLASS_THRESHOLD = 500
 
     def __init__(self, repo_root: Path, verbose: bool = False):
         """
@@ -223,6 +227,7 @@ class QualityAnalyzer:
         Calculate complexity using simple heuristic (count decision keywords).
 
         Note: This counts all decision points in the file (file-level complexity).
+        'else' clauses are not counted as they don't add separate decision paths.
         
         Args:
             content: Source code
@@ -230,7 +235,6 @@ class QualityAnalyzer:
         Returns:
             Estimated complexity score
         """
-        # Note: 'else' is not included as it's part of the if statement
         keywords = ["if", "while", "for", "switch", "case", "catch", "&&", "||"]
         complexity = 1  # Base complexity
 
@@ -317,8 +321,12 @@ class QualityAnalyzer:
 
         # Detect code smells
         code_smells = len(high_complexity_files)
-        long_methods = sum(1 for m in self.file_metrics if m.lines_of_code > 100)
-        large_classes = sum(1 for m in self.file_metrics if m.lines_of_code > 500)
+        long_methods = sum(
+            1 for m in self.file_metrics if m.lines_of_code > self.LONG_METHOD_THRESHOLD
+        )
+        large_classes = sum(
+            1 for m in self.file_metrics if m.lines_of_code > self.LARGE_CLASS_THRESHOLD
+        )
 
         return CodeQualityMetrics(
             total_files=total_files,
