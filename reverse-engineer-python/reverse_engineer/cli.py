@@ -1509,6 +1509,7 @@ def main():
     traceability_flag = getattr(args, "traceability", False)
     git_changes_flag = getattr(args, "git_changes", False)
     changelog_flag = getattr(args, "changelog", False)
+    quality_flag = getattr(args, "quality", False)
     if not any(
         [
             args.spec,
@@ -1522,6 +1523,7 @@ def main():
             traceability_flag,
             git_changes_flag,
             changelog_flag,
+            quality_flag,
         ]
     ):
         print_help_banner()
