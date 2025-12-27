@@ -8,7 +8,9 @@ reverse_engineer modules, following domain-driven design principles.
 from .analysis_result import AnalysisResult
 from .entities import (
     Actor,
+    CodeQualityMetrics,
     Endpoint,
+    FileQualityMetrics,
     Model,
     Relationship,
     Service,
@@ -97,6 +99,8 @@ __all__ = [
     "SystemBoundary",
     "Relationship",
     "UseCase",
+    "FileQualityMetrics",
+    "CodeQualityMetrics",
     # Tech stack
     "TechStack",
     # Containers

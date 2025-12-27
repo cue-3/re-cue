@@ -94,3 +94,50 @@ class UseCase:
     main_scenario: list[str] = field(default_factory=list)
     extensions: list[str] = field(default_factory=list)
     identified_from: list[str] = field(default_factory=list)
+
+
+@dataclass
+class FileQualityMetrics:
+    """Quality metrics for a single file."""
+
+    file_path: Path
+    lines_of_code: int = 0
+    cyclomatic_complexity: int = 0
+    maintainability_index: float = 0.0
+    halstead_difficulty: float = 0.0
+    comment_ratio: float = 0.0
+
+
+@dataclass
+class CodeQualityMetrics:
+    """Container for code quality metrics."""
+
+    # Overall metrics
+    total_files: int = 0
+    total_lines: int = 0
+    total_code_lines: int = 0
+    total_comment_lines: int = 0
+    total_blank_lines: int = 0
+
+    # Complexity metrics
+    average_complexity: float = 0.0
+    max_complexity: int = 0
+    high_complexity_files: list[FileQualityMetrics] = field(default_factory=list)
+
+    # Duplication metrics
+    duplicate_blocks: int = 0
+    duplication_percentage: float = 0.0
+    duplicated_lines: int = 0
+
+    # Technical debt indicators
+    tech_debt_score: float = 0.0
+    code_smells: int = 0
+    long_methods: int = 0
+    large_classes: int = 0
+
+    # Quality trends (if historical data available)
+    quality_trend: str = "stable"  # improving, stable, declining
+    trend_details: dict = field(default_factory=dict)
+
+    # File-level details
+    file_metrics: list[FileQualityMetrics] = field(default_factory=list)

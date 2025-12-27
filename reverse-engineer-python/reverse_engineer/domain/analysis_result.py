@@ -7,7 +7,17 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from .entities import Actor, Endpoint, Model, Relationship, Service, SystemBoundary, UseCase, View
+from .entities import (
+    Actor,
+    CodeQualityMetrics,
+    Endpoint,
+    Model,
+    Relationship,
+    Service,
+    SystemBoundary,
+    UseCase,
+    View,
+)
 from .tech_stack import TechStack
 
 
@@ -33,6 +43,9 @@ class AnalysisResult:
 
     # Use cases
     use_cases: list[UseCase] = field(default_factory=list)
+
+    # Code quality metrics
+    quality_metrics: Optional[CodeQualityMetrics] = None
 
     # Additional metadata
     analysis_notes: list[str] = field(default_factory=list)
