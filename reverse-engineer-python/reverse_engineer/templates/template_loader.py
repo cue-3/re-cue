@@ -5,6 +5,9 @@ from typing import Optional, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+# Supported template languages
+SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ja"]
+
 
 class TemplateLoader:
     """Loads templates with framework-specific override support.
@@ -35,6 +38,7 @@ class TemplateLoader:
         self,
         framework_id: Optional[str] = None,
         custom_template_dir: Optional[Union[str, Path]] = None,
+        language: str = "en",
     ):
         """Initialize template loader.
 
@@ -44,10 +48,27 @@ class TemplateLoader:
             custom_template_dir: Optional path to custom template directory.
                                 Templates in this directory take highest priority
                                 and will override framework-specific and common templates.
+            language: Template language code (e.g., 'en', 'es', 'fr', 'de', 'ja').
+                     Defaults to 'en' (English).
         """
         self.framework_id = framework_id
+        self.language = language
         self.template_dir = Path(__file__).parent
-        self.common_dir = self.template_dir / "common"
+        
+        # Check for language-specific directory with actual templates
+        lang_common_dir = self.template_dir / language / "common"
+        en_common_dir = self.template_dir / "en" / "common"
+        root_common_dir = self.template_dir / "common"
+        
+        # Use language-specific if it exists and has templates, otherwise fallback to English
+        # Use next() with default to efficiently check if any .md files exist
+        if lang_common_dir.exists() and lang_common_dir.is_dir() and next(lang_common_dir.glob("*.md"), None) is not None:
+            self.common_dir = lang_common_dir
+        elif en_common_dir.exists() and en_common_dir.is_dir():
+            self.common_dir = en_common_dir
+        else:
+            # Final fallback to root common (backward compatibility)
+            self.common_dir = root_common_dir
 
         # Handle custom template directory
         if custom_template_dir:
@@ -63,15 +84,28 @@ class TemplateLoader:
 
         if framework_id:
             # Map framework_id to template directory
-            # nodejs_express, nodejs_nestjs -> nodejs
-            # python_django, python_flask, python_fastapi -> python
+            # Determine the framework subdirectory name
             if framework_id.startswith("nodejs_"):
-                self.framework_dir = self.template_dir / "frameworks" / "nodejs"
+                fw_subdir = "nodejs"
             elif framework_id.startswith("python_"):
-                self.framework_dir = self.template_dir / "frameworks" / "python"
+                fw_subdir = "python"
             else:
-                # java_spring -> java_spring
-                self.framework_dir = self.template_dir / "frameworks" / framework_id
+                fw_subdir = framework_id
+            
+            # Check for language-specific framework templates first
+            lang_fw_dir = self.template_dir / language / "frameworks" / fw_subdir
+            en_fw_dir = self.template_dir / "en" / "frameworks" / fw_subdir
+            root_fw_dir = self.template_dir / "frameworks" / fw_subdir
+            
+            # Use language-specific if it exists and has templates, otherwise fallback
+            # Use next() with default to efficiently check if any .md files exist
+            if lang_fw_dir.exists() and lang_fw_dir.is_dir() and next(lang_fw_dir.glob("*.md"), None) is not None:
+                self.framework_dir = lang_fw_dir
+            elif en_fw_dir.exists() and en_fw_dir.is_dir():
+                self.framework_dir = en_fw_dir
+            else:
+                # Final fallback to root frameworks (backward compatibility)
+                self.framework_dir = root_fw_dir
         else:
             self.framework_dir: Optional[Path] = None
 
@@ -327,6 +361,7 @@ class TemplateLoader:
         """String representation."""
         return (
             f"TemplateLoader(framework_id='{self.framework_id}', "
+            f"language='{self.language}', "
             f"custom_dir='{self.custom_dir}', "
             f"common_dir='{self.common_dir}', "
             f"framework_dir='{self.framework_dir}')"

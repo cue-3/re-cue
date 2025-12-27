@@ -17,6 +17,7 @@ from .generators import (
     SpecGenerator,
     UseCaseMarkdownGenerator,
 )
+from .templates.template_loader import SUPPORTED_LANGUAGES
 from .utils import find_repo_root, log_section
 
 if PLUGIN_ARCHITECTURE_AVAILABLE:
@@ -562,6 +563,15 @@ The script will:
         "Templates in this directory override built-in templates.",
     )
     parser.add_argument(
+        "--template-language",
+        "--lang",
+        type=str,
+        default="en",
+        choices=SUPPORTED_LANGUAGES,
+        help="Template language (default: en). Supported: en (English), es (Spanish), "
+        "fr (French), de (German), ja (Japanese)",
+    )
+    parser.add_argument(
         "-p",
         "--path",
         type=str,
@@ -1068,6 +1078,9 @@ def merge_config_with_args(args, config: ProjectConfig):
 
     if "--template-dir" not in sys.argv and config.template_dir:
         args.template_dir = config.template_dir
+
+    if "--template-language" not in sys.argv and "--lang" not in sys.argv:
+        args.template_language = config.template_language
 
     # Analysis settings
     if "--verbose" not in sys.argv and "-v" not in sys.argv:
@@ -1673,7 +1686,8 @@ def main():
         phase1_file = output_path.parent / "phase1-structure.md"
         print("\n📝 Generating Phase 1: Project Structure...", file=sys.stderr)
         framework_id = getattr(analyzer, "framework_id", None)
-        phase1_gen = StructureDocGenerator(analyzer, framework_id)
+        template_language = getattr(args, "template_language", "en")
+        phase1_gen = StructureDocGenerator(analyzer, framework_id, language=template_language)
         phase1_content = phase1_gen.generate()
         with open(phase1_file, "w") as f:
             f.write(phase1_content)
@@ -1681,7 +1695,7 @@ def main():
         # Phase 2: Actors
         phase2_file = output_path.parent / "phase2-actors.md"
         print("📝 Generating Phase 2: Actor Discovery...", file=sys.stderr)
-        phase2_gen = ActorDocGenerator(analyzer, framework_id)
+        phase2_gen = ActorDocGenerator(analyzer, framework_id, language=template_language)
         phase2_content = phase2_gen.generate()
         with open(phase2_file, "w") as f:
             f.write(phase2_content)
@@ -1689,7 +1703,7 @@ def main():
         # Phase 3: Boundaries
         phase3_file = output_path.parent / "phase3-boundaries.md"
         print("📝 Generating Phase 3: System Boundaries...", file=sys.stderr)
-        phase3_gen = BoundaryDocGenerator(analyzer, framework_id)
+        phase3_gen = BoundaryDocGenerator(analyzer, framework_id, language=template_language)
         phase3_content = phase3_gen.generate()
         with open(phase3_file, "w") as f:
             f.write(phase3_content)
@@ -1697,7 +1711,7 @@ def main():
         # Phase 4: Use Cases
         phase4_file = output_path.parent / "phase4-use-cases.md"
         print("📝 Generating Phase 4: Use Case Analysis...", file=sys.stderr)
-        use_case_gen = UseCaseMarkdownGenerator(analyzer, framework_id)
+        use_case_gen = UseCaseMarkdownGenerator(analyzer, framework_id, language=template_language)
         use_case_content = use_case_gen.generate()
         with open(phase4_file, "w") as f:
             f.write(use_case_content)
@@ -1732,7 +1746,8 @@ def main():
         fourplusone_file = output_path.parent / "fourplusone-architecture.md"
         print("\n📝 Generating 4+1 Architecture View document...", file=sys.stderr)
         framework_id = getattr(analyzer, "framework_id", None)
-        fourplusone_gen = FourPlusOneDocGenerator(analyzer, framework_id)
+        template_language = getattr(args, "template_language", "en")
+        fourplusone_gen = FourPlusOneDocGenerator(analyzer, framework_id, language=template_language)
         fourplusone_content = fourplusone_gen.generate()
         with open(fourplusone_file, "w") as f:
             f.write(fourplusone_content)

@@ -14,10 +14,15 @@ from .base import BaseGenerator
 class StructureDocGenerator(BaseGenerator):
     """Generator for Phase 1: Project Structure documentation."""
 
-    def __init__(self, analyzer: "ProjectAnalyzer", framework_id: Optional[str] = None):
-        """Initialize generator with optional framework ID."""
+    def __init__(
+        self,
+        analyzer: "ProjectAnalyzer",
+        framework_id: Optional[str] = None,
+        language: str = "en",
+    ):
+        """Initialize generator with optional framework ID and language."""
         super().__init__(analyzer)
-        self.template_loader = TemplateLoader(framework_id)
+        self.template_loader = TemplateLoader(framework_id, language=language)
 
     def _load_template(self, template_name: str) -> str:
         """Load a template file with framework-specific fallback."""

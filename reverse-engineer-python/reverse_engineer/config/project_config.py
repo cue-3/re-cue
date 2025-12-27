@@ -45,6 +45,7 @@ class ProjectConfig:
     output_dir: Optional[str] = None
     output_file: Optional[str] = None
     template_dir: Optional[str] = None
+    template_language: str = "en"  # Template language (en, es, fr, de, ja)
 
     # Analysis settings
     verbose: bool = False
@@ -170,6 +171,8 @@ class ProjectConfig:
                     config_data["output_file"] = str(output["file"])
                 if "template_dir" in output:
                     config_data["template_dir"] = str(output["template_dir"])
+                if "template_language" in output:
+                    config_data["template_language"] = str(output["template_language"])
 
             # Analysis settings
             analysis = data.get("analysis", {})
@@ -345,6 +348,7 @@ class ProjectConfig:
                 "dir": self.output_dir,
                 "file": self.output_file,
                 "template_dir": self.template_dir,
+                "template_language": self.template_language,
             },
             "analysis": {
                 "verbose": self.verbose,
