@@ -31,6 +31,7 @@ output:
   format: markdown        # markdown or json
   dir: .                  # Output directory (default: re-<project-name>/)
   template_dir: null      # Custom template directory
+  template_language: en   # Template language (en, es, fr, de, ja)
 
 # Analysis Settings
 analysis:
