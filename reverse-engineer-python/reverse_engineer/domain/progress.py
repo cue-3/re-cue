@@ -23,6 +23,7 @@ class AnalysisStage(Enum):
     BOUNDARIES = "boundaries"
     RELATIONSHIPS = "relationships"
     USE_CASES = "use_cases"
+    QUALITY = "quality"
     GENERATION = "generation"
     COMPLETE = "complete"
 

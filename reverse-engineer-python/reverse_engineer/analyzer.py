@@ -41,6 +41,7 @@ from .analysis import (
     NamingConfig,
     NamingStyle,
     PackageStructureAnalyzer,
+    QualityAnalyzer,
     RelationshipMapper,
     SecurityPatternAnalyzer,
     SystemSystemMapper,
@@ -53,6 +54,7 @@ from .domain import (
     Actor,
     AnalysisProgress,
     AnalysisStage,
+    CodeQualityMetrics,
     Endpoint,
     Model,
     ProgressCallback,
@@ -178,6 +180,9 @@ class ProjectAnalyzer:
         self.system_boundaries: list[SystemBoundary] = []
         self.relationships: list[Relationship] = []
         self.use_cases: list[UseCase] = []
+
+        # Code quality metrics
+        self.quality_metrics: Optional["CodeQualityMetrics"] = None
 
         # Business context for enhanced use case quality
         self.business_context: dict = {
@@ -336,6 +341,7 @@ class ProjectAnalyzer:
                 lambda: self.system_boundary_count,
             ),
             (AnalysisStage.USE_CASES, self._run_use_case_analysis, lambda: self.use_case_count),
+            (AnalysisStage.QUALITY, self.analyze_code_quality, lambda: 1 if self.quality_metrics else 0),
         ]
 
         stage_icons = {
@@ -347,6 +353,7 @@ class ProjectAnalyzer:
             AnalysisStage.ACTORS: "👥",
             AnalysisStage.BOUNDARIES: "🏢",
             AnalysisStage.USE_CASES: "📋",
+            AnalysisStage.QUALITY: "🔍",
         }
 
         stage_names = {
@@ -358,6 +365,7 @@ class ProjectAnalyzer:
             AnalysisStage.ACTORS: "Identifying actors",
             AnalysisStage.BOUNDARIES: "Mapping system boundaries",
             AnalysisStage.USE_CASES: "Generating use cases",
+            AnalysisStage.QUALITY: "Analyzing code quality",
         }
 
         for i, (stage, method, get_count) in enumerate(stages, 1):
@@ -368,7 +376,7 @@ class ProjectAnalyzer:
 
             icon = stage_icons.get(stage, "•")
             name = stage_names.get(stage, stage.value)
-            print(f"{icon} Stage {i}/8: {name}...", file=sys.stderr, end=" ", flush=True)
+            print(f"{icon} Stage {i}/9: {name}...", file=sys.stderr, end=" ", flush=True)
 
             # Start stage tracking
             tracker.start_stage(stage)
@@ -1112,6 +1120,24 @@ class ProjectAnalyzer:
             )
 
         log_info(f"Found {self.use_case_count} use cases", self.verbose)
+
+    def analyze_code_quality(self):
+        """Analyze code quality metrics for the project."""
+        log_info("Analyzing code quality...", self.verbose)
+
+        try:
+            quality_analyzer = QualityAnalyzer(self.repo_root, verbose=self.verbose)
+            self.quality_metrics = quality_analyzer.analyze()
+
+            if self.quality_metrics:
+                log_info(
+                    f"  Analyzed {self.quality_metrics.total_files} files, "
+                    f"avg complexity: {self.quality_metrics.average_complexity:.2f}",
+                    self.verbose,
+                )
+        except Exception as e:
+            log_info(f"Warning: Could not complete quality analysis: {e}", self.verbose)
+            self.quality_metrics = None
 
     # Private helper methods for use case analysis
 

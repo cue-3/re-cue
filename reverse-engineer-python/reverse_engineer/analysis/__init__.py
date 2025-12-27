@@ -12,6 +12,7 @@ from .communication import CommunicationPatternDetector
 from .git import ChangelogGenerator, GitAnalyzer
 from .journey import JourneyAnalyzer
 from .naming import NameSuggestion, NamingConfig, NamingStyle, UseCaseNamer
+from .quality import QualityAnalyzer
 from .relationships import RelationshipMapper
 from .security import SecurityPatternAnalyzer
 from .structure import PackageStructureAnalyzer
@@ -40,4 +41,5 @@ __all__ = [
     "NamingConfig",
     "NameSuggestion",
     "WorkflowAnalyzer",
+    "QualityAnalyzer",
 ]

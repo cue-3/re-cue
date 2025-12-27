@@ -15,6 +15,7 @@ from .git import GitChangelogDocGenerator, GitChangesGenerator
 from .integration_test import IntegrationTestGenerator
 from .journey import JourneyGenerator
 from .plan import PlanGenerator
+from .quality import QualityReportGenerator
 from .spec import SpecGenerator
 from .structure import StructureDocGenerator
 from .traceability import TraceabilityGenerator
@@ -38,4 +39,5 @@ __all__ = [
     "JourneyGenerator",
     "GitChangesGenerator",
     "GitChangelogDocGenerator",
+    "QualityReportGenerator",
 ]

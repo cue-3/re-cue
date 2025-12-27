@@ -15,6 +15,7 @@ from .generation import (
     FourPlusOneDocGenerator,
     IntegrationTestGenerator,
     PlanGenerator,
+    QualityReportGenerator,
     SpecGenerator,
     StructureDocGenerator,
     UseCaseMarkdownGenerator,
@@ -34,4 +35,5 @@ __all__ = [
     "FourPlusOneDocGenerator",
     "VisualizationGenerator",
     "IntegrationTestGenerator",
+    "QualityReportGenerator",
 ]

@@ -79,6 +79,11 @@ def interactive_mode():
     )
     generate_use_cases = generate_use_cases != "n"
 
+    generate_quality = (
+        input("   Generate code quality report (quality-report.md)? [Y/n]: ").strip().lower()
+    )
+    generate_quality = generate_quality != "n"
+
     print()
 
     # Check if at least one option selected
@@ -89,6 +94,7 @@ def interactive_mode():
             generate_data_model,
             generate_api_contract,
             generate_use_cases,
+            generate_quality,
         ]
     ):
         print("❌ Error: At least one generation option must be selected.", file=sys.stderr)
@@ -133,6 +139,8 @@ def interactive_mode():
         print("   ✓ API Contract (api-spec.json)")
     if generate_use_cases:
         print("   ✓ Use Case Analysis (use-cases.md)")
+    if generate_quality:
+        print("   ✓ Code Quality Report (quality-report.md)")
     if description:
         print(f"📄 Description: {description}")
     print(f"📋 Format: {output_format}")
@@ -159,6 +167,7 @@ def interactive_mode():
     config.data_model = generate_data_model
     config.api_contract = generate_api_contract
     config.use_cases = generate_use_cases
+    config.quality = generate_quality
     config.description = description
     config.format = output_format
     config.verbose = verbose
@@ -236,6 +245,13 @@ No generation flags specified. Please provide at least one flag:
                   • Combines all phase data into comprehensive architecture doc
                   • Uses Philippe Kruchten's 4+1 architectural view model
                   • Includes logical, process, development, physical, and use case views
+
+  --quality       Generate code quality report (quality-report.md)
+                  • Cyclomatic complexity metrics
+                  • Code duplication detection
+                  • Technical debt indicators
+                  • Long methods and large classes
+                  • Quality trends analysis
 
   --diagrams      Generate all visualization diagrams (diagrams.md)
                   • Flowcharts for use case scenarios
@@ -499,6 +515,11 @@ The script will:
         "--journey",
         action="store_true",
         help="Generate user journey mapping (journey-map.md) - combines use cases into end-to-end journeys",
+    )
+    parser.add_argument(
+        "--quality",
+        action="store_true",
+        help="Generate code quality report (quality-report.md) - includes complexity, duplication, and technical debt metrics",
     )
 
     # Visualization flags
@@ -1488,6 +1509,7 @@ def main():
     traceability_flag = getattr(args, "traceability", False)
     git_changes_flag = getattr(args, "git_changes", False)
     changelog_flag = getattr(args, "changelog", False)
+    quality_flag = getattr(args, "quality", False)
     if not any(
         [
             args.spec,
@@ -1501,6 +1523,7 @@ def main():
             traceability_flag,
             git_changes_flag,
             changelog_flag,
+            quality_flag,
         ]
     ):
         print_help_banner()
@@ -1806,6 +1829,22 @@ def main():
         print(f"✅ User journey mapping generated: {journey_file}", file=sys.stderr)
         print(f"✅ Journey JSON generated: {journey_json_file}", file=sys.stderr)
 
+    # Generate code quality report if requested
+    if getattr(args, "quality", False):
+        from .generators import QualityReportGenerator
+
+        quality_file = output_path.parent / "quality-report.md"
+        print("\n🔍 Generating code quality report...", file=sys.stderr)
+
+        quality_gen = QualityReportGenerator(analyzer)
+        include_details = getattr(args, "quality_details", False)
+        quality_content = quality_gen.generate(include_file_details=include_details)
+
+        with open(quality_file, "w") as f:
+            f.write(quality_content)
+
+        print(f"✅ Code quality report generated: {quality_file}", file=sys.stderr)
+
     # Export to Confluence if requested
     if getattr(args, "confluence", False):
         from .exporters import ConfluenceConfig, ConfluenceExporter
@@ -1904,6 +1943,8 @@ def main():
                 files_to_export.append(output_path.parent / "traceability.md")
             if getattr(args, "journey", False):
                 files_to_export.append(output_path.parent / "journey-map.md")
+            if getattr(args, "quality", False):
+                files_to_export.append(output_path.parent / "quality-report.md")
 
             # Filter to only existing files
             files_to_export = [f for f in files_to_export if f.exists()]
