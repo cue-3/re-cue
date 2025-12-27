@@ -2,7 +2,7 @@
 
 import unittest
 from pathlib import Path
-from reverse_engineer.templates.template_loader import TemplateLoader
+from reverse_engineer.templates.template_loader import TemplateLoader, SUPPORTED_LANGUAGES
 
 
 class TestMultiLanguageTemplateSupport(unittest.TestCase):
@@ -84,8 +84,7 @@ class TestMultiLanguageTemplateSupport(unittest.TestCase):
         """Test that all supported languages have template directories."""
         template_dir = Path(__file__).parent.parent / "reverse_engineer" / "templates"
         
-        supported_languages = ["en", "es", "fr", "de", "ja"]
-        for lang in supported_languages:
+        for lang in SUPPORTED_LANGUAGES:
             lang_dir = template_dir / lang
             self.assertTrue(lang_dir.exists(), f"Language directory {lang} should exist")
             self.assertTrue(lang_dir.is_dir(), f"Language path {lang} should be a directory")

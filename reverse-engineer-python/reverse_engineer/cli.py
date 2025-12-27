@@ -17,6 +17,7 @@ from .generators import (
     SpecGenerator,
     UseCaseMarkdownGenerator,
 )
+from .templates.template_loader import SUPPORTED_LANGUAGES
 from .utils import find_repo_root, log_section
 
 if PLUGIN_ARCHITECTURE_AVAILABLE:
@@ -566,7 +567,7 @@ The script will:
         "--lang",
         type=str,
         default="en",
-        choices=["en", "es", "fr", "de", "ja"],
+        choices=SUPPORTED_LANGUAGES,
         help="Template language (default: en). Supported: en (English), es (Spanish), "
         "fr (French), de (German), ja (Japanese)",
     )

@@ -5,6 +5,9 @@ from typing import Optional, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+# Supported template languages
+SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ja"]
+
 
 class TemplateLoader:
     """Loads templates with framework-specific override support.
@@ -58,7 +61,8 @@ class TemplateLoader:
         root_common_dir = self.template_dir / "common"
         
         # Use language-specific if it exists and has templates, otherwise fallback to English
-        if lang_common_dir.exists() and lang_common_dir.is_dir() and list(lang_common_dir.glob("*.md")):
+        # Use next() with default to efficiently check if any .md files exist
+        if lang_common_dir.exists() and lang_common_dir.is_dir() and next(lang_common_dir.glob("*.md"), None) is not None:
             self.common_dir = lang_common_dir
         elif en_common_dir.exists() and en_common_dir.is_dir():
             self.common_dir = en_common_dir
@@ -94,7 +98,8 @@ class TemplateLoader:
             root_fw_dir = self.template_dir / "frameworks" / fw_subdir
             
             # Use language-specific if it exists and has templates, otherwise fallback
-            if lang_fw_dir.exists() and lang_fw_dir.is_dir() and list(lang_fw_dir.glob("*.md")):
+            # Use next() with default to efficiently check if any .md files exist
+            if lang_fw_dir.exists() and lang_fw_dir.is_dir() and next(lang_fw_dir.glob("*.md"), None) is not None:
                 self.framework_dir = lang_fw_dir
             elif en_fw_dir.exists() and en_fw_dir.is_dir():
                 self.framework_dir = en_fw_dir
