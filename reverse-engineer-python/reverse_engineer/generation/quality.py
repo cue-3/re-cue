@@ -84,8 +84,7 @@ class QualityReportGenerator(BaseGenerator):
         """Generate complexity metrics section."""
         lines = [
             "\n## Cyclomatic Complexity\n",
-            "Cyclomatic complexity measures the number of independent paths through code. "
-            "Lower values indicate simpler, more maintainable code.\n",
+            "Cyclomatic complexity measures the number of independent paths through code. Lower values indicate simpler, more maintainable code.\n",
             f"- **Average Complexity**: {metrics.average_complexity:.2f}",
             f"- **Maximum Complexity**: {metrics.max_complexity}",
             f"- **High Complexity Files**: {len(metrics.high_complexity_files)} "
