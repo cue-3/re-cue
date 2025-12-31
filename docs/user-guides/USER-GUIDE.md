@@ -585,6 +585,98 @@ re-<project-name>/
 - Generating client SDKs
 - Documenting integrations
 
+## Configuration
+
+### Configuration Files
+
+RE-cue supports configuration files to simplify and standardize project analysis. Instead of specifying options via command-line flags every time, you can define your preferences in a `.recue.yaml` file.
+
+**Create a configuration file** in your project root:
+
+```bash
+# Copy the example template
+cp .recue.yaml.example .recue.yaml
+
+# Or create a minimal config
+cat > .recue.yaml << EOF
+description: "My awesome project"
+generation:
+  spec: true
+  plan: true
+  use_cases: true
+EOF
+```
+
+**Run RE-cue** - it will automatically find and use your config:
+
+```bash
+recue
+```
+
+#### Configuration File Discovery
+
+RE-cue automatically searches for configuration files:
+
+1. **Current directory**: Looks for `.recue.yaml` or `.recue.yml`
+2. **Parent directories**: Walks up the directory tree to find the config
+3. **Explicit path**: Use `--config` to specify a custom location
+
+```bash
+# Use a specific config file
+recue --config /path/to/custom-config.yaml
+
+# Auto-discovery from project path
+recue --path /path/to/project
+```
+
+#### Configuration Structure
+
+The configuration file uses YAML format:
+
+```yaml
+# Project settings
+project_path: /path/to/project
+framework: java_spring  # auto-detected if not specified
+description: "Forecast sprint delivery and predict completion"
+
+# Generation options
+generation:
+  spec: true              # Specification document
+  plan: true              # Implementation plan
+  data_model: true        # Data model documentation
+  api_contract: true      # API contract (OpenAPI)
+  use_cases: true         # Use case analysis
+
+# Output settings
+output:
+  format: markdown        # or 'json'
+  dir: ./docs/reverse     # Output directory
+  template_dir: ./templates # Custom templates
+
+# Analysis settings
+analysis:
+  verbose: true           # Detailed progress output
+  parallel: true          # Parallel file processing
+  cache: true            # Enable result caching
+  max_workers: 4         # Worker process limit
+```
+
+#### CLI Arguments Override Config
+
+Command-line arguments always take precedence over configuration file settings:
+
+```yaml
+# .recue.yaml
+generation:
+  spec: true
+  plan: false
+```
+
+```bash
+# This enables plan generation, overriding the config
+recue --plan
+```
+
 ## Framework Support
 
 RE-cue includes automatic detection and specialized support for multiple frameworks.

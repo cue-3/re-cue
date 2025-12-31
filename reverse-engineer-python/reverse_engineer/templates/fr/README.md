@@ -10,30 +10,26 @@ Ce répertoire contient des modèles en français pour la génération de docume
   - `nodejs/` - Modèles Node.js (Express, NestJS)
   - `python/` - Modèles Python (Django, Flask, FastAPI)
 
-## Statut
+## Fichiers de Modèles
 
-**EN ATTENTE DE TRADUCTION** : Ces modèles n'ont pas encore été traduits.
-Les modèles anglais seront utilisés comme solution de repli jusqu'à ce que la traduction soit terminée.
+### Modèles Communs
 
-## Contribuer
+- `phase1-structure.md` - Phase 1 : Analyse de la Structure du Projet
+- `phase2-actors.md` - Phase 2 : Découverte des Acteurs
+- `phase3-boundaries.md` - Phase 3 : Limites du Système
+- `phase4-use-cases.md` - Phase 4 : Analyse des Cas d'Utilisation
+- `4+1-architecture-template.md` - Modèle de Vue d'Architecture 4+1
+- `base.md` - Modèle de base avec support d'héritage
+- `_footer.md` - Composant de pied de page commun
+- `_stats_table.md` - Composant de tableau de statistiques
+- `_warning.md` - Composant de message d'avertissement
 
-Pour contribuer aux traductions françaises :
+### Modèles Spécifiques au Framework
 
-1. Copiez les modèles correspondants du répertoire `en/`
-2. Traduisez le contenu en conservant les variables `{{VARIABLE_NAME}}`
-3. Soumettez une pull request avec vos traductions
+Chaque répertoire de framework contient des modèles spécialisés qui remplacent les modèles communs
+avec un formatage et une terminologie spécifiques au framework.
 
 ## Utilisation
 
-Pour utiliser les modèles français (lorsqu'ils seront disponibles), exécutez :
-
-```bash
-reverse-engineer --use-cases --template-language fr
-```
-
-Ou configurez dans `.recue.yaml` :
-
-```yaml
-output:
-  template_language: fr
-```
+Ces modèles sont utilisés automatiquement lorsque `--template-language fr` (ou aucune langue n'est spécifiée)
+est fourni à l'outil en ligne de commande RE-cue.

@@ -1,0 +1,1741 @@
+{
+  "glossary_version": "1.0.0",
+  "source_language": "en",
+  "last_updated": "2025-12-28T13:09:47.056416",
+  "generated_from": "/Users/squick/workspace/cue-3/re-cue/reverse-engineer-python/reverse_engineer/templates/en",
+  "categories": {
+    "preserve_exact": {
+      "description": "Terms that must never be translated",
+      "jinja2_variables": {
+        "{{DATE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 5,
+          "variable_name": "DATE"
+        },
+        "{{PROJECT_NAME}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 5,
+          "variable_name": "PROJECT_NAME"
+        },
+        "{{PROJECT_PATH}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 4,
+          "variable_name": "PROJECT_PATH"
+        },
+        "{{BOUNDARY_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 3,
+          "variable_name": "BOUNDARY_COUNT"
+        },
+        "{{ACTOR_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 3,
+          "variable_name": "ACTOR_COUNT"
+        },
+        "{{LAYER_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "LAYER_COUNT"
+        },
+        "{{BOUNDARY_INTERACTIONS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "BOUNDARY_INTERACTIONS"
+        },
+        "{{COMPONENT_MAPPING}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "COMPONENT_MAPPING"
+        },
+        "{{SUBSYSTEM_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "SUBSYSTEM_COUNT"
+        },
+        "{{SUBSYSTEM_ARCHITECTURE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "SUBSYSTEM_ARCHITECTURE"
+        },
+        "{{LAYER_ORGANIZATION}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "LAYER_ORGANIZATION"
+        },
+        "{{COMPONENT_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "COMPONENT_COUNT"
+        },
+        "{{TECH_STACK_BY_BOUNDARY}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "TECH_STACK_BY_BOUNDARY"
+        },
+        "{{FEATURE_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "FEATURE_COUNT"
+        },
+        "{{SECURITY_ANNOTATIONS_SUMMARY}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "SECURITY_ANNOTATIONS_SUMMARY"
+        },
+        "{{ACTOR_BOUNDARY_MATRIX}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "ACTOR_BOUNDARY_MATRIX"
+        },
+        "{{ENDPOINT_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "ENDPOINT_COUNT"
+        },
+        "{{EXTENSION_POINTS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "EXTENSION_POINTS"
+        },
+        "{{WORKFLOWS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "WORKFLOWS"
+        },
+        "{{MODEL_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "MODEL_COUNT"
+        },
+        "{{ACTOR_RELATIONSHIPS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "ACTOR_RELATIONSHIPS"
+        },
+        "{{SERVICE_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "SERVICE_COUNT"
+        },
+        "{{VIEW_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "VIEW_COUNT"
+        },
+        "{{END_USER_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "END_USER_COUNT"
+        },
+        "{{EXTERNAL_SYSTEM_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "EXTERNAL_SYSTEM_COUNT"
+        },
+        "{{INTERNAL_USER_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "INTERNAL_USER_COUNT"
+        },
+        "{{ACCESS_LEVELS_SUMMARY}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "ACCESS_LEVELS_SUMMARY"
+        },
+        "{{BUSINESS_CONTEXT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "BUSINESS_CONTEXT"
+        },
+        "{{USE_CASE_RELATIONSHIPS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "USE_CASE_RELATIONSHIPS"
+        },
+        "{{USE_CASE_COUNT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "USE_CASE_COUNT"
+        },
+        "{{BUSINESS_RULES}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "BUSINESS_RULES"
+        },
+        "{{TRANSACTION_BOUNDARIES}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "TRANSACTION_BOUNDARIES"
+        },
+        "{{SERVICES_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "SERVICES_LIST"
+        },
+        "{{USE_CASES_DETAILED}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "USE_CASES_DETAILED"
+        },
+        "{{VALIDATION_RULES}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "VALIDATION_RULES"
+        },
+        "{{PROJECT_NAME_DISPLAY}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "PROJECT_NAME_DISPLAY"
+        },
+        "{{ENDPOINT_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "ENDPOINT_DETAILS"
+        },
+        "{{ENDPOINT_ROWS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 2,
+          "variable_name": "ENDPOINT_ROWS"
+        },
+        "{{BOUNDARIES_TABLE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "BOUNDARIES_TABLE"
+        },
+        "{{INTERNAL_USERS_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "INTERNAL_USERS_LIST"
+        },
+        "{{BOUNDARIES_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "BOUNDARIES_LIST"
+        },
+        "{{USE_CASES_SUMMARY}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "USE_CASES_SUMMARY"
+        },
+        "{{VIEWS_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "VIEWS_LIST"
+        },
+        "{{ACTORS_SUMMARY}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ACTORS_SUMMARY"
+        },
+        "{{EXTERNAL_SYSTEMS_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "EXTERNAL_SYSTEMS_LIST"
+        },
+        "{{END_USERS_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "END_USERS_LIST"
+        },
+        "{{VARIABLE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "VARIABLE"
+        },
+        "{{VARIABLE_NAME}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "VARIABLE_NAME"
+        },
+        "{{FEATURES_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "FEATURES_LIST"
+        },
+        "{{BOUNDARIES_SUMMARY}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "BOUNDARIES_SUMMARY"
+        },
+        "{{MODELS_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "MODELS_LIST"
+        },
+        "{{ENDPOINTS_LIST}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ENDPOINTS_LIST"
+        },
+        "{{HTTP_ENDPOINT}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "HTTP_ENDPOINT"
+        },
+        "{{API_CONTROLLER}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "API_CONTROLLER"
+        },
+        "{{UI_COMPONENT_FILE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "UI_COMPONENT_FILE"
+        },
+        "{{FEATURES_TABLE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "FEATURES_TABLE"
+        },
+        "{{DATA_MODEL_LOCATION}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "DATA_MODEL_LOCATION"
+        },
+        "{{MODEL}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "MODEL"
+        },
+        "{{FIELDS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "FIELDS"
+        },
+        "{{HTTP_METHOD}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "HTTP_METHOD"
+        },
+        "{{UI_VIEW_NAME}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "UI_VIEW_NAME"
+        },
+        "{{ACTOR}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ACTOR"
+        },
+        "{{ACTOR_TYPE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ACTOR_TYPE"
+        },
+        "{{ACTOR_EVIDENCE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ACTOR_EVIDENCE"
+        },
+        "{{ACTOR_ACCESS_LEVEL}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ACTOR_ACCESS_LEVEL"
+        },
+        "{{ROUTE_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ROUTE_DETAILS"
+        },
+        "{{ROUTE_ROWS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ROUTE_ROWS"
+        },
+        "{{ROUTE_PARAMETERS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ROUTE_PARAMETERS"
+        },
+        "{{MIDDLEWARE_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "MIDDLEWARE_DETAILS"
+        },
+        "{{CORS_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "CORS_DETAILS"
+        },
+        "{{MIDDLEWARE_CHAIN}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "MIDDLEWARE_CHAIN"
+        },
+        "{{ERROR_HANDLING}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ERROR_HANDLING"
+        },
+        "{{AUTH_MIDDLEWARE}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "AUTH_MIDDLEWARE"
+        },
+        "{{PASSPORT_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "PASSPORT_DETAILS"
+        },
+        "{{ROUTE_PROTECTION_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ROUTE_PROTECTION_DETAILS"
+        },
+        "{{REQUEST_MAPPING_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "REQUEST_MAPPING_DETAILS"
+        },
+        "{{RESPONSE_TYPE_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "RESPONSE_TYPE_DETAILS"
+        },
+        "{{RBAC_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "RBAC_DETAILS"
+        },
+        "{{AUTHENTICATION_PATTERNS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "AUTHENTICATION_PATTERNS"
+        },
+        "{{AUTHORIZATION_RULES}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "AUTHORIZATION_RULES"
+        },
+        "{{SECURITY_ANNOTATIONS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "SECURITY_ANNOTATIONS"
+        },
+        "{{SECURITY_BEST_PRACTICES}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "SECURITY_BEST_PRACTICES"
+        },
+        "{{VIEW_TYPE_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "VIEW_TYPE_DETAILS"
+        },
+        "{{URL_PATTERN_DETAILS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "URL_PATTERN_DETAILS"
+        },
+        "{{RESPONSE_FORMATS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "RESPONSE_FORMATS"
+        },
+        "{{REQUEST_PARAMETERS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "REQUEST_PARAMETERS"
+        },
+        "{{ROUTE_DECORATORS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "ROUTE_DECORATORS"
+        },
+        "{{AUTH_DECORATORS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "AUTH_DECORATORS"
+        },
+        "{{DECORATOR_ORDERING}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "DECORATOR_ORDERING"
+        },
+        "{{CUSTOM_DECORATORS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "CUSTOM_DECORATORS"
+        },
+        "{{PERMISSION_DECORATORS}}": {
+          "type": "jinja2_variable",
+          "preserve": true,
+          "frequency": 1,
+          "variable_name": "PERMISSION_DECORATORS"
+        }
+      },
+      "jinja2_controls": {
+        "if": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 9,
+          "pattern": "\\{%\\s*if.*?%\\}"
+        },
+        "endif": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 9,
+          "pattern": "\\{%\\s*endif.*?%\\}"
+        },
+        "endblock": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 6,
+          "pattern": "\\{%\\s*endblock.*?%\\}"
+        },
+        "block": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 6,
+          "pattern": "\\{%\\s*block.*?%\\}"
+        },
+        "for": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 6,
+          "pattern": "\\{%\\s*for.*?%\\}"
+        },
+        "endfor": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 6,
+          "pattern": "\\{%\\s*endfor.*?%\\}"
+        },
+        "extends": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 4,
+          "pattern": "\\{%\\s*extends.*?%\\}"
+        },
+        "else": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 4,
+          "pattern": "\\{%\\s*else.*?%\\}"
+        },
+        "include": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "\\{%\\s*include.*?%\\}"
+        },
+        "set": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "\\{%\\s*set.*?%\\}"
+        },
+        "elif": {
+          "type": "jinja2_control",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "\\{%\\s*elif.*?%\\}"
+        }
+      },
+      "annotations": {
+        "@Controller": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@ManyToOne": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@Column": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@Entity": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@ManyToMany": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@OneToMany": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@PostMapping": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@DeleteMapping": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@RequestMapping": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@PatchMapping": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@RestController": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@PutMapping": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@GetMapping": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 3,
+          "pattern": "@\\w+"
+        },
+        "@Delete": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Post": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Get": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@JoinColumn": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@JoinTable": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@example": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@UseGuards": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Param": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@PostAuthorize": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Secured": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@RolesAllowed": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@PreAuthorize": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Query": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Id": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Transactional": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Table": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Configuration": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Bean": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@GeneratedValue": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Modifying": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Autowired": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Service": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@ConfigurationProperties": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Repository": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@login_required": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@permission_required": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 2,
+          "pattern": "@\\w+"
+        },
+        "@Put": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@CreateDateColumn": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@UpdateDateColumn": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@unique": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@updatedAt": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@id": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@db": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@BeforeInsert": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@default": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@PrimaryGeneratedColumn": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@prisma": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@relation": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@map": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Roles": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@UseInterceptors": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@RequirePermission": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Request": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Public": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Injectable": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@nestjs": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Body": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@MappedSuperclass": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EntityGraph": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@LastModifiedDate": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@PrePersist": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Override": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@OneToOne": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@PersistenceContext": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@CreatedDate": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@CreatedBy": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EnableJpaAuditing": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EntityListeners": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@PreUpdate": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@LastModifiedBy": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@ResponseStatus": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@MockBean": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@ConditionalOnProperty": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Value": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Scheduled": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@ConditionalOnClass": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EnableGlobalMethodSecurity": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Validated": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Email": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Profile": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@PathVariable": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EnableScheduling": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EnableWebSecurity": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@CookieValue": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@CacheEvict": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EnableAsync": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@ConditionalOnMissingBean": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@RequestHeader": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@NotNull": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Pattern": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@DataJpaTest": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@ResponseBody": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@RequestBody": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@NotBlank": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@WebMvcTest": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Component": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Qualifier": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Valid": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@CachePut": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Async": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Cacheable": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@SpringBootTest": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@EnableCaching": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Size": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Min": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@RequestParam": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@NotEmpty": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@Max": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@ExceptionHandler": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@PropertySource": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@localhost": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@contextmanager": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@transaction": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@property": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@permission_classes": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@csrf_exempt": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@api_view": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@posts_router": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@app": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@posts_bp": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@wraps": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@require_http_methods": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@action": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@admin_required": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@user_passes_test": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@jwt_required": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        },
+        "@roles_required": {
+          "type": "annotation",
+          "preserve": true,
+          "frequency": 1,
+          "pattern": "@\\w+"
+        }
+      },
+      "acronyms": {
+        "API": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 11
+        },
+        "HTTP": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 7
+        },
+        "SQL": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 4
+        },
+        "REST": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 4
+        },
+        "ORM": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 2
+        },
+        "JWT": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 2
+        },
+        "JPA": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 2
+        },
+        "URL": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 2
+        },
+        "CORS": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "RBAC": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "URI": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "JPQL": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "MVC": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "JSON": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "XML": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "DAO": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        },
+        "CRUD": {
+          "type": "acronym",
+          "preserve": true,
+          "frequency": 1
+        }
+      },
+      "http_methods": {
+        "PUT": {
+          "type": "http_method",
+          "preserve": true,
+          "frequency": 5
+        },
+        "POST": {
+          "type": "http_method",
+          "preserve": true,
+          "frequency": 5
+        },
+        "DELETE": {
+          "type": "http_method",
+          "preserve": true,
+          "frequency": 5
+        },
+        "GET": {
+          "type": "http_method",
+          "preserve": true,
+          "frequency": 5
+        },
+        "PATCH": {
+          "type": "http_method",
+          "preserve": true,
+          "frequency": 4
+        }
+      }
+    },
+    "translate_with_glossary": {
+      "description": "Domain terms with approved translations",
+      "terms": {
+        "Actor": {
+          "type": "domain_term",
+          "translations": {
+            "es": "Actor",
+            "fr": "Acteur",
+            "de": "Akteur",
+            "ja": "アクター"
+          },
+          "context": "User or system that interacts with the application"
+        },
+        "Use Case": {
+          "type": "domain_term",
+          "translations": {
+            "es": "Caso de Uso",
+            "fr": "Cas d'Utilisation",
+            "de": "Anwendungsfall",
+            "ja": "ユースケース"
+          },
+          "context": "Business scenario or interaction flow"
+        },
+        "Endpoint": {
+          "type": "technical_term",
+          "translations": {
+            "es": "Endpoint",
+            "fr": "Point de Terminaison",
+            "de": "Endpunkt",
+            "ja": "エンドポイント"
+          },
+          "context": "API endpoint/route"
+        },
+        "Boundary": {
+          "type": "domain_term",
+          "translations": {
+            "es": "Límite",
+            "fr": "Frontière",
+            "de": "Grenze",
+            "ja": "境界"
+          },
+          "context": "System boundary in architecture"
+        },
+        "Subsystem": {
+          "type": "domain_term",
+          "translations": {
+            "es": "Subsistema",
+            "fr": "Sous-système",
+            "de": "Subsystem",
+            "ja": "サブシステム"
+          },
+          "context": "Component subsystem"
+        }
+      }
+    },
+    "framework_specific": {
+      "python": {
+        "decorators": [
+          "@BeforeInsert",
+          "@Body",
+          "@Column",
+          "@Controller",
+          "@CreateDateColumn",
+          "@Delete",
+          "@Entity",
+          "@Get",
+          "@Injectable",
+          "@JoinColumn",
+          "@JoinTable",
+          "@ManyToMany",
+          "@ManyToOne",
+          "@OneToMany",
+          "@Param",
+          "@Post",
+          "@PrimaryGeneratedColumn",
+          "@Public",
+          "@Put",
+          "@Request",
+          "@RequirePermission",
+          "@Roles",
+          "@UpdateDateColumn",
+          "@UseGuards",
+          "@UseInterceptors",
+          "@action",
+          "@admin_required",
+          "@api_view",
+          "@app",
+          "@contextmanager",
+          "@csrf_exempt",
+          "@db",
+          "@default",
+          "@example",
+          "@id",
+          "@jwt_required",
+          "@localhost",
+          "@login_required",
+          "@map",
+          "@nestjs",
+          "@permission_classes",
+          "@permission_required",
+          "@posts_bp",
+          "@posts_router",
+          "@prisma",
+          "@property",
+          "@relation",
+          "@require_http_methods",
+          "@roles_required",
+          "@transaction",
+          "@unique",
+          "@updatedAt",
+          "@user_passes_test",
+          "@wraps"
+        ],
+        "concepts": []
+      },
+      "java_spring": {
+        "annotations": [
+          "@Async",
+          "@Autowired",
+          "@Bean",
+          "@CacheEvict",
+          "@CachePut",
+          "@Cacheable",
+          "@Column",
+          "@Component",
+          "@ConditionalOnClass",
+          "@ConditionalOnMissingBean",
+          "@ConditionalOnProperty",
+          "@Configuration",
+          "@ConfigurationProperties",
+          "@Controller",
+          "@CookieValue",
+          "@CreatedBy",
+          "@CreatedDate",
+          "@DataJpaTest",
+          "@DeleteMapping",
+          "@Email",
+          "@EnableAsync",
+          "@EnableCaching",
+          "@EnableGlobalMethodSecurity",
+          "@EnableJpaAuditing",
+          "@EnableScheduling",
+          "@EnableWebSecurity",
+          "@Entity",
+          "@EntityGraph",
+          "@EntityListeners",
+          "@ExceptionHandler",
+          "@GeneratedValue",
+          "@GetMapping",
+          "@Id",
+          "@JoinColumn",
+          "@JoinTable",
+          "@LastModifiedBy",
+          "@LastModifiedDate",
+          "@ManyToMany",
+          "@ManyToOne",
+          "@MappedSuperclass",
+          "@Max",
+          "@Min",
+          "@MockBean",
+          "@Modifying",
+          "@NotBlank",
+          "@NotEmpty",
+          "@NotNull",
+          "@OneToMany",
+          "@OneToOne",
+          "@Override",
+          "@Param",
+          "@PatchMapping",
+          "@PathVariable",
+          "@Pattern",
+          "@PersistenceContext",
+          "@PostAuthorize",
+          "@PostMapping",
+          "@PreAuthorize",
+          "@PrePersist",
+          "@PreUpdate",
+          "@Profile",
+          "@PropertySource",
+          "@PutMapping",
+          "@Qualifier",
+          "@Query",
+          "@Repository",
+          "@RequestBody",
+          "@RequestHeader",
+          "@RequestMapping",
+          "@RequestParam",
+          "@ResponseBody",
+          "@ResponseStatus",
+          "@RestController",
+          "@RolesAllowed",
+          "@Scheduled",
+          "@Secured",
+          "@Service",
+          "@Size",
+          "@SpringBootTest",
+          "@Table",
+          "@Transactional",
+          "@Valid",
+          "@Validated",
+          "@Value",
+          "@WebMvcTest"
+        ],
+        "concepts": []
+      }
+    }
+  },
+  "regex_patterns": {
+    "preserve_exact": [
+      "@\\w+",
+      "\\{\\{[A-Z_]+\\}\\}",
+      "\\{%.*?%\\}",
+      "\\b(API|REST|HTTP|HTTPS|JSON|XML|YAML|URL|URI|DTO|DAO|ORM|CRUD|MVC|JPA|JWT|SQL|JPQL|RBAC|CORS|CSRF|HTML|CSS|DOM|CLI|SDK|IDE|CI|CD|GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)\\b"
+    ],
+    "code_blocks": [
+      "```.*?```",
+      "`[^`]+`"
+    ]
+  }
+}

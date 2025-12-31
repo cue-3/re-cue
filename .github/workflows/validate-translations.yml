@@ -1,0 +1,131 @@
+name: Validate Template Translations
+
+permissions:
+  contents: read
+  pull-requests: write  # For commenting on PRs
+  actions: read         # For uploading artifacts
+
+on:
+  pull_request:
+    paths:
+      - 'reverse-engineer-python/reverse_engineer/templates/**/*.md'
+  push:
+    branches:
+      - main
+    paths:
+      - 'reverse-engineer-python/reverse_engineer/templates/**/*.md'
+  workflow_dispatch:
+
+jobs:
+  validate-translations:
+    name: Validate ${{ matrix.lang }} Translations
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: [es, fr, de, ja]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd reverse-engineer-python
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Check if translations exist
+        id: check-translations
+        run: |
+          if [ -d "reverse-engineer-python/reverse_engineer/templates/${{ matrix.lang }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate ${{ matrix.lang }} translations
+        if: steps.check-translations.outputs.exists == 'true'
+        run: |
+          cd reverse-engineer-python
+          python scripts/validate_translations.py --lang ${{ matrix.lang }} --verbose
+        continue-on-error: true
+        id: validate
+
+      - name: Generate validation report
+        if: steps.check-translations.outputs.exists == 'true' && always()
+        run: |
+          cd reverse-engineer-python
+          echo '# Translation Validation Report: ${{ matrix.lang }}' > validation-report.md
+          echo '' >> validation-report.md
+          echo 'Validation status: ${{ steps.validate.outcome }}' >> validation-report.md
+          echo '' >> validation-report.md
+          
+          if [ -f "validation-output.txt" ]; then
+            echo '## Validation Output' >> validation-report.md
+            echo '```' >> validation-report.md
+            cat validation-output.txt >> validation-report.md
+            echo '```' >> validation-report.md
+          fi
+
+      - name: Upload validation report
+        if: steps.check-translations.outputs.exists == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report-${{ matrix.lang }}
+          path: reverse-engineer-python/validation-report.md
+          retention-days: 30
+
+      - name: Comment on PR
+        if: steps.check-translations.outputs.exists == 'true' && github.event_name == 'pull_request' && steps.validate.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const lang = '${{ matrix.lang }}';
+            const outcome = '${{ steps.validate.outcome }}';
+            
+            let body = '## Translation Validation: ' + lang.toUpperCase() + '\n\n';
+            
+            if (outcome === 'failure') {
+              body += '❌ **Validation Failed**\n\n';
+              body += 'The ' + lang + ' translations have validation errors. ';
+              body += 'Please review the validation output above and fix the issues.\n\n';
+              body += '### Common Issues:\n';
+              body += '- Missing or extra Jinja2 variables ({{VARIABLE}})\n';
+              body += '- Missing annotations (@AnnotationName)\n';
+              body += '- Code block count mismatch\n';
+              body += '- Jinja2 control structure mismatch\n\n';
+              body += 'Run locally to debug:\n';
+              body += '```bash\n';
+              body += 'cd reverse-engineer-python\n';
+              body += 'python scripts/validate_translations.py --lang ' + lang + ' --verbose\n';
+              body += '```\n';
+            } else {
+              body += '✅ **Validation Passed**\n\n';
+              body += 'All ' + lang + ' translations are valid!\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  summary:
+    name: Validation Summary
+    needs: validate-translations
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Check validation results
+        run: |
+          echo "Translation validation workflow completed"
+          echo "Check individual jobs for detailed results"

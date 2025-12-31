@@ -784,6 +784,126 @@ export RECUE_CUSTOM_FRAMEWORK=~/frameworks/custom_framework.py
 recue --spec --framework xyz --path ~/projects/xyz-app
 ```
 
+## Logging & Debugging
+
+### Comprehensive Logging Framework
+
+RE-cue includes a structured logging framework that provides:
+
+- **Configurable log levels** - Set verbosity from DEBUG to CRITICAL
+- **Multiple output formats** - Text or JSON for log aggregation systems
+- **File rotation** - Automatic log file management with size limits
+- **Performance logging** - Built-in context manager for timing operations
+- **Error tracking** - Rich exception information with context
+
+#### Basic Usage
+
+The simplest way to use logging is through the command-line interface:
+
+```bash
+# Enable verbose logging
+recue --spec --verbose
+
+# Write logs to a file
+recue --spec --log-file recue.log
+
+# Use JSON format for structured logging
+recue --spec --log-format json --log-file recue.json
+
+# Set log level to DEBUG
+recue --spec --log-level DEBUG
+```
+
+#### Log Levels
+
+Log levels control which messages are output:
+
+- `DEBUG` - Detailed information for diagnosing problems
+- `INFO` - General informational messages (default)
+- `WARNING` - Warning messages for potentially problematic situations
+- `ERROR` - Error messages for failures that don't stop execution
+- `CRITICAL` - Critical errors that may cause application failure
+
+#### Output Formats
+
+**Text Format** (human-readable):
+```
+2025-12-31 16:50:56 [INFO] reverse_engineer.analyzer - Starting project analysis
+2025-12-31 16:50:57 [DEBUG] reverse_engineer.analyzer - Found 42 Java files
+```
+
+**JSON Format** (machine-readable):
+```json
+{
+  "timestamp": "2025-12-31T16:50:56.123456Z",
+  "level": "INFO",
+  "logger": "reverse_engineer.analyzer",
+  "message": "Starting project analysis",
+  "module": "analyzer",
+  "function": "analyze",
+  "line": 42
+}
+```
+
+#### CLI Arguments
+
+| Argument | Values | Default | Description |
+|----------|--------|---------|-------------|
+| `--log-level` | DEBUG, INFO, WARNING, ERROR, CRITICAL | INFO | Set logging level |
+| `--log-file` | path | (none) | Write logs to file with rotation |
+| `--log-format` | text, json | text | Log output format |
+| `--log-max-bytes` | number | 10485760 | Max log file size before rotation |
+| `--log-backup-count` | number | 5 | Number of rotated log files to keep |
+| `--no-console-log` | flag | false | Disable console logging |
+
+### Performance Optimization
+
+#### Parallel Processing
+
+RE-cue automatically uses parallel processing to analyze large codebases faster by utilizing multiple CPU cores.
+
+**Default Behavior:**
+Simply run your analysis as usual:
+```bash
+recue --use-cases
+```
+
+RE-cue will automatically:
+- Detect the number of CPU cores
+- Use parallel processing for projects with 10+ files
+- Fall back to sequential processing for smaller projects
+
+**Performance Control:**
+```bash
+# Let RE-cue use all CPU cores (default)
+recue --use-cases --verbose
+
+# Limit to 2 worker processes
+recue --use-cases --max-workers 2
+
+# Disable parallel processing for debugging
+recue --use-cases --no-parallel --verbose
+```
+
+**Expected Speedup:**
+
+| Project Size | Sequential | Parallel (4 cores) | Speedup |
+|--------------|------------|-------------------|----------|
+| 50 files     | 2.5s       | 1.2s              | 2.1x     |
+| 100 files    | 5.0s       | 1.8s              | 2.8x     |
+| 500 files    | 25.0s      | 7.5s              | 3.3x     |
+
+**Complete Optimization Stack:**
+```bash
+# Use all performance features together
+recue --use-cases \
+  --parallel \
+  --cache \
+  --incremental \
+  --max-workers 4 \
+  --verbose
+```
+
 ## Performance Tuning
 
 ### Profiling Analysis
@@ -847,6 +967,147 @@ EOF
 
 # Use config
 recue --config ~/.recue/config.yaml --use-cases
+```
+
+## Output Formats & Export
+
+### HTML Export
+
+Generate interactive HTML documentation:
+
+```bash
+# Enable HTML export in configuration
+cat > .recue.yaml << EOF
+html:
+  enabled: true
+  output: ./docs/html
+  title: "My Documentation"
+  dark_mode: true
+  search: true
+  theme_color: "#2563eb"
+EOF
+```
+
+Features:
+- Interactive navigation
+- Search functionality
+- Dark/light mode toggle
+- Responsive design
+- Print-friendly styling
+
+### Multiple Format Export
+
+```bash
+# Generate multiple output formats
+recue --spec --format markdown --output docs/spec.md
+recue --spec --format json --output api/spec.json
+recue --api-contract --output api/openapi.json
+```
+
+## Integration with External Systems
+
+### JIRA Export
+
+Export use cases and requirements to JIRA:
+
+```yaml
+# .recue.yaml
+jira:
+  enabled: true
+  url: https://company.atlassian.net
+  username: user@company.com
+  api_token: ${JIRA_API_TOKEN}
+  project: DOC
+  issue_type: "Story"
+  labels: ["generated", "documentation"]
+```
+
+```bash
+# Export to JIRA
+recue --use-cases --export-jira
+```
+
+### Confluence Export
+
+Publish documentation to Confluence:
+
+```yaml
+# .recue.yaml
+confluence:
+  enabled: true
+  url: https://company.atlassian.net/wiki
+  user: user@company.com
+  token: ${CONFLUENCE_API_TOKEN}
+  space: DOC
+  parent: "12345"
+  prefix: "RE-cue: "
+```
+
+```bash
+# Publish to Confluence
+recue --spec --plan --publish-confluence
+```
+
+### Slack Integration
+
+Send analysis summaries to Slack:
+
+```bash
+# Configure webhook URL
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/..."
+
+# Run analysis with Slack notification
+recue --use-cases --notify-slack
+```
+
+## Template System Advanced Usage
+
+### Multi-Language Templates
+
+Support for multiple output languages:
+
+```bash
+# Generate documentation in different languages
+recue --spec --template-lang en --output docs/en/
+recue --spec --template-lang es --output docs/es/
+recue --spec --template-lang fr --output docs/fr/
+```
+
+### Template Validation
+
+Validate custom templates:
+
+```bash
+# Validate template syntax
+recue --validate-templates ~/.recue/templates/
+
+# Test template with sample data
+recue --test-template ~/.recue/templates/spec.md.j2
+
+# Quick start for template development
+recue --create-template-scaffold my-custom-template
+```
+
+### Template Inheritance
+
+```jinja2
+{# base-template.md.j2 #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title | default('Documentation') }}</title>
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>
+
+{# spec-template.md.j2 #}
+{% extends "base-template.md.j2" %}
+{% block content %}
+# {{ project_name }} Specification
+{{ spec_content }}
+{% endblock %}
 ```
 
 ## Next Steps

@@ -10,30 +10,26 @@ Este directorio contiene plantillas en español para la generación de documenta
   - `nodejs/` - Plantillas de Node.js (Express, NestJS)
   - `python/` - Plantillas de Python (Django, Flask, FastAPI)
 
-## Estado
+## Archivos de Plantilla
 
-**PENDIENTE DE TRADUCCIÓN**: Estas plantillas aún no se han traducido. 
-Se utilizarán las plantillas en inglés como alternativa hasta que se complete la traducción.
+### Plantillas Comunes
 
-## Contribuir
+- `phase1-structure.md` - Fase 1: Análisis de Estructura del Proyecto
+- `phase2-actors.md` - Fase 2: Descubrimiento de Actores
+- `phase3-boundaries.md` - Fase 3: Límites del Sistema
+- `phase4-use-cases.md` - Fase 4: Análisis de Casos de Uso
+- `4+1-architecture-template.md` - Plantilla de Vista de Arquitectura 4+1
+- `base.md` - Plantilla base con soporte de herencia
+- `_footer.md` - Componente de pie de página común
+- `_stats_table.md` - Componente de tabla de estadísticas
+- `_warning.md` - Componente de mensaje de advertencia
 
-Para contribuir con traducciones al español:
+### Plantillas Específicas del Framework
 
-1. Copie las plantillas correspondientes del directorio `en/`
-2. Traduzca el contenido manteniendo las variables `{{VARIABLE_NAME}}`
-3. Envíe un pull request con sus traducciones
+Cada directorio de framework contiene plantillas especializadas que sobrescriben las plantillas comunes
+con formato y terminología específicos del framework.
 
 ## Uso
 
-Para usar plantillas en español (cuando estén disponibles), ejecute:
-
-```bash
-reverse-engineer --use-cases --template-language es
-```
-
-O configure en `.recue.yaml`:
-
-```yaml
-output:
-  template_language: es
-```
+Estas plantillas se usan automáticamente cuando se proporciona `--template-language es` (o no se especifica idioma)
+a la herramienta de línea de comandos RE-cue.
