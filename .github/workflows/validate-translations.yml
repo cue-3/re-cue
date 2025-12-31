@@ -1,5 +1,10 @@
 name: Validate Template Translations
 
+permissions:
+  contents: read
+  pull-requests: write  # For commenting on PRs
+  actions: read         # For uploading artifacts
+
 on:
   pull_request:
     paths:
