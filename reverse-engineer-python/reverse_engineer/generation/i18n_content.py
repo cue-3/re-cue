@@ -1,0 +1,477 @@
+# Content pattern translations
+# Auto-generated from content_patterns.json
+
+CONTENT_PATTERNS = {
+    "preconditions": {
+        "all_required_fields_must_be_provided": {
+            "en": "All required fields must be provided",
+            "de": "Alle erforderlichen Felder müssen angegeben werden",
+            "es": "Todos los campos obligatorios deben ser proporcionados",
+            "fr": "",
+            "ja": "",
+        },
+        "database_connection_must_be_available": {
+            "en": "Database connection must be available",
+            "de": "Datenbankverbindung muss verfügbar sein",
+            "es": "La conexión a la base de datos debe estar disponible",
+            "fr": "",
+            "ja": "",
+        },
+        "email_address_must_be_valid": {
+            "en": "Email address must be valid",
+            "de": "E-Mail-Adresse muss gültig sein",
+            "es": "La dirección de correo electrónico debe ser válida",
+            "fr": "",
+            "ja": "",
+        },
+        "entity_must_exist_in_the_system": {
+            "en": "Entity must exist in the system",
+            "de": "Entität muss im System vorhanden sein",
+            "es": "La entidad debe existir en el sistema",
+            "fr": "",
+            "ja": "",
+        },
+        "input_data_must_meet_size_constraints": {
+            "en": "Input data must meet size constraints",
+            "de": "Eingabedaten müssen Größenbeschränkungen erfüllen",
+            "es": "Los datos de entrada deben cumplir con las restricciones de tamaño",
+            "fr": "",
+            "ja": "",
+        },
+        "user_must_be_authenticated": {
+            "en": "User must be authenticated",
+            "de": "Benutzer muss authentifiziert sein",
+            "es": "El usuario debe estar autenticado",
+            "fr": "",
+            "ja": "",
+        },
+        "user_must_have_appropriate_permissions": {
+            "en": "User must have appropriate permissions",
+            "de": "Benutzer muss über entsprechende Berechtigungen verfügen",
+            "es": "El usuario debe tener los permisos adecuados",
+            "fr": "",
+            "ja": "",
+        },
+    },
+    "postconditions": {
+        "background_process_is_initiated": {
+            "en": "Background process is initiated",
+            "de": "Hintergrundprozess wird initiiert",
+            "es": "Se inicia el proceso en segundo plano",
+            "fr": "",
+            "ja": "",
+        },
+        "changes_are_persisted_to_database": {
+            "en": "Changes are persisted to database",
+            "de": "Änderungen werden in der Datenbank gespeichert",
+            "es": "Los cambios se guardan en la base de datos",
+            "fr": "",
+            "ja": "",
+        },
+        "entity_data_is_updated_in_the_system": {
+            "en": "Entity data is updated in the system",
+            "de": "Entitätsdaten werden im System aktualisiert",
+            "es": "Los datos de la entidad se actualizan en el sistema",
+            "fr": "",
+            "ja": "",
+        },
+        "entity_is_removed_from_the_system": {
+            "en": "Entity is removed from the system",
+            "de": "Entität wird aus dem System entfernt",
+            "es": "La entidad es eliminada del sistema",
+            "fr": "",
+            "ja": "",
+        },
+        "new_entity_is_created_in_the_system": {
+            "en": "New entity is created in the system",
+            "de": "Neue Entität wird im System erstellt",
+            "es": "Se crea una nueva entidad en el sistema",
+            "fr": "",
+            "ja": "",
+        },
+        "operation_completes_successfully": {
+            "en": "Operation completes successfully",
+            "de": "Vorgang wird erfolgreich abgeschlossen",
+            "es": "La operación se completa exitosamente",
+            "fr": "",
+            "ja": "",
+        },
+        "scheduled_task_is_registered": {
+            "en": "Scheduled task is registered",
+            "de": "Geplante Aufgabe wird registriert",
+            "es": "Tarea programada registrada",
+            "fr": "",
+            "ja": "",
+        },
+        "user_receives_appropriate_response": {
+            "en": "User receives appropriate response",
+            "de": "Benutzer erhält entsprechende Antwort",
+            "es": "El usuario recibe la respuesta apropiada",
+            "fr": "",
+            "ja": "",
+        },
+        "user_receives_confirmation": {
+            "en": "User receives confirmation",
+            "de": "Benutzer erhält Bestätigung",
+            "es": "El usuario recibe confirmación",
+            "fr": "",
+            "ja": "",
+        },
+    },
+    "scenarios": {
+        "system_confirms_successful_creation": {
+            "en": "System confirms successful creation",
+            "de": "System bestätigt erfolgreiche Erstellung",
+            "es": "El sistema confirma la creación exitosa",
+            "fr": "",
+            "ja": "",
+        },
+        "system_confirms_successful_deletion": {
+            "en": "System confirms successful deletion",
+            "de": "System bestätigt erfolgreiche Löschung",
+            "es": "El sistema confirma la eliminación exitosa",
+            "fr": "",
+            "ja": "",
+        },
+        "system_confirms_successful_update": {
+            "en": "System confirms successful update",
+            "de": "System bestätigt erfolgreiche Aktualisierung",
+            "es": "El sistema confirma la actualización exitosa",
+            "fr": "",
+            "ja": "",
+        },
+        "system_creates_new": {
+            "en": "System creates new {}",
+            "de": "System erstellt neues {}",
+            "es": "El sistema crea nuevo {}",
+            "fr": "",
+            "ja": "",
+        },
+        "system_displays_information": {
+            "en": "System displays {} information",
+            "de": "System zeigt {}-Informationen an",
+            "es": "El sistema muestra información de {}",
+            "fr": "",
+            "ja": "",
+        },
+        "system_processes_request": {
+            "en": "System processes request",
+            "de": "System verarbeitet Anfrage",
+            "es": "El sistema procesa la solicitud",
+            "fr": "",
+            "ja": "",
+        },
+        "system_removes": {
+            "en": "System removes {}",
+            "de": "System entfernt {}",
+            "es": "El sistema elimina {}",
+            "fr": "",
+            "ja": "",
+        },
+        "system_requests_confirmation": {
+            "en": "System requests confirmation",
+            "de": "System fordert Bestätigung an",
+            "es": "El sistema solicita confirmación",
+            "fr": "",
+            "ja": "",
+        },
+        "system_retrieves_data": {
+            "en": "System retrieves {} data",
+            "de": "System ruft {}-Daten ab",
+            "es": "El sistema recupera datos de {}",
+            "fr": "",
+            "ja": "",
+        },
+        "system_returns_result": {
+            "en": "System returns result",
+            "de": "System gibt Ergebnis zurück",
+            "es": "El sistema devuelve el resultado",
+            "fr": "",
+            "ja": "",
+        },
+        "system_updates_data": {
+            "en": "System updates {} data",
+            "de": "System aktualisiert {}-Daten",
+            "es": "El sistema actualiza los datos de {}",
+            "fr": "",
+            "ja": "",
+        },
+        "system_validates_changes": {
+            "en": "System validates changes",
+            "de": "System validiert Änderungen",
+            "es": "El sistema valida los cambios",
+            "fr": "",
+            "ja": "",
+        },
+        "system_validates_input_data": {
+            "en": "System validates input data",
+            "de": "System validiert Eingabedaten",
+            "es": "El sistema valida los datos de entrada",
+            "fr": "",
+            "ja": "",
+        },
+        "user_confirms_deletion": {
+            "en": "User confirms deletion",
+            "de": "Benutzer bestätigt Löschung",
+            "es": "El usuario confirma la eliminación",
+            "fr": "",
+            "ja": "",
+        },
+        "user_enters_details": {
+            "en": "User enters {} details",
+            "de": "Benutzer gibt {}-Details ein",
+            "es": "El usuario ingresa los detalles de {}",
+            "fr": "",
+            "ja": "",
+        },
+        "user_modifies_details": {
+            "en": "User modifies {} details",
+            "de": "Benutzer ändert {}-Details",
+            "es": "El usuario modifica los detalles de {}",
+            "fr": "",
+            "ja": "",
+        },
+        "user_navigates_to_creation_page": {
+            "en": "User navigates to {} creation page",
+            "de": "Benutzer navigiert zur {}-Erstellungsseite",
+            "es": "El usuario navega a la página de creación de {}",
+            "fr": "",
+            "ja": "",
+        },
+        "user_requests_to_view": {
+            "en": "User requests to view {}",
+            "de": "Benutzer fordert Anzeige von {} an",
+            "es": "El usuario solicita ver {}",
+            "fr": "",
+            "ja": "",
+        },
+        "user_selects_to_delete": {
+            "en": "User selects {} to delete",
+            "de": "Benutzer wählt {} zum Löschen aus",
+            "es": "El usuario selecciona {} para eliminar",
+            "fr": "",
+            "ja": "",
+        },
+        "user_selects_to_update": {
+            "en": "User selects {} to update",
+            "de": "Benutzer wählt {} zur Aktualisierung aus",
+            "es": "El usuario selecciona {} para actualizar",
+            "fr": "",
+            "ja": "",
+        },
+        "user_sends_request_to": {
+            "en": "User sends {} request to {}",
+            "de": "Benutzer sendet {}-Anfrage an {}",
+            "es": "El usuario envía solicitud {} a {}",
+            "fr": "",
+            "ja": "",
+        },
+    },
+    "validations": {
+        "field_must_be_a_valid_email_address": {
+            "en": "Field must be a valid email address",
+            "de": "Feld muss eine gültige E-Mail-Adresse sein",
+            "es": "El campo debe ser una dirección de correo electrónico válida",
+            "fr": "",
+            "ja": "",
+        },
+        "field_must_match_pattern": {
+            "en": "Field must match pattern: {pattern}",
+            "de": "Feld muss dem Muster entsprechen: {pattern}",
+            "es": "El campo debe coincidir con el patrón: {pattern}",
+            "fr": "",
+            "ja": "",
+        },
+        "field_must_not_be_empty": {
+            "en": "Field must not be empty",
+            "de": "Feld darf nicht leer sein",
+            "es": "El campo no debe estar vacío",
+            "fr": "",
+            "ja": "",
+        },
+        "field_must_not_be_null": {
+            "en": "Field must not be null",
+            "de": "Feld darf nicht null sein",
+            "es": "El campo no debe ser nulo",
+            "fr": "",
+            "ja": "",
+        },
+        "field_size_must_be_maximum_length": {
+            "en": "Field size must be maximum length {max}",
+            "de": "Feldgröße darf maximal {max} Zeichen betragen",
+            "es": "El tamaño del campo debe ser de longitud máxima {max}",
+            "fr": "",
+            "ja": "",
+        },
+        "field_size_must_be_minimum_length": {
+            "en": "Field size must be minimum length {min}",
+            "de": "Feldgröße muss mindestens {min} Zeichen betragen",
+            "es": "El tamaño del campo debe ser de longitud mínima {min}",
+            "fr": "",
+            "ja": "",
+        },
+        "field_size_must_be_minimum_length_and_maximum_len": {
+            "en": "Field size must be minimum length {min} and maximum length {max}",
+            "de": "Feldgröße muss mindestens {min} und maximal {max} Zeichen betragen",
+            "es": "El tamaño del campo debe tener una longitud mínima de {min} y una longitud máxima de {max}",
+            "fr": "",
+            "ja": "",
+        },
+        "value_must_be_at_least": {
+            "en": "Value must be at least {min}",
+            "de": "Wert muss mindestens {min} betragen",
+            "es": "El valor debe ser al menos {min}",
+            "fr": "",
+            "ja": "",
+        },
+        "value_must_be_at_most": {
+            "en": "Value must be at most {max}",
+            "de": "Wert darf höchstens {max} betragen",
+            "es": "El valor debe ser como máximo {max}",
+            "fr": "",
+            "ja": "",
+        },
+    },
+    "workflows": {
+        "asynchronous_background_operation": {
+            "en": "Asynchronous background operation",
+            "de": "Asynchrone Hintergrundoperation",
+            "es": "Operación asíncrona en segundo plano",
+            "fr": "",
+            "ja": "",
+        },
+        "multistep_workflow_with_service_calls": {
+            "en": "Multi-step workflow with {count} service calls",
+            "de": "Mehrstufiger Workflow mit {count} Service-Aufrufen",
+            "es": "Flujo de trabajo de múltiples pasos con {count} llamadas de servicio",
+            "fr": "",
+            "ja": "",
+        },
+        "operation_with_automatic_retry_on_failure": {
+            "en": "Operation with automatic retry on failure",
+            "de": "Vorgang mit automatischer Wiederholung bei Fehler",
+            "es": "Operación con reintento automático en caso de fallo",
+            "fr": "",
+            "ja": "",
+        },
+        "scheduled_background_job": {
+            "en": "Scheduled background job",
+            "de": "Geplanter Hintergrundjob",
+            "es": "Tarea programada en segundo plano",
+            "fr": "",
+            "ja": "",
+        },
+    },
+    "business_rules": {
+        "has_size_constraints": {
+            "en": "{entity} has {count} size constraint(s)",
+            "de": "{entity} hat {count} Größenbeschränkung(en)",
+            "es": "{entity} has {count} size constraint(s)",
+            "fr": "",
+            "ja": "",
+        },
+        "must_have_valid": {
+            "en": "{entity} must have valid {fields}",
+            "de": "{entity} muss gültige {fields} haben",
+            "es": "{entity} must have valid {fields}",
+            "fr": "",
+            "ja": "",
+        },
+        "requires_valid_email_address": {
+            "en": "{entity} requires valid email address",
+            "de": "{entity} erfordert gültige E-Mail-Adresse",
+            "es": "{entity} requires valid email address",
+            "fr": "",
+            "ja": "",
+        },
+    },
+    "extensions": {
+        "database_error_system_rolls_back_transaction_and_s": {
+            "en": "Database error: System rolls back transaction and shows error",
+            "de": "Datenbankfehler: System macht Transaktion rückgängig und zeigt Fehler an",
+            "es": "Database error: System rolls back transaction and shows error",
+            "fr": "",
+            "ja": "",
+        },
+        "email_format_invalid_system_shows_email_validation": {
+            "en": "Email format invalid: System shows email validation error",
+            "de": "E-Mail-Format ungültig: System zeigt E-Mail-Validierungsfehler an",
+            "es": "Email format invalid: System shows email validation error",
+            "fr": "",
+            "ja": "",
+        },
+        "input_size_invalid_system_shows_size_constraint_er": {
+            "en": "Input size invalid: System shows size constraint error",
+            "de": "System zeigt Fehler bei Größenbeschränkung an",
+            "es": "Input size invalid: System shows size constraint error",
+            "fr": "",
+            "ja": "",
+        },
+        "operation_fails_system_automatically_retries": {
+            "en": "Operation fails: System automatically retries",
+            "de": "Vorgang schlägt fehl: System wiederholt automatisch",
+            "es": "Operation fails: System automatically retries",
+            "fr": "",
+            "ja": "",
+        },
+        "required_field_missing_system_shows_validation_err": {
+            "en": "Required field missing: System shows validation error",
+            "de": "Erforderliches Feld fehlt: System zeigt Validierungsfehler an",
+            "es": "Required field missing: System shows validation error",
+            "fr": "",
+            "ja": "",
+        },
+    },
+}
+
+def get_content(category: str, key: str, language: str = "en", **kwargs) -> str:
+    """
+    Get translated content pattern and apply format parameters.
+    
+    Args:
+        category: Content category (preconditions, postconditions, scenarios, etc.)
+        key: Pattern key
+        language: Target language code
+        **kwargs: Format parameters to apply to the pattern
+        
+    Returns:
+        Translated and formatted string, falls back to English if translation missing
+    """
+    import logging
+    
+    if category not in CONTENT_PATTERNS:
+        logging.warning(f"Unknown content category: {category}")
+        return f"[{category}.{key}]"
+    
+    if key not in CONTENT_PATTERNS[category]:
+        logging.warning(f"Unknown content key: {category}.{key}")
+        return f"[{category}.{key}]"
+    
+    pattern = CONTENT_PATTERNS[category][key]
+    translation = pattern.get(language, '')
+    
+    # Fall back to English if translation is missing
+    if not translation:
+        if language != 'en':
+            logging.warning(f"Missing {language} translation for {category}.{key}, using English")
+        translation = pattern.get('en', f'[{category}.{key}]')
+    
+    # Apply format parameters if provided
+    if kwargs:
+        try:
+            # Extract positional arguments from kwargs in consistent order
+            # Most patterns use 'entity' or 'field' as the primary placeholder
+            values = []
+            for param in ['entity', 'field', 'method', 'min', 'max', 'count', 'pattern']:
+                if param in kwargs:
+                    values.append(kwargs[param])
+            
+            if values:
+                return translation.format(*values)
+            else:
+                return translation.format(**kwargs)
+        except (KeyError, IndexError) as e:
+            logging.warning(f"Format error for {category}.{key}: {e}")
+            return translation
+    
+    return translation

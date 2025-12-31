@@ -10,30 +10,26 @@ Dieses Verzeichnis enthält deutsche Vorlagen für die RE-cue-Dokumentationsgene
   - `nodejs/` - Node.js (Express, NestJS) Vorlagen
   - `python/` - Python (Django, Flask, FastAPI) Vorlagen
 
-## Status
+## Vorlagendateien
 
-**ÜBERSETZUNG AUSSTEHEND**: Diese Vorlagen wurden noch nicht übersetzt.
-Englische Vorlagen werden als Fallback verwendet, bis die Übersetzung abgeschlossen ist.
+### Gemeinsame Vorlagen
 
-## Mitwirken
+- `phase1-structure.md` - Phase 1: Projektstrukturanalyse
+- `phase2-actors.md` - Phase 2: Akteurerkennung
+- `phase3-boundaries.md` - Phase 3: Systemgrenzen
+- `phase4-use-cases.md` - Phase 4: Anwendungsfallanalyse
+- `4+1-architecture-template.md` - 4+1 Architektursicht-Vorlage
+- `base.md` - Basisvorlage mit Vererbungsunterstützung
+- `_footer.md` - Gemeinsame Fußzeilenkomponente
+- `_stats_table.md` - Statistiktabellenkomponente
+- `_warning.md` - Warnmeldungskomponente
 
-So können Sie deutsche Übersetzungen beitragen:
+### Framework-spezifische Vorlagen
 
-1. Kopieren Sie die entsprechenden Vorlagen aus dem Verzeichnis `en/`
-2. Übersetzen Sie den Inhalt, behalten Sie dabei die Variablen `{{VARIABLE_NAME}}` bei
-3. Reichen Sie einen Pull Request mit Ihren Übersetzungen ein
+Jedes Framework-Verzeichnis enthält spezialisierte Vorlagen, die gemeinsame Vorlagen
+mit framework-spezifischer Formatierung und Terminologie überschreiben.
 
 ## Verwendung
 
-Um deutsche Vorlagen zu verwenden (wenn verfügbar), führen Sie aus:
-
-```bash
-reverse-engineer --use-cases --template-language de
-```
-
-Oder konfigurieren Sie in `.recue.yaml`:
-
-```yaml
-output:
-  template_language: de
-```
+Diese Vorlagen werden automatisch verwendet, wenn `--template-language de` dem
+RE-cue-Befehlszeilenwerkzeug übergeben wird.

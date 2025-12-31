@@ -914,6 +914,7 @@ def run_phased_analysis(args):
 
     # Get naming style from args
     naming_style = getattr(args, "naming_style", "business")
+    template_language = getattr(args, "template_language", "en")
 
     # Initialize analyzer
     log_section("RE-cue - Phased Reverse Engineering")
@@ -926,6 +927,7 @@ def run_phased_analysis(args):
         enable_incremental=args.incremental,
         max_workers=args.max_workers,
         naming_style=naming_style,
+        language=template_language,
         _suppress_deprecation_warning=True,
     )
 
@@ -1623,6 +1625,7 @@ def main():
 
     # Get naming style from args
     naming_style = getattr(args, "naming_style", "business")
+    template_language = getattr(args, "template_language", "en")
 
     # Note: Using _suppress_deprecation_warning since CLI is the official interface
     # and will be updated when framework-specific analyzers fully support all features
@@ -1634,6 +1637,7 @@ def main():
         enable_caching=args.cache if hasattr(args, "cache") else True,
         max_workers=args.max_workers,
         naming_style=naming_style,
+        language=template_language,
         _suppress_deprecation_warning=True,
     )
     analyzer.analyze()

@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 from ..templates.template_loader import TemplateLoader
 from ..utils import format_project_name
 from .base import BaseGenerator
+from .i18n import get_text
 
 
 class UseCaseMarkdownGenerator(BaseGenerator):
@@ -21,6 +22,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
         """Initialize generator with optional framework ID and language."""
         super().__init__(analyzer)
         self.template_loader = TemplateLoader(framework_id, language=language)
+        self.language = language
 
     def _load_template(self, template_name: str) -> str:
         """Load a template file with framework-specific fallback."""
@@ -74,7 +76,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
             readonly_count = sum(1 for t in context["transactions"] if t.get("readonly", False))
             write_count = len(context["transactions"]) - readonly_count
             lines.append(
-                f"| Transaction Boundaries | {len(context['transactions'])} total | Write: {write_count}, Read-Only: {readonly_count} |"
+                f"| {get_text('transaction_boundaries', self.language)} | {len(context['transactions'])} total | {get_text('write', self.language)}: {write_count}, {get_text('read_only', self.language)}: {readonly_count} |"
             )
 
         # Validation rules
@@ -93,7 +95,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
                 ]
             )
             lines.append(
-                f"| Validation Rules | {len(context['validations'])} constraints | {types_summary} |"
+                f"| {get_text('validation_rules', self.language)} | {len(context['validations'])} {get_text('constraints', self.language)} | {types_summary} |"
             )
 
         # Business workflows
@@ -112,7 +114,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
                 ]
             )
             lines.append(
-                f"| Business Workflows | {len(context['workflows'])} patterns | {types_summary} |"
+                f"| {get_text('business_workflows', self.language)} | {len(context['workflows'])} {get_text('patterns', self.language)} | {types_summary} |"
             )
 
         # Business rules
@@ -129,7 +131,7 @@ class UseCaseMarkdownGenerator(BaseGenerator):
                 ]
             )
             lines.append(
-                f"| Business Rules | {len(context['business_rules'])} derived | {types_summary} |"
+                f"| {get_text('business_rules', self.language)} | {len(context['business_rules'])} {get_text('derived', self.language)} | {types_summary} |"
             )
 
         return "\n".join(lines) if lines else "*No business context information available.*"
@@ -150,41 +152,41 @@ class UseCaseMarkdownGenerator(BaseGenerator):
             use_cases_by_actor[actor].append(use_case)
 
         for actor, use_cases in use_cases_by_actor.items():
-            lines.append(f"### {actor} Use Cases")
+            lines.append(f"### {actor} {get_text('use_cases', self.language)}")
             lines.append("")
-            lines.append(f"Total: {len(use_cases)} use cases")
+            lines.append(f"{get_text('total', self.language)}: {len(use_cases)} {get_text('use_cases', self.language).lower()}")
             lines.append("")
 
             # Show all use cases with full detail
             for i, use_case in enumerate(use_cases, 1):
                 lines.append(f"#### UC{i:02d}: {use_case.name}")
                 lines.append("")
-                lines.append(f"**Primary Actor**: {use_case.primary_actor}")
+                lines.append(f"**{get_text('primary_actor', self.language)}**: {use_case.primary_actor}")
 
                 if use_case.secondary_actors:
-                    lines.append(f"**Secondary Actors**: {', '.join(use_case.secondary_actors)}")
+                    lines.append(f"**{get_text('secondary_actors', self.language)}**: {', '.join(use_case.secondary_actors)}")
 
                 if use_case.preconditions:
                     lines.append("")
-                    lines.append("**Preconditions**:")
+                    lines.append(f"**{get_text('preconditions', self.language)}**:")
                     for precondition in use_case.preconditions:
                         lines.append(f"- {precondition}")
 
                 if use_case.postconditions:
                     lines.append("")
-                    lines.append("**Postconditions**:")
+                    lines.append(f"**{get_text('postconditions', self.language)}**:")
                     for postcondition in use_case.postconditions:
                         lines.append(f"- {postcondition}")
 
                 if use_case.main_scenario:
                     lines.append("")
-                    lines.append("**Main Scenario**:")
+                    lines.append(f"**{get_text('main_scenario', self.language)}**:")
                     for j, step in enumerate(use_case.main_scenario, 1):
                         lines.append(f"{j}. {step}")
 
                 if use_case.extensions:
                     lines.append("")
-                    lines.append("**Extensions**:")
+                    lines.append(f"**{get_text('extensions', self.language)}**:")
                     for extension in use_case.extensions:
                         lines.append(f"- {extension}")
 

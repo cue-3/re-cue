@@ -48,6 +48,7 @@ from .analysis import (
     UIPatternAnalyzer,
     UseCaseNamer,
 )
+from .generation.i18n_content import get_content
 
 # Import domain models
 from .domain import (
@@ -126,6 +127,7 @@ class ProjectAnalyzer:
         naming_style: Optional[str] = None,
         naming_config: Optional[NamingConfig] = None,
         progress_callback: Optional[ProgressCallback] = None,
+        language: str = "en",
         _suppress_deprecation_warning: bool = False,
     ):
         """
@@ -141,6 +143,7 @@ class ProjectAnalyzer:
             naming_style: Style for use case naming (business, technical, concise, verbose, user_centric)
             naming_config: Full naming configuration object (overrides naming_style)
             progress_callback: Optional callback for progress reporting
+            language: Target language for generated content (en, de, es, fr, ja)
             _suppress_deprecation_warning: Internal flag to suppress deprecation warning
                 (used by create_analyzer during transition period)
 
@@ -161,6 +164,7 @@ class ProjectAnalyzer:
         self.repo_root = repo_root
         self.verbose = verbose
         self.enable_optimizations = enable_optimizations
+        self.language = language
 
         # Initialize progress tracker
         self.progress_tracker = AnalysisProgressTracker(
@@ -1079,7 +1083,7 @@ class ProjectAnalyzer:
 
         # Analyze business context for enhanced use case quality
         log_info("Analyzing business context...", self.verbose)
-        business_identifier = BusinessProcessIdentifier(verbose=self.verbose)
+        business_identifier = BusinessProcessIdentifier(verbose=self.verbose, language=self.language)
 
         # Get all Java files (excluding tests)
         all_java_files = list(self.repo_root.rglob("**/*.java"))
@@ -1595,58 +1599,75 @@ class ProjectAnalyzer:
 
         if method_name.lower().startswith("create"):
             return [
-                f"User navigates to {entity} creation page",
-                f"User enters {entity} details",
-                "System validates input data",
-                f"System creates new {entity}",
-                "System confirms successful creation",
+                get_content("scenarios", "user_navigates_to_creation_page", self.language, entity=entity),
+                get_content("scenarios", "user_enters_details", self.language, entity=entity),
+                get_content("scenarios", "system_validates_input_data", self.language),
+                get_content("scenarios", "system_creates_new", self.language, entity=entity),
+                get_content("scenarios", "system_confirms_successful_creation", self.language),
             ]
         elif method_name.lower().startswith(("get", "view")):
             return [
-                f"User requests to view {entity}",
-                f"System retrieves {entity} data",
-                f"System displays {entity} information",
+                get_content("scenarios", "user_requests_to_view", self.language, entity=entity),
+                get_content("scenarios", "system_retrieves_data", self.language, entity=entity),
+                get_content("scenarios", "system_displays_information", self.language, entity=entity),
             ]
         elif method_name.lower().startswith("update"):
             return [
-                f"User selects {entity} to update",
-                f"User modifies {entity} details",
-                "System validates changes",
-                f"System updates {entity} data",
-                "System confirms successful update",
+                get_content("scenarios", "user_selects_to_update", self.language, entity=entity),
+                get_content("scenarios", "user_modifies_details", self.language, entity=entity),
+                get_content("scenarios", "system_validates_changes", self.language),
+                get_content("scenarios", "system_updates_data", self.language, entity=entity),
+                get_content("scenarios", "system_confirms_successful_update", self.language),
             ]
         elif method_name.lower().startswith("delete"):
             return [
-                f"User selects {entity} to delete",
-                "System requests confirmation",
-                "User confirms deletion",
-                f"System removes {entity}",
-                "System confirms successful deletion",
+                get_content("scenarios", "user_selects_to_delete", self.language, entity=entity),
+                get_content("scenarios", "system_requests_confirmation", self.language),
+                get_content("scenarios", "user_confirms_deletion", self.language),
+                get_content("scenarios", "system_removes", self.language, entity=entity),
+                get_content("scenarios", "system_confirms_successful_deletion", self.language),
             ]
         else:
+            # For generic operations, build simple scenario steps
+            operation = method_name.lower().replace("_", " ")
             return [
-                f"User initiates {entity} operation",
-                "System processes request",
-                "System returns result",
+                f"User initiates {entity} {operation}",
+                get_content("scenarios", "system_processes_request", self.language),
+                get_content("scenarios", "system_returns_result", self.language),
             ]
 
     def _generate_preconditions(self, method_name: str) -> list[str]:
         """Generate preconditions for a use case."""
         if method_name.lower().startswith(("update", "delete", "get")):
-            return ["Entity must exist in the system", "User must have appropriate permissions"]
+            return [
+                get_content("preconditions", "entity_must_exist_in_the_system", self.language),
+                get_content("preconditions", "user_must_have_appropriate_permissions", self.language),
+            ]
         else:
-            return ["User must have appropriate permissions"]
+            return [get_content("preconditions", "user_must_have_appropriate_permissions", self.language)]
 
     def _generate_postconditions(self, method_name: str) -> list[str]:
         """Generate postconditions for a use case."""
         if method_name.lower().startswith("create"):
-            return ["New entity is created in the system", "User receives confirmation"]
+            return [
+                get_content("postconditions", "new_entity_is_created_in_the_system", self.language),
+                get_content("postconditions", "user_receives_confirmation", self.language),
+            ]
         elif method_name.lower().startswith("update"):
-            return ["Entity data is updated in the system", "User receives confirmation"]
+            return [
+                get_content("postconditions", "entity_data_is_updated_in_the_system", self.language),
+                get_content("postconditions", "user_receives_confirmation", self.language),
+            ]
         elif method_name.lower().startswith("delete"):
-            return ["Entity is removed from the system", "User receives confirmation"]
+            return [
+                get_content("postconditions", "entity_is_removed_from_the_system", self.language),
+                get_content("postconditions", "user_receives_confirmation", self.language),
+            ]
         else:
-            return ["Operation completes successfully", "User receives appropriate response"]
+            return [
+                get_content("postconditions", "operation_completes_successfully", self.language),
+                get_content("postconditions", "user_receives_appropriate_response", self.language),
+            ]
 
 
 # Compatibility wrapper for new plugin architecture

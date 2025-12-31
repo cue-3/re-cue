@@ -1,0 +1,6 @@
+# Translation Dependencies
+#
+# Install with: pip install -r requirements-translation.txt
+
+# Claude API for AI translation
+anthropic>=0.25.0

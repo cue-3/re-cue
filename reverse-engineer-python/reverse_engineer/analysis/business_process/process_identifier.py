@@ -18,13 +18,15 @@ class BusinessProcessIdentifier:
     to provide better context for preconditions, postconditions, and extension scenarios.
     """
 
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, language: str = "en"):
         """Initialize the business process identifier.
 
         Args:
             verbose: Whether to show detailed progress
+            language: Target language for generated content (en, de, es, fr, ja)
         """
         self.verbose = verbose
+        self.language = language
 
         # Transaction annotation patterns
         self.transaction_patterns = {
@@ -466,6 +468,8 @@ class BusinessProcessIdentifier:
         Returns:
             Enhanced list of preconditions
         """
+        from ...generation.i18n_content import get_content
+        
         preconditions = list(use_case.get("preconditions", []))
 
         # Add validation-based preconditions
@@ -481,15 +485,15 @@ class BusinessProcessIdentifier:
                 if v["type"] in ["not_null", "not_empty", "not_blank"]
             ]
             if required and len(required) > 0:
-                preconditions.append("All required fields must be provided")
+                preconditions.append(get_content("preconditions", "all_required_fields_must_be_provided", self.language))
 
             size_constraints = [v for v in relevant_validations if v["type"] == "size"]
             if size_constraints:
-                preconditions.append("Input data must meet size constraints")
+                preconditions.append(get_content("preconditions", "input_data_must_meet_size_constraints", self.language))
 
             email = [v for v in relevant_validations if v["type"] == "email"]
             if email:
-                preconditions.append("Email address must be valid")
+                preconditions.append(get_content("preconditions", "email_address_must_be_valid", self.language))
 
         # Add transaction-based preconditions
         relevant_transactions = [
@@ -503,7 +507,7 @@ class BusinessProcessIdentifier:
                 if "database connection must be available" not in [
                     p.lower() for p in preconditions
                 ]:
-                    preconditions.append("Database connection must be available")
+                    preconditions.append(get_content("preconditions", "database_connection_must_be_available", self.language))
                 break
 
         return preconditions
@@ -520,6 +524,8 @@ class BusinessProcessIdentifier:
         Returns:
             Enhanced list of postconditions
         """
+        from ...generation.i18n_content import get_content
+        
         postconditions = list(use_case.get("postconditions", []))
 
         # Add transaction-based postconditions
@@ -534,7 +540,7 @@ class BusinessProcessIdentifier:
                 if transaction.get("propagation") == "REQUIRES_NEW":
                     postconditions.append("Changes are committed in separate transaction")
                 else:
-                    postconditions.append("Changes are persisted to database")
+                    postconditions.append(get_content("postconditions", "changes_are_persisted_to_database", self.language))
                 break
 
         # Add workflow-based postconditions
@@ -544,9 +550,9 @@ class BusinessProcessIdentifier:
 
         for workflow in relevant_workflows:
             if workflow["type"] == "async_operation":
-                postconditions.append("Background process is initiated")
+                postconditions.append(get_content("postconditions", "background_process_is_initiated", self.language))
             elif workflow["type"] == "scheduled_job":
-                postconditions.append("Scheduled task is registered")
+                postconditions.append(get_content("postconditions", "scheduled_task_is_registered", self.language))
 
         return postconditions
 
