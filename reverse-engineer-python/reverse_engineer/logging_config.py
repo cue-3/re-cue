@@ -16,7 +16,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class JSONFormatter(logging.Formatter):
@@ -37,7 +37,7 @@ class JSONFormatter(logging.Formatter):
         Returns:
             JSON string representation of the log record
         """
-        log_data: Dict[str, Any] = {
+        log_data: dict[str, Any] = {
             "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
             "level": record.levelname,
             "logger": record.name,
@@ -74,7 +74,7 @@ class PerformanceLogger:
             pass
     """
 
-    def __init__(self, logger: logging.Logger, operation: str, context: Optional[Dict] = None):
+    def __init__(self, logger: logging.Logger, operation: str, context: Optional[dict] = None):
         """
         Initialize performance logger.
 
@@ -199,7 +199,7 @@ def get_logger(name: str) -> logging.Logger:
 
 
 # Convenience functions for backward compatibility
-def log_debug(message: str, context: Optional[Dict] = None, **kwargs):
+def log_debug(message: str, context: Optional[dict] = None, **kwargs):
     """
     Log a debug message.
 
@@ -213,7 +213,7 @@ def log_debug(message: str, context: Optional[Dict] = None, **kwargs):
     logger.debug(message, extra=extra, **kwargs)
 
 
-def log_info(message: str, context: Optional[Dict] = None, **kwargs):
+def log_info(message: str, context: Optional[dict] = None, **kwargs):
     """
     Log an info message.
 
@@ -227,7 +227,7 @@ def log_info(message: str, context: Optional[Dict] = None, **kwargs):
     logger.info(message, extra=extra, **kwargs)
 
 
-def log_warning(message: str, context: Optional[Dict] = None, **kwargs):
+def log_warning(message: str, context: Optional[dict] = None, **kwargs):
     """
     Log a warning message.
 
@@ -241,7 +241,7 @@ def log_warning(message: str, context: Optional[Dict] = None, **kwargs):
     logger.warning(message, extra=extra, **kwargs)
 
 
-def log_error(message: str, context: Optional[Dict] = None, exc_info: bool = False, **kwargs):
+def log_error(message: str, context: Optional[dict] = None, exc_info: bool = False, **kwargs):
     """
     Log an error message.
 
@@ -256,7 +256,7 @@ def log_error(message: str, context: Optional[Dict] = None, exc_info: bool = Fal
     logger.error(message, extra=extra, exc_info=exc_info, **kwargs)
 
 
-def log_critical(message: str, context: Optional[Dict] = None, exc_info: bool = False, **kwargs):
+def log_critical(message: str, context: Optional[dict] = None, exc_info: bool = False, **kwargs):
     """
     Log a critical message.
 

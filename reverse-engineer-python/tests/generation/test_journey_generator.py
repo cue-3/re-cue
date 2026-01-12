@@ -2,12 +2,11 @@
 Tests for the JourneyGenerator module.
 """
 
-import unittest
 import json
-from unittest.mock import Mock
+import unittest
 from pathlib import Path
 
-from reverse_engineer.domain import UseCase, Actor, SystemBoundary, Endpoint
+from reverse_engineer.domain import Actor, Endpoint, SystemBoundary, UseCase
 from reverse_engineer.generation.journey import JourneyGenerator
 
 

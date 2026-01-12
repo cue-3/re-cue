@@ -3,7 +3,7 @@ Test file for ty Language Server Protocol integration
 This file contains various Python patterns to test ty LSP features
 """
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TypeVar, Generic
 
 
 # Test 1: Basic type annotations
@@ -64,8 +64,6 @@ class User:
 
 
 # Test 8: Generic types
-from typing import TypeVar, Generic
-
 T = TypeVar('T')
 
 class Container(Generic[T]):

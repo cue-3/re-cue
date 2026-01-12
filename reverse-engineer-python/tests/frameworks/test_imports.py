@@ -10,14 +10,14 @@ class TestFrameworksImports(unittest.TestCase):
         """Test importing from new frameworks package."""
         from reverse_engineer.frameworks import (
             BaseAnalyzer,
-            TechDetector,
-            create_analyzer,
+            DjangoAnalyzer,
+            FastAPIAnalyzer,
+            FlaskAnalyzer,
             JavaSpringAnalyzer,
             NodeExpressAnalyzer,
-            DjangoAnalyzer,
-            FlaskAnalyzer,
-            FastAPIAnalyzer,
             RubyRailsAnalyzer,
+            TechDetector,
+            create_analyzer,
         )
         
         # Verify all classes are importable
@@ -35,11 +35,11 @@ class TestFrameworksImports(unittest.TestCase):
         """Test importing from old analyzers module."""
         from reverse_engineer.analyzers import (
             BaseAnalyzer,
+            DjangoAnalyzer,
+            FastAPIAnalyzer,
+            FlaskAnalyzer,
             JavaSpringAnalyzer,
             NodeExpressAnalyzer,
-            DjangoAnalyzer,
-            FlaskAnalyzer,
-            FastAPIAnalyzer,
             RubyRailsAnalyzer,
         )
         
@@ -61,14 +61,14 @@ class TestFrameworksImports(unittest.TestCase):
     
     def test_same_classes_both_imports(self):
         """Test that both import paths return the same classes."""
-        from reverse_engineer.frameworks import JavaSpringAnalyzer as NewJava
         from reverse_engineer.analyzers import JavaSpringAnalyzer as OldJava
+        from reverse_engineer.frameworks import JavaSpringAnalyzer as NewJava
         
         # Should be the exact same class
         self.assertIs(NewJava, OldJava)
         
-        from reverse_engineer.frameworks import TechDetector as NewDetector
         from reverse_engineer.detectors import TechDetector as OldDetector
+        from reverse_engineer.frameworks import TechDetector as NewDetector
         
         # Should be the exact same class
         self.assertIs(NewDetector, OldDetector)

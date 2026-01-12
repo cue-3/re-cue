@@ -75,11 +75,28 @@ class SpecGenerator(BaseGenerator):
         """Generate Markdown format specification."""
         project_info = self.analyzer.get_project_info()
         display_name = format_project_name(project_info["name"])
-
-        # Extract intent context from description
         intent_context = extract_intent_context(description)
 
-        output = [
+        # Build header section
+        output = self._build_header_section(display_name, project_info, description)
+
+        # Generate user stories
+        output.extend(self._generate_user_stories(intent_context))
+
+        # Add edge cases
+        output.extend(self._generate_edge_cases())
+
+        # Add requirements section header
+        output.extend([
+            "## Requirements *(mandatory)*",
+            "",
+            "### Functional Requirements",
+            "",
+        ])
+
+    def _build_header_section(self, display_name: str, project_info: dict, description: str) -> list[str]:
+        """Build the header section of the specification."""
+        return [
             f"# Feature Specification: {display_name}",
             "",
             "**Feature Branch**: `main`",
@@ -103,143 +120,154 @@ class SpecGenerator(BaseGenerator):
             "",
         ]
 
-        # Generate user stories
+    def _generate_user_stories(self, intent_context: dict) -> list[str]:
+        """Generate user stories from endpoints."""
+        output = []
         story_num = 1
         controllers_seen = set()
 
+        # Generate controller-based stories
         for endpoint in self.analyzer.endpoints[:6]:  # Limit to first 6 controllers
             if endpoint.controller in controllers_seen:
                 continue
             controllers_seen.add(endpoint.controller)
 
-            # Generate story for this controller
-            actor, goal, benefit = self._infer_business_outcome(endpoint.controller, intent_context)
-
-            feature_name = endpoint.controller.replace("Controller", "").replace("Api", "")
-            priority = "P1" if story_num <= 3 else "P2"
-
-            output.extend(
-                [
-                    "",
-                    f"### User Story {story_num} - {feature_name} (Priority: {priority})",
-                    "",
-                    f"As a **{actor}**, I want to **{goal}**",
-                    f"so that **I can {benefit}**.",
-                    "",
-                    "**Why this priority**: Core business value - this capability directly supports the application's primary purpose.",
-                    "",
-                    "**Independent Test**: Can be tested by exercising the available endpoints and verifying that users can achieve the stated goal.",
-                    "",
-                    "**Acceptance Scenarios**:",
-                    "",
-                    "1. **Given** I have valid data, **When** I make requests, **Then** I receive accurate results",
-                    "2. **Given** I provide invalid data, **When** I attempt operations, **Then** I receive clear error messages",
-                    "",
-                    "---",
-                ]
-            )
+            output.extend(self._build_controller_story(endpoint, story_num, intent_context))
             story_num += 1
 
         # Add UI story if views exist
         if self.analyzer.view_count > 0:
-            output.extend(
-                [
-                    "",
-                    f"### User Story {story_num} - User Interface Interactions (Priority: P1)",
-                    "",
-                    "As a **system user**, I want to **interact with a web-based interface**",
-                    "so that **I can perform operations without needing to use API calls directly**.",
-                    "",
-                    f"**Why this priority**: The UI provides the primary user experience with {self.analyzer.view_count} views available.",
-                    "",
-                    "**Independent Test**: Can be fully tested by navigating through available views and verifying all interactive elements function correctly.",
-                    "",
-                    "**Acceptance Scenarios**:",
-                    "",
-                    "1. **Given** I access the application, **When** I navigate between views, **Then** the interface responds smoothly",
-                    "2. **Given** I interact with forms, **When** I submit data, **Then** it is processed correctly",
-                    "3. **Given** I view data displays, **When** information is loaded, **Then** it is presented clearly and accurately",
-                    "4. **Given** errors occur, **When** I receive feedback, **Then** messages are helpful and actionable",
-                    "",
-                    "---",
-                ]
-            )
+            output.extend(self._build_ui_story(story_num))
 
-        # Add edge cases and requirements
-        output.extend(
-            [
-                "",
-                "### Edge Cases",
-                "",
-                "- What happens when **invalid data is submitted** to API endpoints?",
-                "- How does the system handle **concurrent modifications** to the same entity?",
-                "- What occurs when **required authentication** is missing or expired?",
-                "- How does the system respond to **malformed JSON** in requests?",
-                "- What happens when **database connections fail** during operations?",
-                "",
-                "## Requirements *(mandatory)*",
-                "",
-                "### Functional Requirements",
-                "",
-            ]
-        )
+        return output
+
+    def _build_controller_story(self, endpoint, story_num: int, intent_context: dict) -> list[str]:
+        """Build a user story for a controller."""
+        actor, goal, benefit = self._infer_business_outcome(endpoint.controller, intent_context)
+        feature_name = endpoint.controller.replace("Controller", "").replace("Api", "")
+        priority = "P1" if story_num <= 3 else "P2"
+
+        return [
+            "",
+            f"### User Story {story_num} - {feature_name} (Priority: {priority})",
+            "",
+            f"As a **{actor}**, I want to **{goal}**",
+            f"so that **I can {benefit}**.",
+            "",
+            "**Why this priority**: Core business value - this capability directly supports the application's primary purpose.",
+            "",
+            "**Independent Test**: Can be tested by exercising the available endpoints and verifying that users can achieve the stated goal.",
+            "",
+            "**Acceptance Scenarios**:",
+            "",
+            "1. **Given** I have valid data, **When** I make requests, **Then** I receive accurate results",
+            "2. **Given** I provide invalid data, **When** I attempt operations, **Then** I receive clear error messages",
+            "",
+            "---",
+        ]
+
+    def _build_ui_story(self, story_num: int) -> list[str]:
+        """Build a user story for UI interactions."""
+        return [
+            "",
+            f"### User Story {story_num} - User Interface Interactions (Priority: P1)",
+            "",
+            "As a **system user**, I want to **interact with a web-based interface**",
+            "so that **I can perform operations without needing to use API calls directly**.",
+            "",
+            f"**Why this priority**: The UI provides the primary user experience with {self.analyzer.view_count} views available.",
+            "",
+            "**Independent Test**: Can be fully tested by navigating through available views and verifying all interactive elements function correctly.",
+            "",
+            "**Acceptance Scenarios**:",
+            "",
+            "1. **Given** I access the application, **When** I navigate between views, **Then** the interface responds smoothly",
+            "2. **Given** I interact with forms, **When** I submit data, **Then** it is processed correctly",
+            "3. **Given** I view data displays, **When** information is loaded, **Then** it is presented clearly and accurately",
+            "4. **Given** errors occur, **When** I receive feedback, **Then** messages are helpful and actionable",
+            "",
+            "---",
+        ]
+
+    def _generate_edge_cases(self) -> list[str]:
+        """Generate edge cases section."""
+        return [
+            "",
+            "### Edge Cases",
+            "",
+            "- What happens when **invalid data is submitted** to API endpoints?",
+            "- How does the system handle **concurrent modifications** to the same entity?",
+            "- What occurs when **required authentication** is missing or expired?",
+            "- How does the system respond to **malformed JSON** in requests?",
+            "- What happens when **database connections fail** during operations?",
+            "",
+        ]
 
         # Generate functional requirements
+        output.extend(self._generate_functional_requirements())
+
+    def _generate_functional_requirements(self) -> list[str]:
+        """Generate functional requirements based on detected features."""
+        requirements = []
         req_counter = 1
 
         # Check for authentication
         if any(ep.authenticated for ep in self.analyzer.endpoints):
-            output.append(
+            requirements.append(
                 f"- **FR-{req_counter:03d}**: System MUST provide authentication and authorization for protected endpoints"
             )
             req_counter += 1
 
-        # Check for HTTP methods
+        # Generate HTTP method requirements
+        req_counter = self._add_http_method_requirements(requirements, req_counter)
+
+        # Add core requirements
+        requirements.extend([
+            f"- **FR-{req_counter:03d}**: System MUST validate all input data for correctness and completeness",
+        ])
+        req_counter += 1
+        requirements.extend([
+            f"- **FR-{req_counter:03d}**: System MUST return appropriate HTTP status codes for all operations",
+        ])
+        req_counter += 1
+        requirements.extend([
+            f"- **FR-{req_counter:03d}**: System MUST handle errors gracefully with meaningful error messages",
+        ])
+        req_counter += 1
+
+        if self.analyzer.model_count > 0:
+            requirements.append(
+                f"- **FR-{req_counter:03d}**: System MUST persist data using {self.analyzer.model_count} defined data models"
+            )
+
+        return requirements
+
+    def _add_http_method_requirements(self, requirements: list[str], req_counter: int) -> int:
+        """Add HTTP method-specific requirements."""
         methods = set(ep.method for ep in self.analyzer.endpoints)
+        
         if "GET" in methods:
-            output.append(
+            requirements.append(
                 f"- **FR-{req_counter:03d}**: System MUST support retrieval of data via GET endpoints"
             )
             req_counter += 1
         if "POST" in methods:
-            output.append(
+            requirements.append(
                 f"- **FR-{req_counter:03d}**: System MUST support creation of new entities via POST endpoints"
             )
             req_counter += 1
         if "PUT" in methods or "PATCH" in methods:
-            output.append(
+            requirements.append(
                 f"- **FR-{req_counter:03d}**: System MUST support updates to existing entities via PUT/PATCH endpoints"
             )
             req_counter += 1
         if "DELETE" in methods:
-            output.append(
+            requirements.append(
                 f"- **FR-{req_counter:03d}**: System MUST support deletion of entities via DELETE endpoints"
             )
             req_counter += 1
 
-        output.extend(
-            [
-                f"- **FR-{req_counter:03d}**: System MUST validate all input data for correctness and completeness",
-            ]
-        )
-        req_counter += 1
-        output.extend(
-            [
-                f"- **FR-{req_counter:03d}**: System MUST return appropriate HTTP status codes for all operations",
-            ]
-        )
-        req_counter += 1
-        output.extend(
-            [
-                f"- **FR-{req_counter:03d}**: System MUST handle errors gracefully with meaningful error messages",
-            ]
-        )
-        req_counter += 1
-
-        if self.analyzer.model_count > 0:
-            output.append(
-                f"- **FR-{req_counter:03d}**: System MUST persist data using {self.analyzer.model_count} defined data models"
-            )
+        return req_counter
 
         # Key entities
         output.extend(

@@ -56,7 +56,18 @@ class ExternalSystemDetector:
         """Detect external systems from Java files and configuration."""
         external_systems = []
 
-        # Analyze Java files
+        # Analyze Java and configuration files
+        external_systems.extend(self._analyze_java_files(java_files))
+        if config_files:
+            external_systems.extend(self._analyze_config_files(config_files))
+
+        # Deduplicate and merge evidence
+        return self._deduplicate_systems(external_systems)
+
+    def _analyze_java_files(self, java_files: list[Path]) -> list[dict[str, Any]]:
+        """Analyze all Java files for external system integrations."""
+        external_systems = []
+        
         for java_file in java_files:
             try:
                 content = java_file.read_text(encoding="utf-8")
@@ -68,20 +79,27 @@ class ExternalSystemDetector:
                     log_info(f"Warning: Could not analyze {java_file.name}: {e}")
                 continue
 
-        # Analyze configuration files if provided
-        if config_files:
-            for config_file in config_files:
-                try:
-                    content = config_file.read_text(encoding="utf-8")
-                    systems = self._analyze_config_file(content, config_file)
-                    external_systems.extend(systems)
+        return external_systems
 
-                except Exception as e:
-                    if self.verbose:
-                        log_info(f"Warning: Could not analyze config {config_file.name}: {e}")
-                    continue
+    def _analyze_config_files(self, config_files: list[Path]) -> list[dict[str, Any]]:
+        """Analyze all configuration files for external system references."""
+        external_systems = []
 
-        # Deduplicate external systems
+        for config_file in config_files:
+            try:
+                content = config_file.read_text(encoding="utf-8")
+                systems = self._analyze_config_file(content, config_file)
+                external_systems.extend(systems)
+
+            except Exception as e:
+                if self.verbose:
+                    log_info(f"Warning: Could not analyze config {config_file.name}: {e}")
+                continue
+
+        return external_systems
+
+    def _deduplicate_systems(self, external_systems: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Deduplicate external systems and merge evidence."""
         unique_systems = []
         system_names_seen = set()
 
@@ -102,7 +120,18 @@ class ExternalSystemDetector:
         """Analyze Java file for external system integrations."""
         systems = []
 
-        # Check for REST client patterns
+        # Check different integration patterns using helper methods
+        systems.extend(self._detect_rest_clients(content, java_file))
+        systems.extend(self._detect_message_queues(content, java_file))
+        systems.extend(self._detect_external_databases(content, java_file))
+        systems.extend(self._detect_service_patterns(content, java_file))
+
+        return systems
+
+    def _detect_rest_clients(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Detect REST client integrations."""
+        systems = []
+        
         if self.integration_patterns["rest_client"].search(content):
             # Extract URLs to identify specific services
             url_pattern = re.compile(r'["\']https?://([^/"\']+)[^"\']*["\']')
@@ -123,7 +152,12 @@ class ExternalSystemDetector:
                     if self.verbose:
                         log_info(f"  Found external REST API: {system_name} in {java_file.name}")
 
-        # Check for message queue integrations
+        return systems
+
+    def _detect_message_queues(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Detect message queue integrations."""
+        systems = []
+        
         if self.integration_patterns["message_queue"].search(content):
             queue_names = re.findall(r'queue\s*=\s*["\']([^"\']+)["\']', content, re.IGNORECASE)
             for queue in queue_names:
@@ -140,7 +174,12 @@ class ExternalSystemDetector:
                 if self.verbose:
                     log_info(f"  Found message queue: {system_name} in {java_file.name}")
 
-        # Check for external database connections
+        return systems
+
+    def _detect_external_databases(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Detect external database connections."""
+        systems = []
+        
         db_matches = self.integration_patterns["database_external"].findall(content)
         for db_host in db_matches:
             if not any(local in db_host.lower() for local in ["localhost", "127.0.0.1", "0.0.0.0"]):
@@ -157,6 +196,12 @@ class ExternalSystemDetector:
                 if self.verbose:
                     log_info(f"  Found external database: {system_name} in {java_file.name}")
 
+        return systems
+
+    def _detect_service_patterns(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Detect specific service patterns."""
+        systems = []
+        
         # Check for specific service patterns
         for service_type, pattern in self.integration_patterns.items():
             if service_type in ["payment_gateway", "notification", "cloud_services"]:

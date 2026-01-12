@@ -188,6 +188,18 @@ class BusinessProcessIdentifier:
         """
         validations = []
 
+        # Extract different types of validations using helper methods
+        validations.extend(self._extract_basic_validations(content, java_file))
+        validations.extend(self._extract_size_validations(content, java_file))
+        validations.extend(self._extract_numeric_validations(content, java_file))
+        validations.extend(self._extract_format_validations(content, java_file))
+
+        return validations
+
+    def _extract_basic_validations(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Extract basic validation annotations (NotNull, NotEmpty, NotBlank)."""
+        validations = []
+
         # Find @NotNull annotations
         for match in self.validation_patterns["not_null"].finditer(content):
             validation = self._create_validation_rule(
@@ -212,6 +224,12 @@ class BusinessProcessIdentifier:
             if validation:
                 validations.append(validation)
 
+        return validations
+
+    def _extract_size_validations(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Extract size-related validation annotations."""
+        validations = []
+
         # Find @Size annotations
         for match in self.validation_patterns["size"].finditer(content):
             min_val = match.group(1) if match.group(1) else None
@@ -232,6 +250,12 @@ class BusinessProcessIdentifier:
                 validation["max"] = max_val
                 validations.append(validation)
 
+        return validations
+
+    def _extract_numeric_validations(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Extract numeric validation annotations (Min, Max)."""
+        validations = []
+
         # Find @Min annotations
         for match in self.validation_patterns["min"].finditer(content):
             min_val = match.group(1)
@@ -251,6 +275,12 @@ class BusinessProcessIdentifier:
             if validation:
                 validation["max_value"] = max_val
                 validations.append(validation)
+
+        return validations
+
+    def _extract_format_validations(self, content: str, java_file: Path) -> list[dict[str, Any]]:
+        """Extract format validation annotations (Email, Pattern)."""
+        validations = []
 
         # Find @Email annotations
         for match in self.validation_patterns["email"].finditer(content):

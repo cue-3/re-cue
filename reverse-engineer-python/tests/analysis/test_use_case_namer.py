@@ -5,23 +5,23 @@ Tests the UseCaseNamer class and its various naming styles,
 business terminology integration, and alternative suggestions.
 """
 
+import json
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
-import json
 
 # PyYAML is a dependency of the project, but handle import gracefully
 try:
-    import yaml
-    HAS_YAML = True
+    import importlib.util
+    HAS_YAML = importlib.util.find_spec("yaml") is not None
 except ImportError:
     HAS_YAML = False
 
 from reverse_engineer.analysis.naming import (
-    UseCaseNamer,
-    NamingStyle,
-    NamingConfig,
     NameSuggestion,
+    NamingConfig,
+    NamingStyle,
+    UseCaseNamer,
 )
 
 
@@ -557,7 +557,7 @@ class TestUseCaseNamerIntegration(unittest.TestCase):
     
     def test_can_import_from_analysis(self):
         """Test that namer can be imported from analysis package."""
-        from reverse_engineer.analysis import UseCaseNamer, NamingStyle, NamingConfig
+        from reverse_engineer.analysis import UseCaseNamer
         
         namer = UseCaseNamer()
         self.assertIsNotNone(namer)

@@ -15,7 +15,6 @@ from typing import Any, Optional
 from ...utils import log_info
 from ..base import Actor, BaseAnalyzer, Endpoint, Model, Service, SystemBoundary, UseCase, View
 
-
 # ============================================================================
 # Module-level processor functions for multiprocessing
 # These must be at module level to be picklable by multiprocessing
@@ -92,7 +91,7 @@ def _process_model_file(file_path: Path) -> Optional[dict[str, Any]]:
     """
     try:
         content = file_path.read_text(encoding="utf-8", errors="replace")
-    except Exception as e:
+    except Exception:
         # Return None to filter out files with read errors
         # The parallel processor will log this as a processing failure
         return None
@@ -207,6 +206,17 @@ class JavaSpringAnalyzer(BaseAnalyzer):
         """Discover REST endpoints from Spring controllers."""
         log_info("Discovering API endpoints...", self.verbose)
 
+        controller_files = self._discover_controller_files()
+        if not controller_files:
+            log_info("  No controllers found in project", self.verbose)
+            return self.endpoints
+
+        self._process_controller_files(controller_files)
+        log_info(f"Found {self.endpoint_count} endpoints", self.verbose)
+        return self.endpoints
+
+    def _discover_controller_files(self) -> list[Path]:
+        """Find all controller files in the project."""
         # Find controller directories
         controller_dirs: list[Path] = []
         for pattern in ["controller", "controllers", "api"]:
@@ -221,10 +231,6 @@ class JavaSpringAnalyzer(BaseAnalyzer):
             controller_files = list(self.repo_root.rglob("src/**/*Controller.java"))
             controller_dirs = list(set(f.parent for f in controller_files))
 
-        if not controller_dirs:
-            log_info("  No controllers found in project", self.verbose)
-            return self.endpoints
-
         # Collect all controller files
         all_controller_files = []
         for controller_dir in controller_dirs:
@@ -234,33 +240,33 @@ class JavaSpringAnalyzer(BaseAnalyzer):
                         log_info(f"  Skipping test controller: {java_file.name}", self.verbose)
                     continue
                 all_controller_files.append(java_file)
+        
+        return all_controller_files
 
+    def _process_controller_files(self, controller_files: list[Path]) -> None:
+        """Process controller files and extract endpoint information."""
         # Process files in parallel
-        if all_controller_files:
-            results = self._process_files_parallel(
-                all_controller_files,
-                _process_controller_file,
-                desc="Processing controllers",
-            )
+        results = self._process_files_parallel(
+            controller_files,
+            _process_controller_file,
+            desc="Processing controllers",
+        )
 
-            # Convert results to Endpoint objects
-            for result in results:
-                if "error" in result:
-                    if self.verbose:
-                        log_info(f"  Error processing {result.get('file')}: {result['error']}", self.verbose)
-                    continue
+        # Convert results to Endpoint objects
+        for result in results:
+            if "error" in result:
+                if self.verbose:
+                    log_info(f"  Error processing {result.get('file')}: {result['error']}", self.verbose)
+                continue
 
-                for endpoint_data in result.get("endpoints", []):
-                    endpoint = Endpoint(
-                        method=endpoint_data["method"],
-                        path=endpoint_data["path"],
-                        controller=endpoint_data["controller"],
-                        authenticated=endpoint_data["authenticated"],
-                    )
-                    self.endpoints.append(endpoint)
-
-        log_info(f"Found {self.endpoint_count} endpoints", self.verbose)
-        return self.endpoints
+            for endpoint_data in result.get("endpoints", []):
+                endpoint = Endpoint(
+                    method=endpoint_data["method"],
+                    path=endpoint_data["path"],
+                    controller=endpoint_data["controller"],
+                    authenticated=endpoint_data["authenticated"],
+                )
+                self.endpoints.append(endpoint)
 
     def discover_models(self) -> list[Model]:
         """Discover data models from Java entities."""

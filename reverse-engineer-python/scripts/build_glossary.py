@@ -16,7 +16,7 @@ import re
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Set, Any
+from typing import Any
 
 
 class GlossaryExtractor:
@@ -42,27 +42,27 @@ class GlossaryExtractor:
         self.acronyms = Counter()
         self.framework_terms = {}
 
-    def extract_annotations(self, content: str) -> Set[str]:
+    def extract_annotations(self, content: str) -> set[str]:
         """Extract all @Annotation patterns (Java/Spring, Python decorators)."""
         pattern = r'@\w+'
         return set(re.findall(pattern, content))
 
-    def extract_jinja2_variables(self, content: str) -> Set[str]:
+    def extract_jinja2_variables(self, content: str) -> set[str]:
         """Extract all {{VARIABLE_NAME}} patterns."""
         pattern = r'\{\{([A-Z_][A-Z0-9_]*)\}\}'
         return set(re.findall(pattern, content))
 
-    def extract_jinja2_controls(self, content: str) -> Set[str]:
+    def extract_jinja2_controls(self, content: str) -> set[str]:
         """Extract all {% control %} patterns."""
         pattern = r'\{%\s*(\w+).*?%\}'
         return set(re.findall(pattern, content))
 
-    def extract_jinja2_filters(self, content: str) -> Set[str]:
+    def extract_jinja2_filters(self, content: str) -> set[str]:
         """Extract Jinja2 filter usage."""
         pattern = r'\|\s*(\w+)'
         return set(re.findall(pattern, content))
 
-    def extract_acronyms(self, content: str) -> Set[str]:
+    def extract_acronyms(self, content: str) -> set[str]:
         """Extract technical acronyms from content (excluding code blocks)."""
         # Remove code blocks first
         content_no_code = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
@@ -76,7 +76,7 @@ class GlossaryExtractor:
 
         return found_acronyms
 
-    def extract_code_blocks(self, content: str) -> List[str]:
+    def extract_code_blocks(self, content: str) -> list[str]:
         """Extract code block languages for framework detection."""
         pattern = r'```(\w+)'
         return re.findall(pattern, content)
@@ -136,14 +136,14 @@ class GlossaryExtractor:
         for template_file in template_files:
             self.analyze_template(template_file)
 
-        print(f"\nExtracted:")
+        print("\nExtracted:")
         print(f"  - {len(self.jinja2_variables)} unique Jinja2 variables")
         print(f"  - {len(self.jinja2_controls)} unique Jinja2 controls")
         print(f"  - {len(self.annotations)} unique annotations")
         print(f"  - {len(self.acronyms)} technical acronyms")
         print(f"  - {len(self.framework_terms)} frameworks")
 
-    def build_glossary(self) -> Dict[str, Any]:
+    def build_glossary(self) -> dict[str, Any]:
         """Build comprehensive glossary structure."""
         glossary = {
             'glossary_version': '1.0.0',
@@ -286,7 +286,7 @@ class GlossaryExtractor:
         print(f"\n✓ Glossary saved to {output_path}")
         print(f"  Total terms: {self._count_terms(glossary)}")
 
-    def _count_terms(self, glossary: Dict) -> int:
+    def _count_terms(self, glossary: dict) -> int:
         """Count total terms in glossary."""
         count = 0
         for category in glossary['categories'].values():

@@ -142,59 +142,87 @@ class UseCaseMarkdownGenerator(BaseGenerator):
             return "*No use cases identified in the current analysis.*"
 
         lines = []
+        use_cases_by_actor = self._group_use_cases_by_actor()
 
-        # Group use cases by actor
+        for actor, use_cases in use_cases_by_actor.items():
+            lines.extend(self._build_actor_section(actor, use_cases))
+
+        return "\n".join(lines)
+
+    def _group_use_cases_by_actor(self) -> dict[str, list[Any]]:
+        """Group use cases by primary actor."""
         use_cases_by_actor: dict[str, list[Any]] = {}
         for use_case in self.analyzer.use_cases:
             actor = use_case.primary_actor or "System"
             if actor not in use_cases_by_actor:
                 use_cases_by_actor[actor] = []
             use_cases_by_actor[actor].append(use_case)
+        return use_cases_by_actor
 
-        for actor, use_cases in use_cases_by_actor.items():
-            lines.append(f"### {actor} {get_text('use_cases', self.language)}")
-            lines.append("")
-            lines.append(f"{get_text('total', self.language)}: {len(use_cases)} {get_text('use_cases', self.language).lower()}")
-            lines.append("")
+    def _build_actor_section(self, actor: str, use_cases: list) -> list[str]:
+        """Build a section for an actor's use cases."""
+        lines = [
+            f"### {actor} {get_text('use_cases', self.language)}",
+            "",
+            f"{get_text('total', self.language)}: {len(use_cases)} {get_text('use_cases', self.language).lower()}",
+            "",
+        ]
 
-            # Show all use cases with full detail
-            for i, use_case in enumerate(use_cases, 1):
-                lines.append(f"#### UC{i:02d}: {use_case.name}")
-                lines.append("")
-                lines.append(f"**{get_text('primary_actor', self.language)}**: {use_case.primary_actor}")
+        # Show all use cases with full detail
+        for i, use_case in enumerate(use_cases, 1):
+            lines.extend(self._format_use_case(use_case, i))
 
-                if use_case.secondary_actors:
-                    lines.append(f"**{get_text('secondary_actors', self.language)}**: {', '.join(use_case.secondary_actors)}")
+        return lines
 
-                if use_case.preconditions:
-                    lines.append("")
-                    lines.append(f"**{get_text('preconditions', self.language)}**:")
-                    for precondition in use_case.preconditions:
-                        lines.append(f"- {precondition}")
+    def _format_use_case(self, use_case, index: int) -> list[str]:
+        """Format a single use case with all details."""
+        lines = [
+            f"#### UC{index:02d}: {use_case.name}",
+            "",
+            f"**{get_text('primary_actor', self.language)}**: {use_case.primary_actor}",
+        ]
 
-                if use_case.postconditions:
-                    lines.append("")
-                    lines.append(f"**{get_text('postconditions', self.language)}**:")
-                    for postcondition in use_case.postconditions:
-                        lines.append(f"- {postcondition}")
+        if use_case.secondary_actors:
+            lines.append(f"**{get_text('secondary_actors', self.language)}**: {', '.join(use_case.secondary_actors)}")
 
-                if use_case.main_scenario:
-                    lines.append("")
-                    lines.append(f"**{get_text('main_scenario', self.language)}**:")
-                    for j, step in enumerate(use_case.main_scenario, 1):
-                        lines.append(f"{j}. {step}")
+        # Add preconditions
+        if use_case.preconditions:
+            lines.extend(self._format_list_section('preconditions', use_case.preconditions))
 
-                if use_case.extensions:
-                    lines.append("")
-                    lines.append(f"**{get_text('extensions', self.language)}**:")
-                    for extension in use_case.extensions:
-                        lines.append(f"- {extension}")
+        # Add postconditions
+        if use_case.postconditions:
+            lines.extend(self._format_list_section('postconditions', use_case.postconditions))
 
-                lines.append("")
-                lines.append("---")
-                lines.append("")
+        # Add main scenario
+        if use_case.main_scenario:
+            lines.extend(self._format_numbered_section('main_scenario', use_case.main_scenario))
 
-        return "\n".join(lines)
+        # Add extensions
+        if use_case.extensions:
+            lines.extend(self._format_list_section('extensions', use_case.extensions))
+
+        lines.extend(["", "---", ""])
+        return lines
+
+    def _format_list_section(self, section_name: str, items: list[str]) -> list[str]:
+        """Format a bulleted list section."""
+        lines = [
+            "",
+            f"**{get_text(section_name, self.language)}**:",
+        ]
+        for item in items:
+            lines.append(f"- {item}")
+        return lines
+
+    def _format_numbered_section(self, section_name: str, items: list[str]) -> list[str]:
+        """Format a numbered list section."""
+        lines = [
+            "",
+            f"**{get_text(section_name, self.language)}**:",
+        ]
+        for j, step in enumerate(items, 1):
+            lines.append(f"{j}. {step}")
+        return lines
 
     def generate(self) -> str:
         """Generate use case documentation using template."""
@@ -236,3 +264,67 @@ class UseCaseMarkdownGenerator(BaseGenerator):
         output = output.replace("{{TRANSACTION_BOUNDARIES}}", transaction_boundaries)
 
         return output
+
+    def _group_use_cases_by_actor(self) -> dict[str, list[Any]]:
+        """Group use cases by primary actor."""
+        use_cases_by_actor: dict[str, list[Any]] = {}
+        for use_case in self.analyzer.use_cases:
+            actor = use_case.primary_actor or "System"
+            if actor not in use_cases_by_actor:
+                use_cases_by_actor[actor] = []
+            use_cases_by_actor[actor].append(use_case)
+        return use_cases_by_actor
+
+    def _build_actor_section(self, actor: str, use_cases: list) -> list[str]:
+        """Build a section for an actor's use cases."""
+        lines = [
+            f"### {actor} {get_text('use_cases', self.language)}",
+            "",
+            f"{get_text('total', self.language)}: {len(use_cases)} {get_text('use_cases', self.language).lower()}",
+            "",
+        ]
+
+        for i, use_case in enumerate(use_cases, 1):
+            lines.extend(self._format_use_case(use_case, i))
+
+        return lines
+
+    def _format_use_case(self, use_case, index: int) -> list[str]:
+        """Format a single use case with all details."""
+        lines = [
+            f"#### UC{index:02d}: {use_case.name}",
+            "",
+            f"**{get_text('primary_actor', self.language)}**: {use_case.primary_actor}",
+        ]
+
+        if use_case.secondary_actors:
+            lines.append(f"**{get_text('secondary_actors', self.language)}**: {', '.join(use_case.secondary_actors)}")
+
+        if use_case.preconditions:
+            lines.extend(self._format_list_section('preconditions', use_case.preconditions))
+
+        if use_case.postconditions:
+            lines.extend(self._format_list_section('postconditions', use_case.postconditions))
+
+        if use_case.main_scenario:
+            lines.extend(self._format_numbered_section('main_scenario', use_case.main_scenario))
+
+        if use_case.extensions:
+            lines.extend(self._format_list_section('extensions', use_case.extensions))
+
+        lines.extend(["", "---", ""])
+        return lines
+
+    def _format_list_section(self, section_name: str, items: list[str]) -> list[str]:
+        """Format a bulleted list section."""
+        lines = ["", f"**{get_text(section_name, self.language)}**:"]
+        for item in items:
+            lines.append(f"- {item}")
+        return lines
+
+    def _format_numbered_section(self, section_name: str, items: list[str]) -> list[str]:
+        """Format a numbered list section."""
+        lines = ["", f"**{get_text(section_name, self.language)}**:"]
+        for j, step in enumerate(items, 1):
+            lines.append(f"{j}. {step}")
+        return lines

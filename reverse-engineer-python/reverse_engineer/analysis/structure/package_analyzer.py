@@ -139,6 +139,14 @@ class PackageStructureAnalyzer:
         """Analyze package hierarchy to identify logical subsystems."""
         boundaries = []
         java_files = list(self.repo_root.rglob("**/*.java"))
+        package_groups = self._build_package_groups(java_files)
+
+        # Create boundaries for significant package groups
+        boundaries = self._create_boundaries_from_groups(package_groups)
+        return boundaries
+
+    def _build_package_groups(self, java_files: list[Path]) -> dict[str, dict]:
+        """Build package groups from Java files."""
         package_groups = {}
 
         for java_file in java_files:
@@ -146,87 +154,85 @@ class PackageStructureAnalyzer:
             if "/test/" in str(java_file) or "\\test\\" in str(java_file):
                 continue
 
-            try:
-                content = java_file.read_text()
-                package_match = re.search(r"package\s+([^;]+);", content)
-                if package_match:
-                    package = package_match.group(1)
+            package_info = self._extract_package_info(java_file)
+            if package_info:
+                self._add_to_package_groups(package_groups, package_info, java_file)
 
-                    # Analyze package structure for domain grouping
-                    parts = package.split(".")
+        return package_groups
 
-                    # Try to identify domain packages (usually after base package)
-                    if len(parts) >= 3:
-                        # Common patterns: com.company.app.domain or com.company.domain
-                        domain_candidates = []
+    def _extract_package_info(self, java_file: Path) -> tuple[str, list[str]] | None:
+        """Extract package information from a Java file."""
+        try:
+            content = java_file.read_text()
+            package_match = re.search(r"package\s+([^;]+);", content)
+            if package_match:
+                package = package_match.group(1)
+                parts = package.split(".")
+                return package, parts
+        except Exception:
+            pass
+        return None
 
-                        # Look for domain indicators
-                        for i, part in enumerate(parts):
-                            if part in [
-                                "controller",
-                                "service",
-                                "repository",
-                                "model",
-                                "dto",
-                                "entity",
-                            ]:
-                                # The part before this is likely the domain
-                                if i > 0 and parts[i - 1] not in ["com", "org", "net", "io"]:
-                                    domain_candidates.append(parts[i - 1])
+    def _add_to_package_groups(self, package_groups: dict, package_info: tuple[str, list[str]], java_file: Path) -> None:
+        """Add Java file to appropriate package groups."""
+        package, parts = package_info
 
-                        # If no clear domain, use the last meaningful package
-                        if not domain_candidates:
-                            for part in reversed(parts):
-                                if part not in [
-                                    "com",
-                                    "org",
-                                    "net",
-                                    "io",
-                                    "app",
-                                    "application",
-                                    "main",
-                                ]:
-                                    domain_candidates.append(part)
-                                    break
+        if len(parts) >= 3:
+            domain_candidates = self._identify_domain_candidates(parts)
+            self._group_by_domains(package_groups, domain_candidates, package, java_file)
 
-                        # Group by domain
-                        for domain in domain_candidates:
-                            if domain not in package_groups:
-                                package_groups[domain] = {
-                                    "components": [],
-                                    "package_prefix": package,
-                                    "layers": set(),
-                                }
+    def _identify_domain_candidates(self, parts: list[str]) -> list[str]:
+        """Identify domain candidates from package parts."""
+        domain_candidates = []
 
-                            package_groups[domain]["components"].append(java_file.stem)
+        # Look for domain indicators
+        for i, part in enumerate(parts):
+            if part in ["controller", "service", "repository", "model", "dto", "entity"]:
+                # The part before this is likely the domain
+                if i > 0 and parts[i - 1] not in ["com", "org", "net", "io"]:
+                    domain_candidates.append(parts[i - 1])
 
-                            # Track architectural layers
-                            if "controller" in package:
-                                package_groups[domain]["layers"].add("presentation")
-                            elif "service" in package:
-                                package_groups[domain]["layers"].add("business")
-                            elif "repository" in package or "dao" in package:
-                                package_groups[domain]["layers"].add("data")
-                            elif "model" in package or "entity" in package or "dto" in package:
-                                package_groups[domain]["layers"].add("model")
-            except Exception:
-                continue
+        # If no clear domain, use the last meaningful package
+        if not domain_candidates:
+            for part in reversed(parts):
+                if part not in ["com", "org", "net", "io", "app", "application", "main"]:
+                    domain_candidates.append(part)
+                    break
 
-        # Create boundaries for significant package groups
+        return domain_candidates
+
+    def _group_by_domains(self, package_groups: dict, domain_candidates: list[str], package: str, java_file: Path) -> None:
+        """Group Java files by domain."""
+        for domain in domain_candidates:
+            if domain not in package_groups:
+                package_groups[domain] = {
+                    "components": [],
+                    "package_prefix": package,
+                    "layers": set(),
+                }
+
+            package_groups[domain]["components"].append(java_file.stem)
+            self._track_architectural_layers(package_groups[domain], package)
+
+    def _track_architectural_layers(self, domain_group: dict, package: str) -> None:
+        """Track architectural layers for a domain group."""
+        if "controller" in package:
+            domain_group["layers"].add("presentation")
+        elif "service" in package:
+            domain_group["layers"].add("business")
+        elif "repository" in package or "dao" in package:
+            domain_group["layers"].add("data")
+        elif "model" in package or "entity" in package or "dto" in package:
+            domain_group["layers"].add("model")
+
+    def _create_boundaries_from_groups(self, package_groups: dict[str, dict]) -> list[SystemBoundary]:
+        """Create boundaries for significant package groups."""
+        boundaries = []
+
         for domain, info in package_groups.items():
             if len(info["components"]) >= 2:  # Only meaningful groups
-                # Determine boundary type based on layers present
-                if len(info["layers"]) >= 3:
-                    boundary_type = "domain_subsystem"  # Full vertical slice
-                elif "presentation" in info["layers"]:
-                    boundary_type = "api_layer"
-                elif "business" in info["layers"]:
-                    boundary_type = "service_layer"
-                elif "data" in info["layers"]:
-                    boundary_type = "data_layer"
-                else:
-                    boundary_type = "subsystem"
-
+                boundary_type = self._determine_boundary_type(info["layers"])
+                
                 boundaries.append(
                     SystemBoundary(
                         name=f"{domain.replace('_', ' ').title()} Subsystem",
@@ -237,6 +243,19 @@ class PackageStructureAnalyzer:
                 )
 
         return boundaries
+
+    def _determine_boundary_type(self, layers: set[str]) -> str:
+        """Determine boundary type based on layers present."""
+        if len(layers) >= 3:
+            return "domain_subsystem"  # Full vertical slice
+        elif "presentation" in layers:
+            return "api_layer"
+        elif "business" in layers:
+            return "service_layer"
+        elif "data" in layers:
+            return "data_layer"
+        else:
+            return "subsystem"
 
     def _detect_microservice_boundaries(self):
         """Detect microservice boundaries from configuration files."""

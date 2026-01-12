@@ -2,13 +2,12 @@
 Test technology detection and plugin architecture.
 """
 
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
-import os
 
-from reverse_engineer.detectors import TechDetector, TechStack
 from reverse_engineer.analyzers import BaseAnalyzer, JavaSpringAnalyzer
+from reverse_engineer.detectors import TechDetector
 
 
 class TestTechnologyDetection(unittest.TestCase):

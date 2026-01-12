@@ -5,14 +5,14 @@ Tests parallel processing, caching, and incremental analysis across all
 supported frameworks to ensure consistent behavior.
 """
 
-import unittest
-import tempfile
 import shutil
+import tempfile
 import time
+import unittest
 from pathlib import Path
 
-from reverse_engineer.optimized_analyzer import OptimizedAnalyzer
 from reverse_engineer.analyzer import ProjectAnalyzer
+from reverse_engineer.optimized_analyzer import OptimizedAnalyzer
 
 
 # Module-level processor functions for multiprocessing (must be picklable)

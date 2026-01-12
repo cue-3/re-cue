@@ -11,12 +11,11 @@ This module provides comprehensive performance benchmarks to:
 Benchmarks establish baseline metrics and detect performance regressions.
 """
 
-import json
 import tempfile
 import time
 import unittest
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from reverse_engineer.performance import (
     CacheManager,
@@ -57,7 +56,7 @@ class PerformanceBenchmarkResult:
         duration: float,
         throughput: float = 0.0,
         memory_mb: float = 0.0,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ):
         """
         Initialize benchmark result.
@@ -75,7 +74,7 @@ class PerformanceBenchmarkResult:
         self.memory_mb = memory_mb
         self.metadata = metadata or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "name": self.name,
@@ -106,7 +105,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up benchmark environment."""
-        cls.results: List[PerformanceBenchmarkResult] = []
+        cls.results: list[PerformanceBenchmarkResult] = []
         cls.temp_dir = tempfile.mkdtemp()
         cls.project_root = Path(cls.temp_dir) / "benchmark-project"
         cls.project_root.mkdir()
@@ -127,7 +126,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             print(result)
             print("-" * 70)
 
-    def _create_java_files(self, count: int, lines_per_file: int = 50) -> List[Path]:
+    def _create_java_files(self, count: int, lines_per_file: int = 50) -> list[Path]:
         """
         Create Java files for testing.
 
@@ -145,11 +144,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         for i in range(count):
             file_path = src_dir / f"Class{i}.java"
             content_lines = [
-                f"package com.example;",
+                "package com.example;",
                 "",
-                f"import org.springframework.web.bind.annotation.*;",
+                "import org.springframework.web.bind.annotation.*;",
                 "",
-                f"@RestController",
+                "@RestController",
                 f'@RequestMapping("/api/resource{i}")',
                 f"public class Class{i} {{",
                 "",
@@ -160,10 +159,10 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             for j in range(methods_needed):
                 content_lines.extend(
                     [
-                        f"    @GetMapping",
+                        "    @GetMapping",
                         f"    public String method{j}() {{",
                         f'        return "result{j}";',
-                        f"    }}",
+                        "    }",
                         "",
                     ]
                 )
@@ -175,7 +174,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
         return files
 
-    def _create_python_files(self, count: int, lines_per_file: int = 30) -> List[Path]:
+    def _create_python_files(self, count: int, lines_per_file: int = 30) -> list[Path]:
         """
         Create Python files for testing.
 

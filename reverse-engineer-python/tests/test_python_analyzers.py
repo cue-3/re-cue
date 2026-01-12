@@ -2,11 +2,11 @@
 Test Python framework analyzers (Django, Flask, FastAPI).
 """
 
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
 
-from reverse_engineer.analyzers import DjangoAnalyzer, FlaskAnalyzer, FastAPIAnalyzer
+from reverse_engineer.analyzers import DjangoAnalyzer, FastAPIAnalyzer, FlaskAnalyzer
 
 
 class TestDjangoAnalyzer(unittest.TestCase):

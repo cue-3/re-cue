@@ -10,8 +10,6 @@ Outputs a JSON file with categorized patterns ready for translation.
 import json
 import re
 from pathlib import Path
-from typing import Any
-from collections import defaultdict
 
 
 class PatternExtractor:
@@ -36,8 +34,6 @@ class PatternExtractor:
         if not analyzer_file.exists():
             return
             
-        content = analyzer_file.read_text(encoding='utf-8')
-        
         # Extract scenario patterns (lines 1590-1629)
         scenario_patterns = [
             r'"User sends (\{[^}]+\}) request to (\{[^}]+\})"',
@@ -94,8 +90,6 @@ class PatternExtractor:
         if not process_file.exists():
             return
             
-        content = process_file.read_text(encoding='utf-8')
-        
         # Validation descriptions (lines 215-303)
         validation_patterns = [
             "Field must not be null",
@@ -251,15 +245,15 @@ class PatternExtractor:
         print(f"Repository root: {self.repo_root}")
         
         self.extract_from_analyzer_py()
-        print(f"  ✓ Extracted from analyzer.py")
+        print("  ✓ Extracted from analyzer.py")
         
         self.extract_from_process_identifier()
-        print(f"  ✓ Extracted from process_identifier.py")
+        print("  ✓ Extracted from process_identifier.py")
         
         self.extract_from_framework_analyzers()
-        print(f"  ✓ Extracted from framework analyzers")
+        print("  ✓ Extracted from framework analyzers")
         
-        print(f"\nPattern counts:")
+        print("\nPattern counts:")
         for category, patterns in self.patterns.items():
             print(f"  - {category}: {len(patterns)}")
             

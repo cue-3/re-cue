@@ -116,6 +116,22 @@ class GitAnalyzer:
             When comparing refs, uses two-dot (..) notation for direct
             comparison between from_ref and to_ref.
         """
+        # Get basic file changes
+        changed_files = self._get_basic_changed_files(from_ref, to_ref, staged_only)
+
+        # Add line count statistics
+        self._add_file_statistics(changed_files, from_ref, to_ref, staged_only)
+
+        # Include untracked files if requested
+        if include_untracked and not from_ref and not staged_only:
+            changed_files.extend(self._get_untracked_files())
+
+        return changed_files
+
+    def _get_basic_changed_files(
+        self, from_ref: Optional[str], to_ref: Optional[str], staged_only: bool
+    ) -> list[ChangedFile]:
+        """Get basic changed files without statistics."""
         if staged_only:
             # Show staged changes
             stdout, _, code = self._run_git_command(["diff", "--cached", "--name-status"])
@@ -132,7 +148,12 @@ class GitAnalyzer:
         if code != 0:
             return []
 
+        return self._parse_changed_files_output(stdout)
+
+    def _parse_changed_files_output(self, stdout: str) -> list[ChangedFile]:
+        """Parse git diff name-status output into ChangedFile objects."""
         changed_files = []
+        
         for line in stdout.strip().split("\n"):
             if not line:
                 continue
@@ -155,7 +176,16 @@ class GitAnalyzer:
                     )
                 )
 
-        # Get addition/deletion stats
+        return changed_files
+
+    def _add_file_statistics(
+        self,
+        changed_files: list[ChangedFile],
+        from_ref: Optional[str],
+        to_ref: Optional[str],
+        staged_only: bool,
+    ) -> None:
+        """Add addition/deletion statistics to changed files."""
         if from_ref:
             to_ref = to_ref or "HEAD"
             stat_stdout, _, _ = self._run_git_command(
@@ -166,9 +196,18 @@ class GitAnalyzer:
         else:
             stat_stdout, _, _ = self._run_git_command(["diff", "--numstat"])
 
-        # Parse numstat output for line counts
+        # Parse and apply statistics
+        stat_map = self._parse_numstat_output(stat_stdout)
+        
+        for cf in changed_files:
+            if cf.path in stat_map:
+                cf.additions, cf.deletions, cf.is_binary = stat_map[cf.path]
+
+    def _parse_numstat_output(self, stat_stdout: str) -> dict[str, tuple[int, int, bool]]:
+        """Parse git diff --numstat output."""
         # Note: Git shows '-' for binary files in numstat
         stat_map: dict[str, tuple[int, int, bool]] = {}  # (additions, deletions, is_binary)
+        
         for line in stat_stdout.strip().split("\n"):
             if not line:
                 continue
@@ -185,21 +224,21 @@ class GitAnalyzer:
                     # If conversion fails, mark as binary
                     stat_map[path] = (0, 0, True)
 
-        # Update changed files with stats
-        for cf in changed_files:
-            if cf.path in stat_map:
-                cf.additions, cf.deletions, cf.is_binary = stat_map[cf.path]
+        return stat_map
 
-        # Include untracked files if requested
-        if include_untracked and not from_ref and not staged_only:
-            untracked_stdout, _, _ = self._run_git_command(
-                ["ls-files", "--others", "--exclude-standard"]
-            )
-            for line in untracked_stdout.strip().split("\n"):
-                if line:
-                    changed_files.append(ChangedFile(path=line, change_type=FileChangeType.ADDED))
+    def _get_untracked_files(self) -> list[ChangedFile]:
+        """Get list of untracked files."""
+        untracked_files = []
+        
+        untracked_stdout, _, _ = self._run_git_command(
+            ["ls-files", "--others", "--exclude-standard"]
+        )
+        
+        for line in untracked_stdout.strip().split("\n"):
+            if line:
+                untracked_files.append(ChangedFile(path=line, change_type=FileChangeType.ADDED))
 
-        return changed_files
+        return untracked_files
 
     def _parse_change_type(self, status: str) -> FileChangeType:
         """Parse Git status character to FileChangeType."""

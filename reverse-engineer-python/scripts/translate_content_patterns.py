@@ -14,7 +14,6 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
 
 try:
     import anthropic
@@ -109,7 +108,7 @@ English: "Field size must be minimum length {min} and maximum length {max}"
 IMPORTANT: Return ONLY the translation, no explanations or additional text.
 """
 
-    def translate_patterns(self, patterns: Dict, target_lang: str) -> Dict:
+    def translate_patterns(self, patterns: dict, target_lang: str) -> dict:
         """Translate all patterns to target language."""
         if target_lang not in self.SUPPORTED_LANGUAGES:
             raise ValueError(f"Unsupported language: {target_lang}")
@@ -240,7 +239,7 @@ def main():
         print(f"Error: Input file not found: {args.input}")
         sys.exit(1)
         
-    with open(args.input, 'r', encoding='utf-8') as f:
+    with open(args.input, encoding='utf-8') as f:
         data = json.load(f)
     
     patterns = data.get('patterns', {})

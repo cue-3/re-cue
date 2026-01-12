@@ -227,15 +227,15 @@ public class Resource{i}Service {{
         # Calculate speedup
         speedup = seq_time / par_time if par_time > 0 else 1.0
 
-        print(f"\n  ======================================")
-        print(f"  Performance Comparison")
-        print(f"  ======================================")
+        print("\n  ======================================")
+        print("  Performance Comparison")
+        print("  ======================================")
         print(f"  Sequential time: {seq_time:.3f}s")
         print(f"  Parallel time:   {par_time:.3f}s")
         print(f"  Speedup:         {speedup:.2f}x")
-        print(f"  ======================================")
+        print("  ======================================")
         print(f"  Files processed: {len(endpoints_seq)} controllers, {len(models_seq)} models, {len(services_seq)} services")
-        print(f"  ======================================")
+        print("  ======================================")
 
         # Note: Parallel processing should be at least as fast (accounting for overhead on small datasets)
         # On larger datasets, we expect significant speedup
@@ -263,7 +263,7 @@ public class Resource{i}Service {{
             times.append(elapsed)
             print(f"\n  {workers} worker(s): {elapsed:.3f}s")
 
-        print(f"\n  Scaling efficiency:")
+        print("\n  Scaling efficiency:")
         for i, workers in enumerate(worker_counts):
             if i > 0:
                 baseline_ratio = worker_counts[i] / worker_counts[0]

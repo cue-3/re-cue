@@ -8,10 +8,7 @@ import time
 import unittest
 from pathlib import Path
 
-from reverse_engineer.cache_manager import (
-    CacheManager,
-    CacheStatistics
-)
+from reverse_engineer.cache_manager import CacheManager, CacheStatistics
 
 
 class TestCacheManager(unittest.TestCase):
@@ -385,7 +382,7 @@ class TestCacheManager(unittest.TestCase):
         cache.save_cache()
         
         # Verify cache file format
-        with open(cache.cache_file, 'r') as f:
+        with open(cache.cache_file) as f:
             data = json.load(f)
         
         self.assertIn('version', data)

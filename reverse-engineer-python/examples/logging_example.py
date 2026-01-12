@@ -11,10 +11,11 @@ This script shows various logging features including:
 """
 
 from pathlib import Path
+
 from reverse_engineer.logging_config import (
+    PerformanceLogger,
     configure_logging,
     get_logger,
-    PerformanceLogger,
     log_info,
     log_warning,
 )
@@ -160,7 +161,7 @@ def example_error_logging():
 
     try:
         # Simulate an error
-        1 / 0
+        _ = 1 / 0  # Will raise ZeroDivisionError
     except ZeroDivisionError:
         logger.error("Mathematical error occurred", exc_info=True)
 

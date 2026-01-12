@@ -18,7 +18,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 try:
     import anthropic
@@ -51,7 +51,7 @@ class TemplateTranslator:
     def __init__(
         self,
         config: TranslationConfig,
-        glossary: Dict,
+        glossary: dict,
         source_lang: str = 'en',
         target_lang: str = 'es',
         verbose: bool = False
@@ -280,7 +280,7 @@ Output (""" + target_lang_name + """):
         self,
         source_dir: Path,
         target_dir: Path,
-        file_patterns: Optional[List[str]] = None,
+        file_patterns: Optional[list[str]] = None,
         force: bool = False,
         max_workers: int = 3
     ) -> None:
@@ -328,7 +328,7 @@ Output (""" + target_lang_name + """):
         print("=" * 70)
 
 
-def load_glossary(glossary_path: Path) -> Dict:
+def load_glossary(glossary_path: Path) -> dict:
     """Load glossary from JSON file."""
     if not glossary_path.exists():
         raise FileNotFoundError(
@@ -336,7 +336,7 @@ def load_glossary(glossary_path: Path) -> Dict:
             f"Run: python scripts/build_glossary.py"
         )
 
-    with open(glossary_path, 'r', encoding='utf-8') as f:
+    with open(glossary_path, encoding='utf-8') as f:
         return json.load(f)
 
 
@@ -438,7 +438,7 @@ def main():
             return 1
 
         print("\n✓ Translation complete!")
-        print(f"\nNext steps:")
+        print("\nNext steps:")
         print(f"  1. Validate translations: python scripts/validate_translations.py --lang {args.lang}")
         print(f"  2. Review output in: {target_dir}")
         print(f"  3. Test with: reverse-engineer --use-cases --lang {args.lang} /path/to/project")

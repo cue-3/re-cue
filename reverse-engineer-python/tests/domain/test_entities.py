@@ -6,14 +6,14 @@ import unittest
 from pathlib import Path
 
 from reverse_engineer.domain import (
+    Actor,
     Endpoint,
     Model,
-    View,
-    Service,
-    Actor,
-    SystemBoundary,
     Relationship,
+    Service,
+    SystemBoundary,
     UseCase,
+    View,
 )
 
 

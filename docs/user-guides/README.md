@@ -19,7 +19,7 @@ Power-user workflows, customization, performance tuning, and integrations.
 |-------|----------|-------|------|
 | **[Getting Started](./GETTING-STARTED.md)** | New users | Setup, first analysis, basics | 30 min |
 | **[User Guide](./USER-GUIDE.md)** | All users | Complete feature reference | 2 hours |
-| **[Advanced Usage](./ADVANCED** | Power users | Customization, optimization | 3 hours |
+| **[Advanced Usage](./ADVANCED-USAGE.md)** | Power users | Customization, optimization | 3 hours |
 | **[Best Practices](./BEST-PRACTICES.md)** | All levels | Proven workflows and patterns | 1.5 hours |
 | **[VS Code Extension](./VSCODE-EXTENSION.md)** | VS Code users | IDE integration features | 1 hour |
 | **[Troubleshooting](./TROUBLESHOOTING.md)** | All users | Common issues and solutions | Reference |
@@ -29,8 +29,7 @@ Power-user workflows, customization, performance tuning, and integrations.
 ### By Experience Level
 - **Beginner**: [Getting Started](./GETTING-STARTED.md) → [User Guide](./USER-GUIDE.md) → [Best Practices](./BEST-PRACTICES.md)
 - **Intermediate**: [User Guide](./USER-GUIDE.md) → [Advanced Usage](./ADVANCED-USAGE.md) → [Best Practices](./BEST-PRACTICES.md)
-- **Advanced**: [Advanced Usage](./ADVANCED-USAGE.md) → [Best Practices](./BEST-PRACTICES.md) → [VS Code Extension](.| **[User Guide](./USER-GUIDE.md)** | All users | Complete feature reference | 2 hours |
-| **[AdvanR-GUIDE.md) → [VS Code Extension](./VSCODE-EXTENSION.md)
+- **Advanced**: [Advanced Usage](./ADVANCED-USAGE.md) → [Best Practices](./BEST-PRACTICES.md) → [VS Code Extension](./VSCODE-EXTENSION.md)
 - **DevOps Engineers**: [User Guide](./USER-GUIDE.md) → [Best Practices](./BEST-PRACTICES.md) → [Advanced Usage](./ADVANCED-USAGE.md)
 - **Team Leads**: [Best Practices](./BEST-PRACTICES.md) → [User Guide](./USER-GUIDE.md) → [Advanced Usage](./ADVANCED-USAGE.md)
 - **Architects**: [User Guide](./USER-GUIDE.md) → [Advanced Usage](./ADVANCED-USAGE.md) → [Best Practices](./BEST-PRACTICES.md)
@@ -41,7 +40,7 @@ RE-cue analyzes your code and generates comprehensive documentation:
 
 | Document Type | Description | Audience |
 |---------------|-------------|----------|
-| **Feature Specifica- **Advanced**: [Advanced Usaser stories | PMs, stakeholders |
+| **Feature Specifications** | Advanced User stories | PMs, stakeholders |
 | **Implementation Plans** | Technical architecture and component details | Developers, architects |
 | **Data Models** | Database schemas and entity relationships | DBAs, developers |
 | **Use Cases** | Business processes with actors and workflows | Business analysts |

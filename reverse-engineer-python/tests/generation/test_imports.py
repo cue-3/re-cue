@@ -9,16 +9,16 @@ class TestGenerationImports(unittest.TestCase):
     def test_import_from_generation_package(self):
         """Test importing generators from new generation package."""
         from reverse_engineer.generation import (
-            BaseGenerator,
-            SpecGenerator,
-            PlanGenerator,
-            DataModelGenerator,
-            ApiContractGenerator,
-            UseCaseMarkdownGenerator,
-            StructureDocGenerator,
             ActorDocGenerator,
+            ApiContractGenerator,
+            BaseGenerator,
             BoundaryDocGenerator,
+            DataModelGenerator,
             FourPlusOneDocGenerator,
+            PlanGenerator,
+            SpecGenerator,
+            StructureDocGenerator,
+            UseCaseMarkdownGenerator,
             VisualizationGenerator,
         )
         
@@ -38,16 +38,16 @@ class TestGenerationImports(unittest.TestCase):
     def test_backward_compatibility_import(self):
         """Test importing generators from old generators module."""
         from reverse_engineer.generators import (
-            BaseGenerator,
-            SpecGenerator,
-            PlanGenerator,
-            DataModelGenerator,
-            ApiContractGenerator,
-            UseCaseMarkdownGenerator,
-            StructureDocGenerator,
             ActorDocGenerator,
+            ApiContractGenerator,
+            BaseGenerator,
             BoundaryDocGenerator,
+            DataModelGenerator,
             FourPlusOneDocGenerator,
+            PlanGenerator,
+            SpecGenerator,
+            StructureDocGenerator,
+            UseCaseMarkdownGenerator,
             VisualizationGenerator,
         )
         

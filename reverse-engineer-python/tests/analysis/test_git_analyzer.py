@@ -4,21 +4,20 @@ Unit tests for Git integration module.
 Tests for GitAnalyzer and ChangelogGenerator functionality.
 """
 
+import subprocess
 import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
-import subprocess
-import os
 
-from reverse_engineer.analysis.git import GitAnalyzer, ChangelogGenerator
+from reverse_engineer.analysis.git import ChangelogGenerator, GitAnalyzer
 from reverse_engineer.domain.git import (
-    FileChangeType,
-    ChangedFile,
-    CommitInfo,
     BlameResult,
-    GitAnalysisResult,
+    ChangedFile,
     Changelog,
+    CommitInfo,
+    FileChangeType,
+    GitAnalysisResult,
 )
 
 

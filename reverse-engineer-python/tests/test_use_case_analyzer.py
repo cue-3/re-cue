@@ -6,15 +6,9 @@ system boundaries, relationships, and use cases.
 
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
-from reverse_engineer.analyzer import (
-    ProjectAnalyzer, 
-    Actor, 
-    SystemBoundary, 
-    Relationship, 
-    UseCase
-)
+from reverse_engineer.analyzer import Actor, ProjectAnalyzer, Relationship, SystemBoundary, UseCase
 
 
 class TestUseCaseDataClasses(unittest.TestCase):

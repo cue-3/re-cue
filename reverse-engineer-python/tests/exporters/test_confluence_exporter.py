@@ -8,14 +8,14 @@ Tests cover:
 - Multiple file export
 """
 
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-import tempfile
 
 from reverse_engineer.exporters.confluence import (
-    ConfluenceExporter,
     ConfluenceConfig,
+    ConfluenceExporter,
     ConfluencePageResult,
     MarkdownToConfluenceConverter,
 )

@@ -9,8 +9,9 @@ from pathlib import Path
 # Add the parent directory to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from reverse_engineer.generators import FourPlusOneDocGenerator
 from reverse_engineer.analyzer import ProjectAnalyzer
+from reverse_engineer.generators import FourPlusOneDocGenerator
+
 
 def test_fourplusone_generation():
     """Test the 4+1 architecture document generation."""
@@ -35,7 +36,7 @@ def test_fourplusone_generation():
     analyzer.map_relationships()
     analyzer.extract_use_cases()
     
-    print(f"\n📊 Discovery Results:")
+    print("\n📊 Discovery Results:")
     print(f"   • Endpoints: {analyzer.endpoint_count}")
     print(f"   • Models: {analyzer.model_count}")
     print(f"   • Views: {analyzer.view_count}")

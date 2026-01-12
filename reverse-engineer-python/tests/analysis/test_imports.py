@@ -9,14 +9,14 @@ class TestAnalysisImports(unittest.TestCase):
     def test_import_from_analysis_package(self):
         """Test importing from new analysis package."""
         from reverse_engineer.analysis import (
-            SecurityPatternAnalyzer,
-            ExternalSystemDetector,
-            UIPatternAnalyzer,
-            PackageStructureAnalyzer,
-            CommunicationPatternDetector,
             ActorSystemMapper,
-            SystemSystemMapper,
             BusinessProcessIdentifier,
+            CommunicationPatternDetector,
+            ExternalSystemDetector,
+            PackageStructureAnalyzer,
+            SecurityPatternAnalyzer,
+            SystemSystemMapper,
+            UIPatternAnalyzer,
         )
         
         # Verify all classes are importable
@@ -31,13 +31,13 @@ class TestAnalysisImports(unittest.TestCase):
     
     def test_import_from_subpackages(self):
         """Test importing from analysis subpackages."""
-        from reverse_engineer.analysis.security import SecurityPatternAnalyzer
-        from reverse_engineer.analysis.boundaries import ExternalSystemDetector
-        from reverse_engineer.analysis.ui_patterns import UIPatternAnalyzer
-        from reverse_engineer.analysis.structure import PackageStructureAnalyzer
-        from reverse_engineer.analysis.communication import CommunicationPatternDetector
         from reverse_engineer.analysis.actors import ActorSystemMapper
+        from reverse_engineer.analysis.boundaries import ExternalSystemDetector
         from reverse_engineer.analysis.business_process import BusinessProcessIdentifier
+        from reverse_engineer.analysis.communication import CommunicationPatternDetector
+        from reverse_engineer.analysis.security import SecurityPatternAnalyzer
+        from reverse_engineer.analysis.structure import PackageStructureAnalyzer
+        from reverse_engineer.analysis.ui_patterns import UIPatternAnalyzer
         
         # Verify all can be imported from subpackages
         self.assertIsNotNone(SecurityPatternAnalyzer)

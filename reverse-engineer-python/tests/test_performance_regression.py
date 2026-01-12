@@ -11,7 +11,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from reverse_engineer.performance import CacheManager, OptimizedAnalyzer
 
@@ -45,7 +45,7 @@ class PerformanceBaseline:
         if baseline_file is None:
             baseline_file = Path(__file__).parent / "performance_baseline.json"
         self.baseline_file = baseline_file
-        self.baselines: Dict[str, Dict[str, float]] = {}
+        self.baselines: dict[str, dict[str, float]] = {}
         self._load_baselines()
 
     def _load_baselines(self):
@@ -60,7 +60,7 @@ class PerformanceBaseline:
         else:
             self.baselines = self._get_default_baselines()
 
-    def _get_default_baselines(self) -> Dict[str, Dict[str, float]]:
+    def _get_default_baselines(self) -> dict[str, dict[str, float]]:
         """
         Get default baseline metrics.
 
@@ -111,7 +111,7 @@ class PerformanceBaseline:
         except Exception as e:
             print(f"Warning: Could not save baselines: {e}")
 
-    def get_baseline(self, test_name: str) -> Optional[Dict[str, float]]:
+    def get_baseline(self, test_name: str) -> Optional[dict[str, float]]:
         """
         Get baseline metrics for a test.
 
@@ -123,7 +123,7 @@ class PerformanceBaseline:
         """
         return self.baselines.get(test_name)
 
-    def update_baseline(self, test_name: str, metrics: Dict[str, float]):
+    def update_baseline(self, test_name: str, metrics: dict[str, float]):
         """
         Update baseline metrics for a test.
 
@@ -327,7 +327,6 @@ class TestPerformanceRegression(unittest.TestCase):
         analyzer2.process_files_optimized(files, regression_processor_simple, "Second")
         duration_second = time.time() - start
 
-        stats = analyzer2.cache_manager.get_statistics()
         speedup = duration_first / duration_second if duration_second > 0 else 0
 
         # Get hit rate from second run only (not cumulative)

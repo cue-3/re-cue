@@ -26,6 +26,32 @@ if PLUGIN_ARCHITECTURE_AVAILABLE:
 
 def interactive_mode():
     """Run interactive mode to gather user inputs."""
+    _print_interactive_header()
+    print("Let's configure your reverse engineering session.\n")
+
+    # Gather inputs
+    project_path = _get_project_path()
+    gen_opts = _get_all_generation_options()
+    
+    # Validate at least one option selected
+    if not any(gen_opts.values()):
+        print("❌ Error: At least one generation option must be selected.", file=sys.stderr)
+        sys.exit(1)
+    
+    # Get additional configuration
+    description = _get_description_if_needed(gen_opts["spec"])
+    output_format = _get_output_format()
+    verbose = _get_verbose_option()
+    
+    # Display summary and confirm
+    _display_summary_and_confirm(project_path, gen_opts, description, output_format, verbose)
+    
+    # Build and return config
+    return _build_config(project_path, gen_opts, description, output_format, verbose)
+
+
+def _print_interactive_header() -> None:
+    """Print the interactive mode header."""
     print("""
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                   RE-cue - Reverse Engineering                             ║
@@ -33,9 +59,9 @@ def interactive_mode():
 ╚════════════════════════════════════════════════════════════════════════════╝
 """)
 
-    print("Let's configure your reverse engineering session.\n")
 
-    # Ask for project path
+def _get_project_path() -> str | None:
+    """Get and validate project path from user."""
     print("📁 Project Path")
     print("   Enter the path to the project you want to analyze.")
     print("   Press Enter to use the current directory.")
@@ -53,95 +79,89 @@ def interactive_mode():
             sys.exit(1)
 
     print()
+    return project_path
 
-    # Ask what to generate
+
+def _get_all_generation_options() -> dict[str, bool]:
+    """Get all generation options from user."""
     print("📝 What would you like to generate?")
     print("   You can select multiple options (y/n for each)")
     print()
 
-    generate_spec = input("   Generate specification (spec.md)? [Y/n]: ").strip().lower()
-    generate_spec = generate_spec != "n"
+    return {
+        "spec": _get_yes_no_input("Generate specification (spec.md)?"),
+        "plan": _get_yes_no_input("Generate implementation plan (plan.md)?"),
+        "data_model": _get_yes_no_input("Generate data model documentation (data-model.md)?"),
+        "api_contract": _get_yes_no_input("Generate API contract (api-spec.json)?"),
+        "use_cases": _get_yes_no_input("Generate use case analysis (use-cases.md)?"),
+        "quality": _get_yes_no_input("Generate code quality report (quality-report.md)?"),
+    }
 
-    generate_plan = input("   Generate implementation plan (plan.md)? [Y/n]: ").strip().lower()
-    generate_plan = generate_plan != "n"
 
-    generate_data_model = (
-        input("   Generate data model documentation (data-model.md)? [Y/n]: ").strip().lower()
-    )
-    generate_data_model = generate_data_model != "n"
+def _get_yes_no_input(prompt: str) -> bool:
+    """Get yes/no input from user (default yes)."""
+    response = input(f"   {prompt} [Y/n]: ").strip().lower()
+    return response != "n"
 
-    generate_api_contract = (
-        input("   Generate API contract (api-spec.json)? [Y/n]: ").strip().lower()
-    )
-    generate_api_contract = generate_api_contract != "n"
 
-    generate_use_cases = (
-        input("   Generate use case analysis (use-cases.md)? [Y/n]: ").strip().lower()
-    )
-    generate_use_cases = generate_use_cases != "n"
-
-    generate_quality = (
-        input("   Generate code quality report (quality-report.md)? [Y/n]: ").strip().lower()
-    )
-    generate_quality = generate_quality != "n"
-
-    print()
-
-    # Check if at least one option selected
-    if not any(
-        [
-            generate_spec,
-            generate_plan,
-            generate_data_model,
-            generate_api_contract,
-            generate_use_cases,
-            generate_quality,
-        ]
-    ):
-        print("❌ Error: At least one generation option must be selected.", file=sys.stderr)
+def _get_description_if_needed(spec_enabled: bool) -> str | None:
+    """Get project description if spec generation is enabled."""
+    if not spec_enabled:
+        return None
+        
+    print("\n📄 Project Description")
+    print("   Describe the project intent (e.g., 'forecast sprint delivery')")
+    description = input("   Description: ").strip()
+    if not description:
+        print("\n❌ Error: Description is required for spec generation.", file=sys.stderr)
         sys.exit(1)
+    print()
+    return description
 
-    # Ask for description if spec is selected
-    description = None
-    if generate_spec:
-        print("📄 Project Description")
-        print("   Describe the project intent (e.g., 'forecast sprint delivery')")
-        description = input("   Description: ").strip()
-        if not description:
-            print("\n❌ Error: Description is required for spec generation.", file=sys.stderr)
-            sys.exit(1)
-        print()
 
-    # Ask for output format
+def _get_output_format() -> str:
+    """Get output format from user."""
     print("📋 Output Format")
     format_input = input("   Choose format (markdown/json) [markdown]: ").strip().lower()
-    output_format = format_input if format_input in ["markdown", "json"] else "markdown"
     print()
+    return format_input if format_input in ["markdown", "json"] else "markdown"
 
-    # Ask for verbose mode
+
+def _get_verbose_option() -> bool:
+    """Get verbose mode option from user."""
     verbose_input = input("🔍 Enable verbose mode for detailed progress? [y/N]: ").strip().lower()
-    verbose = verbose_input == "y"
     print()
+    return verbose_input == "y"
 
-    # Display summary and confirm
+
+def _display_summary_and_confirm(
+    project_path: str | None,
+    gen_opts: dict[str, bool],
+    description: str | None,
+    output_format: str,
+    verbose: bool
+) -> None:
+    """Display configuration summary and get user confirmation."""
     print("═══════════════════════════════════════════════════════════════════")
     print("  Configuration Summary")
     print("═══════════════════════════════════════════════════════════════════")
     print()
     print(f"📁 Project Path: {project_path or 'Current directory (auto-detect)'}")
     print("📝 Generating:")
-    if generate_spec:
-        print("   ✓ Specification (spec.md)")
-    if generate_plan:
-        print("   ✓ Implementation Plan (plan.md)")
-    if generate_data_model:
-        print("   ✓ Data Model (data-model.md)")
-    if generate_api_contract:
-        print("   ✓ API Contract (api-spec.json)")
-    if generate_use_cases:
-        print("   ✓ Use Case Analysis (use-cases.md)")
-    if generate_quality:
-        print("   ✓ Code Quality Report (quality-report.md)")
+    
+    doc_names = {
+        "spec": "Specification (spec.md)",
+        "plan": "Implementation Plan (plan.md)",
+        "data_model": "Data Model (data-model.md)",
+        "api_contract": "API Contract (api-spec.json)",
+        "use_cases": "Use Case Analysis (use-cases.md)",
+        "quality": "Code Quality Report (quality-report.md)",
+    }
+    
+    for key, name in doc_names.items():
+        if gen_opts[key]:
+            print(f"   ✓ {name}")
+    
     if description:
         print(f"📄 Description: {description}")
     print(f"📋 Format: {output_format}")
@@ -154,21 +174,28 @@ def interactive_mode():
     if confirm == "n":
         print("\n❌ Operation cancelled by user.")
         sys.exit(0)
-
     print()
 
-    # Return configuration as a namespace object similar to argparse
+
+def _build_config(
+    project_path: str | None,
+    gen_opts: dict[str, bool],
+    description: str | None,
+    output_format: str,
+    verbose: bool
+):
+    """Build configuration object from interactive inputs."""
     class Config:
         pass
 
     config = Config()
     config.path = project_path
-    config.spec = generate_spec
-    config.plan = generate_plan
-    config.data_model = generate_data_model
-    config.api_contract = generate_api_contract
-    config.use_cases = generate_use_cases
-    config.quality = generate_quality
+    config.spec = gen_opts["spec"]
+    config.plan = gen_opts["plan"]
+    config.data_model = gen_opts["data_model"]
+    config.api_contract = gen_opts["api_contract"]
+    config.use_cases = gen_opts["use_cases"]
+    config.quality = gen_opts["quality"]
     config.description = description
     config.format = output_format
     config.verbose = verbose
@@ -868,7 +895,25 @@ def run_phased_analysis(args):
     """Run analysis in phases with separate documents."""
     from .phase_manager import PhaseManager, run_phase_1, run_phase_2, run_phase_3, run_phase_4
 
-    # Find repository root - check both positional and flag arguments
+    # Setup paths
+    repo_root = _get_repo_root(args)
+    output_dir = _setup_output_directory(args, repo_root)
+
+    # Initialize components
+    phase_manager = PhaseManager(repo_root, output_dir)
+    analyzer = _create_phased_analyzer(args, repo_root)
+
+    # Execute requested phase(s)
+    _execute_phases(args.phase, analyzer, phase_manager, args.verbose)
+
+    # Report completion
+    print("\n" + "═" * 70, file=sys.stderr)
+    print(f"📁 All documents saved to: {output_dir}", file=sys.stderr)
+    print("═" * 70 + "\n", file=sys.stderr)
+
+
+def _get_repo_root(args) -> Path:
+    """Get and validate repository root path."""
     project_path = args.project_path or args.path
     if project_path:
         repo_root = Path(project_path).resolve()
@@ -878,20 +923,23 @@ def run_phased_analysis(args):
         if not repo_root.is_dir():
             print(f"Error: Specified path is not a directory: {project_path}", file=sys.stderr)
             sys.exit(1)
+        return repo_root
     else:
         repo_root = find_repo_root(Path.cwd())
         if not repo_root:
             print("Error: Could not determine repository root.", file=sys.stderr)
             print("Tip: Use --path to specify the project directory.", file=sys.stderr)
             sys.exit(1)
+        return repo_root
 
-    # Setup output directory
+
+def _setup_output_directory(args, repo_root: Path) -> Path:
+    """Setup and validate output directory for phased analysis."""
     print("\n=== DEBUG: Output Directory Setup ===", file=sys.stderr)
     print(f"args.output_dir = {args.output_dir!r}", file=sys.stderr)
     print(f"repo_root = {repo_root}", file=sys.stderr)
 
     if args.output_dir:
-        # Use specified output directory
         if args.output_dir == ".":
             output_dir = repo_root
             print("Using repo_root as output_dir (output_dir='.')", file=sys.stderr)
@@ -899,7 +947,6 @@ def run_phased_analysis(args):
             output_dir = Path(args.output_dir).resolve()
             print(f"Using resolved output_dir: {output_dir}", file=sys.stderr)
     else:
-        # Default: save to re-<project_name> in project root
         project_name = repo_root.name
         output_dir = repo_root / f"re-{project_name}"
         print(f"No --output-dir specified, using default: {output_dir}", file=sys.stderr)
@@ -908,19 +955,16 @@ def run_phased_analysis(args):
     print("=====================================\n", file=sys.stderr)
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
 
-    # Initialize phase manager
-    phase_manager = PhaseManager(repo_root, output_dir)
 
-    # Get naming style from args
+def _create_phased_analyzer(args, repo_root: Path):
+    """Create ProjectAnalyzer for phased analysis."""
     naming_style = getattr(args, "naming_style", "business")
     template_language = getattr(args, "template_language", "en")
 
-    # Initialize analyzer
     log_section("RE-cue - Phased Reverse Engineering")
-    # Note: Using _suppress_deprecation_warning since CLI is the official interface
-    # and will be updated when framework-specific analyzers fully support all features
-    analyzer = ProjectAnalyzer(
+    return ProjectAnalyzer(
         repo_root,
         verbose=args.verbose,
         enable_optimizations=args.parallel,
@@ -931,37 +975,34 @@ def run_phased_analysis(args):
         _suppress_deprecation_warning=True,
     )
 
-    # Determine which phase to run
-    phase = args.phase
+
+def _execute_phases(phase: str, analyzer, phase_manager, verbose: bool) -> None:
+    """Execute the requested phase(s) with state validation."""
+    from .phase_manager import run_phase_1, run_phase_2, run_phase_3, run_phase_4
 
     if phase == "all":
-        # Run all phases sequentially
-        run_phase_1(analyzer, phase_manager, args.verbose)
-        run_phase_2(analyzer, phase_manager, args.verbose)
-        run_phase_3(analyzer, phase_manager, args.verbose)
-        run_phase_4(analyzer, phase_manager, args.verbose)
+        run_phase_1(analyzer, phase_manager, verbose)
+        run_phase_2(analyzer, phase_manager, verbose)
+        run_phase_3(analyzer, phase_manager, verbose)
+        run_phase_4(analyzer, phase_manager, verbose)
     elif phase == "1":
-        run_phase_1(analyzer, phase_manager, args.verbose)
+        run_phase_1(analyzer, phase_manager, verbose)
     elif phase == "2":
-        # Load previous state if exists
-        state = phase_manager.load_state()
-        if state and state.get("last_phase") != "1":
-            print("Warning: Phase 1 may not have been completed yet.", file=sys.stderr)
-        run_phase_2(analyzer, phase_manager, args.verbose)
+        _validate_previous_phase(phase_manager, "1")
+        run_phase_2(analyzer, phase_manager, verbose)
     elif phase == "3":
-        state = phase_manager.load_state()
-        if state and state.get("last_phase") not in ["1", "2"]:
-            print("Warning: Previous phases may not have been completed yet.", file=sys.stderr)
-        run_phase_3(analyzer, phase_manager, args.verbose)
+        _validate_previous_phase(phase_manager, "1", "2")
+        run_phase_3(analyzer, phase_manager, verbose)
     elif phase == "4":
-        state = phase_manager.load_state()
-        if state and state.get("last_phase") not in ["1", "2", "3"]:
-            print("Warning: Previous phases may not have been completed yet.", file=sys.stderr)
-        run_phase_4(analyzer, phase_manager, args.verbose)
+        _validate_previous_phase(phase_manager, "1", "2", "3")
+        run_phase_4(analyzer, phase_manager, verbose)
 
-    print("\n" + "═" * 70, file=sys.stderr)
-    print(f"📁 All documents saved to: {output_dir}", file=sys.stderr)
-    print("═" * 70 + "\n", file=sys.stderr)
+
+def _validate_previous_phase(phase_manager, *expected_phases: str) -> None:
+    """Validate that previous phases were completed."""
+    state = phase_manager.load_state()
+    if state and state.get("last_phase") not in expected_phases:
+        print("Warning: Previous phases may not have been completed yet.", file=sys.stderr)
 
 
 def list_frameworks():
@@ -1016,11 +1057,15 @@ def merge_config_with_args(args, config: ProjectConfig):
     Returns:
         Modified args namespace with config values merged in
     """
-    # Track which args were explicitly provided on CLI
-    # For flags, we consider them "set" if they're True
-    # For other args, we check if they differ from defaults
+    # Merge different configuration sections using helper methods
+    _merge_project_settings(args, config)
+    _merge_generation_flags(args, config)
+    _merge_output_settings(args, config)
+    _merge_analysis_settings(args, config)
 
-    # Project settings (only set if not provided via CLI)
+
+def _merge_project_settings(args, config: ProjectConfig) -> None:
+    """Merge project-specific settings from config."""
     if not args.project_path and not args.path and config.project_path:
         args.path = config.project_path
 
@@ -1030,45 +1075,31 @@ def merge_config_with_args(args, config: ProjectConfig):
     if not args.description and config.description:
         args.description = config.description
 
-    # Generation flags (only enable from config if not already set via CLI)
-    # We check sys.argv to see if the flag was explicitly provided
-    if "--spec" not in sys.argv and config.generate_spec:
-        args.spec = True
 
-    if "--plan" not in sys.argv and config.generate_plan:
-        args.plan = True
+def _merge_generation_flags(args, config: ProjectConfig) -> None:
+    """Merge generation flags from config if not set via CLI."""
+    flag_mappings = {
+        "--spec": ("spec", config.generate_spec),
+        "--plan": ("plan", config.generate_plan),
+        "--data-model": ("data_model", config.generate_data_model),
+        "--api-contract": ("api_contract", config.generate_api_contract),
+        "--use-cases": ("use_cases", config.generate_use_cases),
+        "--fourplusone": ("fourplusone", config.generate_fourplusone),
+        "--integration-tests": ("integration_tests", config.generate_integration_tests),
+        "--traceability": ("traceability", config.generate_traceability),
+        "--diagrams": ("diagrams", config.generate_diagrams),
+        "--journey": ("journey", config.generate_journey),
+        "--git-changes": ("git_changes", config.generate_git_changes),
+        "--changelog": ("changelog", config.generate_changelog),
+    }
 
-    if "--data-model" not in sys.argv and config.generate_data_model:
-        args.data_model = True
+    for cli_flag, (attr_name, config_value) in flag_mappings.items():
+        if cli_flag not in sys.argv and config_value:
+            setattr(args, attr_name, True)
 
-    if "--api-contract" not in sys.argv and config.generate_api_contract:
-        args.api_contract = True
 
-    if "--use-cases" not in sys.argv and config.generate_use_cases:
-        args.use_cases = True
-
-    if "--fourplusone" not in sys.argv and config.generate_fourplusone:
-        args.fourplusone = True
-
-    if "--integration-tests" not in sys.argv and config.generate_integration_tests:
-        args.integration_tests = True
-
-    if "--traceability" not in sys.argv and config.generate_traceability:
-        args.traceability = True
-
-    if "--diagrams" not in sys.argv and config.generate_diagrams:
-        args.diagrams = True
-
-    if "--journey" not in sys.argv and config.generate_journey:
-        args.journey = True
-
-    if "--git-changes" not in sys.argv and config.generate_git_changes:
-        args.git_changes = True
-
-    if "--changelog" not in sys.argv and config.generate_changelog:
-        args.changelog = True
-
-    # Output settings
+def _merge_output_settings(args, config: ProjectConfig) -> None:
+    """Merge output-related settings from config."""
     if "--format" not in sys.argv and "-f" not in sys.argv:
         args.format = config.output_format
 
@@ -1084,7 +1115,20 @@ def merge_config_with_args(args, config: ProjectConfig):
     if "--template-language" not in sys.argv and "--lang" not in sys.argv:
         args.template_language = config.template_language
 
-    # Analysis settings
+
+def _merge_analysis_settings(args, config: ProjectConfig) -> None:
+    """Merge analysis-related settings from config."""
+    _merge_basic_analysis_settings(args, config)
+    _merge_naming_settings(args, config)
+    _merge_git_settings(args, config)
+    _merge_diagram_settings(args, config)
+    _merge_confluence_settings(args, config)
+    _merge_html_settings(args, config)
+    _merge_jira_settings(args, config)
+
+
+def _merge_basic_analysis_settings(args, config: ProjectConfig) -> None:
+    """Merge basic analysis settings (verbose, parallel, cache, etc.)."""
     if "--verbose" not in sys.argv and "-v" not in sys.argv:
         args.verbose = config.verbose
 
@@ -1100,14 +1144,18 @@ def merge_config_with_args(args, config: ProjectConfig):
     if "--max-workers" not in sys.argv and config.max_workers:
         args.max_workers = config.max_workers
 
-    # Naming settings
+
+def _merge_naming_settings(args, config: ProjectConfig) -> None:
+    """Merge naming-related settings."""
     if "--naming-style" not in sys.argv:
         args.naming_style = config.naming_style
 
     if "--no-naming-alternatives" not in sys.argv:
         args.naming_alternatives = config.naming_alternatives
 
-    # Git settings
+
+def _merge_git_settings(args, config: ProjectConfig) -> None:
+    """Merge Git-related settings."""
     if "--git" not in sys.argv and config.git_mode:
         args.git = True
 
@@ -1120,11 +1168,15 @@ def merge_config_with_args(args, config: ProjectConfig):
     if "--git-staged" not in sys.argv and config.git_staged:
         args.git_staged = True
 
-    # Diagram settings
+
+def _merge_diagram_settings(args, config: ProjectConfig) -> None:
+    """Merge diagram-related settings."""
     if "--diagram-type" not in sys.argv:
         args.diagram_type = config.diagram_type
 
-    # Confluence settings
+
+def _merge_confluence_settings(args, config: ProjectConfig) -> None:
+    """Merge Confluence export settings."""
     if "--confluence" not in sys.argv and config.confluence_export:
         args.confluence = True
 
@@ -1146,7 +1198,9 @@ def merge_config_with_args(args, config: ProjectConfig):
     if "--confluence-prefix" not in sys.argv:
         args.confluence_prefix = config.confluence_prefix
 
-    # HTML settings
+
+def _merge_html_settings(args, config: ProjectConfig) -> None:
+    """Merge HTML export settings."""
     if "--html" not in sys.argv and config.html_export:
         args.html = True
 
@@ -1169,21 +1223,20 @@ def merge_config_with_args(args, config: ProjectConfig):
     if "--html-theme-color" not in sys.argv:
         args.html_theme_color = config.html_theme_color
 
-    # Jira settings
-    if "--jira" not in sys.argv and config.jira_export:
-        args.jira = True
 
-    if "--jira-url" not in sys.argv and config.jira_url:
-        args.jira_url = config.jira_url
-
-    if "--jira-user" not in sys.argv and config.jira_user:
-        args.jira_user = config.jira_user
-
-    if "--jira-token" not in sys.argv and config.jira_token:
-        args.jira_token = config.jira_token
-
-    if "--jira-project" not in sys.argv and config.jira_project:
-        args.jira_project = config.jira_project
+def _merge_jira_settings(args, config: ProjectConfig) -> None:
+    """Merge Jira export settings."""
+    jira_mappings = {
+        "--jira": ("jira", config.jira_export, True),
+        "--jira-url": ("jira_url", config.jira_url, None),
+        "--jira-user": ("jira_user", config.jira_user, None),
+        "--jira-token": ("jira_token", config.jira_token, None),
+        "--jira-project": ("jira_project", config.jira_project, None),
+    }
+    
+    for cli_flag, (attr_name, config_value, default_value) in jira_mappings.items():
+        if cli_flag not in sys.argv and config_value:
+            setattr(args, attr_name, config_value if config_value else default_value)
 
     if "--jira-issue-type" not in sys.argv:
         args.jira_issue_type = config.jira_issue_type
@@ -1218,8 +1271,9 @@ def main():
     temp_args, _ = parser.parse_known_args()
 
     # Initialize logging as early as possible
-    from .logging_config import configure_logging
     from pathlib import Path as LogPath
+
+    from .logging_config import configure_logging
 
     log_file = None
     if hasattr(temp_args, "log_file") and temp_args.log_file:

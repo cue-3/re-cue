@@ -11,9 +11,9 @@ class TestPerformanceImports(unittest.TestCase):
         from reverse_engineer.performance import (
             CacheManager,
             FileTracker,
-            ProgressReporter,
-            ParallelProcessor,
             OptimizedAnalyzer,
+            ParallelProcessor,
+            ProgressReporter,
         )
         
         # Verify classes are importable
@@ -26,8 +26,8 @@ class TestPerformanceImports(unittest.TestCase):
     def test_cache_manager_import(self):
         """Test importing CacheManager."""
         from reverse_engineer.performance.cache_manager import (
-            CacheManager,
             CacheEntry,
+            CacheManager,
             CacheStatistics,
         )
         
@@ -39,8 +39,8 @@ class TestPerformanceImports(unittest.TestCase):
         """Test importing optimization components."""
         from reverse_engineer.performance.optimization import (
             FileTracker,
-            ProgressReporter,
             ParallelProcessor,
+            ProgressReporter,
         )
         
         self.assertIsNotNone(FileTracker)

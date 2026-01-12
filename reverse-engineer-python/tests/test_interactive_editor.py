@@ -2,14 +2,15 @@
 Tests for interactive use case editor.
 """
 
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
-import shutil
+
 from reverse_engineer.interactive_editor import (
     EditableUseCase,
+    InteractiveUseCaseEditor,
     UseCaseParser,
-    InteractiveUseCaseEditor
 )
 
 

@@ -4,20 +4,19 @@ Tests the generation of integration test scenarios from use cases.
 """
 
 import unittest
-from pathlib import Path
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
 from reverse_engineer.domain import (
-    UseCase,
-    Endpoint,
     Actor,
+    ApiTestCase,
+    CoverageMapping,
+    Endpoint,
+    IntegrationTestSuite,
     SystemBoundary,
     TestData,
-    TestStep,
-    ApiTestCase,
     TestScenario,
-    CoverageMapping,
-    IntegrationTestSuite,
+    TestStep,
+    UseCase,
 )
 from reverse_engineer.generation import IntegrationTestGenerator
 

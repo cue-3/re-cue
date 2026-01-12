@@ -24,13 +24,13 @@ import time
 import unittest
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-def run_benchmark_suite(verbose: bool = False) -> tuple[unittest.TestResult, List[Dict[str, Any]]]:
+def run_benchmark_suite(verbose: bool = False) -> tuple[unittest.TestResult, list[dict[str, Any]]]:
     """
     Run benchmark test suite.
 
@@ -78,7 +78,7 @@ def run_regression_suite(verbose: bool = False) -> unittest.TestResult:
 
 
 def save_benchmark_results(
-    results: List[Dict[str, Any]], output_file: Path, metadata: Dict[str, Any] = None
+    results: list[dict[str, Any]], output_file: Path, metadata: dict[str, Any] = None
 ):
     """
     Save benchmark results to JSON file.
@@ -101,7 +101,7 @@ def save_benchmark_results(
     print(f"\n✓ Benchmark results saved to: {output_file}")
 
 
-def update_baseline_file(results: List[Dict[str, Any]], baseline_file: Path):
+def update_baseline_file(results: list[dict[str, Any]], baseline_file: Path):
     """
     Update baseline file with current results.
 
@@ -176,7 +176,7 @@ def update_baseline_file(results: List[Dict[str, Any]], baseline_file: Path):
 def print_summary(
     benchmark_result: unittest.TestResult = None,
     regression_result: unittest.TestResult = None,
-    benchmark_data: List[Dict[str, Any]] = None,
+    benchmark_data: list[dict[str, Any]] = None,
 ):
     """
     Print summary of results.
@@ -191,14 +191,14 @@ def print_summary(
     print("=" * 70)
 
     if benchmark_result:
-        print(f"\nBenchmark Tests:")
+        print("\nBenchmark Tests:")
         print(f"  Ran: {benchmark_result.testsRun}")
         print(f"  Passed: {benchmark_result.testsRun - len(benchmark_result.failures) - len(benchmark_result.errors)}")
         print(f"  Failed: {len(benchmark_result.failures)}")
         print(f"  Errors: {len(benchmark_result.errors)}")
 
     if regression_result:
-        print(f"\nRegression Tests:")
+        print("\nRegression Tests:")
         print(f"  Ran: {regression_result.testsRun}")
         print(f"  Passed: {regression_result.testsRun - len(regression_result.failures) - len(regression_result.errors)}")
         print(f"  Failed: {len(regression_result.failures)}")

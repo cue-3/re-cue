@@ -12,7 +12,7 @@ from pathlib import Path
 
 def generate_i18n_code(patterns_file: Path) -> str:
     """Generate Python code for i18n content patterns."""
-    with open(patterns_file, 'r', encoding='utf-8') as f:
+    with open(patterns_file, encoding='utf-8') as f:
         data = json.load(f)
     
     patterns = data['patterns']
@@ -99,7 +99,7 @@ def main():
     output_file.write_text(code, encoding='utf-8')
     
     print("✓ i18n content module generated")
-    print(f"  Import with: from reverse_engineer.generation.i18n_content import get_content")
+    print("  Import with: from reverse_engineer.generation.i18n_content import get_content")
 
 
 if __name__ == "__main__":

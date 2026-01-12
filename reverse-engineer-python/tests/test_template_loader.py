@@ -2,6 +2,7 @@
 
 import unittest
 from pathlib import Path
+
 from reverse_engineer.templates.template_loader import TemplateLoader
 
 
@@ -532,7 +533,6 @@ class TestCustomTemplateDirectory(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         import tempfile
-        import shutil
 
         # Create a temporary directory for custom templates
         self.temp_dir = tempfile.mkdtemp()

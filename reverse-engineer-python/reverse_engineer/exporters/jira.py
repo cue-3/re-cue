@@ -166,7 +166,7 @@ class JiraExporter:
         if use_case.main_scenario:
             lines.append("")
             lines.append("h3. Main Scenario")
-            for i, step in enumerate(use_case.main_scenario, 1):
+            for _i, step in enumerate(use_case.main_scenario, 1):
                 lines.append(f"# {step}")
 
         # Extensions

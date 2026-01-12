@@ -140,7 +140,7 @@ class UseCasePrototypeAnalyzer:
                                     identified_from=[f"Role enum in {java_file.name}"]
                                 ))
             
-            except Exception as e:
+            except Exception:
                 continue  # Skip files we can't read
     
     def _discover_external_actors(self):
@@ -354,9 +354,9 @@ class UseCasePrototypeAnalyzer:
             return [
                 f"User navigates to {entity} creation page",
                 f"User enters {entity} details",
-                f"System validates input data",
+                "System validates input data",
                 f"System creates new {entity}",
-                f"System confirms successful creation"
+                "System confirms successful creation"
             ]
         elif method_name.lower().startswith('get') or method_name.lower().startswith('view'):
             return [
@@ -368,23 +368,23 @@ class UseCasePrototypeAnalyzer:
             return [
                 f"User selects {entity} to update",
                 f"User modifies {entity} details",
-                f"System validates changes",
+                "System validates changes",
                 f"System updates {entity} data",
-                f"System confirms successful update"
+                "System confirms successful update"
             ]
         elif method_name.lower().startswith('delete'):
             return [
                 f"User selects {entity} to delete",
-                f"System requests confirmation",
-                f"User confirms deletion",
+                "System requests confirmation",
+                "User confirms deletion",
                 f"System removes {entity}",
-                f"System confirms successful deletion"
+                "System confirms successful deletion"
             ]
         else:
             return [
                 f"User initiates {entity} operation",
-                f"System processes request",
-                f"System returns result"
+                "System processes request",
+                "System returns result"
             ]
     
     def _generate_preconditions(self, method_name: str) -> List[str]:

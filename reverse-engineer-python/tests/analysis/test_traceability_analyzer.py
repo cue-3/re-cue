@@ -10,15 +10,18 @@ Tests cover:
 - Coverage calculations
 """
 
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
 
 from reverse_engineer.analysis.traceability import TraceabilityAnalyzer
 from reverse_engineer.domain import (
-    UseCase, Endpoint, Model, Service, View,
-    CodeLink, TestLink, TraceabilityEntry, TraceabilityMatrix
+    Endpoint,
+    Model,
+    Service,
+    TraceabilityMatrix,
+    UseCase,
 )
 
 

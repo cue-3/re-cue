@@ -358,7 +358,7 @@ public class OrderEventHandler {
         result = analyzer.analyze()
 
         order_created = next(
-            (l for l in result.event_listeners if l.method_name == "handleOrderCreated"),
+            (listener for listener in result.event_listeners if listener.method_name == "handleOrderCreated"),
             None,
         )
         self.assertIsNotNone(order_created)
@@ -371,7 +371,7 @@ public class OrderEventHandler {
         result = analyzer.analyze()
 
         user_reg = next(
-            (l for l in result.event_listeners if l.method_name == "onUserRegistered"),
+            (listener for listener in result.event_listeners if listener.method_name == "onUserRegistered"),
             None,
         )
         self.assertIsNotNone(user_reg)
@@ -383,7 +383,7 @@ public class OrderEventHandler {
         result = analyzer.analyze()
 
         large_order = next(
-            (l for l in result.event_listeners if l.method_name == "handleLargeOrder"),
+            (listener for listener in result.event_listeners if listener.method_name == "handleLargeOrder"),
             None,
         )
         self.assertIsNotNone(large_order)
@@ -396,7 +396,7 @@ public class OrderEventHandler {
         result = analyzer.analyze()
 
         after_commit = next(
-            (l for l in result.event_listeners if l.method_name == "handleAfterCommit"),
+            (listener for listener in result.event_listeners if listener.method_name == "handleAfterCommit"),
             None,
         )
         self.assertIsNotNone(after_commit)
@@ -409,7 +409,7 @@ public class OrderEventHandler {
         result = analyzer.analyze()
 
         rollback = next(
-            (l for l in result.event_listeners if l.method_name == "handleRollback"),
+            (listener for listener in result.event_listeners if listener.method_name == "handleRollback"),
             None,
         )
         self.assertIsNotNone(rollback)

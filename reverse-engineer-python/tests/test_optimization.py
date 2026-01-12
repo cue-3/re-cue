@@ -2,7 +2,6 @@
 Tests for performance optimization utilities.
 """
 
-import json
 import tempfile
 import time
 import unittest
@@ -11,11 +10,10 @@ from unittest.mock import patch
 
 from reverse_engineer.optimization import (
     FileTracker,
-    FileMetadata,
-    ProgressReporter,
     ParallelProcessor,
+    ProgressReporter,
+    get_optimal_worker_count,
     read_file_efficiently,
-    get_optimal_worker_count
 )
 
 
@@ -210,7 +208,7 @@ class TestParallelProcessor(unittest.TestCase):
         
         # Check results
         self.assertEqual(len(results), 5)
-        for file_path, result, error in results:
+        for _file_path, result, error in results:
             self.assertIsNone(error)
             self.assertIsNotNone(result)
             self.assertGreater(result, 0)

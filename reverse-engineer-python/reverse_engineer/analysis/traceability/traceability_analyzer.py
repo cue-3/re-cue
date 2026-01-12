@@ -399,7 +399,21 @@ class TraceabilityAnalyzer:
         # Extract keywords from use case
         use_case_keywords = self._extract_use_case_keywords(use_case)
 
-        # Find matching code components
+        # Find and link matching components
+        self._link_code_components(entry, use_case_keywords)
+        self._link_endpoints(entry, use_case_keywords)
+        self._link_models(entry, use_case_keywords)
+        self._link_services(entry, use_case_keywords)
+        self._link_test_files(entry, use_case_keywords, use_case)
+
+        # Calculate coverage and status
+        self._calculate_coverage_metrics(entry, use_case)
+        self._set_verification_status(entry)
+
+        return entry
+
+    def _link_code_components(self, entry: TraceabilityEntry, use_case_keywords: set[str]) -> None:
+        """Find and link matching code components."""
         matched_components: dict[str, tuple[CodeComponent, float]] = {}
 
         for keyword in use_case_keywords:
@@ -430,25 +444,31 @@ class TraceabilityAnalyzer:
                     )
                 )
 
-        # Find related endpoints
+    def _link_endpoints(self, entry: TraceabilityEntry, use_case_keywords: set[str]) -> None:
+        """Find and link related endpoints."""
         for endpoint in self.endpoints:
             endpoint_keywords = self._extract_keywords(f"{endpoint.path} {endpoint.controller}")
             if use_case_keywords & endpoint_keywords:
                 entry.related_endpoints.append(f"{endpoint.method} {endpoint.path}")
 
-        # Find related models
+    def _link_models(self, entry: TraceabilityEntry, use_case_keywords: set[str]) -> None:
+        """Find and link related models."""
         for model in self.models:
             model_keywords = self._extract_keywords(model.name)
             if use_case_keywords & model_keywords:
                 entry.related_models.append(model.name)
 
-        # Find related services
+    def _link_services(self, entry: TraceabilityEntry, use_case_keywords: set[str]) -> None:
+        """Find and link related services."""
         for service in self.services:
             service_keywords = self._extract_keywords(service.name)
             if use_case_keywords & service_keywords:
                 entry.related_services.append(service.name)
 
-        # Find test links
+    def _link_test_files(
+        self, entry: TraceabilityEntry, use_case_keywords: set[str], use_case: UseCase
+    ) -> None:
+        """Find and link test files."""
         for test_file in self._test_files:
             test_keywords = self._extract_keywords(test_file.stem)
             overlap = use_case_keywords & test_keywords
@@ -464,19 +484,19 @@ class TraceabilityAnalyzer:
                     )
                 )
 
-        # Calculate coverage metrics
+    def _calculate_coverage_metrics(self, entry: TraceabilityEntry, use_case: UseCase) -> None:
+        """Calculate coverage metrics for the traceability entry."""
         entry.implementation_coverage = self._calculate_implementation_coverage(use_case, entry)
         entry.test_coverage = self._calculate_test_coverage(use_case, entry)
 
-        # Set verification status
+    def _set_verification_status(self, entry: TraceabilityEntry) -> None:
+        """Set verification status based on coverage metrics."""
         if entry.implementation_coverage >= 80 and entry.test_coverage >= 60:
             entry.verification_status = "verified"
         elif entry.code_links or entry.test_links:
             entry.verification_status = "partial"
         else:
             entry.verification_status = "unverified"
-
-        return entry
 
     def _extract_use_case_keywords(self, use_case: UseCase) -> set[str]:
         """Extract keywords from a use case."""

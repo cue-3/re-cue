@@ -2,7 +2,8 @@
 
 import unittest
 from pathlib import Path
-from reverse_engineer.templates.template_loader import TemplateLoader, SUPPORTED_LANGUAGES
+
+from reverse_engineer.templates.template_loader import SUPPORTED_LANGUAGES, TemplateLoader
 
 
 class TestMultiLanguageTemplateSupport(unittest.TestCase):
@@ -118,7 +119,6 @@ class TestMultiLanguageTemplateLoaderEdgeCases(unittest.TestCase):
         """Test custom template directory works with language setting."""
         # Create a temporary custom template directory
         import tempfile
-        import os
         
         with tempfile.TemporaryDirectory() as tmpdir:
             custom_template = Path(tmpdir) / "phase1-structure.md"

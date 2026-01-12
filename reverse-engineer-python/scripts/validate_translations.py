@@ -14,10 +14,8 @@ Usage:
 import argparse
 import json
 import re
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 
 @dataclass
@@ -28,7 +26,7 @@ class ValidationError:
     type: str
     severity: str  # 'error', 'warning'
     message: str
-    details: Dict = field(default_factory=dict)
+    details: dict = field(default_factory=dict)
     line_number: int = None
     context: str = None
 
@@ -39,24 +37,24 @@ class ValidationResult:
     
     file: str
     passed: bool
-    errors: List[ValidationError] = field(default_factory=list)
-    warnings: List[ValidationError] = field(default_factory=list)
+    errors: list[ValidationError] = field(default_factory=list)
+    warnings: list[ValidationError] = field(default_factory=list)
 
 
 class TranslationValidator:
     """Validate translations preserve required elements."""
 
-    def __init__(self, glossary: Dict, verbose: bool = False):
+    def __init__(self, glossary: dict, verbose: bool = False):
         """Initialize validator with glossary."""
         self.glossary = glossary
         self.verbose = verbose
 
-    def extract_jinja2_variables(self, content: str) -> Set[str]:
+    def extract_jinja2_variables(self, content: str) -> set[str]:
         """Extract all {{VARIABLE}} patterns."""
         pattern = r'\{\{[A-Z_][A-Z0-9_]*\}\}'
         return set(re.findall(pattern, content))
 
-    def extract_jinja2_variables_with_lines(self, content: str) -> Dict[str, List[int]]:
+    def extract_jinja2_variables_with_lines(self, content: str) -> dict[str, list[int]]:
         """Extract all {{VARIABLE}} patterns with line numbers."""
         pattern = r'\{\{[A-Z_][A-Z0-9_]*\}\}'
         variables = {}
@@ -68,17 +66,17 @@ class TranslationValidator:
                 variables[var].append(i)
         return variables
 
-    def extract_jinja2_controls(self, content: str) -> List[str]:
+    def extract_jinja2_controls(self, content: str) -> list[str]:
         """Extract all {% control %} patterns (preserving order)."""
         pattern = r'\{%.*?%\}'
         return re.findall(pattern, content, flags=re.DOTALL)
 
-    def extract_annotations(self, content: str) -> Set[str]:
+    def extract_annotations(self, content: str) -> set[str]:
         """Extract all @Annotation patterns."""
         pattern = r'@\w+'
         return set(re.findall(pattern, content))
 
-    def extract_annotations_with_lines(self, content: str) -> Dict[str, List[int]]:
+    def extract_annotations_with_lines(self, content: str) -> dict[str, list[int]]:
         """Extract all @Annotation patterns with line numbers."""
         pattern = r'@\w+'
         annotations = {}
@@ -100,11 +98,11 @@ class TranslationValidator:
         pattern = r'@\w+'
         return set(re.findall(pattern, content))
 
-    def extract_code_blocks(self, content: str) -> List[str]:
+    def extract_code_blocks(self, content: str) -> list[str]:
         """Extract code block markers."""
         return re.findall(r'```', content)
 
-    def extract_headings(self, content: str) -> List[Tuple[int, str]]:
+    def extract_headings(self, content: str) -> list[tuple[int, str]]:
         """Extract markdown headings with levels."""
         pattern = r'^(#{1,6})\s+(.+)$'
         headings = []
@@ -235,7 +233,6 @@ class TranslationValidator:
             source_annotations = self.extract_annotations(source_content)
             target_annotations = self.extract_annotations(target_content)
             source_annotations_with_lines = self.extract_annotations_with_lines(source_content)
-            target_annotations_with_lines = self.extract_annotations_with_lines(target_content)
 
             missing_annotations = source_annotations - target_annotations
             if missing_annotations:
@@ -375,8 +372,8 @@ class TranslationValidator:
         source_dir: Path,
         target_dir: Path,
         target_lang: str,
-        file_patterns: List[str] = None
-    ) -> List[ValidationResult]:
+        file_patterns: list[str] = None
+    ) -> list[ValidationResult]:
         """Validate all translated files in directory."""
         if not target_dir.exists():
             raise FileNotFoundError(f"Target directory not found: {target_dir}")
@@ -419,7 +416,7 @@ class TranslationValidator:
 
         return results
 
-    def print_summary(self, results: List[ValidationResult]) -> int:
+    def print_summary(self, results: list[ValidationResult]) -> int:
         """Print validation summary and return exit code."""
         total = len(results)
         passed = sum(1 for r in results if r.passed)
@@ -458,7 +455,7 @@ class TranslationValidator:
                             for key, value in error.details.items():
                                 if key == 'source_lines' and isinstance(value, dict):
                                     # Show where items appear in source
-                                    print(f"       Location in source file:")
+                                    print("       Location in source file:")
                                     for item, lines in sorted(value.items()):
                                         if lines:
                                             line_str = ', '.join(f"line {ln}" for ln in lines[:3])
@@ -469,7 +466,7 @@ class TranslationValidator:
                                             print(f"         {item}: location unknown")
                                 elif key == 'target_lines' and isinstance(value, dict):
                                     # Show where items appear in target
-                                    print(f"       Location in translated file:")
+                                    print("       Location in translated file:")
                                     for item, lines in sorted(value.items()):
                                         if lines:
                                             line_str = ', '.join(f"line {ln}" for ln in lines[:3])
@@ -509,7 +506,7 @@ class TranslationValidator:
                             for key, value in warning.details.items():
                                 if key == 'source_lines' and isinstance(value, dict):
                                     # Show where items appear in source
-                                    print(f"       Location in source file:")
+                                    print("       Location in source file:")
                                     for item, lines in sorted(value.items()):
                                         if lines:
                                             line_str = ', '.join(f"line {ln}" for ln in lines[:3])
@@ -520,7 +517,7 @@ class TranslationValidator:
                                             print(f"         {item}: location unknown")
                                 elif key == 'target_lines' and isinstance(value, dict):
                                     # Show where items appear in target
-                                    print(f"       Location in translated file:")
+                                    print("       Location in translated file:")
                                     for item, lines in sorted(value.items()):
                                         if lines:
                                             line_str = ', '.join(f"line {ln}" for ln in lines[:3])
@@ -551,10 +548,10 @@ class TranslationValidator:
         return 0 if failed == 0 else 1
 
 
-def load_glossary(glossary_path: Path) -> Dict:
+def load_glossary(glossary_path: Path) -> dict:
     """Load glossary from JSON file."""
     if glossary_path.exists():
-        with open(glossary_path, 'r', encoding='utf-8') as f:
+        with open(glossary_path, encoding='utf-8') as f:
             return json.load(f)
     return {'categories': {}}
 
@@ -601,7 +598,7 @@ def main():
     # Load glossary
     glossary = load_glossary(args.glossary)
     if args.verbose:
-        print(f"✓ Glossary loaded")
+        print("✓ Glossary loaded")
 
     # Setup paths
     target_dir = args.source_dir.parent / args.lang

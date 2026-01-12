@@ -48,7 +48,6 @@ from .analysis import (
     UIPatternAnalyzer,
     UseCaseNamer,
 )
-from .generation.i18n_content import get_content
 
 # Import domain models
 from .domain import (
@@ -66,6 +65,7 @@ from .domain import (
     UseCase,
     View,
 )
+from .generation.i18n_content import get_content
 
 # Import progress tracking
 from .progress_tracker import AnalysisProgressTracker, ConsoleProgressCallback
@@ -186,7 +186,7 @@ class ProjectAnalyzer:
         self.use_cases: list[UseCase] = []
 
         # Code quality metrics
-        self.quality_metrics: Optional["CodeQualityMetrics"] = None
+        self.quality_metrics: Optional[CodeQualityMetrics] = None
 
         # Business context for enhanced use case quality
         self.business_context: dict = {
@@ -419,12 +419,26 @@ class ProjectAnalyzer:
         """Discover API endpoints from Java controllers."""
         log_info("Discovering API endpoints...", self.verbose)
 
+        # Find controller files using helper method
+        controller_files = self._find_controller_files()
+        
+        if not controller_files:
+            log_info("  No controllers found in project", self.verbose)
+            return
+
+        # Process controller files using appropriate method
+        self._process_controller_files(controller_files)
+        
+        log_info(f"Found {self.endpoint_count} endpoints", self.verbose)
+
+    def _find_controller_files(self) -> list[Path]:
+        """Find all controller files in the project."""
         # Find controller directories
         controller_dirs = []
         for pattern in ["controller", "controllers", "api"]:
             controller_dirs.extend(self.repo_root.rglob(f"src/**/{pattern}/"))
 
-        # Collect all controller files
+        # Collect all controller files from directories
         controller_files = []
         if controller_dirs:
             for controller_dir in controller_dirs:
@@ -441,55 +455,60 @@ class ProjectAnalyzer:
             all_controller_files = list(self.repo_root.rglob("src/**/*Controller.java"))
             controller_files = [f for f in all_controller_files if not self._is_test_file(f)]
 
-        if not controller_files:
-            log_info("  No controllers found in project", self.verbose)
-            return
+        return controller_files
 
+    def _process_controller_files(self, controller_files: list[Path]) -> None:
+        """Process controller files using optimal method."""
         # Use optimized processing if available and beneficial
         if self.optimized_analyzer and len(controller_files) > 10:
-            log_info(
-                f"  Using optimized processing for {len(controller_files)} controllers...",
-                self.verbose,
-            )
-
-            try:
-                from .optimized_analyzer import process_java_controller
-
-                results = self.optimized_analyzer.process_files_optimized(
-                    controller_files, process_java_controller, "Analyzing controllers"
-                )
-
-                # Extract endpoints from results
-                for result in results:
-                    if "endpoints" in result:
-                        for ep_dict in result["endpoints"]:
-                            endpoint = Endpoint(
-                                method=ep_dict["method"],
-                                path=ep_dict["path"],
-                                controller=ep_dict["controller"],
-                                authenticated=ep_dict["authenticated"],
-                            )
-                            self.endpoints.append(endpoint)
-                    elif "error" in result:
-                        log_info(
-                            f"  Error processing {result.get('file', 'unknown')}: {result['error']}",
-                            self.verbose,
-                        )
-
-            except Exception as e:
-                log_info(
-                    f"  Warning: Optimized processing failed, falling back to sequential: {e}",
-                    self.verbose,
-                )
-                # Fall back to sequential processing
-                for java_file in controller_files:
-                    self._analyze_controller_file(java_file)
+            self._process_controllers_optimized(controller_files)
         else:
             # Use original sequential processing
             for java_file in controller_files:
                 self._analyze_controller_file(java_file)
 
-        log_info(f"Found {self.endpoint_count} endpoints", self.verbose)
+    def _process_controllers_optimized(self, controller_files: list[Path]) -> None:
+        """Process controller files using optimized analyzer."""
+        log_info(
+            f"  Using optimized processing for {len(controller_files)} controllers...",
+            self.verbose,
+        )
+
+        try:
+            from .optimized_analyzer import process_java_controller
+
+            results = self.optimized_analyzer.process_files_optimized(
+                controller_files, process_java_controller, "Analyzing controllers"
+            )
+
+            self._extract_optimized_results(results)
+
+        except Exception as e:
+            log_info(
+                f"  Warning: Optimized processing failed, falling back to sequential: {e}",
+                self.verbose,
+            )
+            # Fall back to sequential processing
+            for java_file in controller_files:
+                self._analyze_controller_file(java_file)
+
+    def _extract_optimized_results(self, results: list[dict]) -> None:
+        """Extract endpoints from optimized analysis results."""
+        for result in results:
+            if "endpoints" in result:
+                for ep_dict in result["endpoints"]:
+                    endpoint = Endpoint(
+                        method=ep_dict["method"],
+                        path=ep_dict["path"],
+                        controller=ep_dict["controller"],
+                        authenticated=ep_dict["authenticated"],
+                    )
+                    self.endpoints.append(endpoint)
+            elif "error" in result:
+                log_info(
+                    f"  Error processing {result.get('file', 'unknown')}: {result['error']}",
+                    self.verbose,
+                )
 
     def _analyze_controller_file(self, file_path: Path):
         """Analyze a single controller file for endpoints."""

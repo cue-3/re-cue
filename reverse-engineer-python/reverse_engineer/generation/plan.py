@@ -225,3 +225,90 @@ class PlanGenerator(BaseGenerator):
         )
 
         return "\n".join(output)
+
+    def _build_header(self, display_name: str, project_name: str, project_info: dict) -> list[str]:
+        """Build document header."""
+        return [
+            f"# Implementation Plan: {display_name}",
+            "",
+            f"**Branch**: `{project_name}` | **Date**: {self.date} | **Spec**: [spec.md](./spec.md)",
+            "**Input**: Reverse-engineered specification from existing codebase",
+            "",
+            f"**Note**: This plan documents the current implementation state of the {display_name}",
+            "application, generated through reverse-engineering analysis. Unlike typical plans that",
+            "guide future development, this serves as architectural documentation of what exists.",
+            "",
+            "---",
+            "",
+            "## Summary",
+            "",
+            project_info["description"],
+            "",
+        ]
+
+    def _build_capabilities(self) -> list[str]:
+        """Build capabilities section."""
+        lines = [
+            "**Primary Capabilities**:",
+            f"- RESTful API with {self.analyzer.endpoint_count} endpoints",
+            f"- Data management with {self.analyzer.model_count} models",
+        ]
+
+        if self.analyzer.view_count > 0:
+            lines.append(f"- User interface with {self.analyzer.view_count} views")
+
+        if self.analyzer.service_count > 0:
+            lines.append(f"- Business logic layer with {self.analyzer.service_count} services")
+
+        lines.extend(["", "**Technical Approach**:"])
+        return lines
+
+    def _build_technical_approach(self, project_info: dict) -> list[str]:
+        """Build technical approach list."""
+        lines = []
+
+        if project_info["language"] != "NEEDS CLARIFICATION":
+            lines.append(f"- {project_info['language']} runtime")
+
+        if project_info["dependencies"] != "NEEDS CLARIFICATION":
+            for dep in project_info["dependencies"].split(", "):
+                lines.append(f"- {dep} framework")
+
+        if project_info["storage"] != "N/A":
+            lines.append(f"- {project_info['storage']} for data persistence")
+
+        return lines
+
+    def _build_context_section(self, project_info: dict) -> list[str]:
+        """Build technical context section."""
+        project_type = project_info["type"]
+        
+        return [
+            "",
+            "---",
+            "",
+            "## Technical Context",
+            "",
+            f"**Language/Version**: {project_info['language']}",
+            f"**Primary Dependencies**: {project_info['dependencies']}",
+            f"**Storage**: {project_info['storage']}",
+            f"**Testing**: {project_info['testing']}",
+            "**Target Platform**: Docker containers (Linux), Web browsers (ES2015+)",
+            f"**Project Type**: {project_type}",
+            "**Performance Goals**: <500ms API response time, efficient data processing, optimal resource utilization",
+            "**Constraints**: Scalable architecture, maintainable codebase, robust error handling",
+            f"**Scale/Scope**: {self.analyzer.endpoint_count} API endpoints, {self.analyzer.model_count} data models, {self.analyzer.view_count} UI views",
+            "",
+            "---",
+            "",
+            "## Project Structure",
+            "",
+            "### Documentation (this feature)",
+            "",
+            "```",
+            "specs/001-reverse/",
+            "├── spec.md              # Reverse-engineered specification",
+            "└── plan.md              # This file (implementation plan)",
+            "```",
+            "",
+        ]

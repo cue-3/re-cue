@@ -14,7 +14,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -71,7 +71,7 @@ class MarkdownToHTMLConverter:
     def __init__(self):
         """Initialize the converter."""
         self._code_block_counter = 0
-        self._heading_ids: Dict[str, int] = {}
+        self._heading_ids: dict[str, int] = {}
 
     def convert(self, markdown: str) -> str:
         """
@@ -87,7 +87,7 @@ class MarkdownToHTMLConverter:
         self._heading_ids = {}
 
         # Store code blocks to prevent processing their content
-        code_blocks: Dict[str, str] = {}
+        code_blocks: dict[str, str] = {}
         result = self._preserve_code_blocks(markdown, code_blocks)
 
         # Convert various Markdown elements (order matters!)
@@ -111,7 +111,7 @@ class MarkdownToHTMLConverter:
         match = re.search(r"^#\s+(.+)$", markdown, re.MULTILINE)
         return match.group(1).strip() if match else None
 
-    def extract_toc(self, html: str) -> List[Dict[str, Any]]:
+    def extract_toc(self, html: str) -> list[dict[str, Any]]:
         """
         Extract table of contents from HTML with headings.
 
@@ -148,7 +148,7 @@ class MarkdownToHTMLConverter:
             self._heading_ids[base_id] = 0
             return base_id
 
-    def _preserve_code_blocks(self, text: str, storage: Dict[str, str]) -> str:
+    def _preserve_code_blocks(self, text: str, storage: dict[str, str]) -> str:
         """Preserve code blocks by replacing with placeholders."""
         # Fenced code blocks
         pattern = r"```(\w*)\n?(.*?)```"
@@ -163,7 +163,7 @@ class MarkdownToHTMLConverter:
 
         return re.sub(pattern, replace_block, text, flags=re.DOTALL)
 
-    def _restore_code_blocks(self, text: str, storage: Dict[str, str]) -> str:
+    def _restore_code_blocks(self, text: str, storage: dict[str, str]) -> str:
         """Restore code blocks from placeholders."""
         for key, value in storage.items():
             text = text.replace(key, value)
@@ -520,8 +520,8 @@ class HTMLExporter:
             )
 
     def export_multiple_files(
-        self, markdown_files: List[Path], create_index: bool = True
-    ) -> List[HTMLExportResult]:
+        self, markdown_files: list[Path], create_index: bool = True
+    ) -> list[HTMLExportResult]:
         """
         Export multiple Markdown files to HTML.
 
@@ -565,7 +565,7 @@ class HTMLExporter:
         (self.config.js_dir / "script.js").write_text(js_content, encoding="utf-8")
 
     def _generate_page(
-        self, content: str, title: str, toc_items: List[Dict[str, Any]]
+        self, content: str, title: str, toc_items: list[dict[str, Any]]
     ) -> str:
         """Generate a complete HTML page with navigation."""
         toc_html = self._generate_toc_html(toc_items) if self.config.toc else ""
@@ -614,7 +614,7 @@ class HTMLExporter:
 </body>
 </html>"""
 
-    def _generate_toc_html(self, toc_items: List[Dict[str, Any]]) -> str:
+    def _generate_toc_html(self, toc_items: list[dict[str, Any]]) -> str:
         """Generate HTML for table of contents."""
         if not toc_items:
             return "<p>No headings found</p>"
@@ -657,7 +657,7 @@ class HTMLExporter:
             </div>
         """
 
-    def _create_index_page(self, results: List[HTMLExportResult]):
+    def _create_index_page(self, results: list[HTMLExportResult]):
         """Create an index.html page with links to all documents."""
         # Group documents by category based on filename
         categories = {
@@ -1466,12 +1466,12 @@ function initSmoothScroll() {
 
 
 def export_to_html(
-    markdown_files: List[Path],
+    markdown_files: list[Path],
     output_dir: Path,
     title: str = "RE-cue Documentation",
     dark_mode: bool = True,
     search: bool = True,
-) -> List[HTMLExportResult]:
+) -> list[HTMLExportResult]:
     """
     Convenience function to export Markdown files to HTML.
 

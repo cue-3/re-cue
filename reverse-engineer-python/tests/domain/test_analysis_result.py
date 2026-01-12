@@ -3,14 +3,14 @@ Unit tests for analysis result container.
 """
 
 import unittest
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from reverse_engineer.domain import (
+    Actor,
     AnalysisResult,
     Endpoint,
     Model,
-    Actor,
     TechStack,
 )
 

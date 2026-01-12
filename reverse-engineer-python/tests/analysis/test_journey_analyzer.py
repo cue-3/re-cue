@@ -3,13 +3,17 @@ Tests for the JourneyAnalyzer module.
 """
 
 import unittest
-from unittest.mock import Mock
 
-from reverse_engineer.domain import UseCase, Actor, SystemBoundary, Endpoint
-from reverse_engineer.domain.journey import (
-    Touchpoint, JourneyStage, UserJourney, UserStory, Epic, JourneyMap
-)
 from reverse_engineer.analysis.journey import JourneyAnalyzer
+from reverse_engineer.domain import Actor, Endpoint, SystemBoundary, UseCase
+from reverse_engineer.domain.journey import (
+    Epic,
+    JourneyMap,
+    JourneyStage,
+    Touchpoint,
+    UserJourney,
+    UserStory,
+)
 
 
 class TestJourneyDomainModels(unittest.TestCase):

@@ -131,156 +131,18 @@ class ProjectConfig:
             if not isinstance(data, dict):
                 raise ValueError(f"Invalid .recue.yaml: Expected dictionary, got {type(data)}")
 
-            # Convert YAML keys to ProjectConfig fields
+            # Parse configuration sections
             config_data = {}
-
-            # Project settings
-            if "project_path" in data:
-                config_data["project_path"] = str(data["project_path"])
-            if "framework" in data:
-                config_data["framework"] = str(data["framework"])
-            if "description" in data:
-                config_data["description"] = str(data["description"])
-
-            # Generation flags - support both boolean and nested dict format
-            generation = data.get("generation", {})
-            if isinstance(generation, dict):
-                config_data["generate_spec"] = generation.get("spec", False)
-                config_data["generate_plan"] = generation.get("plan", False)
-                config_data["generate_data_model"] = generation.get("data_model", False)
-                config_data["generate_api_contract"] = generation.get("api_contract", False)
-                config_data["generate_use_cases"] = generation.get("use_cases", False)
-                config_data["generate_fourplusone"] = generation.get("fourplusone", False)
-                config_data["generate_integration_tests"] = generation.get(
-                    "integration_tests", False
-                )
-                config_data["generate_traceability"] = generation.get("traceability", False)
-                config_data["generate_diagrams"] = generation.get("diagrams", False)
-                config_data["generate_journey"] = generation.get("journey", False)
-                config_data["generate_git_changes"] = generation.get("git_changes", False)
-                config_data["generate_changelog"] = generation.get("changelog", False)
-
-            # Output settings
-            output = data.get("output", {})
-            if isinstance(output, dict):
-                if "format" in output:
-                    config_data["output_format"] = str(output["format"])
-                if "dir" in output:
-                    config_data["output_dir"] = str(output["dir"])
-                if "file" in output:
-                    config_data["output_file"] = str(output["file"])
-                if "template_dir" in output:
-                    config_data["template_dir"] = str(output["template_dir"])
-                if "template_language" in output:
-                    config_data["template_language"] = str(output["template_language"])
-
-            # Analysis settings
-            analysis = data.get("analysis", {})
-            if isinstance(analysis, dict):
-                if "verbose" in analysis:
-                    config_data["verbose"] = bool(analysis["verbose"])
-                if "parallel" in analysis:
-                    config_data["parallel"] = bool(analysis["parallel"])
-                if "incremental" in analysis:
-                    config_data["incremental"] = bool(analysis["incremental"])
-                if "cache" in analysis:
-                    config_data["cache"] = bool(analysis["cache"])
-                if "max_workers" in analysis:
-                    config_data["max_workers"] = int(analysis["max_workers"])
-
-            # Use case naming settings
-            naming = data.get("naming", {})
-            if isinstance(naming, dict):
-                if "style" in naming:
-                    config_data["naming_style"] = str(naming["style"])
-                if "alternatives" in naming:
-                    config_data["naming_alternatives"] = bool(naming["alternatives"])
-
-            # Git settings
-            git = data.get("git", {})
-            if isinstance(git, dict):
-                if "enabled" in git:
-                    config_data["git_mode"] = bool(git["enabled"])
-                if "from" in git:
-                    config_data["git_from"] = str(git["from"])
-                if "to" in git:
-                    config_data["git_to"] = str(git["to"])
-                if "staged" in git:
-                    config_data["git_staged"] = bool(git["staged"])
-
-            # Diagram settings
-            diagrams = data.get("diagrams", {})
-            if isinstance(diagrams, dict):
-                if "type" in diagrams:
-                    config_data["diagram_type"] = str(diagrams["type"])
-
-            # Confluence export settings
-            confluence = data.get("confluence", {})
-            if isinstance(confluence, dict):
-                if "enabled" in confluence:
-                    config_data["confluence_export"] = bool(confluence["enabled"])
-                if "url" in confluence:
-                    config_data["confluence_url"] = str(confluence["url"])
-                if "user" in confluence:
-                    config_data["confluence_user"] = str(confluence["user"])
-                if "token" in confluence:
-                    config_data["confluence_token"] = str(confluence["token"])
-                if "space" in confluence:
-                    config_data["confluence_space"] = str(confluence["space"])
-                if "parent" in confluence:
-                    config_data["confluence_parent"] = str(confluence["parent"])
-                if "prefix" in confluence:
-                    config_data["confluence_prefix"] = str(confluence["prefix"])
-
-            # HTML export settings
-            html = data.get("html", {})
-            if isinstance(html, dict):
-                if "enabled" in html:
-                    config_data["html_export"] = bool(html["enabled"])
-                if "output" in html:
-                    config_data["html_output"] = str(html["output"])
-                if "title" in html:
-                    config_data["html_title"] = str(html["title"])
-                if "dark_mode" in html:
-                    config_data["html_dark_mode"] = bool(html["dark_mode"])
-                if "search" in html:
-                    config_data["html_search"] = bool(html["search"])
-                if "theme_color" in html:
-                    config_data["html_theme_color"] = str(html["theme_color"])
-
-            # Jira export settings
-            jira = data.get("jira", {})
-            if isinstance(jira, dict):
-                if "enabled" in jira:
-                    config_data["jira_export"] = bool(jira["enabled"])
-                if "url" in jira:
-                    config_data["jira_url"] = str(jira["url"])
-                if "user" in jira:
-                    config_data["jira_user"] = str(jira["user"])
-                if "token" in jira:
-                    config_data["jira_token"] = str(jira["token"])
-                if "project" in jira:
-                    config_data["jira_project"] = str(jira["project"])
-                if "issue_type" in jira:
-                    config_data["jira_issue_type"] = str(jira["issue_type"])
-
-            # Phase settings
-            phases = data.get("phases", {})
-            if isinstance(phases, dict):
-                if "enabled" in phases:
-                    config_data["phased"] = bool(phases["enabled"])
-                if "phase" in phases:
-                    config_data["phase"] = str(phases["phase"])
-
-            # Impact analysis
-            if "impact_file" in data:
-                config_data["impact_file"] = str(data["impact_file"])
-
-            # Additional options
-            if "refine_use_cases_file" in data:
-                config_data["refine_use_cases_file"] = str(data["refine_use_cases_file"])
-            if "blame_file" in data:
-                config_data["blame_file"] = str(data["blame_file"])
+            cls._parse_project_settings(data, config_data)
+            cls._parse_generation_flags(data, config_data)
+            cls._parse_output_settings(data, config_data)
+            cls._parse_analysis_settings(data, config_data)
+            cls._parse_naming_settings(data, config_data)
+            cls._parse_git_settings(data, config_data)
+            cls._parse_diagram_settings(data, config_data)
+            cls._parse_export_settings(data, config_data)
+            cls._parse_phase_settings(data, config_data)
+            cls._parse_additional_options(data, config_data)
 
             return cls(**config_data)
 
@@ -288,6 +150,207 @@ class ProjectConfig:
             raise yaml.YAMLError(f"Error parsing .recue.yaml: {e}") from e
         except (ValueError, TypeError) as e:
             raise ValueError(f"Invalid configuration in .recue.yaml: {e}") from e
+
+    @staticmethod
+    def _parse_project_settings(data: dict, config_data: dict) -> None:
+        """Parse project-specific settings."""
+        if "project_path" in data:
+            config_data["project_path"] = str(data["project_path"])
+        if "framework" in data:
+            config_data["framework"] = str(data["framework"])
+        if "description" in data:
+            config_data["description"] = str(data["description"])
+
+    @staticmethod
+    def _parse_generation_flags(data: dict, config_data: dict) -> None:
+        """Parse generation flags from configuration."""
+        generation = data.get("generation", {})
+        if not isinstance(generation, dict):
+            return
+
+        flag_mappings = [
+            ("spec", "generate_spec"),
+            ("plan", "generate_plan"),
+            ("data_model", "generate_data_model"),
+            ("api_contract", "generate_api_contract"),
+            ("use_cases", "generate_use_cases"),
+            ("fourplusone", "generate_fourplusone"),
+            ("integration_tests", "generate_integration_tests"),
+            ("traceability", "generate_traceability"),
+            ("diagrams", "generate_diagrams"),
+            ("journey", "generate_journey"),
+            ("git_changes", "generate_git_changes"),
+            ("changelog", "generate_changelog"),
+        ]
+
+        for yaml_key, config_key in flag_mappings:
+            config_data[config_key] = generation.get(yaml_key, False)
+
+    @staticmethod
+    def _parse_output_settings(data: dict, config_data: dict) -> None:
+        """Parse output-related settings."""
+        output = data.get("output", {})
+        if not isinstance(output, dict):
+            return
+
+        if "format" in output:
+            config_data["output_format"] = str(output["format"])
+        if "dir" in output:
+            config_data["output_dir"] = str(output["dir"])
+        if "file" in output:
+            config_data["output_file"] = str(output["file"])
+        if "template_dir" in output:
+            config_data["template_dir"] = str(output["template_dir"])
+        if "template_language" in output:
+            config_data["template_language"] = str(output["template_language"])
+
+    @staticmethod
+    def _parse_analysis_settings(data: dict, config_data: dict) -> None:
+        """Parse analysis-related settings."""
+        analysis = data.get("analysis", {})
+        if not isinstance(analysis, dict):
+            return
+
+        if "verbose" in analysis:
+            config_data["verbose"] = bool(analysis["verbose"])
+        if "parallel" in analysis:
+            config_data["parallel"] = bool(analysis["parallel"])
+        if "incremental" in analysis:
+            config_data["incremental"] = bool(analysis["incremental"])
+        if "cache" in analysis:
+            config_data["cache"] = bool(analysis["cache"])
+        if "max_workers" in analysis:
+            config_data["max_workers"] = int(analysis["max_workers"])
+
+    @staticmethod
+    def _parse_naming_settings(data: dict, config_data: dict) -> None:
+        """Parse use case naming settings."""
+        naming = data.get("naming", {})
+        if not isinstance(naming, dict):
+            return
+
+        if "style" in naming:
+            config_data["naming_style"] = str(naming["style"])
+        if "alternatives" in naming:
+            config_data["naming_alternatives"] = bool(naming["alternatives"])
+
+    @staticmethod
+    def _parse_git_settings(data: dict, config_data: dict) -> None:
+        """Parse Git-related settings."""
+        git = data.get("git", {})
+        if not isinstance(git, dict):
+            return
+
+        if "enabled" in git:
+            config_data["git_mode"] = bool(git["enabled"])
+        if "from" in git:
+            config_data["git_from"] = str(git["from"])
+        if "to" in git:
+            config_data["git_to"] = str(git["to"])
+        if "staged" in git:
+            config_data["git_staged"] = bool(git["staged"])
+
+    @staticmethod
+    def _parse_diagram_settings(data: dict, config_data: dict) -> None:
+        """Parse diagram generation settings."""
+        diagrams = data.get("diagrams", {})
+        if not isinstance(diagrams, dict):
+            return
+
+        if "type" in diagrams:
+            config_data["diagram_type"] = str(diagrams["type"])
+
+    @staticmethod
+    def _parse_export_settings(data: dict, config_data: dict) -> None:
+        """Parse export settings for Confluence, HTML, and Jira."""
+        ProjectConfig._parse_confluence_settings(data, config_data)
+        ProjectConfig._parse_html_settings(data, config_data)
+        ProjectConfig._parse_jira_settings(data, config_data)
+
+    @staticmethod
+    def _parse_confluence_settings(data: dict, config_data: dict) -> None:
+        """Parse Confluence export settings."""
+        confluence = data.get("confluence", {})
+        if not isinstance(confluence, dict):
+            return
+
+        settings_map = [
+            ("enabled", "confluence_export", bool),
+            ("url", "confluence_url", str),
+            ("user", "confluence_user", str),
+            ("token", "confluence_token", str),
+            ("space", "confluence_space", str),
+            ("parent", "confluence_parent", str),
+            ("prefix", "confluence_prefix", str),
+        ]
+
+        for yaml_key, config_key, converter in settings_map:
+            if yaml_key in confluence:
+                config_data[config_key] = converter(confluence[yaml_key])
+
+    @staticmethod
+    def _parse_html_settings(data: dict, config_data: dict) -> None:
+        """Parse HTML export settings."""
+        html = data.get("html", {})
+        if not isinstance(html, dict):
+            return
+
+        settings_map = [
+            ("enabled", "html_export", bool),
+            ("output", "html_output", str),
+            ("title", "html_title", str),
+            ("dark_mode", "html_dark_mode", bool),
+            ("search", "html_search", bool),
+            ("theme_color", "html_theme_color", str),
+        ]
+
+        for yaml_key, config_key, converter in settings_map:
+            if yaml_key in html:
+                config_data[config_key] = converter(html[yaml_key])
+
+    @staticmethod
+    def _parse_jira_settings(data: dict, config_data: dict) -> None:
+        """Parse Jira export settings."""
+        jira = data.get("jira", {})
+        if not isinstance(jira, dict):
+            return
+
+        settings_map = [
+            ("enabled", "jira_export", bool),
+            ("url", "jira_url", str),
+            ("user", "jira_user", str),
+            ("token", "jira_token", str),
+            ("project", "jira_project", str),
+            ("issue_type", "jira_issue_type", str),
+        ]
+
+        for yaml_key, config_key, converter in settings_map:
+            if yaml_key in jira:
+                config_data[config_key] = converter(jira[yaml_key])
+
+    @staticmethod
+    def _parse_phase_settings(data: dict, config_data: dict) -> None:
+        """Parse phase execution settings."""
+        phases = data.get("phases", {})
+        if not isinstance(phases, dict):
+            return
+
+        if "enabled" in phases:
+            config_data["phased"] = bool(phases["enabled"])
+        if "phase" in phases:
+            config_data["phase"] = str(phases["phase"])
+
+    @staticmethod
+    def _parse_additional_options(data: dict, config_data: dict) -> None:
+        """Parse additional configuration options."""
+        if "impact_file" in data:
+            config_data["impact_file"] = str(data["impact_file"])
+        if "refine_use_cases_file" in data:
+            config_data["refine_use_cases_file"] = str(data["refine_use_cases_file"])
+        if "blame_file" in data:
+            config_data["blame_file"] = str(data["blame_file"])
+
+
 
     @classmethod
     def find_and_load(cls, start_path: Path) -> Optional["ProjectConfig"]:

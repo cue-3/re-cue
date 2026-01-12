@@ -2,6 +2,7 @@
 
 import unittest
 from pathlib import Path
+
 from reverse_engineer.templates.template_loader import TemplateLoader
 
 
@@ -507,7 +508,8 @@ class TestTemplateInheritanceEdgeCases(unittest.TestCase):
 
         loader = TemplateLoader(custom_template_dir=temp_dir)
 
-        with self.assertRaises(Exception):  # Jinja2 TemplateNotFound
+        from jinja2 import TemplateNotFound
+        with self.assertRaises(TemplateNotFound):  # Jinja2 TemplateNotFound
             loader.render_template('test.md')
 
         import shutil
@@ -527,8 +529,9 @@ class TestTemplateInheritanceEdgeCases(unittest.TestCase):
 
         loader = TemplateLoader(custom_template_dir=temp_dir)
 
+        from jinja2 import TemplateRuntimeError
         # Jinja2 should detect and prevent circular inheritance
-        with self.assertRaises(Exception):
+        with self.assertRaises(TemplateRuntimeError):
             loader.render_template('a.md')
 
         import shutil

@@ -9,17 +9,19 @@ Tests cover:
 - Dependency chains
 """
 
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
 
 from reverse_engineer.analysis.relationships import RelationshipMapper
 from reverse_engineer.analysis.relationships.relationship_mapper import (
-    DataFlow, DependencyChain, ActorCommunication
+    ActorCommunication,
+    DataFlow,
+    DependencyChain,
 )
 from reverse_engineer.boundary_enhancer import BoundaryLayer
-from reverse_engineer.domain import Actor, SystemBoundary, Endpoint, Relationship
+from reverse_engineer.domain import Actor, Endpoint, Relationship, SystemBoundary
 
 
 class TestRelationshipMapperInit(unittest.TestCase):

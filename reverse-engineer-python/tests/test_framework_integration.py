@@ -12,23 +12,23 @@ ensuring consistent behavior across all supported frameworks:
 - .NET/ASP.NET Core
 """
 
-import unittest
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
+import unittest
 from abc import ABC, abstractmethod
+from pathlib import Path
 
+from reverse_engineer.analyzer import ProjectAnalyzer
 from reverse_engineer.analyzers import (
+    DjangoAnalyzer,
+    DotNetAspNetCoreAnalyzer,
+    FastAPIAnalyzer,
+    FlaskAnalyzer,
     JavaSpringAnalyzer,
     NodeExpressAnalyzer,
     RubyRailsAnalyzer,
-    DjangoAnalyzer,
-    FlaskAnalyzer,
-    FastAPIAnalyzer,
-    DotNetAspNetCoreAnalyzer
 )
 from reverse_engineer.generators import UseCaseMarkdownGenerator
-from reverse_engineer.analyzer import ProjectAnalyzer
 
 
 class BaseFrameworkIntegrationTest(ABC):

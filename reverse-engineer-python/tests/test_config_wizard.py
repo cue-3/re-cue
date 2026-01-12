@@ -2,18 +2,18 @@
 Tests for configuration wizard functionality.
 """
 
-import unittest
 import tempfile
+import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from reverse_engineer.config_wizard import (
-    WizardConfig,
     ConfigProfile,
     ConfigurationWizard,
+    WizardConfig,
+    delete_profile,
     list_profiles,
     load_profile,
-    delete_profile
 )
 
 
@@ -264,8 +264,8 @@ class TestConfigurationWizard(unittest.TestCase):
     @patch('builtins.input')
     def test_configure_output_preferences_with_custom_templates(self, mock_input):
         """Test output preferences with custom template directory."""
-        import tempfile
         import shutil
+        import tempfile
         
         # Create a temp directory for custom templates
         temp_dir = tempfile.mkdtemp()

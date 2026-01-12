@@ -1,8 +1,9 @@
 """Tests for Jinja2 template integration."""
 
-import unittest
 import tempfile
+import unittest
 from pathlib import Path
+
 from reverse_engineer.templates.template_loader import TemplateLoader
 
 

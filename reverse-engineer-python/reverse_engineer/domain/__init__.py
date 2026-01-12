@@ -38,6 +38,15 @@ from .journey import (
     UserJourney,
     UserStory,
 )
+from .progress import (
+    AnalysisProgress,
+    AnalysisStage,
+    FileProgress,
+    ProgressCallback,
+    ProgressStatus,
+    ProgressSummary,
+    StageProgress,
+)
 from .tech_stack import TechStack
 from .test_scenario import (
     ApiTestCase,
@@ -63,15 +72,6 @@ from .transaction import (
     TransactionIsolation,
     TransactionPattern,
     TransactionPropagation,
-)
-from .progress import (
-    AnalysisProgress,
-    AnalysisStage,
-    FileProgress,
-    ProgressCallback,
-    ProgressStatus,
-    ProgressSummary,
-    StageProgress,
 )
 from .use_case_model import EditableUseCase
 from .workflow import (

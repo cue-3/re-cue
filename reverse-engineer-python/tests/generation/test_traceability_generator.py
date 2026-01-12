@@ -9,17 +9,17 @@ Tests cover:
 - Gap analysis
 """
 
-import unittest
 import json
+import unittest
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
 
-from reverse_engineer.generation import TraceabilityGenerator
 from reverse_engineer.domain import (
-    UseCase, Endpoint, Model, Service, View,
-    TraceabilityMatrix, TraceabilityEntry, CodeLink, TestLink,
-    ImpactAnalysis, ImpactedItem
+    Endpoint,
+    ImpactAnalysis,
+    ImpactedItem,
+    UseCase,
 )
+from reverse_engineer.generation import TraceabilityGenerator
 
 
 class MockAnalyzer:

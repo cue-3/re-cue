@@ -2,10 +2,10 @@
 Test Ruby on Rails analyzer.
 """
 
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
-import shutil
 
 from reverse_engineer.analyzers import RubyRailsAnalyzer
 

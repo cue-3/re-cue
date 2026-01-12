@@ -243,56 +243,87 @@ class TechDetector:
         indicators = []
         max_score = 0.0
 
-        # Check for required files (0.3 weight)
-        max_score += 0.3
-        file_matches = 0
-        for file_pattern in rules.get("files", []):
-            if self._find_files(file_pattern):
-                file_matches += 1
-                indicators.append(f"file:{file_pattern}")
-
-        if file_matches > 0:
-            score += 0.3 * (file_matches / len(rules["files"]))
-
-        # Check for pattern matches (0.5 weight)
-        patterns = rules.get("patterns", [])
-        if patterns:
-            max_score += 0.5
-            pattern_matches = 0
-            for pattern, file_glob in patterns:
-                if self._find_pattern(pattern, file_glob):
-                    pattern_matches += 1
-                    indicators.append(f"pattern:{pattern[:30]}")
-
-            if pattern_matches > 0:
-                score += 0.5 * (pattern_matches / len(patterns))
-
-        # Check directory structure (0.2 weight)
-        structure = rules.get("structure", [])
-        if structure:
-            max_score += 0.2
-            structure_matches = 0
-            for dir_pattern in structure:
-                if self._find_files(dir_pattern):
-                    structure_matches += 1
-                    indicators.append(f"structure:{dir_pattern}")
-
-            if structure_matches > 0:
-                score += 0.2 * (structure_matches / len(structure))
-
+        # Score different criteria
+        file_score, file_indicators, file_max = self._score_required_files(rules)
+        pattern_score, pattern_indicators, pattern_max = self._score_patterns(rules)
+        structure_score, structure_indicators, structure_max = self._score_directory_structure(rules)
+        
+        score += file_score + pattern_score + structure_score
+        indicators.extend(file_indicators + pattern_indicators + structure_indicators)
+        max_score += file_max + pattern_max + structure_max
+        
         # Check for exclude patterns (negative scoring)
-        exclude_patterns = rules.get("exclude_patterns", [])
-        for pattern, file_glob in exclude_patterns:
-            if self._find_pattern(pattern, file_glob):
-                score = 0.0
-                indicators = [f"excluded:{pattern[:30]}"]
-                break
+        if self._has_exclusion_patterns(rules):
+            score = 0.0
+            indicators = ["excluded"]
 
         # Normalize score
         if max_score > 0:
             score = score / max_score
 
         return score, indicators
+
+    def _score_required_files(self, rules: dict) -> tuple[float, list[str], float]:
+        """Score based on required files (0.3 weight)."""
+        files = rules.get("files", [])
+        if not files:
+            return 0.0, [], 0.0
+            
+        max_score = 0.3
+        file_matches = 0
+        indicators = []
+        
+        for file_pattern in files:
+            if self._find_files(file_pattern):
+                file_matches += 1
+                indicators.append(f"file:{file_pattern}")
+        
+        score = 0.3 * (file_matches / len(files)) if file_matches > 0 else 0.0
+        return score, indicators, max_score
+
+    def _score_patterns(self, rules: dict) -> tuple[float, list[str], float]:
+        """Score based on pattern matches (0.5 weight)."""
+        patterns = rules.get("patterns", [])
+        if not patterns:
+            return 0.0, [], 0.0
+            
+        max_score = 0.5
+        pattern_matches = 0
+        indicators = []
+        
+        for pattern, file_glob in patterns:
+            if self._find_pattern(pattern, file_glob):
+                pattern_matches += 1
+                indicators.append(f"pattern:{pattern[:30]}")
+        
+        score = 0.5 * (pattern_matches / len(patterns)) if pattern_matches > 0 else 0.0
+        return score, indicators, max_score
+
+    def _score_directory_structure(self, rules: dict) -> tuple[float, list[str], float]:
+        """Score based on directory structure (0.2 weight)."""
+        structure = rules.get("structure", [])
+        if not structure:
+            return 0.0, [], 0.0
+            
+        max_score = 0.2
+        structure_matches = 0
+        indicators = []
+        
+        for dir_pattern in structure:
+            if self._find_files(dir_pattern):
+                structure_matches += 1
+                indicators.append(f"structure:{dir_pattern}")
+        
+        score = 0.2 * (structure_matches / len(structure)) if structure_matches > 0 else 0.0
+        return score, indicators, max_score
+
+    def _has_exclusion_patterns(self, rules: dict) -> bool:
+        """Check if any exclusion patterns are found."""
+        exclude_patterns = rules.get("exclude_patterns", [])
+        for pattern, file_glob in exclude_patterns:
+            if self._find_pattern(pattern, file_glob):
+                return True
+        return False
 
     def _find_files(self, pattern: str) -> list[Path]:
         """Find files matching pattern in repository."""

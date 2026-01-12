@@ -1,7 +1,7 @@
 """Tests for framework configuration system."""
 
 import unittest
-from pathlib import Path
+
 from reverse_engineer.config.framework_config import FrameworkConfig, FrameworkInfo
 
 

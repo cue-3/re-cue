@@ -4,7 +4,6 @@ Integration tests for large codebase optimization features.
 Tests the complete workflow with simulated large projects.
 """
 
-import os
 import tempfile
 import time
 import unittest

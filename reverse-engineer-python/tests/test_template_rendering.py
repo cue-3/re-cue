@@ -1,10 +1,8 @@
 """Tests for template rendering and generation."""
 
 import unittest
-from pathlib import Path
-from datetime import datetime
+
 from reverse_engineer.templates.template_loader import TemplateLoader
-import re
 
 
 class TestTemplateRendering(unittest.TestCase):

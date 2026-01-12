@@ -5,10 +5,11 @@ Tests the full workflow from file discovery through use case generation,
 including both standard and phased analysis modes.
 """
 
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
+
 from reverse_engineer.analyzer import ProjectAnalyzer
 from reverse_engineer.generators import UseCaseMarkdownGenerator
 from reverse_engineer.phase_manager import PhaseManager
@@ -247,7 +248,6 @@ public class UserControllerTest {
         self.assertIsInstance(preconditions, list)
         
         # Should have context-enhanced preconditions
-        precondition_text = ' '.join(preconditions).lower()
         
         # Check for various enhancements (at least one should be present)
         has_validation = any('field' in p.lower() or 'valid' in p.lower() 
@@ -276,7 +276,6 @@ public class UserControllerTest {
         phase_manager = PhaseManager(self.project_root, output_dir)
         
         # Create analyzer
-        analyzer = ProjectAnalyzer(self.project_root, verbose=False)
         
         # Save state after "completing" Phase 1
         phase_manager.save_state('1', {'endpoints': 5})

@@ -3,11 +3,10 @@ Integration tests for use case analysis functionality.
 Tests the complete workflow and integration between components.
 """
 
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 from reverse_engineer.analyzer import ProjectAnalyzer
 from reverse_engineer.generators import UseCaseMarkdownGenerator

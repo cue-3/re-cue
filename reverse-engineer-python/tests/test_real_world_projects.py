@@ -13,9 +13,9 @@ found in production codebases:
 - Enterprise applications (complex security, workflow-heavy)
 """
 
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
 
 from reverse_engineer.analyzer import ProjectAnalyzer

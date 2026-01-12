@@ -3,12 +3,13 @@ Unit tests for traceability domain models.
 """
 
 import unittest
+
 from reverse_engineer.domain import (
     CodeLink,
+    ImpactAnalysis,
+    ImpactedItem,
     TestLink,
     TraceabilityEntry,
-    ImpactedItem,
-    ImpactAnalysis,
     TraceabilityMatrix,
 )
 

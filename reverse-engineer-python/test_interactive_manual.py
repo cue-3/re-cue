@@ -4,13 +4,14 @@ Manual test script for interactive use case editor.
 This script tests the parser and editor functionality without requiring interactive input.
 """
 
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
 from reverse_engineer.interactive_editor import (
     EditableUseCase,
+    InteractiveUseCaseEditor,
     UseCaseParser,
-    InteractiveUseCaseEditor
 )
 
 
@@ -172,7 +173,7 @@ def test_edit_operations():
         extensions=["1a. Validation fails"]
     )
     
-    print(f"\nOriginal use case:")
+    print("\nOriginal use case:")
     print(f"  Name: {uc.name}")
     print(f"  Preconditions: {len(uc.preconditions)}")
     print(f"  Extensions: {len(uc.extensions)}")
@@ -182,7 +183,7 @@ def test_edit_operations():
     uc.preconditions.append("Shopping cart is not empty")
     uc.extensions.append("2a. Payment declined")
     
-    print(f"\nAfter edits:")
+    print("\nAfter edits:")
     print(f"  Name: {uc.name}")
     print(f"  Preconditions: {len(uc.preconditions)} - {uc.preconditions}")
     print(f"  Extensions: {len(uc.extensions)} - {uc.extensions}")
@@ -229,7 +230,7 @@ def test_roundtrip():
     
     result = parsed[0]
     
-    print(f"\nComparison:")
+    print("\nComparison:")
     print(f"  ID: {original.id} == {result.id} : {original.id == result.id}")
     print(f"  Name: {original.name} == {result.name} : {original.name == result.name}")
     print(f"  Actor: {original.primary_actor} == {result.primary_actor} : {original.primary_actor == result.primary_actor}")

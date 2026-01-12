@@ -2,17 +2,17 @@
 Tests for enhanced system boundary detection module.
 """
 
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
 
 from reverse_engineer.boundary_enhancer import (
-    BoundaryEnhancer,
     ArchitecturalLayerDetector,
+    BoundaryEnhancer,
+    BoundaryInteractionAnalyzer,
     DomainBoundaryDetector,
     MicroserviceBoundaryDetector,
-    BoundaryInteractionAnalyzer
 )
 
 

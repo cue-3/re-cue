@@ -2,9 +2,9 @@
 Test Node.js Express analyzer.
 """
 
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
 
 from reverse_engineer.analyzers import NodeExpressAnalyzer
 

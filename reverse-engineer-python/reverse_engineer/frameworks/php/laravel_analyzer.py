@@ -134,7 +134,7 @@ class LaravelAnalyzer(BaseAnalyzer):
                     ("DELETE", f"/{resource}/{{id}}", "destroy"),
                 ]
 
-                for method, path, action in restful_actions:
+                for method, path, _action in restful_actions:
                     endpoint = Endpoint(
                         method=method,
                         path=path,
@@ -164,7 +164,7 @@ class LaravelAnalyzer(BaseAnalyzer):
                     ("DELETE", f"/{resource}/{{id}}", "destroy"),
                 ]
 
-                for method, path, action in api_actions:
+                for method, path, _action in api_actions:
                     endpoint = Endpoint(
                         method=method,
                         path=path,
@@ -397,7 +397,7 @@ class LaravelAnalyzer(BaseAnalyzer):
                     name="Guest",
                     type="end_user",
                     access_level="public",
-                    identified_from=[f"Laravel auth - unauthenticated visitor"],
+                    identified_from=["Laravel auth - unauthenticated visitor"],
                 )
             )
 
@@ -406,7 +406,7 @@ class LaravelAnalyzer(BaseAnalyzer):
                     name="User",
                     type="end_user",
                     access_level="authenticated",
-                    identified_from=[f"Laravel auth - authenticated user"],
+                    identified_from=["Laravel auth - authenticated user"],
                 )
             )
 

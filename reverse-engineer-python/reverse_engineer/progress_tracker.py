@@ -6,11 +6,11 @@ with the domain models and provides file-by-file progress, stage completion
 percentage, time estimates, cancellation support, and error recovery.
 """
 
+import logging
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional
-import logging
 
 from .domain.progress import (
     AnalysisProgress,

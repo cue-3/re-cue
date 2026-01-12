@@ -1,7 +1,6 @@
 """Tests for BaseGenerator."""
 
 import unittest
-from datetime import datetime
 from unittest.mock import Mock
 
 from reverse_engineer.generation.base import BaseGenerator

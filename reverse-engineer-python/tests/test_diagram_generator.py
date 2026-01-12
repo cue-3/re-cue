@@ -3,18 +3,17 @@ Tests for the diagram generator module.
 """
 
 import unittest
-from unittest.mock import Mock
-from pathlib import Path
 from dataclasses import dataclass
+from unittest.mock import Mock
 
 from reverse_engineer.diagram_generator import (
+    ArchitectureDiagramGenerator,
+    ComponentDiagramGenerator,
     DiagramConfig,
+    DiagramGenerator,
+    ERDiagramGenerator,
     FlowchartGenerator,
     SequenceDiagramGenerator,
-    ComponentDiagramGenerator,
-    ERDiagramGenerator,
-    ArchitectureDiagramGenerator,
-    DiagramGenerator
 )
 
 
